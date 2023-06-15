@@ -1,0 +1,355 @@
+% Minimal Runtime System
+%
+% File:         mex.tex
+% Author:       Bob Walton (walton@acm.org)
+% Date:		See \date below.
+  
+\documentclass[12pt]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{wasysym}
+\usepackage{makeidx}
+% \usepackage{pictex} (obsolete? not available under CentOS 7)
+\usepackage{upquote} % (imported to local directory
+                     % ; not available under CentOS 7)
+    % Modifies \verb and \verbatim to print ' with
+    % the Computer Modern Typewrite font.
+    % Also includes the textcomp package.
+    % Modifies \verb and \verbatim to print ' with
+    % the Computer Modern Typewrite font.
+    % Also includes the textcomp package.
+
+\makeindex
+
+\setlength{\oddsidemargin}{0in}
+\setlength{\evensidemargin}{0in}
+\setlength{\textwidth}{6.5in}
+\setlength{\textheight}{8.5in}
+\raggedbottom
+
+\setlength{\unitlength}{1in}
+
+% The following attempt to eliminate headers at the bottom of a page.
+\widowpenalty=300
+\clubpenalty=300
+\setlength{\parskip}{3ex plus 2ex minus 2ex}
+
+\pagestyle{headings}
+\setlength{\parindent}{0.0in}
+\setlength{\parskip}{1ex}
+
+\setcounter{secnumdepth}{5}
+\setcounter{tocdepth}{5}
+\newcommand{\subsubsubsection}[1]{\paragraph[#1]{#1.}}
+\newcommand{\subsubsubsubsection}[1]{\subparagraph[#1]{#1.}}
+
+% Begin \tableofcontents surgery.
+
+\newcount\AtCatcode
+\AtCatcode=\catcode`@
+\catcode `@=11	% @ is now a letter
+
+\renewcommand{\contentsname}{}
+\renewcommand\l@section{\@dottedtocline{1}{0.1em}{1.4em}}
+\renewcommand\l@table{\@dottedtocline{1}{0.1em}{1.4em}}
+\renewcommand\tableofcontents{%
+    \begin{list}{}%
+	     {\setlength{\itemsep}{0in}%
+	      \setlength{\topsep}{0in}%
+	      \setlength{\parsep}{1ex}%
+	      \setlength{\labelwidth}{0in}%
+	      \setlength{\baselineskip}{1.5ex}%
+	      \setlength{\leftmargin}{0.8in}%
+	      \setlength{\rightmargin}{0.8in}}%
+    \item\@starttoc{toc}%
+    \end{list}}
+\renewcommand\listoftables{%
+    \begin{list}{}%
+	     {\setlength{\itemsep}{0in}%
+	      \setlength{\topsep}{0in}%
+	      \setlength{\parsep}{1ex}%
+	      \setlength{\labelwidth}{0in}%
+	      \setlength{\baselineskip}{1.5ex}%
+	      \setlength{\leftmargin}{1.0in}%
+	      \setlength{\rightmargin}{1.0in}%
+	      }%
+    \item\@starttoc{lot}%
+    \end{list}}
+
+\catcode `@=\AtCatcode	% @ is now restored
+
+% End \tableofcontents surgery.
+
+\newsavebox{\LAQUOTEBOX}
+\begin{lrbox}{\LAQUOTEBOX}
+{\tt \guillemotleft}
+\end{lrbox}
+\newcommand{\LAQUOTE}{\usebox{\LAQUOTEBOX}}
+
+\newsavebox{\RAQUOTEBOX}
+\begin{lrbox}{\RAQUOTEBOX}
+{\tt \guillemotright}
+\end{lrbox}
+\newcommand{\RAQUOTE}{\usebox{\RAQUOTEBOX}}
+
+\newcommand{\CN}[2]%	Change Notice.
+    {\hspace*{0in}\marginpar{\sloppy \raggedright \it \footnotesize
+     $^{\mbox{#1}}$#2}}
+    % Change notice.
+
+\newcommand{\TT}[1]{{\tt \bfseries #1}}
+\newcommand{\TTALL}{\tt \bfseries}
+
+\newcommand{\STAR}{{\Large $^\star$}}
+\newcommand{\PLUS}[1][]{{$^{+#1}$}}
+\newcommand{\QMARK}{{$^{\,\mbox{\footnotesize ?}}$}}
+\newcommand{\OPEN}{{$\{$}}
+\newcommand{\CLOSE}{{$\}$}}
+
+\newcommand{\key}[1]{{\bf \em #1}\index{#1}}
+\newcommand{\lkey}[2]{{\bf \em #1 #2}\index{#1!#2}}
+\newcommand{\mkey}[2]{{\bf \em #1}\index{#1!#2}}
+\newcommand{\lmkey}[3]{{\bf \em #1 #2}\index{#1!#2!#3}}
+
+\newcommand{\skey}[2]{{\bf \em #1#2}\index{#1}}
+\newcommand{\slkey}[3]{{\bf \em #1 #2#3}\index{#1!#2}}
+\newcommand{\smkey}[3]{{\bf \em #1#2}\index{#1!#3}}
+
+\newcommand{\ikey}[2]{{\bf \em #1}\index{#2}}
+
+\newcommand{\ttkey}[1]{\TT{#1}\index{#1@{\tt #1}}}
+\newcommand{\ttikey}[2]{\TT{#1}\index{#2@{\tt #2}}}
+\newcommand{\ttlkey}[2]{\TT{#1 #2}\index{#1@{\tt #1}!#2@{\tt #2}}}
+\newcommand{\ttmkey}[2]{\TT{#1}\index{#1@{\tt #1}!#2}}
+
+\newcommand{\ttdkey}[1]{\TT{.#1}\index{#1@{\tt .#1}}}
+\newcommand{\ttdmkey}[2]{\TT{.#1}\index{#1@{\tt .#1}!#2}}
+
+\newcommand{\ttbkey}[1]{\TT{[#1]}\index{[]@{\tt [#1]}}}
+\newcommand{\ttbmkey}[2]{\TT{[#1]}\index{[]@{\tt [#1]}!#2}}
+
+\newcommand{\tttkey}[1]{\TT{<#1>}\index{#1@{\tt <#1>}}}
+\newcommand{\tttmkey}[2]{\TT{<#1>}\index{#1@{\tt <#1>}!#2}}
+
+\newcommand{\tttbkey}[1]{{\TT {<#1|}\ldots\TT{|#1>}}%
+    \index{#1@\TT{<#1|}\ldots\TT{|#1>}}}
+\newcommand{\tttbmkey}[2]{{\TT{<#1|}\ldots\TT{|#1>}}%
+    \index{#1@\TT{<#1|}\ldots\TT{|#1>}!#2}}
+
+\newcommand{\ttarmkey}[2]{{\tt ->}\TT{#1}\index{#1@{\tt #1}!#2}}
+
+\newcommand{\ttindex}[1]{\index{#1@{\tt #1}}}
+\newcommand{\ttmindex}[2]{\index{#1@{\tt #1}!#2}}
+\newcommand{\ttlindex}[2]{\index{#1#2@{\tt #1}!{\tt #2}}}
+
+\newcommand{\emkey}[1]{{\bf \em #1}\index{#1@{\em #1}}}
+\newcommand{\emlkey}[2]{{\bf \em #1#2}\index{#1@{\em #1}!#2@{\em #2}}}
+\newcommand{\emskey}[2]{{\bf \em #1#2}\index{#1@{\em #1}}}
+\newcommand{\emikey}[2]{{\bf \em #1}\index{#2}}
+\newcommand{\emindex}[1]{\index{#1@{\em #1}}}
+
+\newcommand{\ttomkey}[3]{\TT{operator #2}\index{#1@{\tt operator #2}!{#3}}}
+\newcommand{\ttmokey}[2]{\TT{#1}\index{#1@{\tt operator #1}!{#2}}}
+
+\newcommand{\ttfkey}[2]{\TT{#1}\index{#1@{\tt #1}!for #2@for {\tt #2}}}
+
+\newcommand{\ttakey}[2]{\TT{#1}\index{#2@{\tt #1}}}
+\newcommand{\ttamkey}[3]{\TT{#1}\index{#2@{\tt #1}!#3}}
+
+\newcommand{\subskey}[1]{$\mathbf{^{#1}}$\index{#1@$^{#1}$}}
+\newcommand{\subsmkey}[2]{$\mathbf{^{#1}}$\index{#1@$^{#1}$!#2}}
+
+\newcommand{\minkey}[1]%
+           {\TT{min::#1}\ttindex{min::#1}\ttindex{#1}}
+\newcommand{\minlkey}[2]%
+           {\TT{min::#1#2}\index{min::#1@{\tt min::#1}!#2@{\tt #2}}%
+                          \index{#1@{\tt #1}!#2@{\tt #2}}}
+\newcommand{\minikey}[2]%
+           {\TT{min::#1}\ttindex{min::#2}\ttindex{#2}}
+\newcommand{\minmkey}[2]%
+           {\TT{min::#1}\ttmindex{min::#1}{#2}\ttmindex{#1}{#2}}
+\newcommand{\MUPkey}[1]{\TT{MUP::#1}\ttindex{MUP::#1}\ttindex{#1}}
+\newcommand{\MUPmkey}[2]%
+           {\TT{MUP::#1}\ttmindex{MUP::#1}{#2}\ttmindex{#1}{#2}}
+\newcommand{\minindex}[1]{\ttindex{min::#1}\ttindex{#1}}
+\newcommand{\minmindex}[2]{\ttmindex{min::#1}{#2}\ttmindex{#1}{#2}}
+\newcommand{\MUPindex}[1]{\ttindex{MUP::#1}\ttindex{#1}}
+
+\newcommand{\itemref}[1]{\ref{#1}$\,^{p\pageref{#1}}$}
+\newcommand{\pagref}[1]{p\pageref{#1}}
+
+\newcommand{\EOL}{\penalty \exhyphenpenalty}
+
+\newlength{\figurewidth}
+\setlength{\figurewidth}{\textwidth}
+\addtolength{\figurewidth}{-0.40in}
+
+\newsavebox{\figurebox}
+
+\newenvironment{boxedfigure}[1][!btp]%
+	{\begin{figure*}[#1]
+	 \begin{lrbox}{\figurebox}
+	 \begin{minipage}{\figurewidth}
+
+	 \vspace*{1ex}}%
+	{
+	 \vspace*{1ex}
+
+	 \end{minipage}
+	 \end{lrbox}
+
+	 \centering
+	 \fbox{\hspace*{0.1in}\usebox{\figurebox}\hspace*{0.1in}}
+	 \end{figure*}}
+
+\newenvironment{indpar}[1][0.3in]%
+	{\begin{list}{}%
+		     {\setlength{\itemsep}{0in}%
+		      \setlength{\topsep}{0in}%
+		      \setlength{\parsep}{1ex}%
+		      \setlength{\labelwidth}{#1}%
+		      \setlength{\leftmargin}{#1}%
+		      \addtolength{\leftmargin}{\labelsep}}%
+	 \item}%
+	{\end{list}}
+
+\newenvironment{itemlist}[1][1.2in]%
+	{\begin{list}{}{\setlength{\labelwidth}{#1}%
+		        \setlength{\leftmargin}{\labelwidth}%
+		        \addtolength{\leftmargin}{+0.2in}%
+		        \renewcommand{\makelabel}[1]{##1\hfill}}}%
+	{\end{list}}
+
+\newcommand{\LABEL}[1]{\label{#1}}
+\newlength{\ARGBREAKLENGTH}
+\settowidth{\ARGBREAKLENGTH}{\tt ~~~~}
+\newcommand{\ARGBREAK}[1][\ARGBREAKLENGTH]{\\&\hspace*{#1}}
+\newcommand{\ARGSKIP}[2][\ARGBREAKLENGTH]{\\[#2]&\hspace*{#1}}
+\newcommand{\TTKEY}[1]{\ttkey{#1}}
+\newcommand{\TTARMKEY}[2]{\ttarmkey{#1}{#2}}
+\newcommand{\TTBKEY}[1]{\ttbkey{#1}}
+\newcommand{\TTBMKEY}[2]{\ttbmkey{#1}{#2}}
+\newcommand{\TTOMKEY}[3]{\ttomkey{#1}{#2}{#3}}
+\newcommand{\TTMOKEY}[2]{\ttmokey{#1}{#2}}
+\newcommand{\TTDKEY}[1]{\ttdkey{#1}}
+\newcommand{\TTDMKEY}[2]{\ttdmkey{#1}{#2}}
+\newcommand{\TTMKEY}[1]{\ttmkey{#1}}
+\newcommand{\MINKEY}[1]%
+	   {\TT{#1}\ttindex{min::#1}\ttindex{#1}}
+\newcommand{\MINLKEY}[2]%
+           {\TT{#1#2}\index{min::#1@{\tt min::#1}!#2@{\tt #2}}%
+                     \index{#1@{\tt #1}!#2@{\tt #2}}}
+\newcommand{\MINIKEY}[2]%
+           {\TT{#1}\ttindex{min::#2}\ttindex{#2}}
+\newcommand{\MINMKEY}[2]%
+           {\TT{#1}\ttmindex{min::#1}{#2}\ttmindex{#1}{#2}}
+\newcommand{\MUPKEY}[1]%
+	   {\TT{#1}\ttindex{MUP::#1}\ttindex{#1}}
+
+\newcommand{\REL}{$\,^R$}
+\newcommand{\COMPACT}{$\,^C$}
+\newcommand{\LOOSE}{$\,^L$}
+\newcommand{\RESIZE}{$\,^S$}
+\newcommand{\REORG}{$\,^O$}
+
+\begin{document}
+        
+\title{Minimal Runtime System\\[2ex]Execution Engine\\[2ex]MEX\\[2ex]
+       (Draft 1a)}
+
+\author{Robert L. Walton}
+
+\date{June 15, 2023}
+ 
+\maketitle
+
+\newpage
+\begin{center}
+\large \bf Table of Contents
+\end{center}
+
+\bigskip
+
+\tableofcontents 
+
+\newpage
+
+\section{Introduction}
+
+This document describes MEX,
+the Minimal Runtime System Execution Engine.
+
+MEX is a stack-oriented assembly language with some higher level
+language features.
+
+TBD
+
+A modest number of \skey{abbreviation}s are used throughout this document
+and the corresponding code:
+
+\begin{indpar}
+\begin{tabular}{p{0.8in}l}
+\ttmkey{instr}{abbreviation}	& instruction \\
+\ttmkey{pc}{abbreviation}	& program counter \\
+\ttmkey{prog}{abbreviation}	& program \\
+\end{tabular}
+\end{indpar}
+
+\section{Interfaces}
+\label{INTERFACES}
+
+MEX code and documentation is organized within the following
+directories:
+
+\begin{center}
+\begin{tabular}{ll}
+\ldots\TT{/}\ttkey{mex/include} & \TT{*.h} files such as \TT{mex.h}
+\\[1ex]
+\ldots\TT{/}\ttkey{mex/src} & \TT{*.cc} files such as \TT{mex.cc}
+\\[1ex]
+\ldots\TT{/}\ttkey{mex/test} & test scripts such as \TT{mex\_interface\_test.cc}
+\\[1ex]
+\ldots\TT{/}\ttkey{mex/doc} & documentation files such as \TT{mex.tex}
+\\[1ex]
+\ldots\TT{/}\ttkey{mex/lib} & contains \TT{libmex.a} library of MEX binary files
+\end{tabular}
+\end{center}
+
+
+
+The C++ data and functions described in this document can be
+accessed by C++ code that contains the following inclusion:
+
+\begin{center}
+\verb|#include  <mex.h>|
+\end{center}
+
+External MEX data and functions are placed in the
+\ttmkey{mex}{namespace}\label{mex::} namespace.
+
+\section{Data}
+
+A MEX \key{program} consists of one or more \TT{mex::\EOL prog}
+vectors, each containing a program compiled from an input
+\TT{min::file}.
+
+A MEX \key{process} consists of one \TT{mex::\EOL stack}
+vector containing the variables of the process.  These
+variables are read-only, except that some may initially
+be write-only before being switched to read-only.
+
+\clearpage
+
+\appendix
+
+\centerline{\Large \bf Appendices}
+
+TBD
+
+\bibliographystyle{plain}
+\bibliography{min}
+
+\printindex
+
+\end{document}
