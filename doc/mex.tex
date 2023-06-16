@@ -332,10 +332,12 @@ External MEX data and functions are placed in the
 
 A MEX \key{program} consists of one or more \TT{mex::\EOL prog}
 vectors, each containing a program compiled from an input
-\TT{min::file}.
+\TT{min::file}.  Associated with each \TT{mex::\EOL prog}
+vector is a \TT{mex::\EOL face} vector, specifying an interface
+to the functions in the \TT{mex::\EOL prog} file.
 
 A MEX \key{process} consists of one \TT{mex::\EOL stack}
-vector containing the variables of the process.  These
+vector of \TT{min::gen} values that are the variables of the process.  These
 variables are read-only, except that some may initially
 be write-only before being switched to read-only.
 
