@@ -34,7 +34,23 @@ struct instr {
     min::uns16 op_code, immedA;
     min::uns32 immedB;
     min::gen immedC;
-}
+};
+
+enum op_code {
+    ADD, ADDI,
+    SUB, SUBR, SUBI, SUBRI,
+    MUL, MULI,
+    DIV, DIVR, DIVI, DIVRI,
+    REM, REMR, REMI, REMRI,
+    EXPI,
+    JMP,
+    JMPEQ, JMPNE, JMPLT, JMPLEQ, JMPGT, JMPGEQ,
+    NEG, ABS,
+    PUSH, PUSHI,
+    POP,
+    ASSIGN,
+    NOP
+};
 
 # endif // MEX_H
 
