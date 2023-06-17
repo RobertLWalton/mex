@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Jun 16 17:25:13 EDT 2023
+// Date:	Sat Jun 17 03:18:04 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -31,22 +31,28 @@
 namespace mex {
 
 struct instr {
-    min::uns16 op_code, regA, regB, regC;
-    min::gen immed;
+    min::uns16 op_code;
+    min::uns16 immedA, immedB, immedC;
+    min::gen immedD;
 };
 
 enum op_code {
     ADD, ADDI,
-    SUB, SUB, SUBI, SUBRI,
+    SUB, SUBR, SUBI, SUBRI,
     MUL, MULI,
-    DIV, DIV, DIVI, DIVRI,
-    REM, REM, REMI, REMRI,
+    DIV, DIVR, DIVI, DIVRI,
+    REM, REMR, REMI, REMRI,
     EXPI,
     JMP,
-    JMPEQ, JMPNE, JMPLT, JMPLEQ, JMPGT, JMPGEQ,
+    JMPEQ, JMPEQI, JMPNE, JMPNEI,
+    JMPLT, JMPLTI, JMPLEQ, JMPLEQI,
+    JMPGT, JMPGTI, JMPGEQ, JMPGEQI,
     NEG, ABS,
-    ASSIGN, ASSIGNI,
-    BEGIN, END, ITERATE, BREAK,
+    PUSH, PUSHI, PUSHG,
+    BEG, END,
+    BEGLOOP, ENDLOOP, BREAK,
+    CALL, CALLG,
+    RET,
     NOP
 };
 
