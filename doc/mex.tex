@@ -260,7 +260,7 @@
 
 \author{Robert L. Walton}
 
-\date{June 15, 2023}
+\date{June 17, 2023}
  
 \maketitle
 
@@ -296,8 +296,8 @@ and the corresponding code:
 \end{tabular}
 \end{indpar}
 
-\section{Interfaces}
-\label{INTERFACES}
+\section{C++ Interfaces}
+\label{C++-INTERFACES}
 
 MEX code and documentation is organized within the following
 directories:
@@ -327,6 +327,87 @@ accessed by C++ code that contains the following inclusion:
 
 External MEX data and functions are placed in the
 \ttmkey{mex}{namespace}\label{mex::} namespace.
+
+\section{Program Structure}
+\label{PROGRAM-STRUCTURE}
+
+A MEX \key{program} consists of one or more modules.
+A MEX \key{module} is a data structure compiled from
+a source code file.  A module has a code vector,
+an interface, and a global variable stack.  A \key{code vector} is a vector
+of instructions.  An \key{interface} is a data structure
+that allows the compilation of references to the
+global variables of the module and function calls to the
+functions in the module code vector.
+
+When a module is compiled, the compiler may reference the interfaces
+of pre-existing modules.
+
+Immediately after a module is compiled, it is executed.  The
+resulting execution stack (see \itemref{STACKS}) becomes the
+modules global variable stack.
+
+Each module is compiled sequentially, and it is possible to add
+to the end of a pre-existing module.  Instructions are
+just added to the end of the module's code vector, information
+is added to the module's interface, and variables are pushed into the
+the module's global variable stack.
+
+A function is a sequential block of code in a module code vector.
+When the module code vector is executed, just after compiling
+the module, its functions are skipped over, as if they were not
+there.  When a function is called using the module interface,
+the function code block instructions are executed.  A function
+can itself contain another function, and each function has
+its own interface.  However, these function interfaces are
+only used during compilation of the function code, and cannot
+be accessed by other modules, so they are part of the compiler
+and not part of MEX.
+
+MEX does \underline{not} itself provide a compiler, but it
+assumes certain compilation behaviors.
+
+\subsection{Stacks}
+\label{STACKS}
+
+MEX is stack oriented.  A stack is a vector of \TT{min::gen}
+values.  The end of this vector is referred to as the
+\ikey{top}{of stack} of the stack.  Values may be \ikey{pushed}{into stack}
+into the stack, meaning they are added to the end of the stack vector,
+or \ikey{popped}{from stack} from the stack,
+meaning that they are removed from the
+end of the stack vector.
+
+In MEX the only operations that pop the stack are returns from
+functions and ends of loop iterations.
+
+MEX assumes that variables in the stack are read-only, unless
+they are being assigned values by a block of code.  Blocks
+push the variables they are assigning into the stack just before
+the block executes, and then treats these as write-only until
+the block ends, at which time they become read-only.
+
+When a function executes, it begins with just its arguments
+in the stack.  When it returns, it pops these are everything
+else the function pushed into the stack, and then pushes
+the return values of the function into the stack.
+
+Builtin instructions behave like function calls: for example,
+the \TT{ADD} instruction pops its two arguments from the stack
+and them pushes their sum into the stack.
+
+Immediately after it compiles, a module executes as if it were a function
+of no arguments.  At its end, it does not pop its stack, but
+leaves the stack as the module's global variable stack.
+
+The number of values above the current function arguments in the
+stack (or the number above the beginning of the stack for a
+module execution) is a parameter if the current instruction known
+to the compiler.  To maintain this rule, forward jumps must push
+null values into the stack to take the place of the values that would be
+pushed by the code being skipped.  Backward skips are not allowed.
+
+
 
 \section{Data}
 
