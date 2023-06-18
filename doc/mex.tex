@@ -487,6 +487,79 @@ the loop pops these values and the write-only values,
 leaving the names {\tt i} and {\tt sum} pointing at the read-only values
 in the stack.
 
+\subsection{Code Vectors}
+\label{CODE-VECTORS}
+
+A \key{code vector} is a MIN packed vector of instructions.
+The specific definitions are:
+
+TBD
+
+The syntactic structure of a code vector is:
+
+\begin{indpar}
+\emkey{code-vector} ::= {\em code-item}\STAR{}
+\\[0.5ex]
+\emkey{code-item} \begin{tabular}[t]{@{}rl} 
+		  ::= & {\em arithmetic-instruction} \\
+		  $|$ & {\em jump-instruction} \\
+		  $|$ & {\em push-instruction} \\
+		  $|$ & {\em call-instruction} \\
+		  $|$ & {\em normal-block} \\
+		  $|$ & {\em loop-block} \\
+		  $|$ & {\em function-block} \\
+		  \end{tabular}
+\\[0.5ex]
+\emkey{arithmetic-instruction}
+    \begin{tabular}[t]{@{}rl}
+    ::= & \TT{ADD} $|$ \TT{ADDI} \\
+    $|$ & \TT{SUB} $|$ \TT{SUBR} $|$ \TT{SUBI} $|$ \TT{SUBRI} \\
+    $|$ & \TT{MUL} $|$ \TT{MULI} \\
+    $|$ & \TT{DIV} $|$ \TT{DIVR} $|$ \TT{DIVI} $|$ \TT{DIVRI} \\
+    $|$ & \TT{REM} $|$ \TT{REMR} $|$ \TT{REMI} $|$ \TT{REMRI} \\
+    $|$ & \TT{NEG} $|$ \TT{ABS} \\
+    $|$ & \TT{LOG} $|$ \TT{LOG10} $|$ \TT{LOGE} \\
+    $|$ & \TT{EXP} $|$ \TT{EXP10} $|$ \TT{EXPE} \\
+    $|$ & \TT{SIN} $|$ \TT{ARCSIN} \\
+    $|$ & \TT{COS} $|$ \TT{ARCCOS} \\
+    $|$ & \TT{TAN} $|$ \TT{ARCTAN} \\
+    $|$ & \TT{COTAN} $|$ \TT{ARCCOTAN} \\
+    $|$ & \TT{POWER} \\
+    \end{tabular}
+\\[0.5ex]
+\emkey{jump-instruction}
+    \begin{tabular}[t]{@{}rl}
+    ::= & \TT{JMP} \\
+    $|$ & \TT{JMPEQ} $|$ \TT{JMPNE} $|$ \TT{JMPEQI} $|$ \TT{JMPNEI} \\
+    $|$ & \TT{JMPLT} $|$ \TT{JMPLEQ} $|$ \TT{JMPLTI} $|$ \TT{JMPLEQI} \\
+    $|$ & \TT{JMPGT} $|$ \TT{JMPGEQ} $|$ \TT{JMPGTI} $|$ \TT{JMPGEQI} \\
+    $|$ & \TT{BREAK} $|$ \TT{CONTINUE} \\
+    \end{tabular}
+\\[0.5ex]
+\emkey{push-instruction} ::= \TT{PUSH} $|$ \TT{PUSHI} $|$ \TT{PUSHG}
+\\[0.5ex]
+\emkey{call-instruction} ::= \TT{CALL} $|$ \TT{CALLG} $|$ \TT{RET}
+\\[0.5ex]
+\emkey{normal-block} ::= \begin{tabular}[t]{@{}l}
+			 \TT{BEG} \\
+			 {\em code-item}\STAR{} \\
+			 \TT{END} \\
+			 \end{tabular}
+\\[0.5ex]
+\emkey{loop-block} ::= \begin{tabular}[t]{@{}l}
+		       \TT{BEGL} \\
+		       {\em code-item}\STAR{} \\
+		       \TT{ENDL} \\
+		       \end{tabular}
+\\[0.5ex]
+\emkey{function-block} ::= \begin{tabular}[t]{@{}l}
+			   \TT{BEGF} \\
+			   {\em code-item}\STAR{} \\
+			   \TT{ENDF} \\
+			   \end{tabular}
+\end{indpar}
+
+
 \section{Data}
 
 A MEX \key{program} consists of one or more \TT{mex::\EOL prog}
