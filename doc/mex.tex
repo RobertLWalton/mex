@@ -235,17 +235,15 @@
 \newcommand{\TTDKEY}[1]{\ttdkey{#1}}
 \newcommand{\TTDMKEY}[2]{\ttdmkey{#1}{#2}}
 \newcommand{\TTMKEY}[1]{\ttmkey{#1}}
-\newcommand{\MINKEY}[1]%
-	   {\TT{#1}\ttindex{min::#1}\ttindex{#1}}
-\newcommand{\MINLKEY}[2]%
-           {\TT{#1#2}\index{min::#1@{\tt min::#1}!#2@{\tt #2}}%
+\newcommand{\MEXKEY}[1]%
+	   {\TT{#1}\ttindex{mex::#1}\ttindex{#1}}
+\newcommand{\MEXLKEY}[2]%
+           {\TT{#1#2}\index{mex::#1@{\tt min::#1}!#2@{\tt #2}}%
                      \index{#1@{\tt #1}!#2@{\tt #2}}}
-\newcommand{\MINIKEY}[2]%
-           {\TT{#1}\ttindex{min::#2}\ttindex{#2}}
-\newcommand{\MINMKEY}[2]%
-           {\TT{#1}\ttmindex{min::#1}{#2}\ttmindex{#1}{#2}}
-\newcommand{\MUPKEY}[1]%
-	   {\TT{#1}\ttindex{MUP::#1}\ttindex{#1}}
+\newcommand{\MEXIKEY}[2]%
+           {\TT{#1}\ttindex{mex::#2}\ttindex{#2}}
+\newcommand{\MEXMKEY}[2]%
+           {\TT{#1}\ttmindex{mex::#1}{#2}\ttmindex{#1}{#2}}
 
 \newcommand{\REL}{$\,^R$}
 \newcommand{\COMPACT}{$\,^C$}
@@ -491,10 +489,6 @@ in the stack.
 \label{CODE-VECTORS}
 
 A \key{code vector} is a MIN packed vector of instructions.
-The specific definitions are:
-
-TBD
-
 The syntactic structure of a code vector is:
 
 \begin{indpar}
@@ -557,6 +551,42 @@ The syntactic structure of a code vector is:
 			   {\em code-item}\STAR{} \\
 			   \TT{ENDF} \\
 			   \end{tabular}
+\end{indpar}
+
+The interface to a MEX module and its code vector is:
+
+\begin{indpar}
+
+\begin{tabular}{r@{}l@{~~~~~~~~}l}
+\verb|struct                   mex::| & \MEXKEY{instr}
+\LABEL{MEX::INSTR} \\
+\verb|{                             | \\
+\verb|    min::uns16 | & \TTMKEY{op\_code}{in {\tt mex::instr}} \\
+\verb|    min::uns16 | & \TTMKEY{immedA}{in {\tt mex::instr}} \\
+\verb|    min::uns16 | & \TTMKEY{immedB}{in {\tt mex::instr}} \\
+\verb|    min::uns16 | & \TTMKEY{immedC}{in {\tt mex::instr}} \\
+\verb|    min::gen | & \TTMKEY{immedD}{in {\tt mex::instr}} \\
+\verb|}                             | \\
+\end{tabular}
+
+\begin{tabular}{r@{}l@{~~~~~~~~}l}
+\verb|struct                   mex::| & \MEXKEY{module\_header}
+\LABEL{MEX::MODULE_HEADER} \\
+\verb|{                             | \\
+\verb|    min::uns32 | & \TTMKEY{control}{in {\tt mex::code\_header}} \\
+\verb|    min::uns32 | & \TTMKEY{length}{in {\tt mex::code\_header}} \\
+\verb|    min::uns32 | & \TTMKEY{max\_length}{in {\tt mex::code\_header}} \\
+\verb|    min::phrase_position_vec | & \TTMKEY{position}{in {\tt mex::code\_header}} \\
+\verb|    min::gen | & \TTMKEY{interface}{in {\tt mex::code\_header}} \\
+\verb|}                             | \\
+\end{tabular}
+
+\verb|typedef min::packed_vec_ptr<mex::instr,mex::module_header>| \\
+\hspace*{3em}\verb|mex::|\MEXKEY{module}
+\\[0.5ex]
+\verb|typedef min::packed_vec_insptr<mex::instr,mex::module_header>| \\
+\hspace*{3em}\verb|mex::|\MEXKEY{module\_insptr}
+
 \end{indpar}
 
 
