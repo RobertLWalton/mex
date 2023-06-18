@@ -510,7 +510,10 @@ The syntactic structure of a code vector is:
     $|$ & \TT{SUB} $|$ \TT{SUBR} $|$ \TT{SUBI} $|$ \TT{SUBRI} \\
     $|$ & \TT{MUL} $|$ \TT{MULI} \\
     $|$ & \TT{DIV} $|$ \TT{DIVR} $|$ \TT{DIVI} $|$ \TT{DIVRI} \\
-    $|$ & \TT{REM} $|$ \TT{REMR} $|$ \TT{REMI} $|$ \TT{REMRI} \\
+    $|$ & \TT{FLOOR} $|$ \TT{FLOORR} $|$ \TT{FLOORI} $|$ \TT{FLOORRI} \\
+    $|$ & \TT{CEIL} $|$ \TT{CEILR} $|$ \TT{CEILI} $|$ \TT{CEILRI} \\
+    $|$ & \TT{TRUNC} $|$ \TT{TRUNCR} $|$ \TT{TRUNCI} $|$ \TT{TRUNCRI} \\
+    $|$ & \TT{ROUND} $|$ \TT{ROUNDR} $|$ \TT{ROUNDI} $|$ \TT{ROUNDRI} \\
     $|$ & \TT{NEG} $|$ \TT{ABS} \\
     $|$ & \TT{LOG} $|$ \TT{LOG10} $|$ \TT{LOGE} \\
     $|$ & \TT{EXP} $|$ \TT{EXP10} $|$ \TT{EXPE} \\
@@ -589,19 +592,97 @@ The interface to a MEX module and its code vector is:
 
 \end{indpar}
 
+The \TT{module} vector is the module's code vector.
 
-\section{Data}
+The \ttikey{position}{of module} member of the \TT{module} gives a
+\TT{min::\EOL phrase\_\EOL position} for every \TT{mex::instr}
+element of the \TT{module} vector, and also gives the
+\TT{position->\EOL file->\EOL file\_\EOL name} of the source
+file of the \TT{module}.  This information can be used to
+print trace and error messages.
 
-A MEX \key{program} consists of one or more \TT{mex::\EOL prog}
-vectors, each containing a program compiled from an input
-\TT{min::file}.  Associated with each \TT{mex::\EOL prog}
-vector is a \TT{mex::\EOL face} vector, specifying an interface
-to the functions in the \TT{mex::\EOL prog} file.
+The \ttikey{interface}{of module} member of the \TT{module} points
+at the module's interface.  MEX does not itself specify or use
+the interface -- this is up to the compiler.  However the compiler
+may choose to use the interface in \itemref{INTERFACE}.
 
-A MEX \key{process} consists of one \TT{mex::\EOL stack}
-vector of \TT{min::gen} values that are the variables of the process.  These
-variables are read-only, except that some may initially
-be write-only before being switched to read-only.
+\subsection{Instructions}
+\label{INSTRUCTIONS}
+
+A MEX instruction (a \TT{mex::instr}, see \pagref{MEX::INSTR})
+consists of an \TT{op\_code} and up to 4 immediate values,
+\TT{immedA}, \TT{immedB}, \TT{immedC}, and \TT{immedD}.
+
+Some examples:
+\begin{indpar}\begin{verbatim}
+mex::instr an_add_instruction = {mex::ADD};
+    // Pop 2 values and push their sum.
+mex::instr an_add_immediate_instruction = {mex::ADDI,,,,3.14159};
+    // Add 3.14159 to top value.
+mex::instr a_begin_instruction = {mex::BEG};
+    // Do nothing.
+mex::instr an_end_instruction = {mex::END,10};
+    // Pop 10 values and discard them.
+mex::instr a_jump_instruction = {mex::JMP,10,5,32,min::MISSING()};
+    // Pop 10 values and discard them, then push min::MISSING()
+    // 5 times, then add 32 to program counter.
+\end{verbatim}\end{indpar}
+
+The arithmetic instruction set is in Figure~\ref{ARITHMETIC-INSTRUCTIONS}.
+IEEE 64-bit floating point operations are used; there are no errors
+but \TT{NaN}s may be returned as results.
+
+\begin{boxedfigure}
+
+\begin{tabular}{|l|l|}
+\hline
+\TT{ADD}/\TT{MUL}
+    & Pop 2 values, then push their sum/product.
+\\\hline
+\TT{ADDI}/\TT{MULI}
+    & Adds/multiplies the top value by \TT{immedD}.
+\\\hline
+\TT{SUB}/\TT{SUBR}
+    & Pop 2 values, then push second/first popped minus \\
+    & first/second popped.
+\\\hline
+\TT{SUBI}
+    & Subtract \TT{immedD} from top value.
+\\\hline
+\TT{SUBRI}
+    & Replace top value by \TT{immedD} minus top value.
+\\\hline
+\TT{DIV}/\TT{DIVR}
+    & Pop 2 values, then push second/first popped divided by\\
+    & first/second popped.
+\\\hline
+\TT{DIVI}
+    & Divide top value by \TT{immedD}.
+\\\hline
+\TT{DIVRI}
+    & Replace top value by \TT{immedD} divided by top value.
+\\\hline
+\TT{MOD}/\TT{MODR}
+    & Pop 2 values, then push the round-toward-minus-infinity \\
+    & remainder of the second/first value popped divided by \\
+    & the first/second value popped.
+\\\hline
+\TT{MODI}
+    & Replace the top value by the round-toward-minus-infinity \\
+    & remainder of the top value divided by \TT{immedD}.
+\\\hline
+\TT{MODRI}
+    & Replace the top value by the round-toward-minus-infinity \\
+    & remainder of \TT{immedD} divided by the top value.
+\\\hline
+\end{tabular}
+\caption{Arithmetic Instructions}
+\label{ARITHMETIC-INSTRUCTIONS}
+\end{boxedfigure}
+
+\section{Interface}
+\label{INTERFACE}
+
 
 \clearpage
 
