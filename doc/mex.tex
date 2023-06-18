@@ -260,7 +260,7 @@
 
 \author{Robert L. Walton}
 
-\date{June 17, 2023}
+\date{June 18, 2023}
  
 \maketitle
 
@@ -379,16 +379,22 @@ meaning that they are removed from the
 end of the stack vector.
 
 In MEX the only operations that pop the stack are returns from
-functions and ends of loop iterations.
+functions and ends of blocks.
 
 MEX assumes that variables in the stack are read-only, unless
-they are being assigned values by a block of code.  Blocks
-push the variables they are assigning into the stack just before
-the block executes, and then treats these as write-only until
-the block ends, at which time they become read-only.
+they are being assigned values by a block of code.  MEX assumes
+that the variables to be assigned by a block are pushed into the stack
+by the compiler and made write-only.  Then the block is executed
+and writes these variables.  When the block finishes, it pops
+all the values code inside the block has pushed into the stack,
+leaving the write-only variables pushed before the block executed.
+These variables are then made read-only by the compiler.
+
+Note that MEX itself has no notion of read-only or write-only.
+The compiler must enforce these.
 
 When a function executes, it begins with just its arguments
-in the stack.  When it returns, it pops these are everything
+in the stack.  When it returns, it pops these and everything
 else the function pushed into the stack, and then pushes
 the return values of the function into the stack.
 
@@ -402,12 +408,84 @@ leaves the stack as the module's global variable stack.
 
 The number of values above the current function arguments in the
 stack (or the number above the beginning of the stack for a
-module execution) is a parameter if the current instruction known
+module execution) is a parameter of the current instruction known
 to the compiler.  To maintain this rule, forward jumps must push
 null values into the stack to take the place of the values that would be
-pushed by the code being skipped.  Backward skips are not allowed.
+pushed by the code being skipped.  Backward jumps are not allowed.
+
+Forward jumps that leave a block may pop values from the stack
+instead of pushing values.  In general a jump may first pop
+values from the stack, and then push null values.
 
 
+MEX assumes that the compiler will implement \skey{next variables}.
+Consider the code:
+\begin{indpar}\begin{verbatim}
+x = 53
+next x = x + 1      // Now x == 54
+next x = x + 1      // Now x == 55
+\end{verbatim}\end{indpar}
+First {\tt x} is set to {\tt 53}, which is pushed into the stack.
+The compiler points the name
+{\tt x} at the stack location containing this value,
+but this location is read-only and cannot be changed.
+Then \TT{next x} is set to {\tt x + 1}, which is pushed into the stack.
+At this point the compiler repoints the name {\tt x} at this new
+stack location.  And so forth.
+
+MEX assumes that loop blocks are implemented with next variables.
+Consider the code:
+\begin{indpar}\begin{verbatim}
+i = 1
+sum = 0
+next i, next sum = while i <= 4:
+    next sum = sum + i
+    next i = i + 1
+\end{verbatim}\end{indpar}
+which MEX assumes is equivalent to:
+\begin{indpar}\begin{verbatim}
+i = 1
+sum = 0
+next i, next sum:
+    // First loop iteration
+    next sum = sum + i
+    next i = i + 1
+next i, next sum:
+    // Second loop iteration
+    next sum = sum + i
+    next i = i + 1
+next i, next sum:
+    // Third loop iteration
+    next sum = sum + i
+    next i = i + 1
+next i, next sum:
+    // Fourth loop iteration
+    next sum = sum + i
+    next i = i + 1
+next i, next sum:
+    // Fifth iteration does nothing but exit loop
+\end{verbatim}\end{indpar}
+However MEX assumes that the compiler prepares for a loop
+block a bit differently than the preparation for
+a non-loop block.
+
+MEX assumes that to implement the example loop, the compiler
+will first push copies of {\tt i} and {\tt sum} into
+the stack, and repoint {\tt i} and {\tt sum} to these
+copies, which will be read-only.
+Then the complier will push {\tt i} and {\tt sum}
+into the stack again, point the names {\tt next i} and
+{\tt next sum} at these values, and make them write-only.
+Then MEX will execute 5 loop iterations.  In each the
+write-only values get updated.  At the end of each
+iteration, the 2 write-only locations are copied to the
+2 read-only locations in preparation for the next
+iteration, and any values pushed into the stack by
+code inside the loop block (there are no such vallues
+in the example) are popped from the stack.  The end of
+the loop pops these values and the write-only values,
+leaving the names {\tt i} and {\tt sum} pointing at the read-only values
+in the stack.
 
 \section{Data}
 
