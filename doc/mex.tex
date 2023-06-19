@@ -653,6 +653,25 @@ and a return stack.  Specifically:
 
 \end{indpar}
 
+A \ttkey{pc}, or \key{program counter}, is a pointer to a module,
+which is a code vector, and an index in that vector of an instruction.
+Thus a \TT{pc} points at an instruction.
+
+An \ttkey{sp}, or \key{stack pointer}, is the index of an element of
+the process vector which is the stack.  To push a value into you add
++1 to the \TT{sp} and store the value in the element it now indexes.
+To pop a value, you remove the value indexed by \TT{sp}, and then
+add -1 to the \TT{sp}.
+
+The \ttkey{return\_stack} is used by \TT{CALL} and \TT{RET}
+instructions, with \TT{rp} being the index of the element at the
+top of the stack (the last element pushed).
+A \TT{CALL} instruction pushes the \TT{pc} value
+pointing at the instruction after the \TT{CALL} into the
+\TT{return\_stack}.  A \TT{RET} instruction pops a value from
+the \TT{return\_stack} and stores it in the program counter
+(the \TT{pc} memeber of the \TT{process}).
+
 \subsection{Instructions}
 \label{INSTRUCTIONS}
 
