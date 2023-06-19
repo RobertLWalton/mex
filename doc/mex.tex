@@ -780,10 +780,97 @@ but \TT{NaN}s may be returned as results.
     & Pop 2 values, then push the arc-tangent of the \\
     & first/second popped divided by the second/first popped.
 \\\hline
+\TT{POWER}
+    & Replace the top value by the top value to the \TT{immedA} power.
+\\\hline
 \end{tabular}
 \end{center}
 \caption{Arithmetic Instructions}
 \label{ARITHMETIC-INSTRUCTIONS}
+\end{boxedfigure}
+
+\begin{boxedfigure}
+
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+\TT{PUSH}
+    & Push the \TT{immedB}'th value in the stack below the top value \\
+    & into the stack (\TT{immedB} = 0 duplicates the top value).
+\\\hline
+\TT{PUSHI}
+    & Push \TT{immedD} into the stack.
+\\\hline
+\TT{PUSHG}
+    & Push into the stack the \TT{immedB}'th value from the end of the \\
+    & global value stack of the module pointed at by \TT{immedD}.
+\\\hline
+\TT{JMP}
+    & Add \TT{immedA} to \TT{sp} (popping the stack \TT{immedA} times), \\
+    & then push \TT{immedD} into the stack \TT{immedB} times, \\
+    & then add \TT{immedC} to the \TT{pc} (skipping \TT{immedC} instructions).
+\\\hline
+\TT{JMPEQ/JMPNE}
+    & Pop 2 values and compare them.  If they are equal/not-equal \\
+    & continue as per the \TT{JMP} instruction.  Otherwise do nothing.
+\\\hline
+\TT{JMPLT/JMPLEQ}
+    & Pop 2 values and compare them.  If the first popped is \\
+    & less-than/less-than-or-equal-to the second popped, \\
+    & continue as per the \TT{JMP} instruction.  Otherwise do nothing.
+\\\hline
+\TT{JMPGT/JMPGEQ}
+    & Pop 2 values and compare them.  If the first popped is \\
+    & greater-than/greater-than-or-equal-to the second popped, \\
+    & continue as per the \TT{JMP} instruction.  Otherwise do nothing.
+\\\hline
+\TT{BEG}/\TT{NOP}
+    & Do nothing.
+\\\hline
+\TT{END}
+    & Add \TT{immedA} to \TT{sp} (popping the stack \TT{immedA} times).
+\\\hline
+\TT{BEGL}
+    & Take the top \TT{immedB} values in the stack and push a copy of \\
+    & them all into the stack, preserving stack ordering.
+\\\hline
+\TT{ENDL}/\TT{CONT}
+    & First add \TT{immedA} to \TT{sp} (popping the stack \TT{immedA} times), \\
+    & then take the top \TT{immedB} values in the stack and copy them \\
+    & to the next lower \TT{immedB} values in the stack, then subtract \\
+    & \TT{immedC} from the \TT{pc} (jumping backwards).
+\\\hline
+\TT{BEGF}
+    & Add \TT{immedC} to the \TT{pc} (skipping \TT{immedC} instructions).
+\\\hline
+\TT{ENDF}
+    & Add \TT{immedA} to \TT{sp} (popping the stack \TT{immedA} times),
+    					then \\
+    & pop the return stack and set the \TT{pc} to the value popped.
+\\\hline
+\TT{CALL}
+    & Push the \TT{pc} value in to the return stack, then
+                               set the \TT{index} \\
+    & of the \TT{pc} to \TT{immedC} (this should be the \\
+    & first instruction \underline{after} the \TT{BEGF} of the function.
+\\\hline
+\TT{CALLG}
+    & Push the \TT{pc} value in to the return stack, then
+                      set the \TT{index} \\
+    & of the \TT{pc} to \TT{immedC} and the \TT{module}
+                            of the \TT{pc} to \TT{immedD} \\
+    & (which must convert to a \TT{mex::module}).
+\\\hline
+\TT{RET}
+    & Pop \TT{immedB} values from the stack and save them.  Then \\
+    & add \TT{immedA} to \TT{sp} (popping the stack \TT{immedA} times), \\
+    & then push the saved values into the stack, then pop \\
+    & the return stack and set the \TT{pc} to the value popped.
+\\\hline
+\end{tabular}
+\end{center}
+\caption{Non-Arithmetic Instructions}
+\label{NON-ARITHMETIC-INSTRUCTIONS}
 \end{boxedfigure}
 
 \section{Interface}
