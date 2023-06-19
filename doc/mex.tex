@@ -561,27 +561,30 @@ The interface to a MEX module and its code vector is:
 \begin{indpar}
 
 \begin{tabular}{r@{}l@{~~~~~~~~}l}
-\verb|struct                   mex::| & \MEXKEY{instr}
+\verb|struct                        mex::| & \MEXKEY{instr}
 \LABEL{MEX::INSTR} \\
-\verb|{                             | \\
+\verb|{                                  | \\
 \verb|    min::uns16 | & \TTMKEY{op\_code}{in {\tt mex::instr}} \\
 \verb|    min::uns16 | & \TTMKEY{immedA}{in {\tt mex::instr}} \\
 \verb|    min::uns16 | & \TTMKEY{immedB}{in {\tt mex::instr}} \\
 \verb|    min::uns16 | & \TTMKEY{immedC}{in {\tt mex::instr}} \\
 \verb|    min::gen | & \TTMKEY{immedD}{in {\tt mex::instr}} \\
-\verb|}                             | \\
+\verb|}                                  | \\
 \end{tabular}
 
 \begin{tabular}{r@{}l@{~~~~~~~~}l}
-\verb|struct                   mex::| & \MEXKEY{module\_header}
+\verb|struct                        mex::| & \MEXKEY{module\_header}
 \LABEL{MEX::MODULE_HEADER} \\
-\verb|{                             | \\
+\verb|{                                  | \\
 \verb|    min::uns32 | & \TTMKEY{control}{in {\tt mex::code\_header}} \\
 \verb|    min::uns32 | & \TTMKEY{length}{in {\tt mex::code\_header}} \\
 \verb|    min::uns32 | & \TTMKEY{max\_length}{in {\tt mex::code\_header}} \\
-\verb|    min::phrase_position_vec | & \TTMKEY{position}{in {\tt mex::code\_header}} \\
+\verb|    min::phrase_position_vec | & \TTMKEY{position}
+                                              {in {\tt mex::code\_header}} \\
+\verb|    min::packed_vec_ptr<min::gen> | & \TTMKEY{globals}
+                                              {in {\tt mex::code\_header}} \\
 \verb|    min::gen | & \TTMKEY{interface}{in {\tt mex::code\_header}} \\
-\verb|}                             | \\
+\verb|}                                  | \\
 \end{tabular}
 
 \verb|typedef min::packed_vec_ptr<mex::instr,mex::module_header>| \\
@@ -601,10 +604,54 @@ element of the \TT{module} vector, and also gives the
 file of the \TT{module}.  This information can be used to
 print trace and error messages.
 
+The \ttikey{globals}{of module} member of the \TT{module}
+is a copy of the stack created by executing the module code.
+This stack contains global variables exported by the module.
+
 The \ttikey{interface}{of module} member of the \TT{module} points
 at the module's interface.  MEX does not itself specify or use
 the interface -- this is up to the compiler.  However the compiler
 may choose to use the interface in \itemref{INTERFACE}.
+
+\subsection{Processes}
+\label{PROCESSES}
+
+A \key{process} is a stack, a program counter, a stack pointer,
+and a return stack.  Specifically:
+
+\begin{indpar}
+
+\begin{tabular}{r@{}l@{~~~~~~~~}l}
+\verb|struct                        mex::| & \MEXKEY{pc}
+\LABEL{MEX::PC} \\
+\verb|{                                  | \\
+\verb|    mex::module | & \TTMKEY{module}{in {\tt mex::pc}} \\
+\verb|    min::uns32 | & \TTMKEY{index}{in {\tt mex::pc}} \\
+\verb|}                                  | \\
+\end{tabular}
+
+\begin{tabular}{r@{}l@{~~~~~~~~}l}
+\verb|struct                        mex::| & \MEXKEY{process\_header}
+\LABEL{MEX::PROCESS_HEADER} \\
+\verb|{                                  | \\
+\verb|    min::uns32 | & \TTMKEY{control}{in {\tt mex::process\_header}} \\
+\verb|    min::uns32 | & \TTMKEY{length}{in {\tt mex::process\_header}} \\
+\verb|    min::uns32 | & \TTMKEY{max\_length}{in {\tt mex::process\_header}} \\
+\verb|    mex::pc | & \TTMKEY{pc}{in {\tt mex::process\_header}} \\
+\verb|    min::uns32 | & \TTMKEY{sp}{in {\tt mex::process\_header}} \\
+\verb|    min::packed_vec_insptr<mex::pc> | & \TTMKEY{return\_stack}
+                                              {in {\tt mex::process\_header}} \\
+\verb|    min::uns32 | & \TTMKEY{rp}{in {\tt mex::process\_header}} \\
+\verb|}                                  | \\
+\end{tabular}
+
+\verb|typedef min::packed_vec_ptr<min::gen,mex::process_header>| \\
+\hspace*{3em}\verb|mex::|\MEXKEY{process}
+\\[0.5ex]
+\verb|typedef min::packed_vec_insptr<min::gen,mex::process_header>| \\
+\hspace*{3em}\verb|mex::|\MEXKEY{process\_insptr}
+
+\end{indpar}
 
 \subsection{Instructions}
 \label{INSTRUCTIONS}
