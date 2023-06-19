@@ -258,7 +258,7 @@
 
 \author{Robert L. Walton}
 
-\date{June 18, 2023}
+\date{June 19, 2023}
  
 \maketitle
 
@@ -700,13 +700,17 @@ but \TT{NaN}s may be returned as results.
 
 \begin{boxedfigure}
 
+\begin{center}
 \begin{tabular}{|l|l|}
 \hline
 \TT{ADD}/\TT{MUL}
     & Pop 2 values, then push their sum/product.
 \\\hline
-\TT{ADDI}/\TT{MULI}
-    & Adds/multiplies the top value by \TT{immedD}.
+\TT{ADDI}
+    & Adds \TT{immedD} to the top value.
+\\\hline
+\TT{MULI}
+    & Multiplies the top value by \TT{immedD}.
 \\\hline
 \TT{SUB}/\TT{SUBR}
     & Pop 2 values, then push second/first popped minus \\
@@ -730,8 +734,8 @@ but \TT{NaN}s may be returned as results.
 \\\hline
 \TT{MOD}/\TT{MODR}
     & Pop 2 values, then push the round-toward-minus-infinity \\
-    & remainder of the second/first value popped divided by \\
-    & the first/second value popped.
+    & remainder of the second/first popped divided by \\
+    & the first/second popped.
 \\\hline
 \TT{MODI}
     & Replace the top value by the round-toward-minus-infinity \\
@@ -741,7 +745,43 @@ but \TT{NaN}s may be returned as results.
     & Replace the top value by the round-toward-minus-infinity \\
     & remainder of \TT{immedD} divided by the top value.
 \\\hline
+\TT{FLOOR}/\TT{CEILING}
+    & Replace the top value by the and integer equal to the \\
+    & top value rounded toward minus/plus infinity.
+\\\hline
+\TT{TRUNC}/\TT{ROUND}
+    & Replace the top value by the and integer equal to the \\
+    & top value rounded toward zero/the-nearest-integer.
+\\\hline
+\TT{NEG}/\TT{ABS}
+    & Replace the top value by its negation/absolute-value.
+\\\hline
+\TT{LOG10}/\TT{LOGE}
+    & Replace the top value by its log base 10/e.
+\\\hline
+\TT{LOG}/\TT{LOGR}
+    & Pop 2 values, then push the log of the first/second popped \\
+    & base the second/first popped.
+\\\hline
+\TT{EXP10}/\TT{EXPE}
+    & Replace the top value by 10/e to the top value power.
+\\\hline
+\TT{EXP}/\TT{EXPR}
+    & Pop 2 values, then push the first/second popped to the \\
+    & second/first popped power.
+\\\hline
+\TT{COS}/\TT{SIN}/\TT{TAN}
+    & Replace the top value by its sin/cos/tan.
+\\\hline
+\TT{ASIN}/\TT{ACOS}/\TT{TAN}
+    & Replace the top value by its arc- sin/cos/tan.
+\\\hline
+\TT{ATAN2}/\TT{ATAN2R}
+    & Pop 2 values, then push the arc-tangent of the \\
+    & first/second popped divided by the second/first popped.
+\\\hline
 \end{tabular}
+\end{center}
 \caption{Arithmetic Instructions}
 \label{ARITHMETIC-INSTRUCTIONS}
 \end{boxedfigure}
