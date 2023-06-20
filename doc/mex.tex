@@ -10,15 +10,7 @@
 \usepackage{lmodern}
 \usepackage{wasysym}
 \usepackage{makeidx}
-% \usepackage{pictex} (obsolete? not available under CentOS 7)
-\usepackage{upquote} % (imported to local directory
-                     % ; not available under CentOS 7)
-    % Modifies \verb and \verbatim to print ' with
-    % the Computer Modern Typewrite font.
-    % Also includes the textcomp package.
-    % Modifies \verb and \verbatim to print ' with
-    % the Computer Modern Typewrite font.
-    % Also includes the textcomp package.
+\usepackage{upquote}
 
 \makeindex
 
@@ -496,46 +488,18 @@ The syntactic structure of a code vector is:
 \\[0.5ex]
 \emkey{code-item} \begin{tabular}[t]{@{}rl} 
 		  ::= & {\em arithmetic-instruction} \\
-		  $|$ & {\em jump-instruction} \\
-		  $|$ & {\em push-instruction} \\
-		  $|$ & {\em call-instruction} \\
+		  $|$ & {\em non-arithmetic-instruction} \\
 		  $|$ & {\em normal-block} \\
 		  $|$ & {\em loop-block} \\
 		  $|$ & {\em function-block} \\
 		  \end{tabular}
 \\[0.5ex]
-\emkey{arithmetic-instruction}
-    \begin{tabular}[t]{@{}rl}
-    ::= & \TT{ADD} $|$ \TT{ADDI} \\
-    $|$ & \TT{SUB} $|$ \TT{SUBR} $|$ \TT{SUBI} $|$ \TT{SUBRI} \\
-    $|$ & \TT{MUL} $|$ \TT{MULI} \\
-    $|$ & \TT{DIV} $|$ \TT{DIVR} $|$ \TT{DIVI} $|$ \TT{DIVRI} \\
-    $|$ & \TT{FLOOR} $|$ \TT{FLOORR} $|$ \TT{FLOORI} $|$ \TT{FLOORRI} \\
-    $|$ & \TT{CEIL} $|$ \TT{CEILR} $|$ \TT{CEILI} $|$ \TT{CEILRI} \\
-    $|$ & \TT{TRUNC} $|$ \TT{TRUNCR} $|$ \TT{TRUNCI} $|$ \TT{TRUNCRI} \\
-    $|$ & \TT{ROUND} $|$ \TT{ROUNDR} $|$ \TT{ROUNDI} $|$ \TT{ROUNDRI} \\
-    $|$ & \TT{NEG} $|$ \TT{ABS} \\
-    $|$ & \TT{LOG} $|$ \TT{LOG10} $|$ \TT{LOGE} \\
-    $|$ & \TT{EXP} $|$ \TT{EXP10} $|$ \TT{EXPE} \\
-    $|$ & \TT{SIN} $|$ \TT{ARCSIN} \\
-    $|$ & \TT{COS} $|$ \TT{ARCCOS} \\
-    $|$ & \TT{TAN} $|$ \TT{ARCTAN} \\
-    $|$ & \TT{COTAN} $|$ \TT{ARCCOTAN} \\
-    $|$ & \TT{POWER} \\
-    \end{tabular}
+\emkey{arithmetic-instruction} ::=
+    instructions in Figure \ref{ARITHMETIC-INSTRUCTIONS}
 \\[0.5ex]
-\emkey{jump-instruction}
-    \begin{tabular}[t]{@{}rl}
-    ::= & \TT{JMP} \\
-    $|$ & \TT{JMPEQ} $|$ \TT{JMPNE} $|$ \TT{JMPEQI} $|$ \TT{JMPNEI} \\
-    $|$ & \TT{JMPLT} $|$ \TT{JMPLEQ} $|$ \TT{JMPLTI} $|$ \TT{JMPLEQI} \\
-    $|$ & \TT{JMPGT} $|$ \TT{JMPGEQ} $|$ \TT{JMPGTI} $|$ \TT{JMPGEQI} \\
-    $|$ & \TT{BREAK} $|$ \TT{CONTINUE} \\
-    \end{tabular}
-\\[0.5ex]
-\emkey{push-instruction} ::= \TT{PUSH} $|$ \TT{PUSHI} $|$ \TT{PUSHG}
-\\[0.5ex]
-\emkey{call-instruction} ::= \TT{CALL} $|$ \TT{CALLG} $|$ \TT{RET}
+\emkey{non-arithmetic-instruction} ::=
+     instructions in Figure \ref{ARITHMETIC-INSTRUCTIONS}
+     excepting \TT{BEG\ldots} and \TT{END\ldots}
 \\[0.5ex]
 \emkey{normal-block} ::= \begin{tabular}[t]{@{}l}
 			 \TT{BEG} \\
@@ -564,7 +528,8 @@ The interface to a MEX module and its code vector is:
 \verb|struct                        mex::| & \MEXKEY{instr}
 \LABEL{MEX::INSTR} \\
 \verb|{                                  | \\
-\verb|    min::uns16 | & \TTMKEY{op\_code}{in {\tt mex::instr}} \\
+\verb|    min::uns8 | & \TTMKEY{op\_code}{in {\tt mex::instr}} \\
+\verb|    min::uns8 | & \TTMKEY{trace\_index}{in {\tt mex::instr}} \\
 \verb|    min::uns16 | & \TTMKEY{immedA}{in {\tt mex::instr}} \\
 \verb|    min::uns16 | & \TTMKEY{immedB}{in {\tt mex::instr}} \\
 \verb|    min::uns16 | & \TTMKEY{immedC}{in {\tt mex::instr}} \\
@@ -642,6 +607,9 @@ and a return stack.  Specifically:
 \verb|    min::packed_vec_insptr<mex::pc> | & \TTMKEY{return\_stack}
                                               {in {\tt mex::process\_header}} \\
 \verb|    min::uns32 | & \TTMKEY{rp}{in {\tt mex::process\_header}} \\
+\verb|    min::uns64 | & \TTMKEY{trace\_flags}{in {\tt mex::process\_header}} \\
+\verb|    int | & \TTMKEY{excepts}{in {\tt mex::process\_header}} \\
+\verb|    bool | & \TTMKEY{optimize}{in {\tt mex::process\_header}} \\
 \verb|}                                  | \\
 \end{tabular}
 
@@ -655,13 +623,15 @@ and a return stack.  Specifically:
 
 A \ttkey{pc}, or \key{program counter}, is a pointer to a module,
 which is a code vector, and an index in that vector of an instruction.
-Thus a \TT{pc} points at an instruction.
+Thus a \TT{pc} points at an instruction.  The \TT{pc} member of a
+process is the current program counter of that process.
 
 An \ttkey{sp}, or \key{stack pointer}, is the index of an element of
 the process vector which is the stack.  To push a value into you add
 +1 to the \TT{sp} and store the value in the element it now indexes.
 To pop a value, you remove the value indexed by \TT{sp}, and then
-add -1 to the \TT{sp}.
+add -1 to the \TT{sp}.  The \TT{sp} member of a
+process is the current stack pointer of that process.
 
 The \ttkey{return\_stack} is used by \TT{CALL} and \TT{RET}
 instructions, with \TT{rp} being the index of the element at the
@@ -669,34 +639,16 @@ top of the stack (the last element pushed).
 A \TT{CALL} instruction pushes the \TT{pc} value
 pointing at the instruction after the \TT{CALL} into the
 \TT{return\_stack}.  A \TT{RET} instruction pops a value from
-the \TT{return\_stack} and stores it in the program counter
-(the \TT{pc} memeber of the \TT{process}).
+the \TT{return\_stack} and stores it in the current program counter
+of the process (the \TT{pc} member of the \TT{process}).
+
+The \TT{trace\_flags}, \TT{excepts}, and \TT{optimize}
+members of a process
+are explained in \itemref{TRACING-AND-EXCEPTIONS}.
 
 \subsection{Instructions}
 \label{INSTRUCTIONS}
 
-A MEX instruction (a \TT{mex::instr}, see \pagref{MEX::INSTR})
-consists of an \TT{op\_code} and up to 4 immediate values,
-\TT{immedA}, \TT{immedB}, \TT{immedC}, and \TT{immedD}.
-
-Some examples:
-\begin{indpar}\begin{verbatim}
-mex::instr an_add_instruction = {mex::ADD};
-    // Pop 2 values and push their sum.
-mex::instr an_add_immediate_instruction = {mex::ADDI,,,,3.14159};
-    // Add 3.14159 to top value.
-mex::instr a_begin_instruction = {mex::BEG};
-    // Do nothing.
-mex::instr an_end_instruction = {mex::END,10};
-    // Pop 10 values and discard them.
-mex::instr a_jump_instruction = {mex::JMP,10,5,32,min::MISSING()};
-    // Pop 10 values and discard them, then push min::MISSING()
-    // 5 times, then add 32 to program counter.
-\end{verbatim}\end{indpar}
-
-The arithmetic instruction set is in Figure~\ref{ARITHMETIC-INSTRUCTIONS}.
-IEEE 64-bit floating point operations are used; there are no errors
-but \TT{NaN}s may be returned as results.
 
 \begin{boxedfigure}
 
@@ -873,20 +825,107 @@ but \TT{NaN}s may be returned as results.
 \label{NON-ARITHMETIC-INSTRUCTIONS}
 \end{boxedfigure}
 
+A MEX instruction (a \TT{mex::instr}, see \pagref{MEX::INSTR})
+consists of an \TT{op\_code}, a \TT{trace\_index},
+and up to 4 immediate values,
+\TT{immedA}, \TT{immedB}, \TT{immedC}, and \TT{immedD}.
+The \TT{trace\_index} is explained in \itemref{TRACING-AND-EXCEPTIONS}.
+
+Some examples:
+\begin{indpar}\begin{verbatim}
+mex::instr an_add_instruction = {mex::ADD};
+    // Pop 2 values and push their sum.
+mex::instr an_add_immediate_instruction = {mex::ADDI,,,,,3.14159};
+    // Add 3.14159 to top value.
+mex::instr a_begin_instruction = {mex::BEG};
+    // Do nothing.
+mex::instr an_end_instruction = {mex::END,,10};
+    // Pop 10 values and discard them.
+mex::instr a_jump_instruction = {mex::JMP,,10,5,32,min::MISSING()};
+    // Pop 10 values and discard them, then push min::MISSING()
+    // 5 times, then add 32 to program counter.
+\end{verbatim}\end{indpar}
+
+The arithmetic instruction set is in Figure~\ref{ARITHMETIC-INSTRUCTIONS}.
+IEEE 64-bit floating point operations and the C \TT{math.h}
+library are used.  See \itemref{TRACING-AND-EXCEPTIONS} for error
+handling.
+
+The non-arithmetic instruction set is in
+Figure~\ref{NON-ARITHMETIC-INSTRUCTIONS}.
+See \itemref{STACKS} for an overview of stack handling.
+
+\section{Tracing and Exceptions}
+\label{TRACING-AND-EXCEPTIONS}
+
+A process has two modes: \key{normal} and \key{optimized}, as
+determined by the \TT{optimize} member of the process.
+The default setting of the \TT{optimize} member of a process
+is \TT{false}.
+
+In normal mode, if an instruction's \TT{trace\_index} value
+\TT{I} is such that the process's \TT{1ull <{}< I} \TT{trace\_flags}
+bit is on, the instruction is traced.  In optimized mode,
+no tracing is done.  The default setting of the \TT{trace\_flags}
+member of a process is \TT{0}.
+
+When an instruction is traced, the instruction prints its
+\TT{min::phrase\_position} (from its module's
+\TT{min::phrase\_\EOL position\_vec}) followed by
+a description of the value produced by the instruction.
+
+Instructions may raise the following exceptions, each
+associated with a flag bit defined in \TT{fenv.h}
+(see fenv(3) in the unix manual):
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+\ttkey{FE\_DIVBYZERO} &  An operation on finite numbers produces infinity \\
+                      &  as a result (e.g., {\tt 5/+0}).
+\\\hline
+\ttkey{FE\_INVALID} & An operation has no well defined result
+                      (e.g., {\tt 0/0}). \\
+		    & \TT{NaN} becomes the result.
+\\\hline
+\ttkey{FE\_OVERFLOW} & An operation produces a finite result too large to
+                       store. \\
+		     & An infinity becomes the result.
+\\\hline
+\ttkey{FE\_UNDERFLOW} & An operation produces a finite result too small to
+                        store. \\
+	              & {\tt +0} or {\tt -0} becomes the result.
+\\\hline
+\ttkey{FE\_INEXACT} & An operation produces a finite result that cannot
+                      be stored exactly. \\
+		    & The result is rounded to the nearest value.
+\\\hline
+\end{tabular}
+\end{center}
+
+In normal mode, an instruction that raises an exception prints
+an error message if the instruction raises any exception whose bit
+is on in the process's \TT{excepts} member.
+
+In optimized mode, instructions do not print error messages
+involving exceptions.
+
+I both modes, if any instruction raised an exception whose bit
+is on in the process's \TT{excepts} member, a notice message is
+printed when the process terminates.
+
+The default setting of a process's \TT{excepts} member
+is:
+\begin{center}
+\TT{FE\_DIVBYZERO|FE\_INVALID|FE\_OVERFLOW}
+\end{center}
+
+
+
 \section{Interface}
 \label{INTERFACE}
 
 
 \clearpage
-
-\appendix
-
-\centerline{\Large \bf Appendices}
-
-TBD
-
-\bibliographystyle{plain}
-\bibliography{min}
 
 \printindex
 
