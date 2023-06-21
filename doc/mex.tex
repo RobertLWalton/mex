@@ -246,7 +246,7 @@
 \begin{document}
         
 \title{Minimal Runtime System\\[2ex]Execution Engine\\[2ex]MEX\\[2ex]
-       (Draft 1a)}
+       (Draft 1)}
 
 \author{Robert L. Walton}
 
@@ -254,7 +254,6 @@
  
 \maketitle
 
-\newpage
 \begin{center}
 \large \bf Table of Contents
 \end{center}
@@ -330,34 +329,35 @@ that allows the compilation of references to the
 global variables of the module and function calls to the
 functions in the module code vector.
 
-When a module is compiled, the compiler may reference the interfaces
+When a module is compiled, it is loaded into memory
+ready for execution.  There is no MEX `binary' language.
+
+Interfaces are provided by and used by the compiler, and
+not by MEX.  Typically a module may reference the interface
 of pre-existing modules.
 
 Immediately after a module is compiled, it is executed.  The
 resulting execution stack (see \itemref{STACKS}) becomes the
-modules global variable stack.
+module's global variable stack.
 
 Each module is compiled sequentially, and it is possible to add
 to the end of a pre-existing module.  Instructions are
-just added to the end of the module's code vector, information
-is added to the module's interface, and variables are pushed into the
-the module's global variable stack.
+just added to the end of the module's code vector
+and variables are pushed into the
+the module's global variable stack.  Adding to interfaces is
+a matter for the compiler, and not for MEX.
 
 A function is a sequential block of code in a module code vector.
 When the module code vector is executed, just after compiling
 the module, its functions are skipped over, as if they were not
-there.  When a function is called using the module interface,
+there.  When a function is called
 the function code block instructions are executed.  A function
-can itself contain another function, and each function has
-its own interface.  However, these function interfaces are
-only used during compilation of the function code, and cannot
-be accessed by other modules, so they are part of the compiler
-and not part of MEX.
+can itself contain another function.
 
 MEX does \underline{not} itself provide a compiler, but it
-assumes certain compilation behaviors.
+assumes a few compilation behaviors.
 
-\subsection{Stacks}
+\section{Stacks}
 \label{STACKS}
 
 MEX is stack oriented.  A stack is a vector of \TT{min::gen}
@@ -368,15 +368,12 @@ or \ikey{popped}{from stack} from the stack,
 meaning that they are removed from the
 end of the stack vector.
 
-In MEX the only operations that pop the stack are returns from
-functions and ends of blocks.
-
 MEX assumes that variables in the stack are read-only, unless
 they are being assigned values by a block of code.  MEX assumes
 that the variables to be assigned by a block are pushed into the stack
 by the compiler and made write-only.  Then the block is executed
 and writes these variables.  When the block finishes, it pops
-all the values code inside the block has pushed into the stack,
+all the values that code inside the block has pushed into the stack,
 leaving the write-only variables pushed before the block executed.
 These variables are then made read-only by the compiler.
 
@@ -390,7 +387,7 @@ the return values of the function into the stack.
 
 Builtin instructions behave like function calls: for example,
 the \TT{ADD} instruction pops its two arguments from the stack
-and them pushes their sum into the stack.
+and then pushes their sum into the stack.
 
 Immediately after it compiles, a module executes as if it were a function
 of no arguments.  At its end, it does not pop its stack, but
@@ -401,7 +398,8 @@ stack (or the number above the beginning of the stack for a
 module execution) is a parameter of the current instruction known
 to the compiler.  To maintain this rule, forward jumps must push
 null values into the stack to take the place of the values that would be
-pushed by the code being skipped.  Backward jumps are not allowed.
+pushed by the code being skipped.  Backward jumps are only allowed when
+a loop block ends.
 
 Forward jumps that leave a block may pop values from the stack
 instead of pushing values.  In general a jump may first pop
@@ -477,7 +475,7 @@ the loop pops these values and the write-only values,
 leaving the names {\tt i} and {\tt sum} pointing at the read-only values
 in the stack.
 
-\subsection{Code Vectors}
+\section{Code Vectors}
 \label{CODE-VECTORS}
 
 A \key{code vector} is a MIN packed vector of instructions.
@@ -497,7 +495,8 @@ The syntactic structure of a code vector is:
 \emkey{arithmetic-instruction} ::=
     instructions in Figure \ref{ARITHMETIC-INSTRUCTIONS}
 \\[0.5ex]
-\emkey{non-arithmetic-instruction} ::=
+\emkey{non-arithmetic-instruction} ::= \\
+\hspace*{3em}
      instructions in Figure \ref{ARITHMETIC-INSTRUCTIONS}
      excepting \TT{BEG\ldots} and \TT{END\ldots}
 \\[0.5ex]
@@ -575,10 +574,9 @@ This stack contains global variables exported by the module.
 
 The \ttikey{interface}{of module} member of the \TT{module} points
 at the module's interface.  MEX does not itself specify or use
-the interface -- this is up to the compiler.  However the compiler
-may choose to use the interface in \itemref{INTERFACE}.
+the interface -- this is up to the compiler.
 
-\subsection{Processes}
+\section{Processes}
 \label{PROCESSES}
 
 A \key{process} is a stack, a program counter, a stack pointer,
@@ -646,7 +644,7 @@ The \TT{trace\_flags}, \TT{excepts}, and \TT{optimize}
 members of a process
 are explained in \itemref{TRACING-AND-EXCEPTIONS}.
 
-\subsection{Instructions}
+\section{Instructions}
 \label{INSTRUCTIONS}
 
 
@@ -918,12 +916,6 @@ is:
 \begin{center}
 \TT{FE\_DIVBYZERO|FE\_INVALID|FE\_OVERFLOW}
 \end{center}
-
-
-
-\section{Interface}
-\label{INTERFACE}
-
 
 \clearpage
 
