@@ -250,7 +250,7 @@
 
 \author{Robert L. Walton}
 
-\date{June 19, 2023}
+\date{June 22, 2023}
  
 \maketitle
 
@@ -378,7 +378,9 @@ leaving the write-only variables pushed before the block executed.
 These variables are then made read-only by the compiler.
 
 Note that MEX itself has no notion of read-only or write-only.
-The compiler must enforce these.
+The compiler must enforce these.  MEX assumes that to allow
+a form of variable update the compiler implements `next variables'
+as described in \itemref{NEXT-VARIABLES-AND-LOOPS}.
 
 When a function executes, it begins with just its arguments
 in the stack.  When it returns, it pops these and everything
@@ -405,6 +407,12 @@ Forward jumps that leave a block may pop values from the stack
 instead of pushing values.  In general a jump may first pop
 values from the stack, and then push null values.
 
+There are special considerations involving the stack if the
+compiler allows functions to be nested inside other functions.
+These considerations are described in \itemref{NESTED-FUNCTIONS}.
+
+\subsection{Next Variables and Loops}
+\label{NEXT-VARIABLES-AND-LOOPS}
 
 MEX assumes that the compiler will implement \skey{next variables}.
 Consider the code:
@@ -474,6 +482,11 @@ in the example) are popped from the stack.  The end of
 the loop pops these values and the write-only values,
 leaving the names {\tt i} and {\tt sum} pointing at the read-only values
 in the stack.
+
+\subsection{Nested Functions}
+\label{NESTED-FUNCTIONS}
+
+TBD
 
 \section{Code Vectors}
 \label{CODE-VECTORS}
@@ -580,7 +593,7 @@ the interface -- this is up to the compiler.
 \label{PROCESSES}
 
 A \key{process} is a stack, a program counter, a stack pointer,
-and a return stack.  Specifically:
+a return stack, and other parameters.  Specifically:
 
 \begin{indpar}
 
@@ -594,6 +607,16 @@ and a return stack.  Specifically:
 \end{tabular}
 
 \begin{tabular}{r@{}l@{~~~~~~~~}l}
+\verb|struct                        mex::| & \MEXKEY{ret}
+\LABEL{MEX::ret} \\
+\verb|{                                  | \\
+\verb|    mex::pc | & \TTMKEY{saved\_pc}{in {\tt mex::ret}} \\
+\verb|    min::uns32 | & \TTMKEY{saved\_fp}{in {\tt mex::ret}} \\
+\verb|    min::uns32 | & \TTMKEY{nargs}{in {\tt mex::ret}} \\
+\verb|}                                  | \\
+\end{tabular}
+
+\begin{tabular}{r@{}l@{~~~~~~~~}l}
 \verb|struct                        mex::| & \MEXKEY{process\_header}
 \LABEL{MEX::PROCESS_HEADER} \\
 \verb|{                                  | \\
@@ -602,9 +625,10 @@ and a return stack.  Specifically:
 \verb|    min::uns32 | & \TTMKEY{max\_length}{in {\tt mex::process\_header}} \\
 \verb|    mex::pc | & \TTMKEY{pc}{in {\tt mex::process\_header}} \\
 \verb|    min::uns32 | & \TTMKEY{sp}{in {\tt mex::process\_header}} \\
-\verb|    min::packed_vec_insptr<mex::pc> | & \TTMKEY{return\_stack}
+\verb|    min::packed_vec_insptr<mex::ret> | & \TTMKEY{return\_stack}
                                               {in {\tt mex::process\_header}} \\
 \verb|    min::uns32 | & \TTMKEY{rp}{in {\tt mex::process\_header}} \\
+\verb|    min::uns32 | & \TTMKEY{fp}{in {\tt mex::process\_header}}\TT{[16]} \\
 \verb|    min::uns64 | & \TTMKEY{trace\_flags}{in {\tt mex::process\_header}} \\
 \verb|    int | & \TTMKEY{excepts}{in {\tt mex::process\_header}} \\
 \verb|    bool | & \TTMKEY{optimize}{in {\tt mex::process\_header}} \\
@@ -634,11 +658,17 @@ process is the current stack pointer of that process.
 The \ttkey{return\_stack} is used by \TT{CALL} and \TT{RET}
 instructions, with \TT{rp} being the index of the element at the
 top of the stack (the last element pushed).
-A \TT{CALL} instruction pushes the \TT{pc} value
+A \TT{CALL} instruction pushes a \TT{mex::ret} value
+into the return stack.  This contains a \TT{saved\_pc} member
 pointing at the instruction after the \TT{CALL} into the
-\TT{return\_stack}.  A \TT{RET} instruction pops a value from
-the \TT{return\_stack} and stores it in the current program counter
+\TT{return\_stack}.  A \TT{RET} instruction pops a \TT{mex::ret} value from
+the \TT{return\_stack} and stores its \TT{saved\_pc}
+in the current program counter
 of the process (the \TT{pc} member of the \TT{process}).
+See Figure~\ref{FUNCTION-INSTRUCTIONS} for more details.
+
+The frame pointer vector, \TT{fp}, is explained in
+\itemref{NESTED-FUNCTIONS}.
 
 The \TT{trace\_flags}, \TT{excepts}, and \TT{optimize}
 members of a process
@@ -745,15 +775,19 @@ are explained in \itemref{TRACING-AND-EXCEPTIONS}.
 \begin{tabular}{|l|l|}
 \hline
 \TT{PUSH}
-    & Push the \TT{immedB}'th value in the stack below the top value \\
-    & into the stack (\TT{immedB} = 0 duplicates the top value).
+    & Push the \TT{immedA}'th value in the stack below the top value \\
+    & into the stack (\TT{immedA} = 0 duplicates the top value).
 \\\hline
 \TT{PUSHI}
     & Push \TT{immedD} into the stack.
 \\\hline
 \TT{PUSHG}
-    & Push into the stack the \TT{immedB}'th value from the end of the \\
+    & Push into the stack the \TT{immedA}'th value from the end of the \\
     & global value stack of the module pointed at by \TT{immedD}.
+\\\hline
+\TT{POP}
+    & Pop 1 value and store it in the \TT{immedA}'th value in the stack below \\
+    & the value popped (\TT{immedA} = 0 effectively discards the value).
 \\\hline
 \TT{JMP}
     & Add \TT{immedA} to \TT{sp} (popping the stack \TT{immedA} times), \\
@@ -790,37 +824,83 @@ are explained in \itemref{TRACING-AND-EXCEPTIONS}.
     & to the next lower \TT{immedB} values in the stack, then subtract \\
     & \TT{immedC} from the \TT{pc} (jumping backwards).
 \\\hline
+\end{tabular}
+\end{center}
+\caption{Housekeeping Instructions}
+\label{HOUSEKEEPING-INSTRUCTIONS}
+\end{boxedfigure}
+
+\begin{boxedfigure}
+
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
 \TT{BEGF}
     & Add \TT{immedC} to the \TT{pc} (skipping \TT{immedC} instructions).
 \\\hline
 \TT{ENDF}
     & Add \TT{immedA} to \TT{sp} (popping the stack \TT{immedA} times),
-    					then \\
-    & pop the return stack and set the \TT{pc} to the value popped.
+    					then pop \\
+    & the return stack, set the process \TT{fp[immedB]} member \\
+    & to the \TT{saved\_fp} member of the value popped, and set \\
+    & the process \TT{pc} member to the \TT{pc} member of the value popped.
 \\\hline
 \TT{CALL}
-    & Push the \TT{pc} value in to the return stack, then
-                               set the \TT{index} \\
-    & of the \TT{pc} to \TT{immedC} (this should be the \\
-    & first instruction \underline{after} the \TT{BEGF} of the function.
+    & Push a \TT{mex::ret} value into the return stack, setting its \\
+    & \TT{saved\_pc} member to point to the instruction after the \TT{CALL}, \\
+    & setting its \TT{saved\_fp} member to the processes \TT{fp[immedB]} \\
+    & member, and setting its \TT{nargs} member to \TT{immedA}.  The set \\
+    & the \TT{index} of the process's \TT{pc} member to \TT{immedC} \\
+    & (this should be the first instruction \underline{after} the
+      \TT{BEGF} of the function. \\
+    & \\
+    & Here \TT{immedA} is the number of arguments and \TT{immedB} is the \\
+    & lexical nesting level (\pagref{LEXICAL-NESTING-LEVEL}) of the
+      target function.
 \\\hline
 \TT{CALLG}
-    & Push the \TT{pc} value in to the return stack, then
-                      set the \TT{index} \\
-    & of the \TT{pc} to \TT{immedC} and the \TT{module}
-                            of the \TT{pc} to \TT{immedD} \\
-    & (which must convert to a \TT{mex::module}).
+    & Same as \TT{CALL} but also set the process's \TT{pc} member's 
+                                                           \TT{module} \\
+    & member from \TT{immedD} (which must convert to a \TT{mex::module}).
 \\\hline
 \TT{RET}
-    & Pop \TT{immedB} values from the stack and save them.  Then \\
-    & add \TT{immedA} to \TT{sp} (popping the stack \TT{immedA} times), \\
-    & then push the saved values into the stack, then pop \\
-    & the return stack and set the \TT{pc} to the value popped.
+    & Pop \TT{immedC} values from the stack and save them.  Then add \\
+    & \TT{immedA} to \TT{sp} (popping the stack \TT{immedA} times), then push \\
+    & the saved values into the stack, then pop the return stack \\
+    & and set the the process's \TT{pc} and \TT{fp[immedB]} members from the \\
+    & \TT{saved\_pc} and \TT{saved\_fp} members of the value popped.
+\\\hline
+\TT{PUSHM}
+    & Push the stack vector value with index \TT{immedA} \\
+    & (i.e., \TT{current\_process[immedA]}).
+\\\hline
+\TT{PUSHF}
+    & Push the stack vector value with index \TT{fp[immedB] - immedA}.
+\\\hline
+\TT{POPM}
+    & Pop 1 value and store it into the stack vector element with index \\
+    & \TT{immedA} (i.e., \TT{current\_process[immedA]}).
+\\\hline
+\TT{POPM}
+    & Pop 1 value and store it into the stack vector element with index \\
+    & \TT{fp[immedB] - immedA}.
+\\\hline
+\TT{PUSHA}
+    & Push the stack vector value with index \TT{fp[immedB] + immedA}.
+\\\hline
+\TT{PUSHNARGS}
+    & Push the \TT{nargs} member of the top value of the \TT{return\_stack} \\
+    & (which is a natural number) converted to IEEE 64-bit floating point.
+\\\hline
+\TT{PUSHN}
+    & Replace the top stack value \TT{V} with the value of \\
+    & the stack vector element with index \TT{fp[immedB] + V}. \\
+    & \TT{V} must convert to a non-negative integer.
 \\\hline
 \end{tabular}
 \end{center}
-\caption{Non-Arithmetic Instructions}
-\label{NON-ARITHMETIC-INSTRUCTIONS}
+\caption{Function Instructions}
+\label{FUNCTION-INSTRUCTIONS}
 \end{boxedfigure}
 
 A MEX instruction (a \TT{mex::instr}, see \pagref{MEX::INSTR})
@@ -849,9 +929,13 @@ IEEE 64-bit floating point operations and the C \TT{math.h}
 library are used.  See \itemref{TRACING-AND-EXCEPTIONS} for error
 handling.
 
-The non-arithmetic instruction set is in
-Figure~\ref{NON-ARITHMETIC-INSTRUCTIONS}.
+The housekeeping instruction set is in
+Figure~\ref{HOUSEKEEPING-INSTRUCTIONS}.
 See \itemref{STACKS} for an overview of stack handling.
+
+The function instruction set is in
+Figure~\ref{FUNCTION-INSTRUCTIONS}.
+See \itemref{NESTED-FUNCTIONS} for details concerning nested functions.
 
 \section{Tracing and Exceptions}
 \label{TRACING-AND-EXCEPTIONS}
