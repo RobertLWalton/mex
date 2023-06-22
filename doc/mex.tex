@@ -486,7 +486,27 @@ in the stack.
 \subsection{Nested Functions}
 \label{NESTED-FUNCTIONS}
 
-TBD
+The lexical nesting level\label{LEXICAL-NESTING-LEVEL}
+of a function is defined as follows.
+
+If the function $F$ is not inside any other function, $F$ has
+level 1.
+
+If the function $F$ is inside a function and $F'$ is the smallest
+function containing $F$, and if $F'$ has level $L'$, then $F$
+has level $L=L'+1$.
+
+If $F$ is a function inside another function $F'$, then $F$ can
+reference the variables that $F'$ can reference when $F$ is
+defined.  To locate these variables, knowing the frame pointer for the
+execution of $F'$ is sufficient.  The frame pointer is defined as the
+stack index of the last argument to $F'$, or equivalently, the stack
+pointer when $F'$ is called.
+
+MEX keeps track of the needed frame pointers using the following:
+\begin{indpar}
+{\bf Theorem}
+\end{indpar}
 
 \section{Code Vectors}
 \label{CODE-VECTORS}
@@ -851,7 +871,7 @@ are explained in \itemref{TRACING-AND-EXCEPTIONS}.
     & Push a \TT{mex::ret} value into the return stack, setting its \\
     & \TT{saved\_pc} member to point to the instruction after the \TT{CALL}, \\
     & setting its \TT{saved\_fp} member to the processes \TT{fp[immedB]} \\
-    & member, and setting its \TT{nargs} member to \TT{immedA}.  The set \\
+    & member, and setting its \TT{nargs} member to \TT{immedA}.  Then set \\
     & the \TT{index} of the process's \TT{pc} member to \TT{immedC} \\
     & (this should be the first instruction \underline{after} the
       \TT{BEGF} of the function. \\
@@ -876,27 +896,27 @@ are explained in \itemref{TRACING-AND-EXCEPTIONS}.
     & Push the stack vector value with index \TT{immedA} \\
     & (i.e., \TT{current\_process[immedA]}).
 \\\hline
-\TT{PUSHF}
-    & Push the stack vector value with index \TT{fp[immedB] - immedA}.
+\TT{PUSHL}
+    & Push the stack vector value with index \TT{fp[immedB] + immedA}.
 \\\hline
 \TT{POPM}
     & Pop 1 value and store it into the stack vector element with index \\
     & \TT{immedA} (i.e., \TT{current\_process[immedA]}).
 \\\hline
-\TT{POPM}
+\TT{POPL}
     & Pop 1 value and store it into the stack vector element with index \\
-    & \TT{fp[immedB] - immedA}.
+    & \TT{fp[immedB] + immedA}.
 \\\hline
 \TT{PUSHA}
-    & Push the stack vector value with index \TT{fp[immedB] + immedA}.
+    & Push the stack vector value with index \TT{fp[immedB] - immedA}.
 \\\hline
 \TT{PUSHNARGS}
     & Push the \TT{nargs} member of the top value of the \TT{return\_stack} \\
     & (which is a natural number) converted to IEEE 64-bit floating point.
 \\\hline
-\TT{PUSHN}
+\TT{PUSHV}
     & Replace the top stack value \TT{V} with the value of \\
-    & the stack vector element with index \TT{fp[immedB] + V}. \\
+    & the stack vector element with index \TT{fp[immedB] - V}. \\
     & \TT{V} must convert to a non-negative integer.
 \\\hline
 \end{tabular}
