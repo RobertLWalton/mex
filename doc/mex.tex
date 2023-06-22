@@ -505,7 +505,15 @@ pointer when $F'$ is called.
 
 MEX keeps track of the needed frame pointers using the following:
 \begin{indpar}
-{\bf Theorem}
+{\bf Theorem}~~~If $F$ is a function of level $L$ and $1\le L'<L$,
+then every execution of $F$ is contained in a unique execution of some
+function $F'$ of level $L'$, and $F'$ is the unique function of
+level $L'$ that lexically contains $F$.
+
+{\bf Corollary}~~~If \TT{fp[$L'$]} is the frame pointer of the last
+\underline{incomplete} execution of a function of level $L'$, then
+it is the frame pointer of the unique function execution of level $L'$
+that contains the function execution of $F$.
 \end{indpar}
 
 \section{Code Vectors}
