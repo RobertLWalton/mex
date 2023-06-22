@@ -631,6 +631,8 @@ a return stack, and other parameters.  Specifically:
 \verb|    min::uns32 | & \TTMKEY{fp}{in {\tt mex::process\_header}}\TT{[16]} \\
 \verb|    min::uns64 | & \TTMKEY{trace\_flags}{in {\tt mex::process\_header}} \\
 \verb|    int | & \TTMKEY{excepts}{in {\tt mex::process\_header}} \\
+\verb|    int | & \TTMKEY{excepts\_accumulator}
+                         {in {\tt mex::process\_header}} \\
 \verb|    bool | & \TTMKEY{optimize}{in {\tt mex::process\_header}} \\
 \verb|}                                  | \\
 \end{tabular}
@@ -670,7 +672,7 @@ See Figure~\ref{FUNCTION-INSTRUCTIONS} for more details.
 The frame pointer vector, \TT{fp}, is explained in
 \itemref{NESTED-FUNCTIONS}.
 
-The \TT{trace\_flags}, \TT{excepts}, and \TT{optimize}
+The \TT{trace\_flags}, \TT{excepts}, \TT{excepts\_accumuator}, and \TT{optimize}
 members of a process
 are explained in \itemref{TRACING-AND-EXCEPTIONS}.
 
@@ -921,7 +923,7 @@ mex::instr an_end_instruction = {mex::END,,10};
     // Pop 10 values and discard them.
 mex::instr a_jump_instruction = {mex::JMP,,10,5,32,min::MISSING()};
     // Pop 10 values and discard them, then push min::MISSING()
-    // 5 times, then add 32 to program counter.
+    // 5 times, then add 32 to program counter to skip 32 instructions.
 \end{verbatim}\end{indpar}
 
 The arithmetic instruction set is in Figure~\ref{ARITHMETIC-INSTRUCTIONS}.
@@ -946,17 +948,19 @@ The default setting of the \TT{optimize} member of a process
 is \TT{false}.
 
 In normal mode, if an instruction's \TT{trace\_index} value
-\TT{I} is such that the process's \TT{1ull <{}< I} \TT{trace\_flags}
-bit is on, the instruction is traced.  In optimized mode,
+\TT{I} is such that the bit \TT{1ull <{}< I} in the process's
+\TT{trace\_flags} is on, the instruction is traced.  In optimized mode,
 no tracing is done.  The default setting of the \TT{trace\_flags}
 member of a process is \TT{0}.
 
-When an instruction is traced, the instruction prints its
-\TT{min::phrase\_position} (from its module's
-\TT{min::phrase\_\EOL position\_vec}) followed by
+When an instruction is traced, the instruction prints source lines
+using \TT{min::\EOL print\_\EOL phrase\_\EOL lines} and the
+instruction's \TT{min::phrase\_position} value from its module's
+\TT{min::phrase\_\EOL position\_\EOL vec}, followed by
 a description of the value produced by the instruction.
 
-Instructions may raise the following exceptions, each
+Arithmetic nstructions (Figure~\ref{ARITHMETIC-INSTRUCTIONS})
+may raise the following exceptions, each
 associated with a flag bit defined in \TT{fenv.h}
 (see fenv(3) in the unix manual):
 \begin{center}
@@ -987,11 +991,15 @@ associated with a flag bit defined in \TT{fenv.h}
 In normal mode, an instruction that raises an exception prints
 an error message if the instruction raises any exception whose bit
 is on in the process's \TT{excepts} member.
+The error message ends with source lines printed
+using \TT{min::\EOL print\_\EOL phrase\_\EOL lines} and the
+instruction's \TT{min::phrase\_position} value from its module's
+\TT{min::phrase\_\EOL position\_\EOL vec}.
 
 In optimized mode, instructions do not print error messages
 involving exceptions.
 
-I both modes, if any instruction raised an exception whose bit
+In both modes, if any instruction raised an exception whose bit
 is on in the process's \TT{excepts} member, a notice message is
 printed when the process terminates.
 
@@ -1000,6 +1008,13 @@ is:
 \begin{center}
 \TT{FE\_DIVBYZERO|FE\_INVALID|FE\_OVERFLOW}
 \end{center}
+
+The process has a register that is the logical OR of all exceptions
+raised during the process.  This is stored partly in hardware
+and partly in the process's \TT{excepts\_\EOL accumulator} member.
+When the process is not running, it is stored in the latter.  When
+a process is optimized and is running and has not been interrupted,
+it is store in the hardware register.
 
 \clearpage
 
