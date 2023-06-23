@@ -511,8 +511,9 @@ function $F'$, then \underline{all} \TT{CALL} statements that invoke $F$
 must be lexically inside $F'$.
 
 {\bf Theorem}~~~If $F$ is a function of level $L$ and $1\le L'<L$,
-then every execution of $F$ is contained in a unique execution of some
-function $F'$ of level $L'$, and $F'$ is the unique function of
+and if $E$ is an execution of $F$, then there is an execution $E'$ of some
+function $F'$ of level $L'$ such that $E\subset E'$, and the smallest
+such execution $E'$ is the execution of the unique function of
 level $L'$ that lexically contains $F$.
 
 {\bf Corollary}~~~If \TT{fp[$L'$]} is the frame pointer of the last
@@ -527,15 +528,21 @@ to be within the scope of the function definition of $F$, and requires that
 scope to be lexically within the definition of the function lexically
 containing the definition of $F$.
 
-Proof of Theorem: TBD
-
-Let $F'$ be the unique function of level $L'$ that
-lexically contains $F$.  Then all \TT{CALL} statements that invoke an execution
-of $F$ must be lexically inside $F'$, and therefore inside an execution of $F'$,
-so every execution of $F$ is inside an execution of $F'$.
-Conversely, if $F'$ is a function that does \underline{not} lexically contain
-$F$, any execution of $F'$ cannot contain a \TT{CALL} to $F$ and therefore
-cannot contain an execution of $F$.
+Proof of Theorem:
+The set of current incompleted function executions is a
+list ordered by size (this order is the same as the order in the
+return stack of the \TT{mex::ret} values created by the \TT{CALL}s
+to the functions).  Let $F'$ be the function of level $L'$ that
+lexically contains $F$.  Then the \TT{CALL} to $F$ is inside $F'$
+but might be inside another function $F_1$ that is inside $F'$
+(it is possible for $F_1$ to be $F$ since recursion is allowed).
+If $F_1$ is $F'$ we are done.  If not, apply the same reasoning to
+$F_1$ to get the function $F_2$ that called it.  If $F_2$ is $F'$
+we are done, but if not $F_2$ is inside $F'$ so use recursion to continue.
+It is impossible
+to get to the beginning of the return stack with only functions that
+are inside $F'$, as then the first function in the return stack
+would be of level $>L'\ge1$ which is impossible (it must be of level 1).
 
 Proof of Corollary:  By inspection of the actions of the \TT{CALL}
 and \TT{RET} statements of Figure~\ref{FUNCTION-INSTRUCTIONS}.
