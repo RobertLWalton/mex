@@ -511,21 +511,18 @@ function $F'$, then \underline{all} \TT{CALL} statements that invoke $F$
 must be lexically inside $F'$.
 
 {\bf Theorem}~~~If $F$ is a function of level $L$ and $1\le L'<L$,
-and if $E$ is an execution of $F$, then there is an execution $E'$ of some
-function $F'$ of level $L'$ such that $E\subset E'$, and the smallest
-such execution $E'$ is the execution of the unique function of
-level $L'$ that lexically contains $F$.
+and if $E$ is an execution of $F$, then the smallest execution $E'$ of some
+function of level $L'$ such that $E\subset E'$ exists and is an execution
+of the unique function $F'$ of level $L'$ that lexically contains $F$.
 
-{\bf Corollary}~~~If \TT{fp[$L'$]} is the frame pointer of the last
-\underline{incomplete} execution of a function of level $L'$, then
-it is the frame pointer of the unique function execution of level $L'$
-that contains the function execution of $F$.
+{\bf Corollary}~~~During $E$ the frame pointer \TT{fp[$L'$]} is the
+the frame pointer of $E'$.
 \end{indpar}
 
 Justification of Assumption: The assumption will be true of any
 compiled language that requires a \TT{CALL} to a level $L>1$ function $F$
 to be within the scope of the function definition of $F$, and requires that
-scope to be lexically within the definition of the function lexically
+scope to be lexically within the the function lexically
 containing the definition of $F$.
 
 Proof of Theorem:
@@ -545,7 +542,18 @@ are inside $F'$, as then the first function in the return stack
 would be of level $>L'\ge1$ which is impossible (it must be of level 1).
 
 Proof of Corollary:  By inspection of the actions of the \TT{CALL}
-and \TT{RET} statements of Figure~\ref{FUNCTION-INSTRUCTIONS}.
+and \TT{RET} statements of Figure~\ref{FUNCTION-INSTRUCTIONS},
+the frame pointer \TT{fp[$L'$]} is the frame pointer
+of the \underline{last} \TT{CALL}ed incomplete execution
+of any function of level $L'$, and is therefore the frame pointer
+of the smallest execution of any function of level $L'$ that contains $E$.
+
+If follows that during $E$ the variables of $F'$ can be accessed by
+\TT{PUSHL} with \TT{immedB} = $L'$, the arguments of $F'$ can be
+accessed by \TT{PUSHA} with \TT{immedB} = $L'$, and
+global variables can be accessed by \TT{PUSHM} or \TT{PUSHG}:
+see Figures~\ref{FUNCTION-INSTRUCTIONS}%
+~and~\ref{HOUSEKEEPING-INSTRUCTIONS}.
 
 \section{Code Vectors}
 \label{CODE-VECTORS}
@@ -837,18 +845,21 @@ are explained in \itemref{TRACING-AND-EXCEPTIONS}.
 \hline
 \TT{PUSH}
     & Push the \TT{immedA}'th value in the stack below the top value \\
-    & into the stack (\TT{immedA} = 0 duplicates the top value).
+    & into the stack (i.e., \TT{sp[- immedA]}, so \TT{immedA} = 0 duplicates \\
+    & the top value).
 \\\hline
 \TT{PUSHI}
     & Push \TT{immedD} into the stack.
 \\\hline
 \TT{PUSHG}
-    & Push into the stack the \TT{immedA}'th value from the end of the \\
-    & global value stack of the module pointed at by \TT{immedD}.
+    & Push into the stack the \TT{immedA}+1'st value of the \\
+    & global value stack of the module pointed at by \TT{immedD} \\
+    & (i.e., \TT{m[immedA]} where \TT{m} is the module)
 \\\hline
 \TT{POP}
     & Pop 1 value and store it in the \TT{immedA}'th value in the stack below \\
-    & the value popped (\TT{immedA} = 0 effectively discards the value).
+    & the value popped (i.e., store to \TT{sp[- immedA]}, so \TT{immedA} = 0 \\
+    & discards the top value).
 \\\hline
 \TT{JMP}
     & Add \TT{immedA} to \TT{sp} (popping the stack \TT{immedA} times), \\
