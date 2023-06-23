@@ -250,7 +250,7 @@
 
 \author{Robert L. Walton}
 
-\date{June 22, 2023}
+\date{June 23, 2023}
  
 \maketitle
 
@@ -486,7 +486,7 @@ in the stack.
 \subsection{Nested Functions}
 \label{NESTED-FUNCTIONS}
 
-The lexical nesting level\label{LEXICAL-NESTING-LEVEL}
+The \key{lexical nesting level}\label{LEXICAL-NESTING-LEVEL}
 of a function is defined as follows.
 
 If the function $F$ is not inside any other function, $F$ has
@@ -503,8 +503,13 @@ execution of $F'$ is sufficient.  The frame pointer is defined as the
 stack index of the last argument to $F'$, or equivalently, the stack
 pointer when $F'$ is called.
 
-MEX keeps track of the needed frame pointers using the following:
+MEX keeps track of the needed frame pointers using the following:%
+\footnote{This method is the similar to that used in Ada.}
 \begin{indpar}
+{\bf Assumption}~~~If $F$ is a function that is lexically inside another
+function $F'$, then \underline{all} \TT{CALL} statements that invoke $F$
+must be lexically inside $F'$.
+
 {\bf Theorem}~~~If $F$ is a function of level $L$ and $1\le L'<L$,
 then every execution of $F$ is contained in a unique execution of some
 function $F'$ of level $L'$, and $F'$ is the unique function of
@@ -515,6 +520,25 @@ level $L'$ that lexically contains $F$.
 it is the frame pointer of the unique function execution of level $L'$
 that contains the function execution of $F$.
 \end{indpar}
+
+Justification of Assumption: The assumption will be true of any
+compiled language that requires a \TT{CALL} to a level $L>1$ function $F$
+to be within the scope of the function definition of $F$, and requires that
+scope to be lexically within the definition of the function lexically
+containing the definition of $F$.
+
+Proof of Theorem: TBD
+
+Let $F'$ be the unique function of level $L'$ that
+lexically contains $F$.  Then all \TT{CALL} statements that invoke an execution
+of $F$ must be lexically inside $F'$, and therefore inside an execution of $F'$,
+so every execution of $F$ is inside an execution of $F'$.
+Conversely, if $F'$ is a function that does \underline{not} lexically contain
+$F$, any execution of $F'$ cannot contain a \TT{CALL} to $F$ and therefore
+cannot contain an execution of $F$.
+
+Proof of Corollary:  By inspection of the actions of the \TT{CALL}
+and \TT{RET} statements of Figure~\ref{FUNCTION-INSTRUCTIONS}.
 
 \section{Code Vectors}
 \label{CODE-VECTORS}
