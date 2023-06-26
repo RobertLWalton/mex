@@ -250,7 +250,7 @@
 
 \author{Robert L. Walton}
 
-\date{June 23, 2023}
+\date{June 26, 2023}
  
 \maketitle
 
@@ -269,21 +269,30 @@
 This document describes MEX,
 the Minimal Runtime System Execution Engine.
 
-MEX is a stack-oriented assembly language with some higher level
-language features.
+MEX is layered on top of the Minimal Runtime System.
 
-TBD
+MEX is stack-oriented and block-oriented.  It computes with
+\ttkey{min::gen} values.
+
+\section{Abbreviations}
+\label{ABBREVIATIONS}
 
 A modest number of \skey{abbreviation}s are used throughout this document
 and the corresponding code:
 
 \begin{indpar}
 \begin{tabular}{p{0.8in}l}
+\ttmkey{immed}{abbreviation}	& immediate \\
 \ttmkey{instr}{abbreviation}	& instruction \\
+\ttmkey{fp}{abbreviation}	& frame pointer \\
 \ttmkey{pc}{abbreviation}	& program counter \\
-\ttmkey{prog}{abbreviation}	& program \\
+\ttmkey{sp}{abbreviation}	& stack pointer \\
+\ttmkey{ret}{abbreviation}	& return \\
 \end{tabular}
 \end{indpar}
+
+In addition abbreviations of the MIN Runtime System are used
+in names of types and functions of that system.
 
 \section{C++ Interfaces}
 \label{C++-INTERFACES}
@@ -305,17 +314,18 @@ directories:
 \end{tabular}
 \end{center}
 
-
+MEX is layered on top of MIN, the Minimal Runtime System, and
+includes \ttkey{min.h}.
 
 The C++ data and functions described in this document can be
 accessed by C++ code that contains the following inclusion:
 
-\begin{center}
+\begin{center}\ttindex{mex.h}
 \verb|#include  <mex.h>|
 \end{center}
 
 External MEX data and functions are placed in the
-\ttmkey{mex}{namespace}\label{mex::} namespace.
+\ttmkey{mex}{namespace} namespace.
 
 \section{Program Structure}
 \label{PROGRAM-STRUCTURE}
@@ -333,19 +343,21 @@ When a module is compiled, it is loaded into memory
 ready for execution.  There is no MEX `binary' language.
 
 Interfaces are provided by and used by the compiler, and
-not by MEX.  Typically a module may reference the interface
-of pre-existing modules.
+not by MEX.  Typically a module may reference interfaces
+of previously compiled modules.
 
 Immediately after a module is compiled, it is executed.  The
 resulting execution stack (see \itemref{STACKS}) becomes the
-module's global variable stack.
+module's \key{global variable stack}, i.e., its vector of
+global variables.
 
 Each module is compiled sequentially, and it is possible to add
 to the end of a pre-existing module.  Instructions are
 just added to the end of the module's code vector
-and variables are pushed into the
-the module's global variable stack.  Adding to interfaces is
-a matter for the compiler, and not for MEX.
+and variables are added to the end of
+the module's global variable stack.  The compiler should add
+interfaces to new global variables and new module functions, but
+this is a matter for the compiler, and not for MEX.
 
 A function is a sequential block of code in a module code vector.
 When the module code vector is executed, just after compiling
@@ -401,7 +413,8 @@ module execution) is a parameter of the current instruction known
 to the compiler.  To maintain this rule, forward jumps must push
 null values into the stack to take the place of the values that would be
 pushed by the code being skipped.  Backward jumps are only allowed when
-a loop block ends.
+a loop iteration block ends, and these pop values that were pushed
+during the iteration block.
 
 Forward jumps that leave a block may pop values from the stack
 instead of pushing values.  In general a jump may first pop
