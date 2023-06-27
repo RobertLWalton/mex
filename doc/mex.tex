@@ -609,7 +609,8 @@ The syntactic structure of a code vector is:
 \\[0.5ex]
 \emkey{code-item} \begin{tabular}[t]{@{}rl} 
 		  ::= & {\em arithmetic-instruction} \\
-		  $|$ & {\em non-arithmetic-instruction} \\
+		  $|$ & {\em housekeeping-instruction} \\
+		  $|$ & {\em function-instruction} \\
 		  $|$ & {\em normal-block} \\
 		  $|$ & {\em loop-block} \\
 		  $|$ & {\em function-block} \\
@@ -618,10 +619,15 @@ The syntactic structure of a code vector is:
 \emkey{arithmetic-instruction} ::=
     instructions in Figure \ref{ARITHMETIC-INSTRUCTIONS}
 \\[0.5ex]
-\emkey{non-arithmetic-instruction} ::= \\
+\emkey{housekeeping-instruction} ::= \\
 \hspace*{3em}
-     instructions in Figure \ref{ARITHMETIC-INSTRUCTIONS}
-     excepting \TT{BEG\ldots} and \TT{END\ldots}
+     instructions in Figure \ref{HOUSEKEEPING-INSTRUCTIONS}
+     excepting \TT{BEG}, \TT{END}, \TT{BEGL}, and \TT{ENDL}
+\\[0.5ex]
+\emkey{function-instruction} ::= \\
+\hspace*{3em}
+     instructions in Figure \ref{FUNCTION-INSTRUCTIONS}
+     excepting \TT{BEGF} and \TT{ENDF}
 \\[0.5ex]
 \emkey{normal-block} ::= \begin{tabular}[t]{@{}l}
 			 \TT{BEG} \\
@@ -755,17 +761,23 @@ a return stack, and other parameters.  Specifically:
 
 \end{indpar}
 
+A \TT{mex::process} is a vector of \TT{min::gen} elements which
+is the process \key{stack}, with the last element being the top
+of the stack (\TT{process[sp]}) and the first element
+being the bottom of the stack (\TT{process[0]}).
+
+An \ttkey{sp}, or \key{stack pointer}, is the index of an element of
+the process vector which is the top of the stack
+(i.e., \TT{process[sp]}).  To push a value into you add
++1 to \TT{sp} and store the value in the element it now indexes.
+To pop a value, you remove the value indexed by \TT{sp}, and then
+add -1 to \TT{sp}.  The \TT{sp} member of a
+process is the \key{current stack pointer} of that process.
+
 A \ttkey{pc}, or \key{program counter}, is a pointer to a module,
 which is a code vector, and an index in that vector of an instruction.
 Thus a \TT{pc} points at an instruction.  The \TT{pc} member of a
-process is the current program counter of that process.
-
-An \ttkey{sp}, or \key{stack pointer}, is the index of an element of
-the process vector which is the stack.  To push a value into you add
-+1 to the \TT{sp} and store the value in the element it now indexes.
-To pop a value, you remove the value indexed by \TT{sp}, and then
-add -1 to the \TT{sp}.  The \TT{sp} member of a
-process is the current stack pointer of that process.
+process is the \key{current program counter} of that process.
 
 The \ttkey{return\_stack} is used by \TT{CALL} and \TT{RET}
 instructions, with \TT{rp} being the index of the element at the
