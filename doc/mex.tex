@@ -729,6 +729,7 @@ a return stack, and other parameters.  Specifically:
 \verb|    mex::pc | & \TTMKEY{saved\_pc}{in {\tt mex::ret}} \\
 \verb|    min::uns32 | & \TTMKEY{saved\_fp}{in {\tt mex::ret}} \\
 \verb|    min::uns32 | & \TTMKEY{nargs}{in {\tt mex::ret}} \\
+\verb|    min::uns32 | & \TTMKEY{trace\_info}{in {\tt mex::ret}} \\
 \verb|}                                  | \\
 \end{tabular}
 
@@ -789,10 +790,14 @@ pointing at the instruction after the \TT{CALL} into the
 the \TT{return\_stack} and stores its \TT{saved\_pc}
 in the current program counter
 of the process (the \TT{pc} member of the \TT{process}).
-See Figure~\ref{FUNCTION-INSTRUCTIONS} for more details.
+The \TT{nargs} member is the number of function arguments,
+and the \TT{trace\_info} member is used for tracing
+(see \pagref{MEX::TRACE}).
+See the \TT{CALL} instruction in Figure~\ref{FUNCTION-INSTRUCTIONS}
+for more details.
 
-The frame pointer vector, \TT{fp}, is explained in
-\itemref{NESTED-FUNCTIONS}.
+The process's frame pointer member, \TT{fp[16]} and the \TT{met::ret}
+value's \TT{saved\_fp} member are explained in \itemref{NESTED-FUNCTIONS}.
 
 The \TT{trace\_flags}, \TT{excepts}, \TT{excepts\_accumuator}, and \TT{optimize}
 members of a process
@@ -850,11 +855,11 @@ are explained in \itemref{TRACING-AND-EXCEPTIONS}.
     & remainder of \TT{immedD} divided by the top value.
 \\\hline
 \TT{FLOOR}/\TT{CEILING}
-    & Replace the top value by the and integer equal to the \\
+    & Replace the top value by the an integer equal to the \\
     & top value rounded toward minus/plus infinity.
 \\\hline
 \TT{TRUNC}/\TT{ROUND}
-    & Replace the top value by the and integer equal to the \\
+    & Replace the top value by the an integer equal to the \\
     & top value rounded toward zero/the-nearest-integer.
 \\\hline
 \TT{NEG}/\TT{ABS}
@@ -909,7 +914,7 @@ are explained in \itemref{TRACING-AND-EXCEPTIONS}.
 \TT{PUSHG}
     & Push into the stack the \TT{immedA}+1'st value of the \\
     & global value stack of the module pointed at by \TT{immedD} \\
-    & (i.e., \TT{m[immedA]} where \TT{m} is the module)
+    & (i.e., \TT{m->globals[immedA]} where \TT{m} is the module)
 \\\hline
 \TT{PUSHM}
     & Push the stack vector value with index \TT{immedA} \\
@@ -957,7 +962,8 @@ are explained in \itemref{TRACING-AND-EXCEPTIONS}.
     & First add \TT{immedA} to \TT{sp} (popping the stack \TT{immedA} times), \\
     & then take the top \TT{immedB} values in the stack and copy them \\
     & to the next lower \TT{immedB} values in the stack, then subtract \\
-    & \TT{immedC} from the \TT{pc} (jumping backwards).
+    & \TT{immedC} from the \TT{pc} (jumping backwards to just after \\
+    & the associated \TT{BEGL}).
 \\\hline
 \end{tabular}
 \end{center}
@@ -972,26 +978,38 @@ are explained in \itemref{TRACING-AND-EXCEPTIONS}.
 \hline
 \TT{BEGF}
     & Add \TT{immedC} to the \TT{pc} (skipping \TT{immedC} instructions).
+    \\[0.5ex]
+    & Also used to provided data for \TT{CALL} as follows: \TT{immedB} is the \\
+    & target functions lexical nesting level (\pagref{LEXICAL-NESTING-LEVEL}),
+                                      and \TT{immedD} is saved \\
+    & in the the \TT{met::ret} value's \TT{trace\_info} member.
 \\\hline
 \TT{ENDF}
     & Add \TT{immedA} to \TT{sp} (popping the stack \TT{immedA} times),
     					then pop \\
-    & the return stack, set the process \TT{fp[immedB]} member \\
-    & to the \TT{saved\_fp} member of the value popped, and set \\
-    & the process \TT{pc} member to the \TT{pc} member of the value popped.
+    & the return stack, set the process \TT{fp[immedB]} member to the \\
+    & \TT{saved\_fp} member of the value popped, and set the process \TT{pc} \\
+    & member to the \TT{saved\_pc} member of the value popped.
 \\\hline
 \TT{CALL}
-    & Push a \TT{mex::ret} value into the return stack, setting its \\
-    & \TT{saved\_pc} member to point to the instruction after the \TT{CALL}, \\
-    & setting its \TT{saved\_fp} member to the processes \TT{fp[immedB]} \\
-    & member, and setting its \TT{nargs} member to \TT{immedA}.  Then set \\
-    & the \TT{index} of the process's \TT{pc} member to \TT{immedC} \\
-    & (this should be the first instruction \underline{after} the
-      \TT{BEGF} of the function. \\
-    & \\
-    & Here \TT{immedA} is the number of arguments and \TT{immedB} is the \\
-    & lexical nesting level (\pagref{LEXICAL-NESTING-LEVEL}) of the
-      target function.
+    & Push a \TT{mex::ret} value into the return stack, setting its
+      \TT{saved\_pc} \\
+    & member to point to the instruction after the \TT{CALL},
+      and setting its \\
+    & \TT{nargs} member to \TT{immedA}.  Then set
+      the \TT{index} of the process's \TT{pc} \\
+    & member to \TT{immedC}, which must reference a \TT{BEGF} instruction.
+    \\[0.5ex]
+    & Then take the target function's lexical level $L$ from the \TT{BEGF} \\
+    & \TT{immedB} value, set the \TT{mex:ret} value's \TT{saved\_fp} member
+      to the \\
+    & process's \TT{fp[$L$]} member, set the process's \TT{fp[$L$]}
+      member to the \\
+    & process's \TT{sp} member, and set the \TT{mex::ret}
+      value's \TT{trace\_info} \\
+    & member from the \TT{BEGF} instruction's \TT{immedD}.
+    \\[0.5ex]
+    & Lastly add +1 to the process current \TT{pc} to skip the \TT{BEGF}.
 \\\hline
 \TT{CALLG}
     & Same as \TT{CALL} but also set the process's \TT{pc} member's 
@@ -1017,7 +1035,8 @@ are explained in \itemref{TRACING-AND-EXCEPTIONS}.
 \\\hline
 \TT{PUSHNARGS}
     & Push the \TT{nargs} member of the top value of the \TT{return\_stack} \\
-    & (which is a natural number) converted to IEEE 64-bit floating point.
+    & (which is a natural number) converted to IEEE 64-bit floating \\
+    & point.
 \\\hline
 \TT{PUSHV}
     & Replace the top stack value \TT{V} with the value of \\
