@@ -1103,7 +1103,7 @@ instruction's \TT{min::phrase\_position} value from its module's
 \TT{min::phrase\_\EOL position\_\EOL vec}, followed by
 a description of the value produced by the instruction.
 
-Arithmetic nstructions (Figure~\ref{ARITHMETIC-INSTRUCTIONS})
+Arithmetic instructions (Figure~\ref{ARITHMETIC-INSTRUCTIONS})
 may raise the following exceptions, each
 associated with a flag bit defined in \TT{fenv.h}
 (see fenv(3) in the unix manual):
@@ -1153,7 +1153,8 @@ is:
 \TT{FE\_DIVBYZERO|FE\_INVALID|FE\_OVERFLOW}
 \end{center}
 
-The process has a register that is the logical OR of all exceptions
+The process has a register that is the logical OR of the flag bits
+of all exceptions
 raised during the process.  This is stored partly in hardware
 and partly in the process's \TT{excepts\_\EOL accumulator} member.
 When the process is not running, it is stored in the latter.  When
