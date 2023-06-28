@@ -250,7 +250,7 @@
 
 \author{Robert L. Walton}
 
-\date{June 27, 2023}
+\date{June 28, 2023}
  
 \maketitle
 
@@ -348,7 +348,7 @@ not by MEX.  Typically a module may reference interfaces
 of previously compiled modules.
 
 Immediately after a module is compiled, it is executed.  The
-resulting execution stack (see \itemref{STACKS}) becomes the
+resulting execution stack (see Stacks, \itemref{STACKS}) becomes the
 module's \key{global variable stack}, i.e., its vector of
 global variables.
 
@@ -393,7 +393,7 @@ These variables are then made read-only by the compiler.
 Note that MEX itself has no notion of read-only or write-only.
 The compiler must enforce these.  MEX assumes that to allow
 a form of variable update the compiler implements `next variables'
-as described in \itemref{NEXT-VARIABLES-AND-LOOPS}.
+as described in Next Variables and Loops, \itemref{NEXT-VARIABLES-AND-LOOPS}.
 
 When a function executes, it begins with just its arguments
 in the stack.  When it returns, it pops these and everything
@@ -423,7 +423,8 @@ values from the stack, and then push null values.
 
 There are special considerations involving the stack if the
 compiler allows functions to be nested inside other functions.
-These considerations are described in \itemref{NESTED-FUNCTIONS}.
+These considerations are described in Nested Functions,
+\itemref{NESTED-FUNCTIONS}.
 
 \subsection{Next Variables and Loops}
 \label{NEXT-VARIABLES-AND-LOOPS}
@@ -658,11 +659,22 @@ The interface to a MEX module and its code vector is:
 \LABEL{MEX::INSTR} \\
 \verb|{                   | \\
 \verb|    min::uns8 | & \TTMKEY{op\_code}{in {\tt mex::instr}} \\
-\verb|    min::uns8 | & \TTMKEY{trace\_index}{in {\tt mex::instr}} \\
+\verb|    min::uns8 | & \TTMKEY{trace\_flags}{in {\tt mex::instr}} \\
 \verb|    min::uns16 | & \TTMKEY{immedA}{in {\tt mex::instr}} \\
 \verb|    min::uns16 | & \TTMKEY{immedB}{in {\tt mex::instr}} \\
 \verb|    min::uns16 | & \TTMKEY{immedC}{in {\tt mex::instr}} \\
 \verb|    min::gen | & \TTMKEY{immedD}{in {\tt mex::instr}} \\
+\verb|}                   | \\
+\end{tabular}
+
+\begin{tabular}{@{}r@{~}l}
+\verb|enum         mex::| & \MEXKEY{trace\_flag}
+\LABEL{MEX::TRACE_FLAG} \\
+\verb|{                   | \\
+\verb|mex:|\TTMKEY{TRACE}{in {\tt mex::trace\_flag}} & \tt = 1 <{}< 0 \\
+\verb|mex:|\TTMKEY{TRACE\_PHRASE}{in {\tt mex::trace\_flag}} & \tt = 1 <{}< 1 \\
+\verb|mex:|\TTMKEY{TRACE\_NOACTION}{in {\tt mex::trace\_flag}}
+                                                     & \tt = 1 <{}< 3 \\
 \verb|}                   | \\
 \end{tabular}
 
@@ -712,7 +724,7 @@ The \ttikey{trace\_info}{of module} member of the \TT{module} points
 at a vector of \TT{min::gen} values such that for module \TT{m},
 \TT{m->\EOL trace\_\EOL info[i]} gives information that can be used
 to print trace messages for instruction \TT{m[i]}.  See
-Trace Functions, \itemref{TRACE-FUNCTIONS}.
+Tracing and Exceptions, \itemref{TRACING-AND-EXCEPTIONS}.
 
 \section{Processes}
 \label{PROCESSES}
@@ -741,7 +753,8 @@ a return stack, and other parameters.  Specifically:
 \verb|}                   | \\
 \end{tabular}
 \\[1ex]
-\verb|typedef (* |\TTKEY{trace\_function}\verb|) ( mex::process p )|
+\verb|typedef (* |\TTKEY{trace\_function}\verb|) ( mex::process p )|%
+\LABEL{MEX::TRACE_FUNCTION} \\
 \\[1ex]
 \begin{tabular}{@{}r@{}l}
 \verb|struct                         mex::| & \MEXKEY{process\_header}%
@@ -756,7 +769,6 @@ a return stack, and other parameters.  Specifically:
                                               {in {\tt mex::process\_header}} \\
 \verb|min::uns32 | & \TTMKEY{rp}{in {\tt mex::process\_header}} \\
 \verb|min::uns32 | & \TTMKEY{fp}{in {\tt mex::process\_header}}\TT{[16]} \\
-\verb|min::uns64 | & \TTMKEY{trace\_flags}{in {\tt mex::process\_header}} \\
 \verb|mex::trace_function | & \TTMKEY{trace\_function}%
                                      {in {\tt mex::process\_header}} \\
 \verb|int | & \TTMKEY{excepts}{in {\tt mex::process\_header}} \\
@@ -807,12 +819,13 @@ See the \TT{CALL} instruction in Figure~\ref{FUNCTION-INSTRUCTIONS}
 for more details.
 
 The process's frame pointer member, \TT{fp[16]} and the \TT{met::ret}
-value's \TT{saved\_fp} member are explained in \itemref{NESTED-FUNCTIONS}.
+value's \TT{saved\_fp} member are explained in Nested Functions,
+\itemref{NESTED-FUNCTIONS}.
 
-The \TT{trace\_flags}, \TT{trace\_function}, \TT{excepts},
+The \TT{trace\_function}, \TT{excepts},
 \TT{excepts\_accumuator}, and \TT{optimize}
 members of a process
-are explained in \itemref{TRACING-AND-EXCEPTIONS}.
+are explained in Tracing and Exceptions, \itemref{TRACING-AND-EXCEPTIONS}.
 
 \section{Instructions}
 \label{INSTRUCTIONS}
@@ -1057,10 +1070,11 @@ are explained in \itemref{TRACING-AND-EXCEPTIONS}.
 \end{boxedfigure}
 
 A MEX instruction (a \TT{mex::instr}, see \pagref{MEX::INSTR})
-consists of an \TT{op\_code}, a \TT{trace\_index},
+consists of an \TT{op\_code}, \TT{trace\_flags},
 and up to 4 immediate values,
 \TT{immedA}, \TT{immedB}, \TT{immedC}, and \TT{immedD}.
-The \TT{trace\_index} is explained in \itemref{TRACING-AND-EXCEPTIONS}.
+The \TT{trace\_flags} are explained in Tracing and Exceptions,
+\itemref{TRACING-AND-EXCEPTIONS}.
 
 Some examples:
 \begin{indpar}\begin{verbatim}
@@ -1079,16 +1093,18 @@ mex::instr a_jump_instruction = {mex::JMP,,10,5,32,min::MISSING()};
 
 The arithmetic instruction set is in Figure~\ref{ARITHMETIC-INSTRUCTIONS}.
 IEEE 64-bit floating point operations and the C \TT{math.h}
-library are used.  See \itemref{TRACING-AND-EXCEPTIONS} for error
+library are used.  See Tracing and Exceptions,
+\itemref{TRACING-AND-EXCEPTIONS} for error
 handling.
 
 The housekeeping instruction set is in
 Figure~\ref{HOUSEKEEPING-INSTRUCTIONS}.
-See \itemref{STACKS} for an overview of stack handling.
+See Stacks, \itemref{STACKS}, for an overview of stack handling.
 
 The function instruction set is in
 Figure~\ref{FUNCTION-INSTRUCTIONS}.
-See \itemref{NESTED-FUNCTIONS} for details concerning nested functions.
+See Nested Functions, \itemref{NESTED-FUNCTIONS},
+for details concerning nested functions.
 
 \section{Tracing and Exceptions}
 \label{TRACING-AND-EXCEPTIONS}
@@ -1098,17 +1114,34 @@ determined by the \TT{optimize} member of the process.
 The default setting of the \TT{optimize} member of a process
 is \TT{false}.
 
-In normal mode, if an instruction's \TT{trace\_index} value
-\TT{I} is such that the bit \TT{1ull <{}< I} in the process's
-\TT{trace\_flags} is on, the instruction is traced.  In optimized mode,
-no tracing is done.  The default setting of the \TT{trace\_flags}
-member of a process is \TT{0}.
+In normal mode, if an instruction's \TT{trace\_flags} value
+is non-zero, the instruction is traced.
+In optimized mode, no tracing is done.
 
-When an instruction is traced, the instruction prints source lines
+When an instruction is traced and it's \TT{TRACE\_PHRASE} flag is on,
+the instruction source lines are printed
 using \TT{min::\EOL print\_\EOL phrase\_\EOL lines} and the
 instruction's \TT{min::phrase\_position} value from its module's
 \TT{min::phrase\_\EOL position\_\EOL vec}, followed by
 a description of the value produced by the instruction.
+
+Tracing an arithmetic instruction produces a message such as:
+\begin{center}
+\tt 1 + 2 ===> 3
+\end{center}
+Note that arithmetic instructions are usually not traced.
+
+Tracing non-arithmetic functions calls the process's
+\TT{trace\_function} member if that is not \TT{NULL},
+or the \TT{mex::\EOL default\_EOL trace\_\EOL function}
+otherwise.  This is called before the instruction is
+executed.  For conditional \TT{JMP\ldots} instructions,
+the call is suppressed if the condition is false (so there
+will be no jump) and the instruction's \TT{TRACE\_NOACTION}
+flag is off.
+
+See \pagref{MEX::DEFAULT_TRACE_INSTRUCTION} for a description
+of the \TT{mex::\EOL default\_\EOL trace\_\EOL instruction}.
 
 Arithmetic instructions (Figure~\ref{ARITHMETIC-INSTRUCTIONS})
 may raise the following exceptions, each
