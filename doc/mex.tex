@@ -673,8 +673,7 @@ The interface to a MEX module and its code vector is:
 \verb|{                   | \\
 \verb|mex:|\TTMKEY{TRACE}{in {\tt mex::trace\_flag}} & \tt = 1 <{}< 0 \\
 \verb|mex:|\TTMKEY{TRACE\_PHRASE}{in {\tt mex::trace\_flag}} & \tt = 1 <{}< 1 \\
-\verb|mex:|\TTMKEY{TRACE\_NOACTION}{in {\tt mex::trace\_flag}}
-                                                     & \tt = 1 <{}< 3 \\
+\verb|mex:|\TTMKEY{TRACE\_NOJMP}{in {\tt mex::trace\_flag}} & \tt = 1 <{}< 2 \\
 \verb|}                   | \\
 \end{tabular}
 
@@ -1118,26 +1117,29 @@ In normal mode, if an instruction's \TT{trace\_flags} value
 is non-zero, the instruction is traced.
 In optimized mode, no tracing is done.
 
-When an instruction is traced and it's \TT{TRACE\_PHRASE} flag is on,
-the instruction source lines are printed
+When an arithmetic instruction is traced and it's \TT{TRACE\_PHRASE} flag is on,
+the instruction source lines are output
 using \TT{min::\EOL print\_\EOL phrase\_\EOL lines} and the
-instruction's \TT{min::phrase\_position} value from its module's
+instruction's \TT{min::\EOL phrase\_\EOL position} value from its module's
 \TT{min::phrase\_\EOL position\_\EOL vec}, followed by
-a description of the value produced by the instruction.
-
-Tracing an arithmetic instruction produces a message such as:
+a message such as:
 \begin{center}
 \tt 1 + 2 ===> 3
 \end{center}
+If the \TT{TRACE\_PHRASE} flag is off, a message such as:
+\begin{center}
+\tt Line 53: 1 + 2 ===> 3
+\end{center}
+is output instead.
 Note that arithmetic instructions are usually not traced.
 
 Tracing non-arithmetic functions calls the process's
 \TT{trace\_function} member if that is not \TT{NULL},
-or the \TT{mex::\EOL default\_EOL trace\_\EOL function}
+or the \TT{mex::\EOL default\_\EOL trace\_\EOL function}
 otherwise.  This is called before the instruction is
 executed.  For conditional \TT{JMP\ldots} instructions,
 the call is suppressed if the condition is false (so there
-will be no jump) and the instruction's \TT{TRACE\_NOACTION}
+will be no jump) and the instruction's \TT{TRACE\_NOJMP}
 flag is off.
 
 See \pagref{MEX::DEFAULT_TRACE_INSTRUCTION} for a description
@@ -1177,7 +1179,7 @@ an error message if the instruction raises any exception whose bit
 is on in the process's \TT{excepts} member.
 The error message ends with source lines printed
 using \TT{min::\EOL print\_\EOL phrase\_\EOL lines} and the
-instruction's \TT{min::phrase\_position} value from its module's
+instruction's \TT{min::phrase\_\EOL position} value from its module's
 \TT{min::phrase\_\EOL position\_\EOL vec}.
 
 In optimized mode, instructions do not print error messages
@@ -1200,6 +1202,13 @@ and partly in the process's \TT{excepts\_\EOL accumulator} member.
 When the process is not running, it is stored in the latter.  When
 a process is optimized and is running and has not been interrupted,
 it is store in the hardware register.
+
+\section{MEX Functions}
+\label{MEX Functions}
+
+{\tt mex::module\_insptr mex::}\TTKEY{create\_module}
+
+{\tt mex::process\_insptr mex::}\TTKEY{create\_process}
 
 \clearpage
 
