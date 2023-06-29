@@ -995,8 +995,14 @@ are explained in Tracing and Exceptions, \itemref{TRACING-AND-EXCEPTIONS}.
     & The process \TT{trace\_flags} member is set from the low order \\
     & 8 bits of \TT{immedA}.
 \\\hline
+\TT{ERROR}
+    & This instruction is always traced.  If \TT{immedB} is not zero, \\
+    & it terminates the process.  Otherwise is adds \TT{immedA} to \TT{sp} \\
+    & (popping the stack \TT{immedA} times).
+\\\hline
 \end{tabular}
 \end{center}
+\vspace*{-3ex}
 \caption{Housekeeping Instructions}
 \label{HOUSEKEEPING-INSTRUCTIONS}
 \end{boxedfigure}
