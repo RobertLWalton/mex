@@ -446,7 +446,7 @@ stack location.  And so forth.
 
 MEX assumes that loop blocks are implemented with next variables.
 Consider the code:
-\begin{indpar}\begin{verbatim}
+\begin{indpar}\label{EXAMPLE-LOOP}\begin{verbatim}
 i = 1
 sum = 0
 next i, next sum = while i <= 4:
@@ -1255,7 +1255,7 @@ is produced, such as:
 \end{center}
 Otherwise $I$ is used to produce the message as follows.
 
-For instructions that reference a single stack location,
+For instructions that reference a single stack or global location,
 namely \TT{PUSH\ldots} and \TT{POP\ldots} instructions,
 $I$ should be a MIN string, and a message such
 as:
@@ -1267,7 +1267,46 @@ like `{\tt my variable =}' or `{\tt POP: my variable =}'.
 Note that \TT{PUSH\ldots} instructions are usually
 \underline{not} traced.
 
-TBD
+For other functions $I$ needs to be a \TT{min::object}
+whose vector elements are MIN strings naming of stack
+elements.  Specifically, $I$\TT{[i]} names \TT{sp[-i]}.
+If this name is a \underline{non-empty} MIN string,
+then the message contains `$I$\TT{[i]} = <value of \TT{sp[-i]}'.
+These stack value parts of the message, if they exist, are separated
+by commas and are all appended to the message prefix followed by a `\TT{:}'.
+
+The message prefix $P$ is the value of the \TT{"prefix"} attribute
+of $I$.  For \TT{JMP\ldots} instructions, the prefix is modified as
+follows.  For a successful jump, the prefix is like
+`$P$ because 5.8 < 7.2'.  For an unsuccessful jump the prefix
+is like `no $P$ because not 5.8 < 7.2'.
+
+The following are examples.
+
+For the \TT{BEGF} instruction of a function names {\tt sum} with
+two arguments, {\tt X} and {\tt Y}, if
+\begin{center}
+$I$ = {\tt \{"": prefix = "ENTRY TO SUM"|"X","Y"|\}}
+\end{center}
+the message would be something like:
+\begin{center}
+\tt ENTRY TO SUM: X = 5.89, Y = 12
+\end{center}
+
+For a \TT{JMPGEQ} instruction used to break out of a loop
+at a time when the only variables were two loop variables,
+{\tt i} and {\tt sum}, as in the example on \pagref{EXAMPLE-LOOP}, if
+\begin{center}
+$I$ = {\tt \{"": prefix = "BREAK"|"", "", "", "", "i","sum"|\}}
+\end{center}
+the message would be something like:
+\begin{center}
+\tt BREAK because 5 > 4: i = 5, sum = 10
+\end{center}
+The 4 {\tt ""}'s skip the two values being compared and the two \TT{next}
+values in the stack.
+
+TBD: depth
 
 
 \section{MEX Functions}
