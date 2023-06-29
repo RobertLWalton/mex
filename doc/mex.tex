@@ -250,7 +250,7 @@
 
 \author{Robert L. Walton}
 
-\date{June 28, 2023}
+\date{June 29, 2023}
  
 \maketitle
 
@@ -671,9 +671,10 @@ The interface to a MEX module and its code vector is:
 \verb|enum         mex::| & \MEXKEY{trace\_flag}
 \LABEL{MEX::TRACE_FLAG} \\
 \verb|{                   | \\
-\verb|mex:|\TTMKEY{TRACE}{in {\tt mex::trace\_flag}} & \tt = 1 <{}< 0 \\
-\verb|mex:|\TTMKEY{TRACE\_PHRASE}{in {\tt mex::trace\_flag}} & \tt = 1 <{}< 1 \\
-\verb|mex:|\TTMKEY{TRACE\_NOJMP}{in {\tt mex::trace\_flag}} & \tt = 1 <{}< 2 \\
+\verb|mex:|\TTMKEY{TRACE\_DEPTH}{in {\tt mex::trace\_flag}} & \tt = 7 <{}< 0 \\
+\verb|mex:|\TTMKEY{TRACE\_PHRASE}{in {\tt mex::trace\_flag}} & \tt = 1 <{}< 3 \\
+\verb|mex:|\TTMKEY{TRACE\_NOJMP}{in {\tt mex::trace\_flag}} & \tt = 1 <{}< 4 \\
+\verb|mex:|\TTMKEY{TRACE}{in {\tt mex::trace\_flag}} & \tt = 1 <{}< 7 \\
 \verb|}                   | \\
 \end{tabular}
 
@@ -770,6 +771,8 @@ a return stack, and other parameters.  Specifically:
 \verb|min::uns32 | & \TTMKEY{fp}{in {\tt mex::process\_header}}\TT{[16]} \\
 \verb|mex::trace_function | & \TTMKEY{trace\_function}%
                                      {in {\tt mex::process\_header}} \\
+\verb|min::uns32 | & \TTMKEY{trace\_depth}{in {\tt mex::process\_header}} \\
+\verb|min::uns8 | & \TTMKEY{trace\_flags}{in {\tt mex::process\_header}} \\
 \verb|int | & \TTMKEY{excepts}{in {\tt mex::process\_header}} \\
 \verb|int | & \TTMKEY{excepts\_accumulator}%
                          {in {\tt mex::process\_header}} \\
@@ -821,7 +824,7 @@ The process's frame pointer member, \TT{fp[16]} and the \TT{met::ret}
 value's \TT{saved\_fp} member are explained in Nested Functions,
 \itemref{NESTED-FUNCTIONS}.
 
-The \TT{trace\_function}, \TT{excepts},
+The \TT{trace\_function}, \TT{trace\_depth}, \TT{trace\_flags}, \TT{excepts},
 \TT{excepts\_accumuator}, and \TT{optimize}
 members of a process
 are explained in Tracing and Exceptions, \itemref{TRACING-AND-EXCEPTIONS}.
@@ -988,6 +991,10 @@ are explained in Tracing and Exceptions, \itemref{TRACING-AND-EXCEPTIONS}.
     & \TT{immedC} from the \TT{pc} (jumping backwards to just after \\
     & the associated \TT{BEGL}).
 \\\hline
+\TT{TRACE}
+    & The process \TT{trace\_flags} member is set from the low order \\
+    & 8 bits of \TT{immedA}.
+\\\hline
 \end{tabular}
 \end{center}
 \caption{Housekeeping Instructions}
@@ -1113,11 +1120,27 @@ determined by the \TT{optimize} member of the process.
 The default setting of the \TT{optimize} member of a process
 is \TT{false}.
 
-In normal mode, if an instruction's \TT{trace\_flags} value
-is non-zero, the instruction is traced.
-In optimized mode, no tracing is done.
+In normal mode, tracing of an instruction
+is controlled by the \key{effective trace flags},
+which are the logical AND of the instruction's \TT{trace\_flags}
+member and the process's \TT{TRACE\_flags} member.
+An instruction is traced if its \TT{TRACE} flag is on
+in its effective trace flags.
 
-When an arithmetic instruction is traced and it's \TT{TRACE\_PHRASE} flag is on,
+In optimized mode, instructions are \underline{not} traced.
+
+As an exception, \TT{ERROR} instructions are traced in all cases.
+
+Arithmetic instructions that have errors raise exception flags.
+In normal mode, an error message is also produced.  In both
+normal and optimized modes, an error message is produced
+when the process terminates if any exception flags have been raised.
+
+\subsection{Arithmetic Tracing}
+\label{ARITHMETIC-TRACING}
+
+When an arithmetic instruction is traced and the effective
+trace flag's \TT{TRACE\_PHRASE} flag is on,
 the instruction source lines are output
 using \TT{min::\EOL print\_\EOL phrase\_\EOL lines} and the
 instruction's \TT{min::\EOL phrase\_\EOL position} value from its module's
@@ -1133,17 +1156,8 @@ If the \TT{TRACE\_PHRASE} flag is off, a message such as:
 is output instead.
 Note that arithmetic instructions are usually not traced.
 
-Tracing non-arithmetic functions calls the process's
-\TT{trace\_function} member if that is not \TT{NULL},
-or the \TT{mex::\EOL default\_\EOL trace\_\EOL function}
-otherwise.  This is called before the instruction is
-executed.  For conditional \TT{JMP\ldots} instructions,
-the call is suppressed if the condition is false (so there
-will be no jump) and the instruction's \TT{TRACE\_NOJMP}
-flag is off.
-
-See \pagref{MEX::DEFAULT_TRACE_INSTRUCTION} for a description
-of the \TT{mex::\EOL default\_\EOL trace\_\EOL instruction}.
+\subsection{Arithmetic Exceptions}
+\label{ARITHMETIC-EXCEPTIONS}
 
 Arithmetic instructions (Figure~\ref{ARITHMETIC-INSTRUCTIONS})
 may raise the following exceptions, each
@@ -1202,6 +1216,53 @@ and partly in the process's \TT{excepts\_\EOL accumulator} member.
 When the process is not running, it is stored in the latter.  When
 a process is optimized and is running and has not been interrupted,
 it is store in the hardware register.
+
+\subsection{Non-Arithmetic Tracing}
+\label{NON-ARITHMETIC-TRACING}
+
+Tracing non-arithmetic functions calls the process's
+\TT{trace\_function} member if that is not \TT{NULL},
+or the \TT{mex::\EOL default\_\EOL trace\_\EOL function}
+otherwise.  This is called before the instruction is
+executed.  For conditional \TT{JMP\ldots} instructions,
+the call is suppressed if the condition is false (so there
+will be no jump) and the instruction's \TT{TRACE\_NOJMP}
+flag is off.  For \TT{CALL} instructions, there are two
+calls to \TT{trace\_function}, one before the \TT{CALL}
+executes, and one with the program counter pointing
+to the \TT{BEGF} instruction, just before the program
+counter is incremented at the end of \TT{CALL} execution.
+
+The remainder of this section describes the behavior of
+the \TT{mex::\EOL default\_\EOL trace\_\EOL function}.
+
+Default tracing uses the \TT{TRACE\_PHRASE} flag in the
+same manner as Arithmetic Tracing, \itemref{ARITHMETIC-TRACING}.
+
+To produce the companion message,
+default tracing of the instruction \TT{module[i]} uses
+$I$ = \TT{module->trace\_info[i]}.  If this is missing
+or equals \TT{min::MISSING()}, a minimal message
+is produced, such as:
+\begin{center}
+\tt POP 1.527 to sp[-6]
+\end{center}
+Otherwise $I$ is used to produce the message as follows.
+
+For instructions that reference a single stack location,
+namely \TT{PUSH\ldots} and \TT{POP\ldots} instructions,
+$I$ should be a MIN string, and a message such
+as:
+\begin{center}
+\tt $I$ 1.527
+\end{center}
+is produced.  Here $I$ would be expected to something
+like `{\tt my variable =}' or `{\tt POP: my variable =}'.
+Note that \TT{PUSH\ldots} instructions are usually
+\underline{not} traced.
+
+TBD
+
 
 \section{MEX Functions}
 \label{MEX Functions}
