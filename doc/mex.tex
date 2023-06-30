@@ -696,11 +696,8 @@ The interface to a MEX module and its code vector is:
 \verb|}                                  | \\
 \end{tabular}
 
-\verb|typedef min::packed_vec_ptr<mex::instr,mex::module_header>| \\
-\hspace*{3em}\verb|mex::|\MEXKEY{module}
-\\[0.5ex]
 \verb|typedef min::packed_vec_insptr<mex::instr,mex::module_header>| \\
-\hspace*{3em}\verb|mex::|\MEXKEY{module\_insptr}
+\hspace*{3em}\verb|mex::|\MEXKEY{module}
 
 \end{indpar}
 
@@ -781,11 +778,8 @@ a return stack, and other parameters.  Specifically:
 \verb|}                                    | \\
 \end{tabular}
 
-\verb|typedef min::packed_vec_ptr<min::gen,mex::process_header>| \\
-\hspace*{3em}\verb|mex::|\MEXKEY{process}
-\\[0.5ex]
 \verb|typedef min::packed_vec_insptr<min::gen,mex::process_header>| \\
-\hspace*{3em}\verb|mex::|\MEXKEY{process\_insptr}
+\hspace*{3em}\verb|mex::|\MEXKEY{process}
 
 \end{indpar}
 
@@ -1340,12 +1334,39 @@ The effective trace flags for this instruction are just the
 The trace message for the \TT{ERROR} instruction is thus in effect an
 error message.
 
+\subsection{Fatal Errors}
+\label{FATAL-ERRORS}
 
+\ikey{Fatal errors}{fatal error} are errors that terminate the current
+process.  A fatal error produces an error message that describes the
+error.  If a \TT{min::phrase\_position} is available for the instruction
+that had the fatal error, it will be used to specify the location
+of the error in source code.
+
+The following is a complete list of fatal errors;
+\begin{enumerate}
+\item \TT{ERROR} instruction with non-zero \TT{immedB}.
+\item A \TT{JMP\ldots} instruction comparing values
+(A) one of which is not a number or an infinity, or
+(B) both of which are infinities with the same sign.
+\item Attempting to increase stack size to above the \TT{max\_length}
+member of the process.
+\item Attempting to increase the \TT{return\_stack}
+size to above the \TT{max\_length} member of the process \TT{return\_stack}.
+\item Attempt to pop a value off an empty stack.
+\item Setting the process \TT{pc} to \TT{\{min::NULL\_STUB,$I$\}} where
+$I$ is \underline{not} \TT{0}.
+\item Attempt to decrement \TT{trace\_depth} when that is \TT{0}.
+
+\end{enumerate}
+
+Note that arithmetic exceptions (see \itemref{ARITHMETIC-EXCEPTIONS})
+are \underline{not} fatal errors.
 
 \section{MEX Functions}
 \label{MEX Functions}
 
-{\tt mex::module\_insptr mex::}\TTKEY{create\_module}
+{\tt mex::module mex::}\TTKEY{create\_module}
     \verb|( min::file f = min::NULL_STUB )|
 \begin{indpar}
 A \TT{mex::module} is created and returned.  The code vector is empty.
@@ -1354,16 +1375,79 @@ The \TT{globals} member is set to \TT{min::NULL\_STUB} and the
 \TT{interface} member is set to \TT{min::MISSING()}.
 \end{indpar}
 
-{\tt mex::process\_insptr mex::}\TTKEY{create\_process} \verb|()|
+{\tt mex::process mex::}\TTKEY{create\_process} \verb|()|
 \begin{indpar}
 A \TT{mex::process} is created and returned.
-An empty \TT{return\_stack} vector is created.
+The process \TT{length} member (stack size) is set to \TT{0}
+and its \TT{max\_length} member (maximum stack size) is set to the
+value of the global variable:
+\begin{indpar}
+\verb|min::uns32 mex::|\MEXKEY{stack\_limit}\verb|    // Default == 16384.|
+\end{indpar}
+
+An empty \TT{return\_stack} vector is created and its \TT{max\_size}
+is set to the value of the global variable:
+\begin{indpar}
+\verb|min::uns32 mex::|\MEXKEY{return\_stack\_limit}%
+            \verb|    // Default == 4096.|
+\end{indpar}
+
+Note: the stack's \TT{max\_length} members are \underline{not} permitted
+to change during process execution.
+
 The \TT{pc} member is set to \TT{\{min::NULL\_STUB,0\}}.
 The \TT{optimize} member is set to \TT{false}.
 The \TT{trace\_function} member is set to \TT{NULL}.
 The \TT{sp}, \TT{rp}, \TT{fp[16]}, \TT{trace\_depth},
 \TT{trace\_flags}, \TT{excepts}, and \TT{excepts\_accumulator}
 members are set to \TT{0}.
+\end{indpar}
+
+{\tt void mex::}\TTKEY{init\_process}
+    \verb|( mex::module m, mex::process p = min:NULL_STUB )|
+\begin{indpar}
+Initialize \TT{p} (which is created by \TT{mex::create\_process}
+if that is \TT{NULL\_STUB}) to run the code in \TT{m}.
+
+The process stack and \TT{return\_stack} are set to empty.
+The \TT{optimize} member is set to \TT{false}.
+The \TT{trace\_function} member is set to \TT{NULL}.
+The \TT{sp}, \TT{rp}, \TT{fp[0]}, \TT{trace\_depth},
+\TT{excepts}, and \TT{excepts\_accumulator}
+members are set to \TT{0}.
+
+The \TT{pc} member is set to \TT{\{m,0\}}.
+
+The \TT{optimize} and \TT{trace\_flags} members are not set
+(but \TT{mex::create\_process} will set them to \TT{false} and
+\TT{0} respectively).
+\end{indpar}
+
+{\tt void mex::}\TTKEY{init\_process}
+    \verb|( mex::pc pc, mex::process p = min:NULL_STUB )|
+\begin{indpar}
+Ditto, but does not set the process \TT{pc} member.
+
+Then emulates a \TT{CALL} to the \TT{pc} argument
+value, which must point at a \TT{BEGF} instruction.
+This creates a \TT{return\_stack} entry whose
+\TT{saved\_pc} is \TT{\{min::NULL\_STUB,0\}}, so a return
+will terminate the process normally.  The \TT{nargs} member
+is set to \TT{0}.
+\end{indpar}
+
+{\tt bool mex::}\TTKEY{run\_process}
+    \verb|( mex::process p, min::uns32 limit = 0xFFFFFFFF )|
+\begin{indpar}
+Execute \TT{p} until it terminates or has executed \TT{limit}
+instructions.  Returns \TT{true} on normal termination
+and \TT{false} otherwise.  Normal termination is one of:
+\begin{enumerate}
+\item \TT{limit} instructions have been executed
+\item \TT{pc} is \TT{\{min::NULL\_STUB,0\}}
+\item \TT{pc} equals \TT{\{m,index\}} with \TT{index} == \TT{m->length}
+\end{enumerate}
+
 \end{indpar}
 
 \clearpage
