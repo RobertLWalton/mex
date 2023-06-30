@@ -250,7 +250,7 @@
 
 \author{Robert L. Walton}
 
-\date{June 29, 2023}
+\date{June 30, 2023}
  
 \maketitle
 
@@ -671,7 +671,8 @@ The interface to a MEX module and its code vector is:
 \verb|enum         mex::| & \MEXKEY{trace\_flag}
 \LABEL{MEX::TRACE_FLAG} \\
 \verb|{                   | \\
-\verb|mex:|\TTMKEY{TRACE\_DEPTH}{in {\tt mex::trace\_flag}} & \tt = 7 <{}< 0 \\
+\verb|mex:|\TTMKEY{TRACE\_DEPTH}{in {\tt mex::trace\_flag}} & \tt = 7 <{}< 0
+\label{MEX::TRACE_DEPTH} \\
 \verb|mex:|\TTMKEY{TRACE\_PHRASE}{in {\tt mex::trace\_flag}} & \tt = 1 <{}< 3 \\
 \verb|mex:|\TTMKEY{TRACE\_NOJMP}{in {\tt mex::trace\_flag}} & \tt = 1 <{}< 4 \\
 \verb|mex:|\TTMKEY{TRACE}{in {\tt mex::trace\_flag}} & \tt = 1 <{}< 7 \\
@@ -997,8 +998,8 @@ are explained in Tracing and Exceptions, \itemref{TRACING-AND-EXCEPTIONS}.
 \\\hline
 \TT{ERROR}
     & This instruction is always traced.  If \TT{immedB} is not zero, \\
-    & it terminates the process.  Otherwise is adds \TT{immedA} to \TT{sp} \\
-    & (popping the stack \TT{immedA} times).
+    & the process terminates.  Otherwise \TT{immedA} is added to \TT{sp} \\
+    & (popping the stack \TT{immedA} times).  See \itemref{ERROR-INSTRUCTION}.
 \\\hline
 \end{tabular}
 \end{center}
@@ -1306,15 +1307,64 @@ the message would be something like:
 The 4 {\tt ""}'s skip the two values being compared and the two \TT{next}
 values in the stack.
 
-TBD: depth
+Trace messages are indented by the process's \TT{trace\_depth} member
+times the global variable:
+\begin{indpar}
+\verb|min::uns32 mex::|\MEXKEY{trace\_indent}\verb|    // Default == 2.|
+\end{indpar}
+In addition, in the first line of a message all the indent spaces but
+the last are replaced by the value of the global variable:
+\begin{indpar}
+\verb|char mex::|\MEXKEY{trace\_mark}\verb|    // Default == '*'.|
+\end{indpar}
+
+A process's \TT{trace\_depth} is initialized to \TT{0} and maintained
+by the following instructions:
+\begin{center}
+\begin{tabular}{l@{~~~~}l}
+\TT{BEG} ~ \TT{BEGL} ~ \TT{CALL}+\TT{BEGF} & Increment by 1. \\
+\TT{END} ~ \TT{ENDL} ~ \TT{ENDF} ~ \TT{RET} & Decrement by 1. \\
+\TT{JMP\ldots} & Decrement by low order 3 bits of instruction's \\
+               & \TT{trace\_flags} member (the bits masked by \\
+               & \TT{mex::TRACE\_DEPTH}: \pagref{MEX::TRACE_DEPTH}). \\
+\end{tabular}
+\end{center}
+
+\subsection{ERROR Instruction}
+\label{ERROR-INSTRUCTION}
+
+The \TT{ERROR} instruction is always traced, even in optimized mode.
+The effective trace flags for this instruction are just the
+\TT{trace\_flags} member of the instruction with the \TT{TRACE} flag forced on.
+
+The trace message for the \TT{ERROR} instruction is thus in effect an
+error message.
+
 
 
 \section{MEX Functions}
 \label{MEX Functions}
 
 {\tt mex::module\_insptr mex::}\TTKEY{create\_module}
+    \verb|( min::file f = min::NULL_STUB )|
+\begin{indpar}
+A \TT{mex::module} is created and returned.  The code vector is empty.
+Empty \TT{position} and \TT{trace\_info} vectors are created.
+The \TT{globals} member is set to \TT{min::NULL\_STUB} and the
+\TT{interface} member is set to \TT{min::MISSING()}.
+\end{indpar}
 
-{\tt mex::process\_insptr mex::}\TTKEY{create\_process}
+{\tt mex::process\_insptr mex::}\TTKEY{create\_process} \verb|()|
+\begin{indpar}
+A \TT{mex::process} is created and returned.
+An empty \TT{return\_stack} vector is created.
+The \TT{pc} member is set to \TT{\{min::NULL\_STUB,0\}}.
+The \TT{optimize} member is set to \TT{false}.
+The \TT{trace\_function} member is set to \TT{NULL}.
+The \TT{sp}, \TT{rp}, \TT{fp[16]}, \TT{trace\_depth},
+\TT{trace\_flags}, \TT{excepts}, and \TT{excepts\_accumulator}
+members are set to \TT{0}.
+\end{indpar}
 
 \clearpage
 
