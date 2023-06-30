@@ -1403,11 +1403,12 @@ The \TT{sp}, \TT{rp}, \TT{fp[16]}, \TT{trace\_depth},
 members are set to \TT{0}.
 \end{indpar}
 
-{\tt void mex::}\TTKEY{init\_process}
+{\tt mex::process mex::}\TTKEY{init\_process}
     \verb|( mex::module m, mex::process p = min:NULL_STUB )|
 \begin{indpar}
 Initialize \TT{p} (which is created by \TT{mex::create\_process}
 if that is \TT{NULL\_STUB}) to run the code in \TT{m}.
+Return the process.
 
 The process stack and \TT{return\_stack} are set to empty.
 The \TT{optimize} member is set to \TT{false}.
@@ -1423,7 +1424,7 @@ The \TT{optimize} and \TT{trace\_flags} members are not set
 \TT{0} respectively).
 \end{indpar}
 
-{\tt void mex::}\TTKEY{init\_process}
+{\tt mex::process mex::}\TTKEY{init\_process}
     \verb|( mex::pc pc, mex::process p = min:NULL_STUB )|
 \begin{indpar}
 Ditto, but does not set the process \TT{pc} member.
@@ -1449,6 +1450,11 @@ and \TT{false} otherwise.  Normal termination is one of:
 \end{enumerate}
 
 \end{indpar}
+
+Note: You can use \TT{init\_process ( m )} followed by \TT{run\_process}
+to run the code of \TT{m}.  You can then add to the end of \TT{m}
+and call \TT{run\_process} again to continue the execution of the code
+of \TT{m}.
 
 \clearpage
 
