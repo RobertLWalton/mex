@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat Jul  1 03:51:20 EDT 2023
+// Date:	Sat Jul  1 18:21:45 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -36,13 +36,16 @@ struct instr {
     min::gen immedD;
 };
 
+// The following must correlate with the opcode_info
+// table in mex.cc.
+//
 enum op_code {
-    ADD, MUL,
-    ADDI, MULI,
-    SUB, SUBR,
-    SUBI, SUBRI,
-    DIV, DIVR,
-    DIVI, DIVRI,
+    ADD = 1,		MUL = 2,
+    ADDI = 3,		MULI = 4,
+    SUB = 5,		SUBR = 6,
+    SUBI = 7,		SUBRI = 8,
+    DIV = 10,		DIVR = 11,
+    DIVI = 12,		DIVRI = 13,
     MOD, MODR,
     MODI, MODRI,
     FLOOR, CEILING,
@@ -155,6 +158,9 @@ inline void set_pc ( mex::process p, mex::pc pc )
         min::unprotected::acc_write_update
 	    ( p, pc.module );
 }
+
+bool run_process
+    ( mex::process p, min::uns32 limit = 0xFFFFFFFF );
 
 } // end mex namespace
 
