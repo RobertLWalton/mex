@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Jun 30 23:10:53 EDT 2023
+// Date:	Fri Jun 30 23:42:33 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -66,7 +66,7 @@ enum op_code {
     END,
     BEGL,
     ENDL, CONT,
-    TRACE,
+    SET_TRACE,
     ERROR,
     BEGF, ENDF,
     CALL, CALLG,
@@ -96,14 +96,59 @@ struct module_header
     min::gen interface;
     min::packed_vec_ptr<min::gen> trace_info;
 };
-MIN_REF ( min::phrase_position, position, mex::module )
+
+typedef min::packed_vec_insptr
+               <mex::instr, mex::module_header>
+	       module;
+
+MIN_REF ( min::phrase_position_vec, position, mex::module )
 MIN_REF ( min::packed_vec_ptr<min::gen>, globals,
                                          mex::module )
 MIN_REF ( min::gen, interface, mex::module )
 MIN_REF ( min::packed_vec_ptr<min::gen>, trace_info,
                                          mex::module )
 
+struct process_header;
 typedef min::packed_vec_insptr
-               <mex::instr, mex::module_header>;
+               <min::gen, mex::process_header>
+	       process;
+
+struct pc
+{
+    mex::module module;
+    min::uns32 index;
+};
+
+struct ret
+{
+    mex::pc saved_pc;
+    min::uns32 saved_fp;
+    min::uns32 nargs;
+};
+
+typedef void (* trace_function ) ( mex::process p );
+
+struct process_header
+{
+    min::uns32 control;
+    min::uns32 length;
+    min::uns32 max_length;
+    mex::pc pc;
+    min::uns32 sp;
+    min::packed_vec_insptr<mex::ret> return_stack;
+    min::uns32 rp;
+    min::uns32 fp[16];
+    mex::trace_function trace_function;
+    min::uns32 trace_depth;
+    min::uns8 trace_flags;
+    int excepts;
+    int excepts_accumulator;
+    bool optimize;
+};
+
+MIN_REF ( min::packed_vec_insptr<mex::ret>,
+          return_stack, mex::process )
+
+} // end mex namespace
 
 # endif // MEX_H
