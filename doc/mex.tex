@@ -250,7 +250,7 @@
 
 \author{Robert L. Walton}
 
-\date{June 30, 2023}
+\date{July 1, 2023}
  
 \maketitle
 
@@ -986,7 +986,7 @@ are explained in Tracing and Exceptions, \itemref{TRACING-AND-EXCEPTIONS}.
     & \TT{immedC} from the \TT{pc} (jumping backwards to just after \\
     & the associated \TT{BEGL}).
 \\\hline
-\TT{TRACE}
+\TT{SET\_TRACE}
     & The process \TT{trace\_flags} member is set from the low order \\
     & 8 bits of \TT{immedA}.
 \\\hline
@@ -1403,8 +1403,8 @@ The \TT{sp}, \TT{rp}, \TT{fp[16]}, \TT{trace\_depth},
 members are set to \TT{0}.
 \end{indpar}
 
-{\tt mex::process mex::}\TTKEY{init\_process}
-    \verb|( mex::module m, mex::process p = min:NULL_STUB )|
+{\tt mex::process mex::}\TTKEY{init\_process} \\
+\hspace*{10em}\verb|( mex::module m, mex::process p = min:NULL_STUB )|
 \begin{indpar}
 Initialize \TT{p} (which is created by \TT{mex::create\_process}
 if that is \TT{NULL\_STUB}) to run the code in \TT{m}.
@@ -1424,8 +1424,8 @@ The \TT{optimize} and \TT{trace\_flags} members are not set
 \TT{0} respectively).
 \end{indpar}
 
-{\tt mex::process mex::}\TTKEY{init\_process}
-    \verb|( mex::pc pc, mex::process p = min:NULL_STUB )|
+{\tt mex::process mex::}\TTKEY{init\_process} \\
+\hspace*{10em}\verb|( mex::pc pc, mex::process p = min:NULL_STUB )|
 \begin{indpar}
 Ditto, but does not set the process \TT{pc} member.
 
