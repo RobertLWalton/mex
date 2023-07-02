@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat Jul  1 23:05:15 EDT 2023
+// Date:	Sun Jul  2 04:39:03 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -228,7 +228,14 @@ while ( true ) // Outer loop.
 	    goto INNER_FATAL;
 	}
 	op_info * info = op_infos + op_code;
-	min::gen arg1, arg2;
+	min::float64 arg1, arg2;
+	bool jmp = false;
+
+#	define F(x) * (min::float64 *) & (x)
+	    // If x is a min::gen that is not a direct
+	    // float, it will be a signalling NaN that
+	    // will raise the invalid exception and
+	    // generate a non-signalling NaN result.
 
 	switch ( info->op_type )
 	{
@@ -240,7 +247,7 @@ while ( true ) // Outer loop.
 	        message = "illegal SP: too small";
 		goto INNER_FATAL;
 	    }
-	    arg1 = sp[0], arg2 = sp[-1];
+	    arg1 = F ( sp[0] ), arg2 = F ( sp[-1] );
 	    break;
 	case A2R:
 	    if ( sp < spbegin + 1 )
@@ -248,7 +255,7 @@ while ( true ) // Outer loop.
 	        message = "illegal SP: too small";
 		goto INNER_FATAL;
 	    }
-	    arg1 = sp[-1], arg2 = sp[0];
+	    arg1 = F ( sp[-1] ), arg2 = F ( sp[0] );
 	    break;
 	case A2I:
 	    if ( sp < spbegin )
@@ -256,7 +263,7 @@ while ( true ) // Outer loop.
 	        message = "illegal SP: too small";
 		goto INNER_FATAL;
 	    }
-	    arg1 = sp[0], arg2 = pc->immedD;
+	    arg1 = F ( sp[0] ), arg2 = F ( pc->immedD );
 	    break;
 	case A2IR:
 	    if ( sp < spbegin )
@@ -264,7 +271,7 @@ while ( true ) // Outer loop.
 	        message = "illegal SP: too small";
 		goto INNER_FATAL;
 	    }
-	    arg1 = pc->immedD, arg2 = sp[0];
+	    arg1 = F ( pc->immedD ), arg2 = F ( sp[0] );
 	    break;
 	case A1:
 	    if ( sp < spbegin )
@@ -272,9 +279,8 @@ while ( true ) // Outer loop.
 	        message = "illegal SP: too small";
 		goto INNER_FATAL;
 	    }
-	    arg1 = sp[0];
-	    arg2 = min::new_direct_float_gen ( 0 );
-	        // To avoid error detector.
+	    arg1 = F ( sp[0] );
+	    arg2 = 0; // To avoid error detector.
 	    break;
 	default:
 	    message = "internal system error:"
@@ -287,6 +293,18 @@ while ( true ) // Outer loop.
 	{
 
 	    feclearexcept ( FE_ALL_EXCEPT );
+
+	    switch ( op_code )
+	    {
+	    case mex::ADD:
+	        * -- sp = min::new_num_gen
+		              ( arg1 + arg2 );
+		break;
+	    case mex::ADDI:
+	        * sp = min::new_num_gen
+		              ( arg1 + arg2 );
+	    }
+
 
 	    // TBD
 
