@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat Jul  1 18:21:34 EDT 2023
+// Date:	Sat Jul  1 23:05:15 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -19,6 +19,7 @@
 // -----
 
 # include <cstdlib>
+# include <cfenv>
 # include <iostream>
 # include <mex.h>
 
@@ -137,8 +138,9 @@ enum
                 // operands in that order.
     A2I =  4,	// sp[0] and immedD are the arithmetic
                 // operands in that order.
-    A2IR = 5,	// immedD and sp[0 are the arithmetic
+    A2IR = 5,	// immedD and sp[0] are the arithmetic
                 // operands in that order.
+    A1 =   6,	// sp[0] is an arithmetic operand.
 };
 
 static
@@ -181,25 +183,27 @@ void init_op_infos ( void )
 	}
     }
 }
-    
-  
-        
+
 bool mex::run_process ( mex::process p, min::uns32 limit )
 {
-    const char * message = NULL;
+    const char * message;
+    char message_buffer[200];
 
+while ( true ) // Outer loop.
+{
     mex::module m = p->pc.module;
     min::uns32 i = p->pc.index;
     if ( m == min::NULL_STUB )
     {
         if ( i == 0 ) return true;
 	message = "Illegal PC: no module and index > 0";
-	goto ERROR_EXIT;
+	goto FATAL;
     }
-    if ( i > m->length )
+    if ( i >= m->length )
     {
+        if ( i == m->length ) return true;
 	message = "Illegal PC: index too large";
-	goto ERROR_EXIT;
+	goto FATAL;
     }
     mex::instr * pcbegin = ~ ( m + 0 );
     mex::instr * pc = ~ ( m + i );
@@ -209,23 +213,122 @@ bool mex::run_process ( mex::process p, min::uns32 limit )
     if ( i > p->max_length )
     {
 	message = "Illegal SP: too large";
-	goto ERROR_EXIT;
+	goto FATAL;
     }
     min::gen * spbegin = ~ ( p + 0 );
     min::gen * sp = ~ ( p + i );
     min::gen * spend = ~ ( p + p->max_length );
 
+    while ( true ) // Inner loop.
+    {
+        min::uns8 op_code = pc->op_code;
+	if ( op_code > max_op_code )
+	{
+	    message = "Illegal op code: too large";
+	    goto INNER_FATAL;
+	}
+	op_info * info = op_infos + op_code;
+	min::gen arg1, arg2;
+
+	switch ( info->op_type )
+	{
+	case NONA:
+	    goto NON_ARITHMETIC;
+	case A2:
+	    if ( sp < spbegin + 1 )
+	    {
+	        message = "illegal SP: too small";
+		goto INNER_FATAL;
+	    }
+	    arg1 = sp[0], arg2 = sp[-1];
+	    break;
+	case A2R:
+	    if ( sp < spbegin + 1 )
+	    {
+	        message = "illegal SP: too small";
+		goto INNER_FATAL;
+	    }
+	    arg1 = sp[-1], arg2 = sp[0];
+	    break;
+	case A2I:
+	    if ( sp < spbegin )
+	    {
+	        message = "illegal SP: too small";
+		goto INNER_FATAL;
+	    }
+	    arg1 = sp[0], arg2 = pc->immedD;
+	    break;
+	case A2IR:
+	    if ( sp < spbegin )
+	    {
+	        message = "illegal SP: too small";
+		goto INNER_FATAL;
+	    }
+	    arg1 = pc->immedD, arg2 = sp[0];
+	    break;
+	case A1:
+	    if ( sp < spbegin )
+	    {
+	        message = "illegal SP: too small";
+		goto INNER_FATAL;
+	    }
+	    arg1 = sp[0];
+	    arg2 = min::new_direct_float_gen ( 0 );
+	        // To avoid error detector.
+	    break;
+	default:
+	    message = "internal system error:"
+	              " bad op_type";
+	    goto INNER_FATAL;
+	}
+
+	// Process arithmetic operator, including
+	// conditional JMPs.
+	{
+
+	    feclearexcept ( FE_ALL_EXCEPT );
+
+	    // TBD
+
+	    int excepts =
+	        fetestexcept ( FE_ALL_EXCEPT );
+	    p->excepts_accumulator |= excepts;
+	    excepts &= p->excepts;
+	    if ( excepts != 0 )
+	    {
+	        if ( excepts & FE_INVALID )
+		    message = "invalid operand(s)";
+	        else if ( excepts & FE_DIVBYZERO )
+		    message = "divide by zero";
+	        else if ( excepts & FE_OVERFLOW )
+		    message = "numeric overflow";
+	        else if ( excepts & FE_INEXACT )
+		    message = "inexact numeric result";
+	        else if ( excepts & FE_UNDERFLOW )
+		    message = "numeric underflow";
+		else
+		    message =
+		        "unknown numeric exception";
+		// TBD
+	    }
+
+	    continue; // inner loop
+	}
+
+    NON_ARITHMETIC:
+        ;
+
 #   define CHECK1 \
 	    if ( sp < spbegin ) \
 	    { \
 	        message = "illegal SP: too small"; \
-		goto ERROR_EXIT; \
+		goto FATAL; \
 	    } \
 	    if ( ! min::is_direct_float ( sp[0] ) ) \
 	    { \
 	        message = \
 		    "illegal argument: not float64"; \
-		goto ERROR_EXIT; \
+		goto FATAL; \
 	    }
 
 #   define CHECK2 \
@@ -234,7 +337,28 @@ bool mex::run_process ( mex::process p, min::uns32 limit )
 	         ! min::is_direct_float ( sp[0] ) \
 	         || \
 	         ! min::is_direct_float ( sp[-1] ) ) \
-	        goto ERROR_EXIT
+	        goto FATAL
 #   define GF(x) min::new_direct_float_gen ( x )
 #   define FG(x) min::unprotected::direct_float_of ( x )
+
+    }
+
+    continue; // outer loop
+
+INNER_FATAL:
+    * (min::uns32 *) & p->pc.index = pc - pcbegin;
+    p->sp = sp - spbegin;
+    p->length = p->sp + 1;
+    goto FATAL;
+
+RESTART:
+    * (min::uns32 *) & p->pc.index = pc - pcbegin;
+    p->sp = sp - spbegin;
+    p->length = p->sp + 1;
+    break; // inner loop
+}
+
+
+FATAL:
+    return false;
 }
