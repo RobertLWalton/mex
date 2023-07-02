@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Jul  2 13:39:42 EDT 2023
+// Date:	Sun Jul  2 18:32:21 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -21,6 +21,7 @@
 # include <cstdlib>
 # include <cstdio>
 # include <cfenv>
+# include <cmath>
 # include <iostream>
 # include <mex.h>
 
@@ -144,6 +145,9 @@ enum
     A2IR = 5,	// immedD and sp[0] are the arithmetic
                 // operands in that order.
     A1 =   6,	// sp[0] is an arithmetic operand.
+    J2 =   7,	// sp[-1] and sp[0] are the arithmetic
+                // operands in that order, and the
+		// operation is a jump.
 };
 
 static
@@ -251,7 +255,7 @@ while ( true ) // Outer loop.
 		goto INNER_FATAL;
 	    }
 	    arg1 = F ( sp[0] ), arg2 = F ( sp[-1] );
-	    break;
+	    goto ARITHMETIC;
 	case A2R:
 	    if ( sp < spbegin + 1 )
 	    {
@@ -259,7 +263,7 @@ while ( true ) // Outer loop.
 		goto INNER_FATAL;
 	    }
 	    arg1 = F ( sp[-1] ), arg2 = F ( sp[0] );
-	    break;
+	    goto ARITHMETIC;
 	case A2I:
 	    if ( sp < spbegin )
 	    {
@@ -267,7 +271,7 @@ while ( true ) // Outer loop.
 		goto INNER_FATAL;
 	    }
 	    arg1 = F ( sp[0] ), arg2 = F ( pc->immedD );
-	    break;
+	    goto ARITHMETIC;
 	case A2IR:
 	    if ( sp < spbegin )
 	    {
@@ -275,7 +279,7 @@ while ( true ) // Outer loop.
 		goto INNER_FATAL;
 	    }
 	    arg1 = F ( pc->immedD ), arg2 = F ( sp[0] );
-	    break;
+	    goto ARITHMETIC;
 	case A1:
 	    if ( sp < spbegin )
 	    {
@@ -284,16 +288,26 @@ while ( true ) // Outer loop.
 	    }
 	    arg1 = F ( sp[0] );
 	    arg2 = 0; // To avoid error detector.
-	    break;
+	    goto ARITHMETIC;
+	case J2:
+	    if ( sp < spbegin + 1 )
+	    {
+	        message = "illegal SP: too small";
+		goto INNER_FATAL;
+	    }
+	    arg1 = F ( sp[0] ), arg2 = F ( sp[-1] );
+	    goto JUMP;
 	default:
 	    message = "internal system error:"
 	              " bad op_type";
 	    goto INNER_FATAL;
 	}
+#	undef F
 
-	// Process arithmetic operator, including
-	// conditional JMPs.
+	ARITHMETIC:
 	{
+	    // Process arithmetic operator, excluding
+	    // JMPs.
 
 	    feclearexcept ( FE_ALL_EXCEPT );
 
@@ -336,8 +350,40 @@ while ( true ) // Outer loop.
 	    continue; // inner loop
 	}
 
-    NON_ARITHMETIC:
-        ;
+	JUMP:
+	{
+	    // Process conditional JMP.
+
+	    bool execute_jmp, bad_jmp;
+	    if ( ! std::isnan ( arg1 )
+	         &&
+		 ! std::isnan ( arg2 ) )
+		bad_jmp = true;
+	    else if ( std::isinf ( arg1 )
+	              &&
+		      std::isinf ( arg2 )
+		      &&
+		      arg1 * arg2 > 0 )
+		bad_jmp = true;
+	    else
+	    {
+	        bad_jmp = false;
+		switch ( op_code )
+		{
+		case mex::JMPEQ:
+		    execute_jmp = ( arg1 == arg2 );
+		}
+	    }
+
+	    // TBD
+
+
+	    continue; // inner loop
+	}
+
+	NON_ARITHMETIC:
+        {
+	}
 
 #   define CHECK1 \
 	    if ( sp < spbegin ) \
@@ -364,19 +410,19 @@ while ( true ) // Outer loop.
 
     } // end inner loop
 
+RESTART:
+    * (min::uns32 *) & p->pc.index = pc - pcbegin;
+    p->sp = sp - spbegin;
+    p->length = p->sp + 1;
     continue; // outer loop
 
+// Fatal error discovered in inner loop.
+//
 INNER_FATAL:
     * (min::uns32 *) & p->pc.index = pc - pcbegin;
     p->sp = sp - spbegin;
     p->length = p->sp + 1;
     goto FATAL;
-
-RESTART:
-    * (min::uns32 *) & p->pc.index = pc - pcbegin;
-    p->sp = sp - spbegin;
-    p->length = p->sp + 1;
-    break; // inner loop
 }
 
 // Come here with fatal error `message'.  At this point
@@ -386,6 +432,34 @@ RESTART:
 //
 FATAL:
     char fatal_buffer[100];
+    char instr_buffer[400];
+    char * q = instr_buffer;
+    q += sprintf ( q, "OP CODE = " );
+    if ( p->pc.module == min::NULL_STUB
+         ||
+	 p->pc.index >= p->pc.module->length )
+	q += sprintf ( q, "<NOT AVAILABLE>" );
+    else
+    {
+        mex::instr * instr =
+	    ~ ( p->pc.module + p->pc.index );
+	min::uns8 op_code = instr->op_code;
+	op_info * info = ( op_code <= max_op_code ?
+	                   op_infos + op_code :
+			   NULL );
+	if ( info != NULL )
+	    q += sprintf ( q, "%s", info->name );
+	else
+	    q += sprintf
+	        ( q, "%u (TOO LARGE)", op_code );
+	q += sprintf
+	    ( q, ", IMMEDA = %u", instr->immedA );
+	q += sprintf
+	    ( q, ", IMMEDB = %u", instr->immedB );
+	q += sprintf
+	    ( q, ", IMMEDC = %u", instr->immedC );
+    }
+
     p->printer << min::bol << "FATAL ERROR: " << min::bom
                << message
 	       << min::indent
@@ -409,6 +483,8 @@ FATAL:
 		    ( sprintf ( fatal_buffer, "%u",
 		                p->pc.module->length ),
 		      fatal_buffer ) )
+	       << min::indent
+	       << instr_buffer
 	       << min::indent
 	       << "SP = " << p->sp
 	       << ", PROCESS MAX_LENGTH = "
