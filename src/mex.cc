@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Jul  2 04:39:03 EDT 2023
+// Date:	Sun Jul  2 13:39:42 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -19,9 +19,12 @@
 // -----
 
 # include <cstdlib>
+# include <cstdio>
 # include <cfenv>
 # include <iostream>
 # include <mex.h>
+
+min::locatable_var<min::printer> mex::default_printer;
 
 
 // Optimized Run Process
@@ -359,7 +362,7 @@ while ( true ) // Outer loop.
 #   define GF(x) min::new_direct_float_gen ( x )
 #   define FG(x) min::unprotected::direct_float_of ( x )
 
-    }
+    } // end inner loop
 
     continue; // outer loop
 
@@ -376,7 +379,46 @@ RESTART:
     break; // inner loop
 }
 
-
+// Come here with fatal error `message'.  At this point
+// there is no instruction to pin the blame on - its a
+// process state error - which can only happen if the
+// compiler has made a mistake.
+//
 FATAL:
+    char fatal_buffer[100];
+    p->printer << min::bol << "FATAL ERROR: " << min::bom
+               << message
+	       << min::indent
+	       << "PC->MODULE = "
+	       << ( p->pc.module == min::NULL_STUB ?
+	            min::new_str_gen ( "<NULL MODULE>"  ):
+		       p->pc.module->position->file
+		    == min::NULL_STUB ?
+		    min::new_str_gen ( "<NULL FILE>" ):
+		       p->pc.module->position->file
+		                   ->file_name
+		    == min::MISSING() ?
+		    min::new_str_gen ( "<NO FILE NAME>" ):
+		    p->pc.module->position->file
+		                ->file_name )
+	       << ", PC INDEX = " << p->pc.index
+	       << min::indent
+	       << "MODULE LENGTH (CODE VECTOR SIZE) = "
+	       << ( p->pc.module == min::NULL_STUB ?
+	                "<NOT AVAILABLE>" :
+		    ( sprintf ( fatal_buffer, "%u",
+		                p->pc.module->length ),
+		      fatal_buffer ) )
+	       << min::indent
+	       << "SP = " << p->sp
+	       << ", PROCESS MAX_LENGTH = "
+	       << p->max_length
+	       << min::indent
+	       << "RP = " << p->rp
+	       << ", RETURN STACK MAX_LENGTH = "
+	       << p->return_stack->max_length
+	       << min::eom;
+		        
     return false;
+
 }

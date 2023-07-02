@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat Jul  1 18:21:45 EDT 2023
+// Date:	Sun Jul  2 13:24:11 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -136,6 +136,7 @@ struct process_header
     min::uns32 control;
     min::uns32 length;
     min::uns32 max_length;
+    min::printer printer;
     const mex::pc pc;
     min::uns32 sp;
     const min::packed_vec_insptr<mex::ret> return_stack;
@@ -149,6 +150,7 @@ struct process_header
     bool optimize;
 };
 
+MIN_REF ( min::printer, printer, mex::process )
 MIN_REF ( min::packed_vec_insptr<mex::ret>,
           return_stack, mex::process )
 inline void set_pc ( mex::process p, mex::pc pc )
@@ -161,6 +163,8 @@ inline void set_pc ( mex::process p, mex::pc pc )
 
 bool run_process
     ( mex::process p, min::uns32 limit = 0xFFFFFFFF );
+
+extern min::locatable_var<min::printer> default_printer;
 
 } // end mex namespace
 

@@ -250,7 +250,7 @@
 
 \author{Robert L. Walton}
 
-\date{July 1, 2023}
+\date{July 2, 2023}
  
 \maketitle
 
@@ -1375,7 +1375,8 @@ The \TT{globals} member is set to \TT{min::NULL\_STUB} and the
 \TT{interface} member is set to \TT{min::MISSING()}.
 \end{indpar}
 
-{\tt mex::process mex::}\TTKEY{create\_process} \verb|()|
+{\tt mex::process mex::}\TTKEY{create\_process} \\
+\hspace*{10em}\verb|( min::printer printer = mex::default_printer )|
 \begin{indpar}
 A \TT{mex::process} is created and returned.
 The process \TT{length} member (stack size) is set to \TT{0}
@@ -1401,6 +1402,11 @@ The \TT{trace\_function} member is set to \TT{NULL}.
 The \TT{sp}, \TT{rp}, \TT{fp[16]}, \TT{trace\_depth},
 \TT{trace\_flags}, \TT{excepts}, and \TT{excepts\_accumulator}
 members are set to \TT{0}.
+\end{indpar}
+
+{\tt min::locatable\_var<min::printer> mex::}\TTKEY{default\_printer}
+\begin{indpar}
+See \TT{mex::create\_process}.
 \end{indpar}
 
 {\tt mex::process mex::}\TTKEY{init\_process} \\
