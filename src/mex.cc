@@ -518,29 +518,6 @@ while ( true ) // Outer loop.
         {
 	}
 
-#   define CHECK1 \
-	    if ( sp < spbegin ) \
-	    { \
-	        message = "illegal SP: too small"; \
-		goto FATAL; \
-	    } \
-	    if ( ! min::is_direct_float ( sp[0] ) ) \
-	    { \
-	        message = \
-		    "illegal argument: not float64"; \
-		goto FATAL; \
-	    }
-
-#   define CHECK2 \
-	    if ( sp < spbegin + 1 \
-	         || \
-	         ! min::is_direct_float ( sp[0] ) \
-	         || \
-	         ! min::is_direct_float ( sp[-1] ) ) \
-	        goto FATAL
-#   define GF(x) min::new_direct_float_gen ( x )
-#   define FG(x) min::unprotected::direct_float_of ( x )
-
     } // end inner loop
 
 RESTART:
