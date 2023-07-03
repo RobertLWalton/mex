@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Jul  2 18:32:21 EDT 2023
+// Date:	Mon Jul  3 05:25:17 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -62,17 +62,17 @@ static bool optimized_run_process
     bool result = true;
 
 #   define CHECK1 \
-	    if ( sp < spbegin \
+	    if ( sp <= spbegin \
 	         || \
-	         ! min::is_direct_float ( sp[0] ) ) \
+	         ! min::is_direct_float ( sp[-1] ) ) \
 	        goto ERROR_EXIT
 
 #   define CHECK2 \
-	    if ( sp < spbegin + 1 \
+	    if ( sp < spbegin + 2 \
 	         || \
-	         ! min::is_direct_float ( sp[0] ) \
+	         ! min::is_direct_float ( sp[-1] ) \
 	         || \
-	         ! min::is_direct_float ( sp[-1] ) ) \
+	         ! min::is_direct_float ( sp[-3] ) ) \
 	        goto ERROR_EXIT
 #   define GF(x) min::new_direct_float_gen ( x )
 #   define FG(x) min::unprotected::direct_float_of ( x )
@@ -81,32 +81,83 @@ static bool optimized_run_process
     {
         if ( pc == pcend ) goto EXIT;
 	if ( limit == 0 ) goto ERROR_EXIT;
-	switch ( pc->op_code )
+	min::uns8 op_code = pc->op_code;
+	switch ( op_code )
 	{
 	case mex::ADD:
 	    CHECK2;
-	    sp[-1] = GF
-	        ( FG ( sp[-1] ) + FG ( sp[0] ) );
+	    sp[-2] = GF
+	        ( FG ( sp[-2] ) + FG ( sp[-1] ) );
 	    -- sp;
 	    break;
 	case mex::NEG:
 	    CHECK1;
-	    sp[0] = GF ( - FG ( sp[0] ) );
+	    sp[-1] = GF ( - FG ( sp[-1] ) );
 	    break;
 	case mex::PUSH:
 	{
-	    min::gen * q = sp - pc->immedA;
-	    if ( q < spbegin || sp >= spend - 1 )
+	    min::gen * q = sp - pc->immedA - 1;
+	    if ( q < spbegin || sp >= spend )
 	        goto ERROR_EXIT;
-	    * ++ sp = * q;
+	    * sp ++ = * q;
 	    break;
 	}
 	case mex::POP:
 	{
-	    min::gen * q = sp - pc->immedA;
-	    if ( q < spbegin ) // includes sp < spbegin
+	    min::gen * q = sp - pc->immedA - 1;
+	    if ( q < spbegin || sp <= spbegin )
 	        goto ERROR_EXIT;
-	    * q = * sp --;
+	    * q = * -- sp;
+	    break;
+	}
+	case mex::JMP:
+	case mex::JMPEQ:
+	case mex::JMPNE:
+	{
+	    unsigned immedA = pc->immedA;
+	    unsigned immedB = pc->immedB;
+	    unsigned immedC = pc->immedC;
+	    min::gen immedD = pc->immedD;
+	    min::float64 arg1, arg2;
+	    min::gen * new_sp = sp - immedA;
+	    if ( op_code != mex::JMP )
+	    {
+	        new_sp -= 2;
+		if ( new_sp < spbegin )
+		    goto ERROR_EXIT;
+		arg1 = FG ( sp[-2] );
+		arg2 = FG ( sp[-1] );
+		if ( std::isnan ( arg1 )
+		     ||
+		     std::isnan ( arg2 )
+		     ||
+		     (    std::isinf ( arg1 )
+		       && std::isinf ( arg2 )
+		       && arg1 * arg2 > 0 ) )
+		    goto ERROR_EXIT;
+		bool execute_jmp;
+		switch ( op_code )
+		{
+		case mex::JMPEQ:
+		    execute_jmp = ( arg1 == arg2 );
+		    break;
+		case mex::JMPNE:
+		    execute_jmp = ( arg1 != arg2 );
+		    break;
+		}
+		if ( ! execute_jmp ) break;
+	    }
+	    if ( new_sp < spbegin )
+	        goto ERROR_EXIT;
+	    if ( new_sp + immedB > spend )
+	        goto ERROR_EXIT;
+	    if ( pc + immedC > pcend )
+	        goto ERROR_EXIT;
+
+	    sp = new_sp + immedB;
+	    while ( new_sp < sp ) * new_sp ++ = immedD;
+	    pc += immedC;
+	    -- pc;
 	    break;
 	}
 	}
@@ -135,8 +186,8 @@ EXIT:
 //
 enum
 {
-    NONA = 1,	// No arithmetic operands.
-    A2 =   2,		// sp[0] and sp[-1] are the arithmetic
+    NONA = 1,	// No arithmetic operands, not a JMP.
+    A2 =   2,	// sp[0] and sp[-1] are the arithmetic
                 // operands in that order.
     A2R =  3,	// sp[-1] and sp[0] are the arithmetic
                 // operands in that order.
@@ -148,6 +199,7 @@ enum
     J2 =   7,	// sp[-1] and sp[0] are the arithmetic
                 // operands in that order, and the
 		// operation is a jump.
+    J =    8,	// JMP, no arithmetic operands.
 };
 
 static
@@ -195,6 +247,7 @@ bool mex::run_process ( mex::process p, min::uns32 limit )
 {
     const char * message;
     char message_buffer[200];
+    char instr_buffer[400];
 
 while ( true ) // Outer loop.
 {
@@ -236,9 +289,11 @@ while ( true ) // Outer loop.
 	}
 	op_info * info = op_infos + op_code;
 	min::float64 arg1, arg2;
-	bool jmp = false;
+	min::gen * new_sp = sp;
+	min::uns8 trace_flags = pc->trace_flags; 
 
-#	define F(x) * (min::float64 *) & (x)
+#	define FG(x) min::unprotected \
+                        ::direct_float_of ( x )
 	    // If x is a min::gen that is not a direct
 	    // float, it will be a signalling NaN that
 	    // will raise the invalid exception and
@@ -249,44 +304,52 @@ while ( true ) // Outer loop.
 	case NONA:
 	    goto NON_ARITHMETIC;
 	case A2:
-	    if ( sp < spbegin + 1 )
+	    new_sp -= 2;
+	    if ( new_sp < spbegin )
 	    {
 	        message = "illegal SP: too small";
 		goto INNER_FATAL;
 	    }
-	    arg1 = F ( sp[0] ), arg2 = F ( sp[-1] );
+	    arg1 = FG ( new_sp[0] );
+	    arg2 = FG ( new_sp[1] );
 	    goto ARITHMETIC;
 	case A2R:
-	    if ( sp < spbegin + 1 )
+	    new_sp -= 2;
+	    if ( new_sp < spbegin )
 	    {
 	        message = "illegal SP: too small";
 		goto INNER_FATAL;
 	    }
-	    arg1 = F ( sp[-1] ), arg2 = F ( sp[0] );
+	    arg1 = FG ( new_sp[1] );
+	    arg2 = FG ( new_sp[0] );
 	    goto ARITHMETIC;
 	case A2I:
-	    if ( sp < spbegin )
+	    new_sp -= 1;
+	    if ( new_sp < spbegin )
 	    {
 	        message = "illegal SP: too small";
 		goto INNER_FATAL;
 	    }
-	    arg1 = F ( sp[0] ), arg2 = F ( pc->immedD );
+	    arg1 = FG ( new_sp[0] );
+	    arg2 = FG ( pc->immedD );
 	    goto ARITHMETIC;
 	case A2IR:
-	    if ( sp < spbegin )
+	    new_sp -= 1;
+	    if ( new_sp < spbegin )
 	    {
 	        message = "illegal SP: too small";
 		goto INNER_FATAL;
 	    }
-	    arg1 = F ( pc->immedD ), arg2 = F ( sp[0] );
+	    arg1 = FG ( pc->immedD );
+	    arg2 = FG ( new_sp[0] );
 	    goto ARITHMETIC;
 	case A1:
-	    if ( sp < spbegin )
+	    if ( new_sp < spbegin )
 	    {
 	        message = "illegal SP: too small";
 		goto INNER_FATAL;
 	    }
-	    arg1 = F ( sp[0] );
+	    arg1 = FG ( new_sp[0] );
 	    arg2 = 0; // To avoid error detector.
 	    goto ARITHMETIC;
 	case J2:
@@ -295,14 +358,17 @@ while ( true ) // Outer loop.
 	        message = "illegal SP: too small";
 		goto INNER_FATAL;
 	    }
-	    arg1 = F ( sp[0] ), arg2 = F ( sp[-1] );
+	    arg1 = FG ( new_sp[0] );
+	    arg2 = FG ( new_sp[1] );
+	    goto JUMP;
+	case J:
 	    goto JUMP;
 	default:
 	    message = "internal system error:"
 	              " bad op_type";
 	    goto INNER_FATAL;
 	}
-#	undef F
+#	undef FG
 
 	ARITHMETIC:
 	{
@@ -314,13 +380,14 @@ while ( true ) // Outer loop.
 	    switch ( op_code )
 	    {
 	    case mex::ADD:
-	        * -- sp = min::new_num_gen
+	        * new_sp = min::new_num_gen
 		              ( arg1 + arg2 );
 		break;
 	    case mex::ADDI:
-	        * sp = min::new_num_gen
+	        * new_sp = min::new_num_gen
 		              ( arg1 + arg2 );
 	    }
+	    sp = new_sp + 1;
 
 
 	    // TBD
@@ -352,33 +419,99 @@ while ( true ) // Outer loop.
 
 	JUMP:
 	{
-	    // Process conditional JMP.
+	    // Process JMP.
 
-	    bool execute_jmp, bad_jmp;
-	    if ( ! std::isnan ( arg1 )
-	         &&
-		 ! std::isnan ( arg2 ) )
-		bad_jmp = true;
-	    else if ( std::isinf ( arg1 )
-	              &&
-		      std::isinf ( arg2 )
-		      &&
-		      arg1 * arg2 > 0 )
-		bad_jmp = true;
-	    else
+	    unsigned immedA = pc->immedA;
+	    unsigned immedB = pc->immedB;
+	    unsigned immedC = pc->immedC;
+	    min::gen immedD = pc->immedD;
+
+	    new_sp -= immedA;
+	    if ( new_sp < spbegin )
 	    {
-	        bad_jmp = false;
-		switch ( op_code )
+	        message = "immedA too large";
+	        goto INNER_FATAL;
+	    }
+	    if ( new_sp + immedB > spend )
+	    {
+	        message = "immedB too large";
+	        goto INNER_FATAL;
+	    }
+	    if ( pc + immedC > pcend )
+	    {
+	        message = "immedC too large";
+	        goto INNER_FATAL;
+	    }
+
+	    bool bad_jmp = false;
+	    bool execute_jmp = true;
+	    if ( op_code != mex::JMP )
+	    {
+		if ( std::isnan ( arg1 )
+		     ||
+		     std::isnan ( arg2 )
+		     ||
+		     (    std::isinf ( arg1 )
+		       && std::isinf ( arg2 )
+		       && arg1 * arg2 > 0 ) )
+		    bad_jmp = true;
+		else switch ( op_code )
 		{
 		case mex::JMPEQ:
 		    execute_jmp = ( arg1 == arg2 );
+		    break;
+		case mex::JMPNE:
+		    execute_jmp = ( arg1 != arg2 );
+		    break;
 		}
 	    }
 
-	    // TBD
+	    if ( bad_jmp )
+	        trace_flags |= mex::TRACE;
+	    else
+	    {
+	        trace_flags &= pc->trace_flags;
+		if ( ! execute_jmp )
+		    sp = new_sp;
+		else
+		{
+		    sp = new_sp + immedB;
+		    while ( new_sp < sp )
+			* new_sp ++ = immedD;
+		    pc += immedC;
+		}
+		++ pc;
+	    }
 
+	    if ( ( trace_flags & mex::TRACE ) == 0 )
+	        continue; // inner loop
 
-	    continue; // inner loop
+	    char * q = instr_buffer;
+	    if ( bad_jmp )
+	    {
+	        q += sprintf
+		    ( q, "%s with invalid operand(s)",
+		         info->name );
+		strcpy ( message_buffer, instr_buffer );
+		message = message_buffer;
+	    }
+	    else if ( execute_jmp )
+	    {
+	        message = NULL;
+	        q += sprintf
+		    ( q, "successful %s", info->name );
+	    }
+	    else
+	    {
+	        message = NULL;
+	        q += sprintf
+		    ( q, "UNsuccessful %s",
+		         info->name );
+	    }
+	    q += sprintf ( q, ": %.15g %s %.15g",
+			   arg1, info->oper, arg2 );
+
+	    goto TRACE;
 	}
 
 	NON_ARITHMETIC:
@@ -416,6 +549,12 @@ RESTART:
     p->length = p->sp + 1;
     continue; // outer loop
 
+TRACE:
+    * (min::uns32 *) & p->pc.index = pc - pcbegin;
+    p->sp = sp - spbegin;
+    p->length = p->sp + 1;
+    continue; // outer loop
+
 // Fatal error discovered in inner loop.
 //
 INNER_FATAL:
@@ -432,7 +571,6 @@ INNER_FATAL:
 //
 FATAL:
     char fatal_buffer[100];
-    char instr_buffer[400];
     char * q = instr_buffer;
     q += sprintf ( q, "OP CODE = " );
     if ( p->pc.module == min::NULL_STUB
