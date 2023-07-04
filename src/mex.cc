@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Jul  3 05:25:17 EDT 2023
+// Date:	Tue Jul  4 03:45:54 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -246,13 +246,18 @@ void init_op_infos ( void )
 bool mex::run_process ( mex::process p, min::uns32 limit )
 {
     const char * message;
-    char message_buffer[200];
-    char instr_buffer[400];
 
 while ( true ) // Outer loop.
 {
     mex::module m = p->pc.module;
     min::uns32 i = p->pc.index;
+    mex::instr * pcbegin;
+    mex::instr * pc;
+    mex::instr * pcend;
+    min::gen * spbegin;
+    min::gen * sp;
+    min::gen * spend;
+
     if ( m == min::NULL_STUB )
     {
         if ( i == 0 ) return true;
@@ -265,9 +270,9 @@ while ( true ) // Outer loop.
 	message = "Illegal PC: index too large";
 	goto FATAL;
     }
-    mex::instr * pcbegin = ~ ( m + 0 );
-    mex::instr * pc = ~ ( m + i );
-    mex::instr * pcend = ~ ( m + m->length );
+    pcbegin = ~ ( m + 0 );
+    pc = ~ ( m + i );
+    pcend = ~ ( m + m->length );
 
     i = p->sp;
     if ( i > p->max_length )
@@ -275,22 +280,24 @@ while ( true ) // Outer loop.
 	message = "Illegal SP: too large";
 	goto FATAL;
     }
-    min::gen * spbegin = ~ ( p + 0 );
-    min::gen * sp = ~ ( p + i );
-    min::gen * spend = ~ ( p + p->max_length );
+    spbegin = ~ ( p + 0 );
+    sp = ~ ( p + i );
+    spend = ~ ( p + p->max_length );
 
     while ( true ) // Inner loop.
     {
         min::uns8 op_code = pc->op_code;
+	op_info * op_info;
+	min::float64 arg1, arg2;
+	min::gen * new_sp = sp;
+	min::uns8 trace_flags = pc->trace_flags; 
+
 	if ( op_code > max_op_code )
 	{
 	    message = "Illegal op code: too large";
 	    goto INNER_FATAL;
 	}
-	op_info * info = op_infos + op_code;
-	min::float64 arg1, arg2;
-	min::gen * new_sp = sp;
-	min::uns8 trace_flags = pc->trace_flags; 
+	op_info = op_infos + op_code;
 
 #	define FG(x) min::unprotected \
                         ::direct_float_of ( x )
@@ -299,7 +306,7 @@ while ( true ) // Outer loop.
 	    // will raise the invalid exception and
 	    // generate a non-signalling NaN result.
 
-	switch ( info->op_type )
+	switch ( op_info->op_type )
 	{
 	case NONA:
 	    goto NON_ARITHMETIC;
@@ -469,64 +476,245 @@ while ( true ) // Outer loop.
 	    if ( bad_jmp )
 	        trace_flags |= mex::TRACE;
 	    else
-	    {
 	        trace_flags &= pc->trace_flags;
-		if ( ! execute_jmp )
-		    sp = new_sp;
+
+	    if ( trace_flags & mex::TRACE )
+	    {
+		// Printing may move module and process
+		// vectors.
+		//
+		* (min::uns32 *)
+		     & p->pc.index = pc - pcbegin;
+		p->sp = sp - spbegin;
+		p->length = p->sp + 1;
+
+		p->printer << min::bol;
+		if ( bad_jmp )
+		    p->printer << "!!! FATAL ERROR: ";
 		else
 		{
-		    sp = new_sp + immedB;
-		    while ( new_sp < sp )
-			* new_sp ++ = immedD;
-		    pc += immedC;
+		    unsigned i = ( p->trace_depth + 1 )
+		               * mex::trace_indent;
+		    while ( 1 < i )
+		    {
+		        p->printer << mex::trace_mark;
+			-- i;
+		    }
+		    p->printer << ' ';
 		}
-		++ pc;
+		p->printer << min::bom;
+
+		min::gen tinfo  = min::MISSING();
+		if ( p->pc.index < m->trace_info->length)
+		    tinfo = m->trace_info[p->pc.index];
+		min::gen name = min::MISSING();
+		min::uns32 tinfo_length = 0;
+		if ( min::is_obj ( tinfo ) )
+		{
+		    min::obj_vec_ptr vp ( tinfo );
+		    tinfo_length = min::size_of ( vp );
+		    if ( tinfo_length >= 1 )
+		        name = vp[0];
+		}
+		else if ( min::is_str ( tinfo ) )
+		    name = tinfo;
+
+		if ( execute_jmp )
+		    p->printer << "successful ";
+		else if ( ! bad_jmp )
+		    p->printer << "UNsuccessful ";
+
+		if ( name == min::MISSING() )
+		    p->printer << op_info->name;
+		else
+		    p->printer << name;
+
+		if ( bad_jmp )
+		    p->printer << " with invalid"
+		                  " operand(s)";
+
+		char buffer[200];
+	        sprintf ( buffer, ": %.15g %s %.15g",
+			  arg1, op_info->oper, arg2 );
+		p->printer << buffer;
+
+		if ( tinfo_length > 1
+		     &&
+		     p->trace_function != NULL )
+		    (p->trace_function) ( p, tinfo );     
+
+		p->printer << min::eom;
+
+		// We assume p->pc.index and p->sp are
+		// not changed by trace_function and
+		// so do not have to be rechecked for
+		// legality.
+		//
+		pcbegin = ~ ( m + 0 );
+		pc = ~ ( m + p->pc.index );
+		pcend = ~ ( m + m->length );
+		spbegin = ~ ( p + 0 );
+		sp = ~ ( p + p->sp );
+		spend = ~ ( p + p->max_length );
 	    }
 
-	    if ( ( trace_flags & mex::TRACE ) == 0 )
-	        continue; // inner loop
-
-	    char * q = instr_buffer;
-	    if ( bad_jmp )
-	    {
-	        q += sprintf
-		    ( q, "%s with invalid operand(s)",
-		         info->name );
-		strcpy ( message_buffer, instr_buffer );
-		message = message_buffer;
-	    }
-	    else if ( execute_jmp )
-	    {
-	        message = NULL;
-	        q += sprintf
-		    ( q, "successful %s", info->name );
-	    }
+	    if ( ! execute_jmp )
+		sp = new_sp;
 	    else
 	    {
-	        message = NULL;
-	        q += sprintf
-		    ( q, "UNsuccessful %s",
-		         info->name );
+		sp = new_sp + immedB;
+		while ( new_sp < sp )
+		    * new_sp ++ = immedD;
+		pc += immedC;
 	    }
-	    q += sprintf ( q, ": %.15g %s %.15g",
-			   arg1, info->oper, arg2 );
-
-	    goto TRACE;
+	    ++ pc;
+	    continue; // inner loop
 	}
 
 	NON_ARITHMETIC:
         {
+	    // Process instructions that push and
+	    // pop.
+
+	    unsigned immedA = pc->immedA;
+	    unsigned immedB = pc->immedB;
+	    unsigned immedC = pc->immedC;
+	    min::gen immedD = pc->immedD;
+
+	    // Pre-trace check for fatal errors.
+	    //
+	    switch ( op_code )
+	    {
+	    case mex::PUSH:
+	        if ( immedA + 1 > sp - spbegin )
+		{
+		    message = "immedA too large";
+		    goto INNER_FATAL;
+		}
+		if ( sp >= spend )
+		{
+		    message =
+		        "stack too large for push";
+		    goto INNER_FATAL;
+		}
+		break;
+	    case mex::PUSHI:
+		if ( sp >= spend )
+		{
+		    message =
+		        "stack too large for push";
+		    goto INNER_FATAL;
+		}
+		break;
+	    case mex::PUSHG:
+	    {
+	        mex::module mg = (mex::module) immedD;
+		if ( mg == min::NULL_STUB )
+		{
+		    message = "immedD is not a module";
+		    goto INNER_FATAL;
+		}
+	        if ( immedA >= mg->length  )
+		{
+		    message = "immedA too large";
+		    goto INNER_FATAL;
+		}
+		if ( sp >= spend )
+		{
+		    message =
+		        "stack too large for push";
+		    goto INNER_FATAL;
+		}
+		break;
+	    }
+	    case mex::PUSHM:
+	        if ( immedA >= sp - spbegin )
+		{
+		    message = "immedA too large";
+		    goto INNER_FATAL;
+		}
+		if ( sp >= spend )
+		{
+		    message =
+		        "stack too large for push";
+		    goto INNER_FATAL;
+		}
+		break;
+	    case mex::POP:
+		if ( sp <= spbegin )
+		{
+		    message =
+		        "stack empty for pop";
+		    goto INNER_FATAL;
+		}
+	        if ( immedA + 1 > sp - spbegin )
+		{
+		    message = "immedA too large";
+		    goto INNER_FATAL;
+		}
+		break;
+	    case mex::BEG:
+	        break;
+	    case mex::NOP:
+	        break;
+	    case mex::BEGL:
+	        if ( immedA > sp - spbegin )
+		{
+		    message = "immedA too large";
+		    goto INNER_FATAL;
+		}
+		if ( sp + immedA > spend )
+		{
+		    message =
+		        "stack too large for push";
+		    goto INNER_FATAL;
+		}
+	        break;
+	    case mex::ENDL:
+	    case mex::CONT:
+	        if ( immedA > sp - spbegin )
+		{
+		    message = "immedA too large";
+		    goto INNER_FATAL;
+		}
+	        if ( immedB > sp - spbegin )
+		{
+		    message = "immedB too large";
+		    goto INNER_FATAL;
+		}
+	        if ( immedA + immedB > sp - spbegin )
+		{
+		    message =
+		        "immedA + immedB too large";
+		    goto INNER_FATAL;
+		}
+	        if ( sp - immedA + immedB > spend )
+		{
+		    message =
+		        "stack too large for push";
+		    goto INNER_FATAL;
+		}
+	        if ( immedC > pc - pcbegin )
+		{
+		    message = "immedC too large";
+		    goto INNER_FATAL;
+		}
+		break;
+	    case mex::SET_TRACE:
+	        break;
+	    case mex::ERROR:
+	        if (    immedB != 0
+		     && immedA > sp - spbegin )
+		{
+		    message = "immedA too large";
+		    goto INNER_FATAL;
+		}
+	        break;
 	}
 
     } // end inner loop
 
 RESTART:
-    * (min::uns32 *) & p->pc.index = pc - pcbegin;
-    p->sp = sp - spbegin;
-    p->length = p->sp + 1;
-    continue; // outer loop
-
-TRACE:
     * (min::uns32 *) & p->pc.index = pc - pcbegin;
     p->sp = sp - spbegin;
     p->length = p->sp + 1;
@@ -548,6 +736,7 @@ INNER_FATAL:
 //
 FATAL:
     char fatal_buffer[100];
+    char instr_buffer[400];
     char * q = instr_buffer;
     q += sprintf ( q, "OP CODE = " );
     if ( p->pc.module == min::NULL_STUB
@@ -559,11 +748,11 @@ FATAL:
         mex::instr * instr =
 	    ~ ( p->pc.module + p->pc.index );
 	min::uns8 op_code = instr->op_code;
-	op_info * info = ( op_code <= max_op_code ?
+	op_info * op_info = ( op_code <= max_op_code ?
 	                   op_infos + op_code :
 			   NULL );
-	if ( info != NULL )
-	    q += sprintf ( q, "%s", info->name );
+	if ( op_info != NULL )
+	    q += sprintf ( q, "%s", op_info->name );
 	else
 	    q += sprintf
 	        ( q, "%u (TOO LARGE)", op_code );
@@ -612,4 +801,6 @@ FATAL:
 		        
     return false;
 
-}
+} // outer loop
+
+} // mex::run_process

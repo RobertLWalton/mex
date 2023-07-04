@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Jul  2 13:24:11 EDT 2023
+// Date:	Tue Jul  4 03:46:31 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -129,7 +129,8 @@ struct ret
     min::uns32 nargs;
 };
 
-typedef void (* trace_function ) ( mex::process p );
+typedef void (* trace_function )
+    ( mex::process p, min::gen info );
 
 struct process_header
 {
@@ -160,6 +161,9 @@ inline void set_pc ( mex::process p, mex::pc pc )
         min::unprotected::acc_write_update
 	    ( p, pc.module );
 }
+
+extern min::uns32 trace_indent;
+extern char trace_mark;
 
 bool run_process
     ( mex::process p, min::uns32 limit = 0xFFFFFFFF );
