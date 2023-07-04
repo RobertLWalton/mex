@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Jul  4 17:00:03 EDT 2023
+// Date:	Tue Jul  4 17:37:44 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -437,8 +437,6 @@ bool mex::run_process ( mex::process p, min::uns32 limit )
 		break;
 	    }
 
-	    // TBD
-
 	    int excepts =
 	        fetestexcept ( FE_ALL_EXCEPT );
 	    p->excepts_accumulator |= excepts;
@@ -452,23 +450,63 @@ bool mex::run_process ( mex::process p, min::uns32 limit )
 	    {
 	        SAVE;
 
-	    if ( excepts != 0 )
-	    {
-	        if ( excepts & FE_INVALID )
-		    message = "invalid operand(s)";
-	        else if ( excepts & FE_DIVBYZERO )
-		    message = "divide by zero";
-	        else if ( excepts & FE_OVERFLOW )
-		    message = "numeric overflow";
-	        else if ( excepts & FE_INEXACT )
-		    message = "inexact numeric result";
-	        else if ( excepts & FE_UNDERFLOW )
-		    message = "numeric underflow";
-		else
-		    message =
-		        "unknown numeric exception";
-		// TBD
-	    }
+		if ( excepts != 0 )
+		{
+		    p->printer << min::bol
+			       << "!!! ERROR: ";
+		    if ( excepts & FE_INVALID )
+			p->printer << "invalid operand(s)";
+		    else if ( excepts & FE_DIVBYZERO )
+			p->printer << "divide by zero";
+		    else if ( excepts & FE_OVERFLOW )
+			p->printer << "numeric overflow";
+		    else if ( excepts & FE_INEXACT )
+			p->printer << "inexact numeric result";
+		    else if ( excepts & FE_UNDERFLOW )
+			p->printer << "numeric underflow";
+		    else
+			p->printer <<
+			    "unknown numeric exception";
+		    p->printer << min::eol;
+		}
+
+		min::phrase_position pp =
+		    p->pc.index < m->position->length ?
+		    m->position[p->pc.index] :
+		    min::MISSING_PHRASE_POSITION;
+
+		if ( pp )
+		    min::print_phrase_lines
+		        ( p->printer,
+			  m->position->file,
+			  pp );
+
+		{
+		    unsigned i = ( p->trace_depth + 1 )
+		               * mex::trace_indent;
+		    while ( 1 < i )
+		    {
+		        p->printer << mex::trace_mark;
+			-- i;
+		    }
+		    p->printer << ' ';
+		}
+		p->printer << min::bom;
+
+		if ( pp )
+		    p->printer
+		        << min::pline_numbers
+			    ( m->position->file, pp )
+			<< ": ";
+
+		char buffer[200];
+	        sprintf
+		    ( buffer, ": %s: %.15g %s %.15g",
+		      op_info->name,
+		      arg1, op_info->oper, arg2 );
+		p->printer << buffer
+		           << min::eom;
+
 	        RESTORE;
 	    }
 
@@ -544,6 +582,7 @@ bool mex::run_process ( mex::process p, min::uns32 limit )
 			   " conditional jump"
 			   " instruction"
 			<< min::eol;
+
 		min::phrase_position pp =
 		    p->pc.index < m->position->length ?
 		    m->position[p->pc.index] :
