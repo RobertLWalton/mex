@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Jul  4 03:45:54 EDT 2023
+// Date:	Tue Jul  4 04:30:37 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -245,10 +245,6 @@ void init_op_infos ( void )
 
 bool mex::run_process ( mex::process p, min::uns32 limit )
 {
-    const char * message;
-
-while ( true ) // Outer loop.
-{
     mex::module m = p->pc.module;
     min::uns32 i = p->pc.index;
     mex::instr * pcbegin;
@@ -257,6 +253,7 @@ while ( true ) // Outer loop.
     min::gen * spbegin;
     min::gen * sp;
     min::gen * spend;
+    const char * message;
 
     if ( m == min::NULL_STUB )
     {
@@ -714,12 +711,6 @@ while ( true ) // Outer loop.
 
     } // end inner loop
 
-RESTART:
-    * (min::uns32 *) & p->pc.index = pc - pcbegin;
-    p->sp = sp - spbegin;
-    p->length = p->sp + 1;
-    continue; // outer loop
-
 // Fatal error discovered in inner loop.
 //
 INNER_FATAL:
@@ -800,7 +791,5 @@ FATAL:
 	       << min::eom;
 		        
     return false;
-
-} // outer loop
 
 } // mex::run_process
