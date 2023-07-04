@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Jul  4 04:30:37 EDT 2023
+// Date:	Tue Jul  4 04:52:13 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -281,8 +281,37 @@ bool mex::run_process ( mex::process p, min::uns32 limit )
     sp = ~ ( p + i );
     spend = ~ ( p + p->max_length );
 
+    // Macros to save and restore pc... and sp... .
+    // We assume p->pc.index and p->sp do not change
+    // between SAVE and RESTORE.
+    //
+    // Printing and interrupts may move module and
+    // process and must be done between a SAVE and
+    // a RESTORE.
+    //
+#   define SAVE \
+	* (min::uns32 *) & p->pc.index = pc - pcbegin; \
+	p->sp = sp - spbegin; \
+	p->length = p->sp + 1;
+
+#   define RESTORE \
+	pcbegin = ~ ( m + 0 ); \
+	pc = ~ ( m + p->pc.index ); \
+	pcend = ~ ( m + m->length ); \
+	spbegin = ~ ( p + 0 ); \
+	sp = ~ ( p + p->sp ); \
+	spend = ~ ( p + p->max_length ); \
+
     while ( true ) // Inner loop.
     {
+        if ( pc == pcend )
+	{
+		* (min::uns32 *)
+		     & p->pc.index = pc - pcbegin;
+		p->sp = sp - spbegin;
+		p->length = p->sp + 1;
+	}
+
         min::uns8 op_code = pc->op_code;
 	op_info * op_info;
 	min::float64 arg1, arg2;
@@ -379,20 +408,23 @@ bool mex::run_process ( mex::process p, min::uns32 limit )
 	    // Process arithmetic operator, excluding
 	    // JMPs.
 
+	    min::float64 result;
+
 	    feclearexcept ( FE_ALL_EXCEPT );
 
 	    switch ( op_code )
 	    {
 	    case mex::ADD:
-	        * new_sp = min::new_num_gen
-		              ( arg1 + arg2 );
-		break;
 	    case mex::ADDI:
-	        * new_sp = min::new_num_gen
-		              ( arg1 + arg2 );
+	        result = arg1 + arg2;
+		break;
+	    case mex::SUB:
+	    case mex::SUBI:
+	    case mex::SUBR:
+	    case mex::SUBRI:
+	        result = arg1 + arg2;
+		break;
 	    }
-	    sp = new_sp + 1;
-
 
 	    // TBD
 
@@ -400,6 +432,15 @@ bool mex::run_process ( mex::process p, min::uns32 limit )
 	        fetestexcept ( FE_ALL_EXCEPT );
 	    p->excepts_accumulator |= excepts;
 	    excepts &= p->excepts;
+
+	    min::uns8 trace_flags = pc->trace_flags;
+	    trace_flags &= p->trace_flags;
+
+	    if (    excepts != 0
+	         || trace_flags & mex::TRACE )
+	    {
+	        SAVE;
+
 	    if ( excepts != 0 )
 	    {
 	        if ( excepts & FE_INVALID )
@@ -417,8 +458,14 @@ bool mex::run_process ( mex::process p, min::uns32 limit )
 		        "unknown numeric exception";
 		// TBD
 	    }
+	        RESTORE;
+	    }
 
-	    continue; // inner loop
+	    * new_sp ++ = min::new_num_gen ( result );
+	    sp = new_sp;
+
+	    ++ pc;
+	    continue; // loop
 	}
 
 	JUMP:
@@ -477,13 +524,7 @@ bool mex::run_process ( mex::process p, min::uns32 limit )
 
 	    if ( trace_flags & mex::TRACE )
 	    {
-		// Printing may move module and process
-		// vectors.
-		//
-		* (min::uns32 *)
-		     & p->pc.index = pc - pcbegin;
-		p->sp = sp - spbegin;
-		p->length = p->sp + 1;
+		SAVE;
 
 		p->printer << min::bol;
 		if ( bad_jmp )
@@ -542,17 +583,7 @@ bool mex::run_process ( mex::process p, min::uns32 limit )
 
 		p->printer << min::eom;
 
-		// We assume p->pc.index and p->sp are
-		// not changed by trace_function and
-		// so do not have to be rechecked for
-		// legality.
-		//
-		pcbegin = ~ ( m + 0 );
-		pc = ~ ( m + p->pc.index );
-		pcend = ~ ( m + m->length );
-		spbegin = ~ ( p + 0 );
-		sp = ~ ( p + p->sp );
-		spend = ~ ( p + p->max_length );
+		RESTORE;
 	    }
 
 	    if ( ! execute_jmp )
@@ -565,7 +596,8 @@ bool mex::run_process ( mex::process p, min::uns32 limit )
 		pc += immedC;
 	    }
 	    ++ pc;
-	    continue; // inner loop
+
+	    continue; // loop
 	}
 
 	NON_ARITHMETIC:
