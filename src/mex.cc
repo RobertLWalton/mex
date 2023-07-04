@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Jul  4 16:10:55 EDT 2023
+// Date:	Tue Jul  4 17:00:03 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -637,9 +637,9 @@ bool mex::run_process ( mex::process p, min::uns32 limit )
 	    // Process instructions that push and
 	    // pop.
 
-	    unsigned immedA = pc->immedA;
-	    unsigned immedB = pc->immedB;
-	    unsigned immedC = pc->immedC;
+	    int immedA = pc->immedA;
+	    int immedB = pc->immedB;
+	    int immedC = pc->immedC;
 	    min::gen immedD = pc->immedD;
 
 	    // Pre-trace check for fatal errors.
@@ -719,12 +719,12 @@ bool mex::run_process ( mex::process p, min::uns32 limit )
 	    case mex::NOP:
 	        break;
 	    case mex::BEGL:
-	        if ( immedA > sp - spbegin )
+	        if ( immedB > sp - spbegin )
 		{
-		    message = "immedA too large";
+		    message = "immedB too large";
 		    goto INNER_FATAL;
 		}
-		if ( sp + immedA > spend )
+		if ( sp + immedB > spend )
 		{
 		    message =
 		        "stack too large for push";
@@ -738,21 +738,11 @@ bool mex::run_process ( mex::process p, min::uns32 limit )
 		    message = "immedA too large";
 		    goto INNER_FATAL;
 		}
-	        if ( immedB > sp - spbegin )
-		{
-		    message = "immedB too large";
-		    goto INNER_FATAL;
-		}
-	        if ( immedA + immedB > sp - spbegin )
+	        if (   immedA + 2 * immedB
+		     > sp - spbegin )
 		{
 		    message =
-		        "immedA + immedB too large";
-		    goto INNER_FATAL;
-		}
-	        if ( sp - immedA + immedB > spend )
-		{
-		    message =
-		        "stack too large for push";
+		        "immedA + 2 * immedB too large";
 		    goto INNER_FATAL;
 		}
 	        if ( immedC > pc - pcbegin )
@@ -771,18 +761,24 @@ bool mex::run_process ( mex::process p, min::uns32 limit )
 		    goto INNER_FATAL;
 		}
 	        break;
+	    }
+
+	    // TBD
+
+	    ++ pc;
+	    continue; // loop
 	}
 
-    } // end inner loop
 
-// Fatal error discovered in inner loop.
-//
-INNER_FATAL:
-    * (min::uns32 *) & p->pc.index = pc - pcbegin;
-    p->sp = sp - spbegin;
-    p->length = p->sp + 1;
-    goto FATAL;
-}
+	// Fatal error discovered in loop.
+	//
+	INNER_FATAL:
+	    * (min::uns32 *) & p->pc.index = pc - pcbegin;
+	    p->sp = sp - spbegin;
+	    p->length = p->sp + 1;
+	    goto FATAL;
+
+    } // end loop
 
 // Come here with fatal error `message'.  At this point
 // there is no instruction to pin the blame on - its a
