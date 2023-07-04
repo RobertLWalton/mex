@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Jul  4 06:37:33 EDT 2023
+// Date:	Tue Jul  4 16:10:55 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -24,6 +24,7 @@
 # include <cmath>
 # include <iostream>
 # include <mex.h>
+# define MUP min::unprotected
 
 min::locatable_var<min::printer> mex::default_printer;
 
@@ -48,13 +49,13 @@ static bool optimized_run_process
     mex::module m = p->pc.module;
     min::uns32 i = p->pc.index;
     if ( m == min::NULL_STUB ) return i == 0;
-    if ( i > m->length ) return false;
+    if ( i >= m->length ) return i == m->length;
     mex::instr * pcbegin = ~ ( m + 0 );
     mex::instr * pc = ~ ( m + i );
     mex::instr * pcend = ~ ( m + m->length );
 
     i = p->sp;
-    if ( i >= p->max_length ) return false;
+    if ( i > p->max_length ) return false;
     min::gen * spbegin = ~ ( p + 0 );
     min::gen * sp = ~ ( p + i );
     min::gen * spend = ~ ( p + p->max_length );
@@ -62,7 +63,7 @@ static bool optimized_run_process
     bool result = true;
 
 #   define CHECK1 \
-	    if ( sp <= spbegin \
+	    if ( sp < spbegin + 1 \
 	         || \
 	         ! min::is_direct_float ( sp[-1] ) ) \
 	        goto ERROR_EXIT
@@ -72,10 +73,10 @@ static bool optimized_run_process
 	         || \
 	         ! min::is_direct_float ( sp[-1] ) \
 	         || \
-	         ! min::is_direct_float ( sp[-3] ) ) \
+	         ! min::is_direct_float ( sp[-2] ) ) \
 	        goto ERROR_EXIT
 #   define GF(x) min::new_direct_float_gen ( x )
-#   define FG(x) min::unprotected::direct_float_of ( x )
+#   define FG(x) MUP::direct_float_of ( x )
 
     while ( true )
     {
@@ -96,37 +97,40 @@ static bool optimized_run_process
 	    break;
 	case mex::PUSH:
 	{
-	    min::gen * q = sp - pc->immedA - 1;
-	    if ( q < spbegin || sp >= spend )
+	    int i = pc->immedA;
+	    if ( sp >= spend || i >= sp - spbegin )
 	        goto ERROR_EXIT;
-	    * sp ++ = * q;
+	    * sp = sp[-i-1];
+	    ++ sp;
 	    break;
 	}
 	case mex::POP:
 	{
-	    min::gen * q = sp - pc->immedA - 1;
-	    if ( q < spbegin || sp <= spbegin )
+	    int i = pc->immedA;
+	    if ( sp <= spbegin || i >= sp - spbegin )
 	        goto ERROR_EXIT;
-	    * q = * -- sp;
+	    -- sp;
+	    sp[-i] = * sp;
 	    break;
 	}
 	case mex::JMP:
 	case mex::JMPEQ:
 	case mex::JMPNE:
 	{
-	    unsigned immedA = pc->immedA;
-	    unsigned immedB = pc->immedB;
-	    unsigned immedC = pc->immedC;
+	    int immedA = pc->immedA;
+	    int immedB = pc->immedB;
+	    int immedC = pc->immedC;
 	    min::gen immedD = pc->immedD;
-	    min::float64 arg1, arg2;
-	    min::gen * new_sp = sp - immedA;
+	    min::gen * new_sp = sp;
+	    bool execute_jmp = true;
 	    if ( op_code != mex::JMP )
 	    {
-	        new_sp -= 2;
-		if ( new_sp < spbegin )
+		min::float64 arg1, arg2;
+		if ( sp < spbegin + 2 )
 		    goto ERROR_EXIT;
-		arg1 = FG ( sp[-2] );
-		arg2 = FG ( sp[-1] );
+		new_sp -= 2;
+		arg1 = FG ( new_sp[0] );
+		arg2 = FG ( new_sp[1] );
 		if ( std::isnan ( arg1 )
 		     ||
 		     std::isnan ( arg2 )
@@ -135,7 +139,7 @@ static bool optimized_run_process
 		       && std::isinf ( arg2 )
 		       && arg1 * arg2 > 0 ) )
 		    goto ERROR_EXIT;
-		bool execute_jmp;
+
 		switch ( op_code )
 		{
 		case mex::JMPEQ:
@@ -145,17 +149,24 @@ static bool optimized_run_process
 		    execute_jmp = ( arg1 != arg2 );
 		    break;
 		}
-		if ( ! execute_jmp ) break;
 	    }
-	    if ( new_sp < spbegin )
-	        goto ERROR_EXIT;
-	    if ( new_sp + immedB > spend )
-	        goto ERROR_EXIT;
-	    if ( pc + immedC > pcend )
+	    if ( immedA > new_sp - spbegin
+	         ||
+		 immedB - immedA > spend - new_sp
+		 ||
+		 immedC > pcend - pc )
 	        goto ERROR_EXIT;
 
+	    if ( ! execute_jmp )
+	    {
+	        sp = new_sp;
+		break;
+	    }
+
+	    new_sp -= immedA;
 	    sp = new_sp + immedB;
 	    while ( new_sp < sp ) * new_sp ++ = immedD;
+
 	    pc += immedC;
 	    -- pc;
 	    break;
@@ -325,8 +336,7 @@ bool mex::run_process ( mex::process p, min::uns32 limit )
 	}
 	op_info = op_infos + op_code;
 
-#	define FG(x) min::unprotected \
-                        ::direct_float_of ( x )
+#	define FG(x) MUP::direct_float_of ( x )
 	    // If x is a min::gen that is not a direct
 	    // float, it will be a signalling NaN that
 	    // will raise the invalid exception and
@@ -386,7 +396,8 @@ bool mex::run_process ( mex::process p, min::uns32 limit )
 	    arg2 = 0; // To avoid error detector.
 	    goto ARITHMETIC;
 	case J2:
-	    if ( sp < spbegin + 1 )
+	    new_sp -= 2;
+	    if ( new_sp < spbegin )
 	    {
 	        message = "illegal SP: too small";
 		goto INNER_FATAL;
@@ -472,18 +483,17 @@ bool mex::run_process ( mex::process p, min::uns32 limit )
 	{
 	    // Process JMP.
 
-	    unsigned immedA = pc->immedA;
-	    unsigned immedB = pc->immedB;
-	    unsigned immedC = pc->immedC;
+	    int immedA = pc->immedA;
+	    int immedB = pc->immedB;
+	    int immedC = pc->immedC;
 	    min::gen immedD = pc->immedD;
 
-	    new_sp -= immedA;
-	    if ( new_sp < spbegin )
+	    if ( immedA > new_sp - spbegin )
 	    {
 	        message = "immedA too large";
 	        goto INNER_FATAL;
 	    }
-	    if ( new_sp + immedB > spend )
+	    if ( immedB - immedA > spend - new_sp )
 	    {
 	        message = "immedB too large";
 	        goto INNER_FATAL;
@@ -610,10 +620,12 @@ bool mex::run_process ( mex::process p, min::uns32 limit )
 		sp = new_sp;
 	    else
 	    {
+		new_sp -= immedA;
 		sp = new_sp + immedB;
 		while ( new_sp < sp )
 		    * new_sp ++ = immedD;
 		pc += immedC;
+		-- pc;
 	    }
 	    ++ pc;
 
