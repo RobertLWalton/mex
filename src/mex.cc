@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Jul  4 04:52:13 EDT 2023
+// Date:	Tue Jul  4 06:37:33 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -528,8 +528,22 @@ bool mex::run_process ( mex::process p, min::uns32 limit )
 
 		p->printer << min::bol;
 		if ( bad_jmp )
-		    p->printer << "!!! FATAL ERROR: ";
-		else
+		    p->printer
+		        << "!!! FATAL ERROR: "
+			   " invalid operands to a"
+			   " conditional jump"
+			   " instruction"
+			<< min::eol;
+		min::phrase_position pp =
+		    p->pc.index < m->position->length ?
+		    m->position[p->pc.index] :
+		    min::MISSING_PHRASE_POSITION;
+
+		if ( pp )
+		    min::print_phrase_lines
+		        ( p->printer,
+			  m->position->file,
+			  pp );
 		{
 		    unsigned i = ( p->trace_depth + 1 )
 		               * mex::trace_indent;
@@ -541,6 +555,12 @@ bool mex::run_process ( mex::process p, min::uns32 limit )
 		    p->printer << ' ';
 		}
 		p->printer << min::bom;
+
+		if ( pp )
+		    p->printer
+		        << min::pline_numbers
+			    ( m->position->file, pp )
+			<< ": ";
 
 		min::gen tinfo  = min::MISSING();
 		if ( p->pc.index < m->trace_info->length)
