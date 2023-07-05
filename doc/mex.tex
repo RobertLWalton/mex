@@ -250,7 +250,7 @@
 
 \author{Robert L. Walton}
 
-\date{July 2, 2023}
+\date{July 5, 2023}
  
 \maketitle
 
@@ -751,7 +751,7 @@ a return stack, and other parameters.  Specifically:
 \verb|}                   | \\
 \end{tabular}
 \\[1ex]
-\verb|typedef (* |\TTKEY{trace\_function}\verb|) ( mex::process p )|%
+\verb|typedef (* mex::|\MEXKEY{trace\_function}\verb|) ( mex::process p )|%
 \LABEL{MEX::TRACE_FUNCTION} \\
 \\[1ex]
 \begin{tabular}{@{}r@{}l}
@@ -775,7 +775,24 @@ a return stack, and other parameters.  Specifically:
 \verb|int | & \TTMKEY{excepts\_accumulator}%
                          {in {\tt mex::process\_header}} \\
 \verb|bool | & \TTMKEY{optimize}{in {\tt mex::process\_header}} \\
+\verb|min::uns32 | & \TTMKEY{counter}{in {\tt mex::process\_header}} \\
+\verb|min::uns32 | & \TTMKEY{limit}{in {\tt mex::process\_header}} \\
+\verb|mex::finish_state | & \TTMKEY{finish\_state}%
+                                   {in {\tt mex::process\_header}} \\
 \verb|}                                    | \\
+\end{tabular}
+
+\begin{tabular}{@{}r@{}l}
+\verb|enum         mex::| & \MEXKEY{finish\_state}%
+\LABEL{MEX::FINISH_STATE} \\
+\verb|{                 | \\
+\verb|mex::| & \TTMKEY{MODULE\_END}{in {\tt mex::finish\_state}} \\
+\verb|mex::| & \TTMKEY{CALL\_END}{in {\tt mex::finish\_state}} \\
+\verb|mex::| & \TTMKEY{LIMIT\_STOP}{in {\tt mex::finish\_state}} \\
+\verb|mex::| & \TTMKEY{ERROR\_STOP}{in {\tt mex::finish\_state}} \\
+\verb|mex::| & \TTMKEY{JMP\_ERROR}{in {\tt mex::finish\_state}} \\
+\verb|mex::| & \TTMKEY{FORM\_ERROR}{in {\tt mex::finish\_state}} \\
+\verb|}                 | \\
 \end{tabular}
 
 \verb|typedef min::packed_vec_insptr<min::gen,mex::process_header>| \\
@@ -789,11 +806,14 @@ of the stack (\TT{process[sp]}) and the first element
 being the bottom of the stack (\TT{process[0]}).
 
 An \ttkey{sp}, or \key{stack pointer}, is the index of an element of
-the process vector which is the top of the stack
-(i.e., \TT{process[sp]}).  To push a value into you add
-+1 to \TT{sp} and store the value in the element it now indexes.
-To pop a value, you remove the value indexed by \TT{sp}, and then
-add -1 to \TT{sp}.  The \TT{sp} member of a
+the process vector which is just beyond the top of the stack.
+It is also the length of the stack.  If the stack is not empty,
+\TT{process[sp-1]} is the top of the stack.
+To push a value into you store the value in the element \TT{sp}
+indexes, and then +1 to \TT{sp}.
+To pop a value, you add -1 to \TT{sp}, and then
+remove the value indexed by \TT{sp}.
+\TT{sp} member of a
 process is the \key{current stack pointer} of that process.
 
 A \ttkey{pc}, or \key{program counter}, is a pointer to a module,
@@ -819,13 +839,15 @@ The process's frame pointer member, \TT{fp[16]} and the \TT{met::ret}
 value's \TT{saved\_fp} member are explained in Nested Functions,
 \itemref{NESTED-FUNCTIONS}.
 
+The process's \TT{counter} is incremented once every time an instruction
+finishes execution.  The process stops when \TT{counter >= limit}. 
+When the process terminates, \TT{finish\_state} is set.  For details
+see \TT{mex::run\_process}, \pagref{MEX::RUN_PROCESS},
+
 The \TT{trace\_function}, \TT{trace\_depth}, \TT{trace\_flags}, \TT{excepts},
 \TT{excepts\_accumuator}, and \TT{optimize}
 members of a process
 are explained in Tracing and Exceptions, \itemref{TRACING-AND-EXCEPTIONS}.
-
-\section{Instructions}
-\label{INSTRUCTIONS}
 
 
 \begin{boxedfigure}
@@ -926,8 +948,9 @@ are explained in Tracing and Exceptions, \itemref{TRACING-AND-EXCEPTIONS}.
 \hline
 \TT{PUSH}
     & Push the \TT{immedA}'th value in the stack below the top value \\
-    & into the stack (i.e., \TT{sp[- immedA]}, so \TT{immedA} = 0 duplicates \\
-    & the top value).
+    & into the stack (i.e., \TT{sp[- immedA - 1]},
+      so \TT{immedA} = 0 \\
+    & duplicates the top value).
 \\\hline
 \TT{PUSHI}
     & Push \TT{immedD} into the stack.
@@ -942,16 +965,16 @@ are explained in Tracing and Exceptions, \itemref{TRACING-AND-EXCEPTIONS}.
     & (i.e., \TT{current\_process[immedA]}).
 \\\hline
 \TT{POP}
-    & Pop 1 value and store it in the \TT{immedA}'th value in the stack below \\
-    & the value popped (i.e., store to \TT{sp[- immedA]}, so \TT{immedA} = 0 \\
-    & discards the top value).
+    & Pop 1 value and store it in the \TT{immedA}'th value in the stack \\
+    & below the value popped (i.e., store to \TT{sp[- immedA - 1]}, \\
+    & so \TT{immedA} = 0 discards the top value).
 \\\hline
 \TT{POPM}
-    & Pop 1 value and store it into the stack vector element with index \\
-    & \TT{immedA} (i.e., \TT{current\_process[immedA]}).
+    & Pop 1 value and store it into the stack vector element with \\
+    & index \TT{immedA} (i.e., \TT{current\_process[immedA]}).
 \\\hline
 \TT{JMP}
-    & Add \TT{immedA} to \TT{sp} (popping the stack \TT{immedA} times), \\
+    & Subtract \TT{immedA} to \TT{sp} (popping the stack \TT{immedA} times), \\
     & then push \TT{immedD} into the stack \TT{immedB} times, \\
     & then add \TT{immedC} to the \TT{pc} (skipping \TT{immedC} instructions).
 \\\hline
@@ -973,14 +996,15 @@ are explained in Tracing and Exceptions, \itemref{TRACING-AND-EXCEPTIONS}.
     & Do nothing.
 \\\hline
 \TT{END}
-    & Add \TT{immedA} to \TT{sp} (popping the stack \TT{immedA} times).
+    & Subtract \TT{immedA} to \TT{sp} (popping the stack \TT{immedA} times).
 \\\hline
 \TT{BEGL}
     & Take the top \TT{immedB} values in the stack and push a copy of \\
     & them all into the stack, preserving stack ordering.
 \\\hline
 \TT{ENDL}/\TT{CONT}
-    & First add \TT{immedA} to \TT{sp} (popping the stack \TT{immedA} times), \\
+    & First subtract \TT{immedA} to \TT{sp}
+      (popping the stack \TT{immedA} times), \\
     & then take the top \TT{immedB} values in the stack and copy them \\
     & to the next lower \TT{immedB} values in the stack, then subtract \\
     & \TT{immedC} from the \TT{pc} (jumping backwards to just after \\
@@ -992,8 +1016,10 @@ are explained in Tracing and Exceptions, \itemref{TRACING-AND-EXCEPTIONS}.
 \\\hline
 \TT{ERROR}
     & This instruction is always traced.  If \TT{immedB} is not zero, \\
-    & the process terminates.  Otherwise \TT{immedA} is added to \TT{sp} \\
-    & (popping the stack \TT{immedA} times).  See \itemref{ERROR-INSTRUCTION}.
+    & the process terminates.
+      Otherwise \TT{immedA} is subtracted \\
+    & from \TT{sp} (popping the stack \TT{immedA} times).
+      See \itemref{ERROR-INSTRUCTION}.
 \\\hline
 \end{tabular}
 \end{center}
@@ -1075,6 +1101,11 @@ are explained in Tracing and Exceptions, \itemref{TRACING-AND-EXCEPTIONS}.
 \caption{Function Instructions}
 \label{FUNCTION-INSTRUCTIONS}
 \end{boxedfigure}
+
+\clearpage
+
+\section{Instructions}
+\label{INSTRUCTIONS}
 
 A MEX instruction (a \TT{mex::instr}, see \pagref{MEX::INSTR})
 consists of an \TT{op\_code}, \TT{trace\_flags},
@@ -1366,7 +1397,7 @@ are \underline{not} fatal errors.
 \section{MEX Functions}
 \label{MEX Functions}
 
-{\tt mex::module mex::}\TTKEY{create\_module}
+{\tt mex::module mex::}\MEXKEY{create\_module}
     \verb|( min::file f = min::NULL_STUB )|
 \begin{indpar}
 A \TT{mex::module} is created and returned.  The code vector is empty.
@@ -1375,7 +1406,7 @@ The \TT{globals} member is set to \TT{min::NULL\_STUB} and the
 \TT{interface} member is set to \TT{min::MISSING()}.
 \end{indpar}
 
-{\tt mex::process mex::}\TTKEY{create\_process} \\
+{\tt mex::process mex::}\MEXKEY{create\_process} \\
 \hspace*{10em}\verb|( min::printer printer = mex::default_printer )|
 \begin{indpar}
 A \TT{mex::process} is created and returned.
@@ -1404,12 +1435,12 @@ The \TT{sp}, \TT{rp}, \TT{fp[16]}, \TT{trace\_depth},
 members are set to \TT{0}.
 \end{indpar}
 
-{\tt min::locatable\_var<min::printer> mex::}\TTKEY{default\_printer}
+{\tt min::locatable\_var<min::printer> mex::}\MEXKEY{default\_printer}
 \begin{indpar}
 See \TT{mex::create\_process}.
 \end{indpar}
 
-{\tt mex::process mex::}\TTKEY{init\_process} \\
+{\tt mex::process mex::}\MEXKEY{init\_process} \\
 \hspace*{10em}\verb|( mex::module m, mex::process p = min:NULL_STUB )|
 \begin{indpar}
 Initialize \TT{p} (which is created by \TT{mex::create\_process}
@@ -1430,7 +1461,7 @@ The \TT{optimize} and \TT{trace\_flags} members are not set
 \TT{0} respectively).
 \end{indpar}
 
-{\tt mex::process mex::}\TTKEY{init\_process} \\
+{\tt mex::process mex::}\MEXKEY{init\_process} \\
 \hspace*{10em}\verb|( mex::pc pc, mex::process p = min:NULL_STUB )|
 \begin{indpar}
 Ditto, but does not set the process \TT{pc} member.
@@ -1443,24 +1474,50 @@ will terminate the process normally.  The \TT{nargs} member
 is set to \TT{0}.
 \end{indpar}
 
-{\tt bool mex::}\TTKEY{run\_process}
-    \verb|( mex::process p, min::uns32 limit = 0xFFFFFFFF )|
+{\tt bool mex::}\MEXKEY{run\_process} \verb|( mex::process p )|%
+\label{MEX::RUN_PROCESS}
 \begin{indpar}
-Execute \TT{p} until it terminates or has executed \TT{limit}
-instructions.  Returns \TT{true} on normal termination
-and \TT{false} otherwise.  Normal termination is one of:
-\begin{enumerate}
-\item \TT{limit} instructions have been executed
-\item \TT{pc} is \TT{\{min::NULL\_STUB,0\}}
-\item \TT{pc} equals \TT{\{m,index\}} with \TT{index} == \TT{m->length}
-\end{enumerate}
-
+Execute \TT{p} until it terminates.
+Returns \TT{true} on normal termination
+and \TT{false} otherwise.  The process \TT{finish\_state} is
+set as follows to indicate cause of termination:
+\begin{center}
+\begin{tabular}{lp{3.0in}l}
+\verb|mex::|\MEXKEY{MODULE\_END}
+    & \raggedright \TT{pc} equals \TT{\{m,index\}} with \TT{index == m->length}
+    & returns \TT{true} \\
+\verb|mex::|\MEXKEY{CALL\_END}
+    & \TT{pc} equals \TT{\{min::NULL\_STUB,0\}}
+    & returns \TT{true} \\
+\verb|mex::|\MEXKEY{LIMIT\_STOP}
+    & \TT{p->counter >= p->limit}
+    & returns \TT{false} \\
+\verb|mex::|\MEXKEY{ERROR\_STOP}
+    & \TT{ERROR} instruction with \TT{immedB != 0}
+    & returns \TT{false} \\
+\verb|mex::|\MEXKEY{JMP\_ERROR}
+    & \raggedright conditional \TT{JMP\ldots}~instruction with
+      invalid operand(s)
+      (either a \TT{NaN} or both infinities of the same sign)
+    & returns \TT{false} \\
+\verb|mex::|\MEXKEY{FORM\_ERROR}
+    & \raggedright program formatting error (likely a compiler
+      error)
+    & returns \TT{false} \\
+\end{tabular}
+\end{center}
 \end{indpar}
 
-Note: You can use \TT{init\_process ( m )} followed by \TT{run\_process}
-to run the code of \TT{m}.  You can then add to the end of \TT{m}
+Notes:
+\begin{enumerate}
+\item On \TT{LIMIT\_STOP}, you can increase \TT{p->limit}
+and call \TT{run\_process} again to continue execution.
+\item You can use \TT{init\_process ( m )} followed by \TT{run\_process}
+to run the code of \TT{m}.  Then after \TT{MODULE\_END},
+you can add to the end of \TT{m}
 and call \TT{run\_process} again to continue the execution of the code
-of \TT{m}.
+of \TT{m} (i.e., execute the added code).
+\end{enumerate}
 
 \clearpage
 

@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Jul  5 18:03:21 EDT 2023
+// Date:	Wed Jul  5 18:56:57 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -974,7 +974,7 @@ bool mex::run_process ( mex::process p )
 	    case mex::SET_TRACE:
 	        break;
 	    case mex::ERROR:
-	        if (    immedB == 0 )
+	        if (    immedB != 0 )
 		    fatal_error = true;
 		else if ( immedA > sp - spbegin )
 		{
