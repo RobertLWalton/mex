@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Jul  5 04:52:54 EDT 2023
+// Date:	Wed Jul  5 18:03:21 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -43,8 +43,7 @@ min::locatable_var<min::printer> mex::default_printer;
 // Return true if (1), normal process termination, and
 // false otherwise.
 //
-static bool optimized_run_process
-	( mex::process p, min::uns32 limit )
+static bool optimized_run_process ( mex::process p )
 {
     mex::module m = p->pc.module;
     min::uns32 i = p->pc.index;
@@ -59,6 +58,10 @@ static bool optimized_run_process
     min::gen * spbegin = ~ ( p + 0 );
     min::gen * sp = ~ ( p + i );
     min::gen * spend = ~ ( p + p->max_length );
+
+    min::uns32 limit = p->limit;
+    if ( p->counter >= limit ) return false;
+    limit -= p->counter;
 
     bool result = true;
     feclearexcept ( FE_ALL_EXCEPT );
@@ -269,6 +272,7 @@ EXIT:
     p->length = p->sp + 1;
     p->excepts_accumulator |= 
 	fetestexcept ( FE_ALL_EXCEPT );
+    p->counter = p->limit - limit;
     return result;
 
 #   undef CHECK1
@@ -342,7 +346,7 @@ void init_op_infos ( void )
     }
 }
 
-bool mex::run_process ( mex::process p, min::uns32 limit )
+bool mex::run_process ( mex::process p )
 {
     mex::module m = p->pc.module;
     min::uns32 i = p->pc.index;
@@ -353,6 +357,7 @@ bool mex::run_process ( mex::process p, min::uns32 limit )
     min::gen * sp;
     min::gen * spend;
     const char * message;
+    min::uns32 limit;
 
     if ( m == min::NULL_STUB )
     {
@@ -380,6 +385,14 @@ bool mex::run_process ( mex::process p, min::uns32 limit )
     sp = ~ ( p + i );
     spend = ~ ( p + p->max_length );
 
+    limit = p->limit;
+    if ( p->counter >= limit )
+    {
+        p->finish_state = mex::LIMIT_STOP;
+	return false;
+    }
+    limit -= p->counter;
+
     // Macros to save and restore pc... and sp... .
     // We assume p->pc.index and p->sp do not change
     // between SAVE and RESTORE.
@@ -390,7 +403,8 @@ bool mex::run_process ( mex::process p, min::uns32 limit )
     //
 #   define SAVE \
 	* (min::uns32 *) & p->pc.index = pc - pcbegin; \
-	p->sp = p->length = sp - spbegin;
+	p->sp = p->length = sp - spbegin; \
+	p->counter = p->limit - limit;
 
 #   define RESTORE \
 	pcbegin = ~ ( m + 0 ); \
@@ -398,36 +412,64 @@ bool mex::run_process ( mex::process p, min::uns32 limit )
 	pcend = pcbegin + m->length; \
 	spbegin = ~ ( p + 0 ); \
 	sp = spbegin + p->sp; \
-	spend = sp + p->max_length;
+	spend = sp + p->max_length; \
+        limit = p->limit - p->counter;
 
     while ( true ) // Inner loop.
     {
         if ( pc == pcend )
 	{
 	    SAVE;
+	    p->finish_state = mex::MODULE_END;
 	    return true;
+	}
+	if ( limit == 0 )
+	{
+	    SAVE;
+	    p->finish_state = mex::LIMIT_STOP;
+	    return false;
 	}
 
 	if ( p->optimize )
 	{
 	    SAVE;
-	    if ( optimized_run_process, limit )
+	    if ( optimized_run_process ( p ) )
+	    {
+	        if ( p->pc.module == min::NULL_STUB )
+		    p->finish_state = mex::CALL_END;
+		else
+		    p->finish_state = mex::MODULE_END;
 	        return true;
+	    }
 	    min::interrupt();
 	    mex::module om = p->pc.module;
 	    min::uns32 oi = p->pc.index;
 	    if ( om == min::NULL_STUB )
 	    {
-		if ( oi == 0 ) return true;
+		if ( oi == 0 )
+		{
+		    p->finish_state = mex::CALL_END;
+		    return true;
+		}
 		message = "Illegal PC: no module and"
 		          " index > 0";
 		goto FATAL;
 	    }
 	    if ( oi >= m->length )
 	    {
-		if ( oi == m->length ) return true;
+		if ( oi == m->length )
+		{
+		    p->finish_state = mex::MODULE_END;
+		    return true;
+		}
 		message = "Illegal PC: index too large";
 		goto FATAL;
+	    }
+
+	    if ( p->counter >= p->limit )
+	    {
+		p->finish_state = mex::LIMIT_STOP;
+		return false;
 	    }
 
 	    RESTORE;
@@ -624,8 +666,7 @@ bool mex::run_process ( mex::process p, min::uns32 limit )
 	    * new_sp ++ = min::new_num_gen ( result );
 	    sp = new_sp;
 
-	    ++ pc;
-	    continue; // loop
+	    goto LOOP;
 	}
 
 	JUMP:
@@ -774,7 +815,11 @@ bool mex::run_process ( mex::process p, min::uns32 limit )
 
 		p->printer << min::eom;
 
-		if ( bad_jmp ) return false;
+		if ( bad_jmp )
+		{
+		    p->finish_state = mex::JMP_ERROR;
+		    return false;
+		}
 
 		RESTORE;
 	    }
@@ -790,9 +835,8 @@ bool mex::run_process ( mex::process p, min::uns32 limit )
 		pc += immedC;
 		-- pc;
 	    }
-	    ++ pc;
 
-	    continue; // loop
+	    goto LOOP;
 	}
 
 	NON_ARITHMETIC:
@@ -1015,7 +1059,11 @@ bool mex::run_process ( mex::process p, min::uns32 limit )
 
 		p->printer << min::eom;
 
-		if ( fatal_error ) return false;
+		if ( fatal_error )
+		{
+		    p->finish_state = mex::ERROR_STOP;
+		    return false;
+		}
 
 		RESTORE;
 	    }
@@ -1105,9 +1153,12 @@ bool mex::run_process ( mex::process p, min::uns32 limit )
 	        break;
 	    }
 
-	    ++ pc;
-	    continue; // loop
+	    goto LOOP;
 	}
+
+	LOOP:
+	    ++ pc; -- limit;
+	    continue; // loop
 
 
 	// Fatal error discovered in loop.
@@ -1124,6 +1175,7 @@ bool mex::run_process ( mex::process p, min::uns32 limit )
 // compiler has made a mistake.
 //
 FATAL:
+    p->finish_state = mex::FORM_ERROR;
     char fatal_buffer[100];
     char instr_buffer[400];
     char * q = instr_buffer;

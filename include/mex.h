@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Jul  4 03:46:31 EDT 2023
+// Date:	Wed Jul  5 18:03:33 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -111,6 +111,16 @@ MIN_REF ( min::gen, interface, mex::module )
 MIN_REF ( min::packed_vec_ptr<min::gen>, trace_info,
                                          mex::module )
 
+enum finish_state
+{
+    MODULE_END	= 1,
+    CALL_END	= 2,
+    LIMIT_STOP	= 3,
+    ERROR_STOP	= 4,
+    JMP_ERROR	= 5,
+    FORM_ERROR	= 6
+};
+
 struct process_header;
 typedef min::packed_vec_insptr
                <min::gen, mex::process_header>
@@ -149,6 +159,9 @@ struct process_header
     int excepts;
     int excepts_accumulator;
     bool optimize;
+    mex::finish_state finish_state;
+    min::uns32 counter;
+    min::uns32 limit;
 };
 
 MIN_REF ( min::printer, printer, mex::process )
@@ -165,8 +178,7 @@ inline void set_pc ( mex::process p, mex::pc pc )
 extern min::uns32 trace_indent;
 extern char trace_mark;
 
-bool run_process
-    ( mex::process p, min::uns32 limit = 0xFFFFFFFF );
+bool run_process ( mex::process p );
 
 extern min::locatable_var<min::printer> default_printer;
 
