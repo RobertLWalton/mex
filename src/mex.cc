@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Jul  4 17:37:44 EDT 2023
+// Date:	Tue Jul  4 22:17:25 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -38,7 +38,7 @@ min::locatable_var<min::printer> mex::default_printer;
 // or  (3) the next instruction would have an error if
 //         executed,
 // or  (4) the pc is invalid,
-// or  (5) if min::interrupt() returns true just before
+// or  (5) if min::pending() returns true just before
 //         executing a backward jump or function return.
 // Return true if (1), normal process termination, and
 // false otherwise.
@@ -302,25 +302,47 @@ bool mex::run_process ( mex::process p, min::uns32 limit )
     //
 #   define SAVE \
 	* (min::uns32 *) & p->pc.index = pc - pcbegin; \
-	p->sp = sp - spbegin; \
-	p->length = p->sp + 1;
+	p->sp = p->length = sp - spbegin;
 
 #   define RESTORE \
 	pcbegin = ~ ( m + 0 ); \
-	pc = ~ ( m + p->pc.index ); \
-	pcend = ~ ( m + m->length ); \
+	pc = pcbegin + p->pc.index; \
+	pcend = pcbegin + m->length; \
 	spbegin = ~ ( p + 0 ); \
-	sp = ~ ( p + p->sp ); \
-	spend = ~ ( p + p->max_length ); \
+	sp = spbegin + p->sp; \
+	spend = sp + p->max_length;
 
     while ( true ) // Inner loop.
     {
         if ( pc == pcend )
 	{
-		* (min::uns32 *)
-		     & p->pc.index = pc - pcbegin;
-		p->sp = sp - spbegin;
-		p->length = p->sp + 1;
+	    SAVE;
+	    return true;
+	}
+
+	if ( p->optimize )
+	{
+	    SAVE;
+	    if ( optimized_run_process, limit )
+	        return true;
+	    min::interrupt();
+	    mex::module om = p->pc.module;
+	    min::uns32 oi = p->pc.index;
+	    if ( om == min::NULL_STUB )
+	    {
+		if ( oi == 0 ) return true;
+		message = "Illegal PC: no module and"
+		          " index > 0";
+		goto FATAL;
+	    }
+	    if ( oi >= m->length )
+	    {
+		if ( oi == m->length ) return true;
+		message = "Illegal PC: index too large";
+		goto FATAL;
+	    }
+
+	    RESTORE;
 	}
 
         min::uns8 op_code = pc->op_code;
