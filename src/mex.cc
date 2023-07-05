@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Jul  5 03:29:57 EDT 2023
+// Date:	Wed Jul  5 04:52:54 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -105,6 +105,33 @@ static bool optimized_run_process
 	    ++ sp;
 	    break;
 	}
+	case mex::PUSHG:
+	{
+	    int i = pc->immedA;
+	    mex::module mg = (mex::module) pc->immedD;
+	    if ( mg == min::NULL_STUB )
+	        goto ERROR_EXIT;
+	    min::packed_vec_ptr<min::gen> globals =
+	        mg->globals;
+	    if ( globals == min::NULL_STUB )
+	        goto ERROR_EXIT;
+	    if ( i >= globals->length )
+	        goto ERROR_EXIT;
+	    if ( sp >= spend )
+	        goto ERROR_EXIT;
+	    * sp ++ = globals[i];
+	    break;
+	}
+	case mex::PUSHM:
+	{
+	    int i = pc->immedA;
+	    if ( i >= sp - spbegin )
+	        goto ERROR_EXIT;
+	    if ( sp >= spend )
+	        goto ERROR_EXIT;
+	    * sp ++ = spbegin[i];
+	    break;
+	}
 	case mex::POP:
 	{
 	    int i = pc->immedA;
@@ -112,6 +139,39 @@ static bool optimized_run_process
 	        goto ERROR_EXIT;
 	    -- sp;
 	    sp[-i] = * sp;
+	    break;
+	}
+	case mex::POPM:
+	{
+	    int i = pc->immedA;
+	    if ( sp <= spbegin || i >= sp - spbegin )
+	        goto ERROR_EXIT;
+	    -- sp;
+	    spbegin[i] = * sp;
+	    break;
+	}
+	case mex::BEG:
+	case mex::NOP:
+	    break;
+	case mex::END:
+	{
+	    int i = pc->immedA;
+	    if ( i > sp - spbegin )
+	        goto ERROR_EXIT;
+	    sp -= i;
+	    break;
+	}
+	case mex::BEGL:
+	{
+	    int i = pc->immedB;
+	    if ( i > sp - spbegin )
+	        goto ERROR_EXIT;
+	    if ( i > spend - sp )
+	        goto ERROR_EXIT;
+	    min::gen * q1 = sp - i;
+	    min::gen * q2 = sp;
+	    while ( q1 < q2 )
+		* sp ++ = * q1 ++;
 	    break;
 	}
 	case mex::JMP:
@@ -194,6 +254,9 @@ static bool optimized_run_process
 	    -- pc;
 	    break;
 	}
+	case mex::SET_TRACE:
+	case mex::ERROR:
+	    goto ERROR_EXIT;
 	}
 	++ pc, -- limit;
     }
@@ -489,7 +552,6 @@ bool mex::run_process ( mex::process p, min::uns32 limit )
 	    p->excepts_accumulator |= excepts;
 	    excepts &= p->excepts;
 
-	    min::uns8 trace_flags = pc->trace_flags;
 	    trace_flags &= p->trace_flags;
 
 	    if (    excepts != 0
@@ -743,6 +805,8 @@ bool mex::run_process ( mex::process p, min::uns32 limit )
 	    int immedC = pc->immedC;
 	    min::gen immedD = pc->immedD;
 
+	    bool fatal_error = false;
+
 	    // Pre-trace check for fatal errors.
 	    //
 	    switch ( op_code )
@@ -776,7 +840,12 @@ bool mex::run_process ( mex::process p, min::uns32 limit )
 		    message = "immedD is not a module";
 		    goto INNER_FATAL;
 		}
-	        if ( immedA >= mg->length  )
+		if ( mg->globals == min::NULL_STUB )
+		{
+		    message = "module has no globals";
+		    goto INNER_FATAL;
+		}
+	        if ( immedA >= mg->globals->length  )
 		{
 		    message = "immedA too large";
 		    goto INNER_FATAL;
@@ -819,6 +888,12 @@ bool mex::run_process ( mex::process p, min::uns32 limit )
 	        break;
 	    case mex::NOP:
 	        break;
+	    case mex::END:
+	    {
+		if ( immedA > sp - spbegin )
+		    goto INNER_FATAL;
+		break;
+	    }
 	    case mex::BEGL:
 	        if ( immedB > sp - spbegin )
 		{
@@ -855,8 +930,9 @@ bool mex::run_process ( mex::process p, min::uns32 limit )
 	    case mex::SET_TRACE:
 	        break;
 	    case mex::ERROR:
-	        if (    immedB != 0
-		     && immedA > sp - spbegin )
+	        if (    immedB == 0 )
+		    fatal_error = true;
+		else if ( immedA > sp - spbegin )
 		{
 		    message = "immedA too large";
 		    goto INNER_FATAL;
@@ -864,7 +940,170 @@ bool mex::run_process ( mex::process p, min::uns32 limit )
 	        break;
 	    }
 
-	    // TBD
+	    if ( fatal_error )
+	        trace_flags |= mex::TRACE
+		             + mex::TRACE_PHRASE;
+	    else
+	        trace_flags &= pc->trace_flags;
+
+	    if ( trace_flags & mex::TRACE )
+	    {
+		SAVE;
+
+		p->printer << min::bol;
+		if ( fatal_error )
+		    p->printer
+		        << "!!! FATAL ERROR: "
+			   " ERROR instruction with"
+			   " zero immedB"
+			<< min::eol;
+
+		min::phrase_position pp =
+		    p->pc.index < m->position->length ?
+		    m->position[p->pc.index] :
+		    min::MISSING_PHRASE_POSITION;
+
+		if ( pp
+		     &&
+		     ( trace_flags & mex::TRACE_PHRASE ) )
+		    min::print_phrase_lines
+		        ( p->printer,
+			  m->position->file,
+			  pp );
+		{
+		    unsigned i = ( p->trace_depth + 1 )
+		               * mex::trace_indent;
+		    while ( 1 < i )
+		    {
+		        p->printer << mex::trace_mark;
+			-- i;
+		    }
+		    p->printer << ' ';
+		}
+		p->printer << min::bom;
+
+		if ( pp )
+		    p->printer
+		        << min::pline_numbers
+			    ( m->position->file, pp )
+			<< ": ";
+
+		min::gen tinfo  = min::MISSING();
+		if ( p->pc.index < m->trace_info->length)
+		    tinfo = m->trace_info[p->pc.index];
+		min::gen name = min::MISSING();
+		min::uns32 tinfo_length = 0;
+		if ( min::is_obj ( tinfo ) )
+		{
+		    min::obj_vec_ptr vp ( tinfo );
+		    tinfo_length = min::size_of ( vp );
+		    if ( tinfo_length >= 1 )
+		        name = vp[0];
+		}
+		else if ( min::is_str ( tinfo ) )
+		    name = tinfo;
+
+		if ( name == min::MISSING() )
+		    p->printer << op_info->name;
+		else
+		    p->printer << name;
+
+		if ( tinfo_length > 1
+		     &&
+		     p->trace_function != NULL )
+		    (p->trace_function) ( p, tinfo );     
+
+		p->printer << min::eom;
+
+		if ( fatal_error ) return false;
+
+		RESTORE;
+	    }
+
+	    // Execute instruction.
+	    //
+	    switch ( op_code )
+	    {
+	    case mex::PUSH:
+	    {
+		int i = pc->immedA;
+		* sp = sp[-i-1];
+		++ sp;
+		break;
+	    }
+	    case mex::PUSHI:
+	    {
+		* sp ++ = pc->immedD;
+		break;
+	    }
+	    case mex::PUSHG:
+	    {
+	        mex::module mg =
+		    (mex::module) pc->immedD;
+		* sp ++ = mg->globals[pc->immedA];
+		break;
+	    }
+	    case mex::PUSHM:
+	        * sp ++ = spbegin[pc->immedA];
+		break;
+	    case mex::POP:
+	    {
+		int i = pc->immedA;
+		-- sp;
+		sp[-i] = * sp;
+		break;
+	    }
+	    case mex::POPM:
+	    {
+		int i = pc->immedA;
+		-- sp;
+		spbegin[i] = * sp;
+		break;
+	    }
+	    case mex::BEG:
+	        break;
+	    case mex::NOP:
+	        break;
+	    case mex::END:
+	    {
+		int i = pc->immedA;
+		sp -= i;
+		break;
+	    }
+	    case mex::BEGL:
+	    {
+	        int i = pc->immedB;
+		min::gen * q1 = sp - i;
+		min::gen * q2 = sp;
+		while ( q1 < q2 )
+		    * sp ++ = * q1 ++;
+	        break;
+	    }
+	    case mex::ENDL:
+	    case mex::CONT:
+	    {
+		if ( min::pending() )
+		{
+		    SAVE;
+		    min::interrupt();
+		    RESTORE;
+		}
+		int immedA = pc->immedA;
+		int immedB = pc->immedB;
+		int immedC = pc->immedC;
+		sp -= immedA;
+		for ( int i = immedB; 0 < i; -- i )
+		    sp[-immedB-i] = sp[-i];
+		pc -= immedC;
+		-- pc;
+		break;
+	    }
+	    case mex::SET_TRACE:
+	        p->trace_flags = (min::uns8) pc->immedA;
+	        break;
+	    case mex::ERROR:
+	        break;
+	    }
 
 	    ++ pc;
 	    continue; // loop
