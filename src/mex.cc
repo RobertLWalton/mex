@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Jul  4 22:17:25 EDT 2023
+// Date:	Wed Jul  5 03:29:57 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -61,6 +61,7 @@ static bool optimized_run_process
     min::gen * spend = ~ ( p + p->max_length );
 
     bool result = true;
+    feclearexcept ( FE_ALL_EXCEPT );
 
 #   define CHECK1 \
 	    if ( sp < spbegin + 1 \
@@ -171,6 +172,28 @@ static bool optimized_run_process
 	    -- pc;
 	    break;
 	}
+	case mex::ENDL:
+	case mex::CONT:
+	{
+	    if ( min::pending() )
+	        goto ERROR_EXIT;
+	    int immedA = pc->immedA;
+	    int immedB = pc->immedB;
+	    int immedC = pc->immedC;
+	    if ( immedA > sp - spbegin )
+	        goto ERROR_EXIT;
+	    if (   immedA + 2 * immedB
+		 > sp - spbegin )
+	        goto ERROR_EXIT;
+	    if ( immedC > pc - pcbegin )
+	        goto ERROR_EXIT;
+	    sp -= immedA;
+	    for ( int i = immedB; 0 < i; -- i )
+	        sp[-immedB-i] = sp[-i];
+	    pc -= immedC;
+	    -- pc;
+	    break;
+	}
 	}
 	++ pc, -- limit;
     }
@@ -181,6 +204,8 @@ EXIT:
     * (min::uns32 *) & p->pc.index = pc - pcbegin;
     p->sp = sp - spbegin;
     p->length = p->sp + 1;
+    p->excepts_accumulator |= 
+	fetestexcept ( FE_ALL_EXCEPT );
     return result;
 
 #   undef CHECK1
@@ -497,7 +522,9 @@ bool mex::run_process ( mex::process p, min::uns32 limit )
 		    m->position[p->pc.index] :
 		    min::MISSING_PHRASE_POSITION;
 
-		if ( pp )
+		if ( pp
+		     &&
+		     ( trace_flags & mex::TRACE_PHRASE ) )
 		    min::print_phrase_lines
 		        ( p->printer,
 			  m->position->file,
@@ -588,9 +615,18 @@ bool mex::run_process ( mex::process p, min::uns32 limit )
 	    }
 
 	    if ( bad_jmp )
-	        trace_flags |= mex::TRACE;
+	        trace_flags |= mex::TRACE
+		             + mex::TRACE_PHRASE;
 	    else
+	    {
 	        trace_flags &= pc->trace_flags;
+		if ( ! execute_jmp
+		     &&
+		        (   trace_flags
+		          & mex::TRACE_NOJUMP )
+		     == 0 )
+		    trace_flags &= ~ mex::TRACE;
+	    }
 
 	    if ( trace_flags & mex::TRACE )
 	    {
@@ -610,7 +646,9 @@ bool mex::run_process ( mex::process p, min::uns32 limit )
 		    m->position[p->pc.index] :
 		    min::MISSING_PHRASE_POSITION;
 
-		if ( pp )
+		if ( pp
+		     &&
+		     ( trace_flags & mex::TRACE_PHRASE ) )
 		    min::print_phrase_lines
 		        ( p->printer,
 			  m->position->file,
@@ -673,6 +711,8 @@ bool mex::run_process ( mex::process p, min::uns32 limit )
 		    (p->trace_function) ( p, tinfo );     
 
 		p->printer << min::eom;
+
+		if ( bad_jmp ) return false;
 
 		RESTORE;
 	    }
@@ -834,9 +874,7 @@ bool mex::run_process ( mex::process p, min::uns32 limit )
 	// Fatal error discovered in loop.
 	//
 	INNER_FATAL:
-	    * (min::uns32 *) & p->pc.index = pc - pcbegin;
-	    p->sp = sp - spbegin;
-	    p->length = p->sp + 1;
+	    SAVE;
 	    goto FATAL;
 
     } // end loop
