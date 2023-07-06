@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Jul  5 18:56:57 EDT 2023
+// Date:	Wed Jul  5 22:18:08 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -67,17 +67,11 @@ static bool optimized_run_process ( mex::process p )
     feclearexcept ( FE_ALL_EXCEPT );
 
 #   define CHECK1 \
-	    if ( sp < spbegin + 1 \
-	         || \
-	         ! min::is_direct_float ( sp[-1] ) ) \
+	    if ( sp < spbegin + 1 ) \
 	        goto ERROR_EXIT
 
 #   define CHECK2 \
-	    if ( sp < spbegin + 2 \
-	         || \
-	         ! min::is_direct_float ( sp[-1] ) \
-	         || \
-	         ! min::is_direct_float ( sp[-2] ) ) \
+	    if ( sp < spbegin + 2 ) \
 	        goto ERROR_EXIT
 #   define GF(x) min::new_direct_float_gen ( x )
 #   define FG(x) MUP::direct_float_of ( x )
@@ -95,10 +89,21 @@ static bool optimized_run_process ( mex::process p )
 	        ( FG ( sp[-2] ) + FG ( sp[-1] ) );
 	    -- sp;
 	    break;
+	case mex::ADDI:
+	    CHECK1;
+	    sp[-1] = GF
+	        ( FG ( sp[-1] ) + FG ( pc->immedD ) );
+	    break;
 	case mex::NEG:
 	    CHECK1;
 	    sp[-1] = GF ( - FG ( sp[-1] ) );
 	    break;
+	case mex::ABS:
+	{
+	    CHECK1;
+	    sp[-1] = GF ( fabs ( FG ( sp[-1] ) ) );
+	    break;
+	}
 	case mex::PUSH:
 	{
 	    int i = pc->immedA;
