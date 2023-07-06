@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Jul  6 18:01:19 EDT 2023
+// Date:	Thu Jul  6 18:04:06 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -47,6 +47,18 @@ static min::float64 powi ( min::float64 x, unsigned i )
 	z = z * z;
     }
     return r;
+}
+
+inline void print_indent ( mex::process p )
+{
+    unsigned i = ( p->trace_depth + 1 )
+	       * mex::trace_indent;
+    while ( 1 < i )
+    {
+	p->printer << mex::trace_mark;
+	-- i;
+    }
+    p->printer << ' ';
 }
         
 
@@ -309,7 +321,8 @@ static bool optimized_run_process ( mex::process p )
 	case mex::POPM:
 	{
 	    int i = pc->immedA;
-	    if ( sp <= spbegin || i >= sp - spbegin )
+	    if (    sp <= spbegin
+	         || i >= sp - 1 - spbegin )
 	        goto ERROR_EXIT;
 	    -- sp;
 	    spbegin[i] = * sp;
@@ -457,6 +470,7 @@ EXIT:
 #   undef CHECK2
 #   undef FG
 #   undef GF
+#   undef A1F
 }
 
 
@@ -889,16 +903,7 @@ bool mex::run_process ( mex::process p )
 			  m->position->file,
 			  pp );
 
-		{
-		    unsigned i = ( p->trace_depth + 1 )
-		               * mex::trace_indent;
-		    while ( 1 < i )
-		    {
-		        p->printer << mex::trace_mark;
-			-- i;
-		    }
-		    p->printer << ' ';
-		}
+		print_indent ( p );
 		p->printer << min::bom;
 
 		if ( pp )
@@ -1012,16 +1017,7 @@ bool mex::run_process ( mex::process p )
 		        ( p->printer,
 			  m->position->file,
 			  pp );
-		{
-		    unsigned i = ( p->trace_depth + 1 )
-		               * mex::trace_indent;
-		    while ( 1 < i )
-		    {
-		        p->printer << mex::trace_mark;
-			-- i;
-		    }
-		    p->printer << ' ';
-		}
+		print_indent ( p );
 		p->printer << min::bom;
 
 		if ( pp )
@@ -1185,6 +1181,19 @@ bool mex::run_process ( mex::process p )
 		    goto INNER_FATAL;
 		}
 		break;
+	    case mex::POPM:
+		if ( sp <= spbegin )
+		{
+		    message =
+		        "stack empty for pop";
+		    goto INNER_FATAL;
+		}
+	        if ( immedA >= sp - 1 - spbegin )
+		{
+		    message = "immedA too large";
+		    goto INNER_FATAL;
+		}
+		break;
 	    case mex::BEG:
 	        break;
 	    case mex::NOP:
@@ -1272,16 +1281,7 @@ bool mex::run_process ( mex::process p )
 		        ( p->printer,
 			  m->position->file,
 			  pp );
-		{
-		    unsigned i = ( p->trace_depth + 1 )
-		               * mex::trace_indent;
-		    while ( 1 < i )
-		    {
-		        p->printer << mex::trace_mark;
-			-- i;
-		    }
-		    p->printer << ' ';
-		}
+		print_indent ( p );
 		p->printer << min::bom;
 
 		if ( pp )
@@ -1410,6 +1410,8 @@ bool mex::run_process ( mex::process p )
 	        p->trace_flags = (min::uns8) pc->immedA;
 	        break;
 	    case mex::ERROR:
+		int immedA = pc->immedA;
+	        sp -= immedA;
 	        break;
 	    }
 
