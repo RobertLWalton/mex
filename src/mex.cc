@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Jul  6 18:04:06 EDT 2023
+// Date:	Thu Jul  6 18:28:42 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -451,7 +451,20 @@ static bool optimized_run_process ( mex::process p )
 	case mex::SET_TRACE:
 	case mex::ERROR:
 	    goto ERROR_EXIT;
+	case mex::BEGF:
+	{
+	    int immedB = pc->immedB;
+	    int immedC = pc->immedC;
+	    if ( immedC > pc - pcbegin )
+	        goto ERROR_EXIT;
+	    if ( immedB > mex::max_lexical_depth )
+	        goto ERROR_EXIT;
+	    pc += immedC;
+	    -- pc;
 	}
+
+	} // end switch ( op_code )
+
 	++ pc, -- limit;
     }
 
@@ -850,7 +863,7 @@ bool mex::run_process ( mex::process p )
 	    case mex::POWI:
 	        result = powi ( arg1, pc->immedA );
 		break;
-	    }
+	    } // end switch ( op_code )
 
 	    int excepts =
 	        fetestexcept ( FE_ALL_EXCEPT );
@@ -1248,7 +1261,19 @@ bool mex::run_process ( mex::process p )
 		    goto INNER_FATAL;
 		}
 	        break;
-	    }
+	    case mex::BEGF:
+	        if ( immedC > pcend - pc )
+		{
+		    message = "immedC too large";
+		    goto INNER_FATAL;
+		}
+	        if ( immedB > mex::max_lexical_depth )
+		{
+		    message = "immedB too large";
+		    goto INNER_FATAL;
+		}
+
+	    } // end switch ( op_code )
 
 	    if ( fatal_error )
 	        trace_flags |= mex::TRACE
@@ -1410,10 +1435,20 @@ bool mex::run_process ( mex::process p )
 	        p->trace_flags = (min::uns8) pc->immedA;
 	        break;
 	    case mex::ERROR:
+	    {
 		int immedA = pc->immedA;
 	        sp -= immedA;
 	        break;
 	    }
+	    case mex::BEGF:
+	    {
+		int immedC = pc->immedC;
+		pc += immedC;
+		-- pc;
+		break;
+	    }
+
+	    } // end switch ( op_code )
 
 	    goto LOOP;
 	}

@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Jul  6 17:55:00 EDT 2023
+// Date:	Thu Jul  6 18:30:30 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -122,6 +122,8 @@ enum finish_state
     FORM_ERROR	= 6
 };
 
+const unsigned max_lexical_depth = 16;
+
 struct process_header;
 typedef min::packed_vec_insptr
                <min::gen, mex::process_header>
@@ -153,7 +155,7 @@ struct process_header
     min::uns32 sp;
     const min::packed_vec_insptr<mex::ret> return_stack;
     min::uns32 rp;
-    min::uns32 fp[16];
+    min::uns32 fp[mex::max_lexical_depth + 1];
     mex::trace_function trace_function;
     min::uns32 trace_depth;
     min::uns8 trace_flags;
