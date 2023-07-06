@@ -16,12 +16,12 @@ using std::endl;
 using std::hex;
 using std::dec;
 
-double result;
+double arg1, arg2, result;
 double sNAN = NAN;
 
-void test ( const char * expression )
+void test ( const char * exp )
 {
-    cout << expression << " ===> " << result << endl;
+    cout << exp << " ===> " << result << endl;
     cout << "    ";
 
     int excepts = fetestexcept ( FE_ALL_EXCEPT );
@@ -32,21 +32,28 @@ void test ( const char * expression )
     else if ( excepts & FE_OVERFLOW )
         cout << " overflow";
     else if ( excepts & FE_INEXACT )
-        cout << " invalid";
+        cout << " inexact";
     else if ( excepts & FE_UNDERFLOW )
-        cout << " invalid";
+        cout << " underflow";
     else if ( excepts == 0 )
         cout << " none";
     else
         cout << " some";
     cout << endl;
 
-    feclearexcept ( FE_ALL_EXCEPT );
 }
 
-#define TEST(expression) \
-    result = (expression); \
-    test (#expression);
+#define TEST1(op,a) \
+    arg1 = (a); \
+    feclearexcept ( FE_ALL_EXCEPT ); \
+    result = op ( arg1 ); \
+    test ( #op " ( " #a  " )" );
+
+#define TEST2(a1,op,a2) \
+    arg1 = (a1), arg2 = (a2); \
+    feclearexcept ( FE_ALL_EXCEPT ); \
+    result = arg1 op arg2; \
+    test ( #a1 " " #op " " #a2 );
 
 void print_as_hex ( const char * name, double value )
 {
@@ -65,19 +72,14 @@ int main ( int argc, const char * argv[] )
 
     feclearexcept ( FE_ALL_EXCEPT );
 
-    TEST ( 6.7 + 5.0 );
-    TEST ( NAN + 5.0 );
-    TEST ( sNAN + 5.0 );
-    TEST ( SNAN + 5.0 );
-    TEST ( ( + INFINITY) + ( - INFINITY ) );
-    TEST ( ( + INFINITY) + ( + INFINITY ) );
-    TEST ( SNAN );
-    TEST ( sNAN );
-    TEST ( 1.0 / 0.0 );
-    TEST ( SNAN - SNAN );
-    TEST ( fabs ( SNAN ) );
-    TEST ( SNAN + SNAN );
-    TEST ( 1e308 + 1e308 );
+    TEST2 ( 6.7, +, 5.0 );
+    TEST2 ( SNAN, +, 5.0 );
+    TEST2 ( (- INFINITY), +, (+ INFINITY) );
+    TEST2 ( 1e308, +, 1e308 );
+    TEST1 ( -, 5.0 );
+    TEST1 ( -, SNAN );
+    TEST1 ( fabs, 5.0 );
+    TEST1 ( fabs, SNAN );
 
     return 0;
 }
