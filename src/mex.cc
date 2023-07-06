@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Jul  6 04:58:12 EDT 2023
+// Date:	Thu Jul  6 18:01:19 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -11,6 +11,7 @@
 // Table of Contents:
 //
 //	Setup
+//	Support Functions
 //	Optimized Run Process
 //	Run Process
 
@@ -28,6 +29,26 @@
 
 min::locatable_var<min::printer> mex::default_printer;
 
+
+// Support Functions
+//
+static min::float64 powi ( min::float64 x, unsigned i )
+{
+    min::float64 r = 1, z = x;
+    unsigned j = 1 << 0;
+    while ( i != 0 )
+    {
+        if ( j & i )
+	{
+	    i -= j;
+	    r *= z;
+	}
+	j <<= 1;
+	z = z * z;
+    }
+    return r;
+}
+        
 
 // Optimized Run Process
 // --------- --- -------
@@ -76,6 +97,11 @@ static bool optimized_run_process ( mex::process p )
 #   define GF(x) min::new_direct_float_gen ( x )
 #   define FG(x) MUP::direct_float_of ( x )
 
+#   define A1F(f) \
+	    CHECK1; \
+	    sp[-1] = GF ( f ( FG ( sp[-1] ) ) ); \
+	    break;
+
     while ( true )
     {
         if ( pc == pcend ) goto EXIT;
@@ -94,16 +120,140 @@ static bool optimized_run_process ( mex::process p )
 	    sp[-1] = GF
 	        ( FG ( sp[-1] ) + FG ( pc->immedD ) );
 	    break;
+	case mex::MUL:
+	    CHECK2;
+	    sp[-2] = GF
+	        ( FG ( sp[-2] ) * FG ( sp[-1] ) );
+	    -- sp;
+	    break;
+	case mex::MULI:
+	    CHECK1;
+	    sp[-1] = GF
+	        ( FG ( sp[-1] ) * FG ( pc->immedD ) );
+	    break;
+	case mex::SUB:
+	    CHECK2;
+	    sp[-2] = GF
+	        ( FG ( sp[-2] ) - FG ( sp[-1] ) );
+	    -- sp;
+	    break;
+	case mex::SUBI:
+	    CHECK1;
+	    sp[-1] = GF
+	        ( FG ( sp[-1] ) - FG ( pc->immedD ) );
+	    break;
+	case mex::SUBR:
+	    CHECK2;
+	    sp[-2] = GF
+	        ( FG ( sp[-1] ) - FG ( sp[-2] ) );
+	    -- sp;
+	    break;
+	case mex::SUBRI:
+	    CHECK1;
+	    sp[-1] = GF
+	        ( FG ( pc->immedD ) - FG ( sp[-1] ) );
+	    break;
+	case mex::DIV:
+	    CHECK2;
+	    sp[-2] = GF
+	        ( FG ( sp[-2] ) / FG ( sp[-1] ) );
+	    -- sp;
+	    break;
+	case mex::DIVI:
+	    CHECK1;
+	    sp[-1] = GF
+	        ( FG ( sp[-1] ) / FG ( pc->immedD ) );
+	    break;
+	case mex::DIVR:
+	    CHECK2;
+	    sp[-2] = GF
+	        ( FG ( sp[-1] ) / FG ( sp[-2] ) );
+	    -- sp;
+	    break;
+	case mex::DIVRI:
+	    CHECK1;
+	    sp[-1] = GF
+	        ( FG ( pc->immedD ) / FG ( sp[-1] ) );
+	    break;
+	case mex::MOD:
+	    CHECK2;
+	    sp[-2] = GF
+	        ( fmod ( FG ( sp[-2] ),
+		         FG ( sp[-1] ) ) );
+	    -- sp;
+	    break;
+	case mex::MODI:
+	    CHECK1;
+	    sp[-1] = GF
+	        ( fmod ( FG ( sp[-1] ),
+		         FG ( pc->immedD ) ) );
+	    break;
+	case mex::MODR:
+	    CHECK2;
+	    sp[-2] = GF
+	        ( fmod ( FG ( sp[-1] ),
+		         FG ( sp[-2] ) ) );
+	    -- sp;
+	    break;
+	case mex::MODRI:
+	    CHECK1;
+	    sp[-1] = GF
+	        ( fmod ( FG ( pc->immedD ),
+		         FG ( sp[-1] ) ) );
+	    break;
+	case mex::FLOOR:
+	    A1F ( floor );
+	case mex::CEIL:
+	    A1F ( ceil );
+	case mex::ROUND:
+	    A1F ( rint );
+	case mex::TRUNC:
+	    A1F ( trunc );
 	case mex::NEG:
 	    CHECK1;
 	    sp[-1] = GF ( - FG ( sp[-1] ) );
 	    break;
 	case mex::ABS:
-	{
-	    CHECK1;
-	    sp[-1] = GF ( fabs ( FG ( sp[-1] ) ) );
+	    A1F ( fabs );
+	case mex::LOG:
+	    A1F ( log );
+	case mex::LOG10:
+	    A1F ( log10 );
+	case mex::EXP:
+	    A1F ( exp );
+	case mex::EXP10:
+	    A1F ( exp10 );
+	case mex::SIN:
+	    A1F ( sin );
+	case mex::COS:
+	    A1F ( cos );
+	case mex::TAN:
+	    A1F ( tan );
+	case mex::ASIN:
+	    A1F ( asin );
+	case mex::ACOS:
+	    A1F ( acos );
+	case mex::ATAN:
+	    A1F ( atan );
+	case mex::ATAN2:
+	    CHECK2;
+	    sp[-2] = GF
+	        ( atan2 ( FG ( sp[-2] ),
+		          FG ( sp[-1] ) ) );
+	    -- sp;
 	    break;
-	}
+	case mex::ATAN2R:
+	    CHECK2;
+	    sp[-2] = GF
+	        ( atan2 ( FG ( sp[-1] ),
+		          FG ( sp[-2] ) ) );
+	    -- sp;
+	    break;
+	case mex::POWI:
+	    CHECK1;
+	    sp[-1] = GF
+	        ( powi ( FG ( sp[-1] ), pc->immedA ) );
+	    break;
 	case mex::PUSH:
 	{
 	    int i = pc->immedA;
@@ -111,6 +261,13 @@ static bool optimized_run_process ( mex::process p )
 	        goto ERROR_EXIT;
 	    * sp = sp[-i-1];
 	    ++ sp;
+	    break;
+	}
+	case mex::PUSHI:
+	{
+	    if ( sp >= spend )
+	        goto ERROR_EXIT;
+	    * sp ++ = pc->immedD;
 	    break;
 	}
 	case mex::PUSHG:
@@ -158,33 +315,13 @@ static bool optimized_run_process ( mex::process p )
 	    spbegin[i] = * sp;
 	    break;
 	}
-	case mex::BEG:
-	case mex::NOP:
-	    break;
-	case mex::END:
-	{
-	    int i = pc->immedA;
-	    if ( i > sp - spbegin )
-	        goto ERROR_EXIT;
-	    sp -= i;
-	    break;
-	}
-	case mex::BEGL:
-	{
-	    int i = pc->immedB;
-	    if ( i > sp - spbegin )
-	        goto ERROR_EXIT;
-	    if ( i > spend - sp )
-	        goto ERROR_EXIT;
-	    min::gen * q1 = sp - i;
-	    min::gen * q2 = sp;
-	    while ( q1 < q2 )
-		* sp ++ = * q1 ++;
-	    break;
-	}
 	case mex::JMP:
 	case mex::JMPEQ:
 	case mex::JMPNE:
+	case mex::JMPLT:
+	case mex::JMPLEQ:
+	case mex::JMPGT:
+	case mex::JMPGEQ:
 	{
 	    int immedA = pc->immedA;
 	    int immedB = pc->immedB;
@@ -217,6 +354,18 @@ static bool optimized_run_process ( mex::process p )
 		case mex::JMPNE:
 		    execute_jmp = ( arg1 != arg2 );
 		    break;
+		case mex::JMPLT:
+		    execute_jmp = ( arg1 < arg2 );
+		    break;
+		case mex::JMPLEQ:
+		    execute_jmp = ( arg1 <= arg2 );
+		    break;
+		case mex::JMPGT:
+		    execute_jmp = ( arg1 > arg2 );
+		    break;
+		case mex::JMPGEQ:
+		    execute_jmp = ( arg1 >= arg2 );
+		    break;
 		}
 	    }
 	    if ( immedA > new_sp - spbegin
@@ -238,6 +387,30 @@ static bool optimized_run_process ( mex::process p )
 
 	    pc += immedC;
 	    -- pc;
+	    break;
+	}
+	case mex::BEG:
+	case mex::NOP:
+	    break;
+	case mex::END:
+	{
+	    int i = pc->immedA;
+	    if ( i > sp - spbegin )
+	        goto ERROR_EXIT;
+	    sp -= i;
+	    break;
+	}
+	case mex::BEGL:
+	{
+	    int i = pc->immedB;
+	    if ( i > sp - spbegin )
+	        goto ERROR_EXIT;
+	    if ( i > spend - sp )
+	        goto ERROR_EXIT;
+	    min::gen * q1 = sp - i;
+	    min::gen * q2 = sp;
+	    while ( q1 < q2 )
+		* sp ++ = * q1 ++;
 	    break;
 	}
 	case mex::ENDL:
@@ -660,6 +833,9 @@ bool mex::run_process ( mex::process p )
 	    case mex::ATAN2R:
 	        result = atan2 ( arg1, arg2 );
 		break;
+	    case mex::POWI:
+	        result = powi ( arg1, pc->immedA );
+		break;
 	    }
 
 	    int excepts =
@@ -679,15 +855,20 @@ bool mex::run_process ( mex::process p )
 		    p->printer << min::bol
 			       << "!!! ERROR: ";
 		    if ( excepts & FE_INVALID )
-			p->printer << "invalid operand(s)";
+			p->printer
+			    << "invalid operand(s)";
 		    else if ( excepts & FE_DIVBYZERO )
-			p->printer << "divide by zero";
+			p->printer
+			    << "divide by zero";
 		    else if ( excepts & FE_OVERFLOW )
-			p->printer << "numeric overflow";
+			p->printer
+			    << "numeric overflow";
 		    else if ( excepts & FE_INEXACT )
-			p->printer << "inexact numeric result";
+			p->printer
+			    << "inexact numeric result";
 		    else if ( excepts & FE_UNDERFLOW )
-			p->printer << "numeric underflow";
+			p->printer
+			    << "numeric underflow";
 		    else
 			p->printer <<
 			    "unknown numeric exception";
@@ -701,7 +882,8 @@ bool mex::run_process ( mex::process p )
 
 		if ( pp
 		     &&
-		     ( trace_flags & mex::TRACE_PHRASE ) )
+		     (   trace_flags
+		       & mex::TRACE_PHRASE ) )
 		    min::print_phrase_lines
 		        ( p->printer,
 			  m->position->file,
@@ -824,7 +1006,8 @@ bool mex::run_process ( mex::process p )
 
 		if ( pp
 		     &&
-		     ( trace_flags & mex::TRACE_PHRASE ) )
+		     (   trace_flags
+		       & mex::TRACE_PHRASE ) )
 		    min::print_phrase_lines
 		        ( p->printer,
 			  m->position->file,
@@ -848,7 +1031,8 @@ bool mex::run_process ( mex::process p )
 			<< ": ";
 
 		min::gen tinfo  = min::MISSING();
-		if ( p->pc.index < m->trace_info->length)
+		if (   p->pc.index
+		     < m->trace_info->length)
 		    tinfo = m->trace_info[p->pc.index];
 		min::gen name = min::MISSING();
 		min::uns32 tinfo_length = 0;
@@ -884,7 +1068,7 @@ bool mex::run_process ( mex::process p )
 		if ( tinfo_length > 1
 		     &&
 		     p->trace_function != NULL )
-		    (p->trace_function) ( p, tinfo );     
+		    (* p->trace_function) ( p, tinfo );
 
 		p->printer << min::eom;
 
@@ -1082,7 +1266,8 @@ bool mex::run_process ( mex::process p )
 
 		if ( pp
 		     &&
-		     ( trace_flags & mex::TRACE_PHRASE ) )
+		     (   trace_flags
+		       & mex::TRACE_PHRASE ) )
 		    min::print_phrase_lines
 		        ( p->printer,
 			  m->position->file,
@@ -1106,7 +1291,8 @@ bool mex::run_process ( mex::process p )
 			<< ": ";
 
 		min::gen tinfo  = min::MISSING();
-		if ( p->pc.index < m->trace_info->length)
+		if (   p->pc.index
+		     < m->trace_info->length )
 		    tinfo = m->trace_info[p->pc.index];
 		min::gen name = min::MISSING();
 		min::uns32 tinfo_length = 0;
@@ -1128,7 +1314,8 @@ bool mex::run_process ( mex::process p )
 		if ( tinfo_length > 1
 		     &&
 		     p->trace_function != NULL )
-		    (p->trace_function) ( p, tinfo );     
+		    (* p->trace_function)
+		        ( p, tinfo );     
 
 		p->printer << min::eom;
 
@@ -1278,19 +1465,23 @@ FATAL:
 	    ( q, ", IMMEDC = %u", instr->immedC );
     }
 
-    p->printer << min::bol << "FATAL ERROR: " << min::bom
+    p->printer << min::bol << "FATAL ERROR: "
+               << min::bom
                << message
 	       << min::indent
 	       << "PC->MODULE = "
 	       << ( p->pc.module == min::NULL_STUB ?
-	            min::new_str_gen ( "<NULL MODULE>"  ):
+	            min::new_str_gen
+		        ( "<NULL MODULE>"  ):
 		       p->pc.module->position->file
 		    == min::NULL_STUB ?
-		    min::new_str_gen ( "<NULL FILE>" ):
+		    min::new_str_gen
+		        ( "<NULL FILE>" ):
 		       p->pc.module->position->file
 		                   ->file_name
 		    == min::MISSING() ?
-		    min::new_str_gen ( "<NO FILE NAME>" ):
+		    min::new_str_gen
+		        ( "<NO FILE NAME>" ):
 		    p->pc.module->position->file
 		                ->file_name )
 	       << ", PC INDEX = " << p->pc.index

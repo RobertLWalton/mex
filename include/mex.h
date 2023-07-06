@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Jul  6 04:59:48 EDT 2023
+// Date:	Thu Jul  6 17:55:00 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -40,36 +40,37 @@ struct instr {
 // table in mex.cc.
 //
 enum op_code {
-    ADD = 1,		MUL = 2,
-    ADDI = 3,		MULI = 4,
-    SUB = 5,		SUBR = 6,
-    SUBI = 7,		SUBRI = 8,
-    DIV = 9,		DIVR = 10,
-    DIVI = 11,		DIVRI = 12,
-    MOD = 13,		MODR = 14,
-    MODI = 15,		MODRI = 16,
-    FLOOR = 17,		CEIL = 18,
-    TRUNC = 19,		ROUND = 20,
-    NEG = 21,		ABS = 22,
-    LOG = 23,		EXP = 24,
-    LOG10 = 25,		EXP10 = 26,
-    SIN = 27,		ASIN = 28,
-    COS = 29,		ACOS = 30,
-    TAN = 31,		ATAN = 32,
-    ATAN2 = 33,		ATAN2R = 34,
-    POWER,
-    PUSH, PUSHI, PUSHG, PUSHM,
-    POP, POPM,
-    JMP,
-    JMPEQ, JMPNE,
-    JMPLT, JMPLEQ,
-    JMPGT, JMPGEQ,
-    BEG, NOP,
-    END,
-    BEGL,
-    ENDL, CONT,
-    SET_TRACE,
-    ERROR,
+    ADD    = 1,		MUL    = 2,
+    ADDI   = 3,		MULI   = 4,
+    SUB    = 5,		SUBR   = 6,
+    SUBI   = 7,		SUBRI  = 8,
+    DIV    = 9,		DIVR   = 10,
+    DIVI   = 11,	DIVRI  = 12,
+    MOD    = 13,	MODR   = 14,
+    MODI   = 15,	MODRI  = 16,
+    FLOOR  = 17,	CEIL   = 18,
+    TRUNC  = 19,	ROUND  = 20,
+    NEG    = 21,	ABS    = 22,
+    LOG    = 23,	EXP    = 24,
+    LOG10  = 25,	EXP10  = 26,
+    SIN    = 27,	ASIN   = 28,
+    COS    = 29,	ACOS   = 30,
+    TAN    = 31,	ATAN   = 32,
+    ATAN2  = 33,	ATAN2R = 34,
+    POWI   = 35,
+    PUSH   = 36,	PUSHI  = 37,
+    PUSHG  = 38,	PUSHM  = 39,
+    POP    = 40,	POPM   = 41,
+    JMP    = 42,
+    JMPEQ  = 43,	JMPNE  = 44,
+    JMPLT  = 45,	JMPLEQ = 46,
+    JMPGT  = 47,	JMPGEQ = 48,
+    BEG    = 49,	NOP    = 50,
+    END    = 51,
+    BEGL   = 52,
+    ENDL   = 53,	CONT   = 54,
+    SET_TRACE = 55,
+    ERROR  = 56,
     BEGF, ENDF,
     CALL, CALLG,
     RET,
@@ -103,7 +104,8 @@ typedef min::packed_vec_insptr
                <mex::instr, mex::module_header>
 	       module;
 
-MIN_REF ( min::phrase_position_vec, position, mex::module )
+MIN_REF ( min::phrase_position_vec, position,
+                                    mex::module )
 MIN_REF ( min::packed_vec_ptr<min::gen>, globals,
                                          mex::module )
 MIN_REF ( min::gen, interface, mex::module )
