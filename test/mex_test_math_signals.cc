@@ -2,11 +2,16 @@
 //
 // File:	mex_test_math_signals.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Jul  6 03:13:02 EDT 2023
+// Date:	Thu Jul  6 05:31:03 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
 // for this program.
+
+// WARNING: DO NOT OPTIMIZE.
+// If the compiler computes SNAN + 5.0 ===> nan at
+// compile time, NO invalid exception will be raised
+// at runtime.
 
 # include <iostream>
 # include <cfenv>
@@ -80,6 +85,8 @@ int main ( int argc, const char * argv[] )
     TEST1 ( -, SNAN );
     TEST1 ( fabs, 5.0 );
     TEST1 ( fabs, SNAN );
+    TEST1 ( round, 5.5 );
+    TEST1 ( round, SNAN );
 
     return 0;
 }

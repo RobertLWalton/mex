@@ -250,7 +250,7 @@
 
 \author{Robert L. Walton}
 
-\date{July 5, 2023}
+\date{July 6, 2023}
  
 \maketitle
 
@@ -897,32 +897,25 @@ are explained in Tracing and Exceptions, \itemref{TRACING-AND-EXCEPTIONS}.
     & Replace the top value by the round-toward-minus-infinity \\
     & remainder of \TT{immedD} divided by the top value.
 \\\hline
-\TT{FLOOR}/\TT{CEILING}
+\TT{FLOOR}/\TT{CEIL}
     & Replace the top value by the an integer equal to the \\
     & top value rounded toward minus/plus infinity.
 \\\hline
 \TT{TRUNC}/\TT{ROUND}
     & Replace the top value by the an integer equal to the \\
-    & top value rounded toward zero/the-nearest-integer.
+    & top value rounded toward zero/the-nearest-integer \\
+    & with nearest halfway cases rounded away from zero.
 \\\hline
 \TT{NEG}/\TT{ABS}
     & Replace the top value by its negation/absolute-value.
 \\\hline
-\TT{LOG10}/\TT{LOGE}
-    & Replace the top value by its log base 10/e.
+\TT{LOG}/\TT{LOG10}
+    & Replace the top value by its log base e/10.
 \\\hline
-\TT{LOG}/\TT{LOGR}
-    & Pop 2 values, then push the log of the first/second popped \\
-    & base the second/first popped.
+\TT{EXP}/\TT{EXP10}
+    & Replace the top value by e/10 to the top value power.
 \\\hline
-\TT{EXP10}/\TT{EXPE}
-    & Replace the top value by 10/e to the top value power.
-\\\hline
-\TT{EXP}/\TT{EXPR}
-    & Pop 2 values, then push the first/second popped to the \\
-    & second/first popped power.
-\\\hline
-\TT{COS}/\TT{SIN}/\TT{TAN}
+\TT{SIN}/\TT{COS}/\TT{TAN}
     & Replace the top value by its sin/cos/tan.
 \\\hline
 \TT{ASIN}/\TT{ACOS}/\TT{TAN}

@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Jul  5 22:18:08 EDT 2023
+// Date:	Thu Jul  6 04:58:12 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -586,11 +586,79 @@ bool mex::run_process ( mex::process p )
 	    case mex::ADDI:
 	        result = arg1 + arg2;
 		break;
+	    case mex::MUL:
+	    case mex::MULI:
+	        result = arg1 * arg2;
+		break;
 	    case mex::SUB:
 	    case mex::SUBI:
 	    case mex::SUBR:
 	    case mex::SUBRI:
-	        result = arg1 + arg2;
+	        result = arg1 - arg2;
+		break;
+	    case mex::DIV:
+	    case mex::DIVI:
+	    case mex::DIVR:
+	    case mex::DIVRI:
+	        result = arg1 / arg2;
+		break;
+	    case mex::MOD:
+	    case mex::MODI:
+	    case mex::MODR:
+	    case mex::MODRI:
+	        result = fmod ( arg1, arg2 );
+		break;
+	    case mex::FLOOR:
+	        result = floor ( arg1 );
+		break;
+	    case mex::CEIL:
+	        result = ceil ( arg1 );
+		break;
+	    case mex::ROUND:
+	        result = rint ( arg1 );
+		break;
+	    case mex::TRUNC:
+	        result = trunc ( arg1 );
+		break;
+	    case mex::NEG:
+	        result = - arg1;
+		break;
+	    case mex::ABS:
+	        result = fabs ( arg1 );
+		break;
+	    case mex::LOG:
+	        result = log ( arg1 );
+		break;
+	    case mex::LOG10:
+	        result = log10 ( arg1 );
+		break;
+	    case mex::EXP:
+	        result = exp ( arg1 );
+		break;
+	    case mex::EXP10:
+	        result = exp10 ( arg1 );
+		break;
+	    case mex::SIN:
+	        result = sin ( arg1 );
+		break;
+	    case mex::COS:
+	        result = cos ( arg1 );
+		break;
+	    case mex::TAN:
+	        result = tan ( arg1 );
+		break;
+	    case mex::ASIN:
+	        result = asin ( arg1 );
+		break;
+	    case mex::ACOS:
+	        result = acos ( arg1 );
+		break;
+	    case mex::ATAN:
+	        result = atan ( arg1 );
+		break;
+	    case mex::ATAN2:
+	    case mex::ATAN2R:
+	        result = atan2 ( arg1, arg2 );
 		break;
 	    }
 

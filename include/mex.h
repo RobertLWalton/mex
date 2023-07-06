@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Jul  5 18:03:33 EDT 2023
+// Date:	Thu Jul  6 04:59:48 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -44,20 +44,19 @@ enum op_code {
     ADDI = 3,		MULI = 4,
     SUB = 5,		SUBR = 6,
     SUBI = 7,		SUBRI = 8,
-    DIV = 10,		DIVR = 11,
-    DIVI = 12,		DIVRI = 13,
-    MOD, MODR,
-    MODI, MODRI,
-    FLOOR, CEILING,
-    TRUNC, ROUND,
-    NEG, ABS,
-    LOG10, LOGE,
-    LOG, LOGR,
-    EXP10, EXPE,
-    EXP, EXPR,
-    SIN, COS, TAN,
-    ASIN, ACOS, ATAN,
-    ATAN2, ATAN2R,
+    DIV = 9,		DIVR = 10,
+    DIVI = 11,		DIVRI = 12,
+    MOD = 13,		MODR = 14,
+    MODI = 15,		MODRI = 16,
+    FLOOR = 17,		CEIL = 18,
+    TRUNC = 19,		ROUND = 20,
+    NEG = 21,		ABS = 22,
+    LOG = 23,		EXP = 24,
+    LOG10 = 25,		EXP10 = 26,
+    SIN = 27,		ASIN = 28,
+    COS = 29,		ACOS = 30,
+    TAN = 31,		ATAN = 32,
+    ATAN2 = 33,		ATAN2R = 34,
     POWER,
     PUSH, PUSHI, PUSHG, PUSHM,
     POP, POPM,
