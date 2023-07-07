@@ -1520,7 +1520,8 @@ A \key{name} is a lexeme beginning with a letter that is
 \underline{not} a number (\TT{nan}, \TT{InF}, etc. are numbers
 and not names).
 
-\subsection{Syntax}
+\subsection{MEXAS Syntax}
+\label{MEXAS-SYNTAX}
 
 A MEXAS program consists of statements which are instructions
 or declarations, each encoded as a sequence of lexemes on
@@ -1543,6 +1544,7 @@ characters.
 
 
 \subsection{Lexical Level and Depth}
+\label{LEXICAL-LEVEL-AND-DEPTH}
 
 Functions are bracketted with \TT{BEGF} and \TT{ENDF}
 and have a \key{lexical level}.  The lexical level of a function
@@ -1570,6 +1572,201 @@ is that of the smallest block containing the instruction.
 The depth of instrucions in a container
 that are \underline{not} inside any block that is in the container
 is \TT{0}.
+
+\subsection{Assembler Stacks}
+\label{ASSEMBLER-STACKS}
+
+The assembler maintains several stacks during assembly.
+
+The assembler's \key{variable stack} mirrors the stack of
+the process during execution.  Each variable stack
+element specifies the lexical level and depth of the
+instruction that created the stack element, and optionally
+assigns a name to the stack element.  These names are the
+variable names of the assembly, and can be used in
+push and pop instructions to name stack elements read or
+written.
+
+When assembled, most instructions manipulate the variable
+stack just as they will manipulate the process stack
+when executed.  The \TT{BEG} instruction does nothing
+but when the \TT{END} instruction is assembled, it pops
+from the end of the variable stack all elements with
+the same lexical level and depth as the \TT{END} instruction.
+\TT{BEGL} and \TT{ENDL} behave similarly, except that
+\TT{BEGL} pushes next variables (see Next Variables and Loops,
+\itemref{NEXT-VARIABLES-AND-LOOPS}) into the variable stack.
+\TT{BEGF} and \TT{ENDF} behave similarly except that \TT{BEGF}
+pushes arguments into the variable stack.
+
+Two instructions that treat the variable stack very differently
+from a process stack are \TT{CALL} and \TT{JMP}.  \TT{CALL}
+pops arguments from the variable stack and pushes returned values.
+\TT{JMP} does nothing to the variable stack, and the conditional
+jumps \TT{JMP\ldots} just pops two elements.
+
+The assembler's \key{function stack} specifies the functions that
+can be called by a \TT{CALL} instruction.  \TT{BEGF} pushs
+a element with a name, lexical level, and depth, and behaves
+for the function stack like \TT{PUSH} does for the variable stack.
+\TT{END\ldots} instructions pop the function stack in the same manner as
+they pop the variable stack.
+
+At the end of assembly, the variable and function stacks hold
+elements of lexical level 0 and depth 0.  These stacks are then
+saved as the module's interface that allows global variables
+and lexical level 1 functions of the module to be accessed by
+other modules.
+
+Lastly the assembler maintains a \key{block stack} whose only
+purpose is to check that \TT{BEG\ldots} and \TT{END\ldots} instructions
+occur in matching pairs.
+
+\subsection{MEXAS Instructions}
+\label{MEXAS-INSTRUCTIONS}
+
+In the following decription of MEXAS instruction syntax and
+assembly actions:
+
+\begin{enumerate}
+\item Unless otherwise specified, when an instruction pushes an
+element into the variable or function stacks, the element is given
+the lexical level and depth of the instruction.
+\item A \emkey{variable-name} is a name of a variable stack element.
+If two elements have the same {\em variable-name}, the element nearer
+the top of the stack hides the element lower down.
+\item A \emkey{function-name} is a name of a function stack element.
+If two elements have the same {\em function-name}, the element nearer
+the top of the stack hides the element lower down.
+\item An \emkey{aop} is an arithmetic intruction operation code,
+as in Figure~\itemref{ARITHMETIC-INSTRUCTIONS}.
+\item When an instruction pushes an element in an assembler stack,
+the element is assigned the lexical level and depth of the instruction.
+\item Modules are named by the name of the file assembled to produce
+the module, with the suffix \TT{.mex} deleted.  Such a name is
+a \emkey{module-name}.
+\item When a {\em variable-name} is assigned to a new variable stack
+element, `\TT{*}' can be used as the {\em variable-name} to indicate
+that the element has no name.
+\item The operands {\em immedA}, {\em immedB}, and {\em immedC},
+if given, must be integers in the range $[0,2^{16})$.
+\end{enumerate}
+
+{\em aop} {\em variable-name}\QMARK{}
+\begin{indpar}
+The same number of elements are popped from the variable stack
+as would be popped from the process stack during execution of the
+arithmetic instruction {\em aop}.
+Then one element is pushed.  If {\em variable-name} is given, it become
+the name of the pushed element, which otherwise has no name.
+\end{indpar}
+
+\TT{PUSH} {\em variable-name}
+\begin{indpar}
+At run-time, pushes into the process stack a copy of the named
+variable.  At assembly time, pushes into the variable stack a
+duplicate of the named variable stack element.
+
+The named variable stack element must have the same lexical
+level as the \TT{PUSH} instruction.
+\end{indpar}
+
+\TT{PUSHI} {\em number} {\em variable-name}\QMARK{}
+\begin{indpar}
+At run-time, pushes into the process stack a copy of the {\em number}.
+At assembly time, pushes into the variable stack an element
+with the given {\em variable-name}, if provided.
+\end{indpar}
+
+\TT{PUSHG} {\em module-name} {\em variable-name}
+           {\em new-variable-name}\QMARK{}
+\begin{indpar}
+At run-time, pushes into the process stack a copy of the named
+global variable in the named module.
+At assembly time, pushes into the variable stack an
+element with the {\em new-variable-name} if given, or 
+the {\em variable-name} otherwise.
+\end{indpar}
+
+\TT{PUSHM} {\em variable-name}
+           {\em new-variable-name}\QMARK{}
+\begin{indpar}
+At run-time, pushes into the process stack a copy of the named
+lexical level 0 variable.
+At assembly time, pushes into the variable stack an
+element with the {\em new-variable-name} if given, or 
+the {\em variable-name} otherwise.
+
+The search of an element with the given {\em variable-name}
+is restricted to variable stack elements with lexical level 0.
+\end{indpar}
+
+\TT{POP} {\em variable-name}
+\begin{indpar}
+At run-time, pops the process stack and stores the value popped
+into the named variable.
+At assembly time, pops the variable stack.
+
+The named variable stack element must have the same lexical
+level as the \TT{PUSH} instruction.
+\end{indpar}
+
+\TT{POPM} {\em variable-name}
+\begin{indpar}
+At run-time, pops the process stack and stores the value popped
+in the named lexical level 0 variable.
+At assembly time, pops the variable stack.
+
+The search of an element with the given {\em variable-name}
+is restricted to variable stack elements with lexical level 0.
+\end{indpar}
+
+\TT{JMP}/\TT{BEG}/\TT{NOP}
+\begin{indpar}
+At run-time these instruction's actions are as described in
+Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}.  At assembly-time,
+these instructions do nothing.
+\end{indpar}
+
+\TT{BEGL} {\em immedB}
+\begin{indpar}
+At run-time this instruction's action is as described in
+Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}.  At assembly-time,
+duplicates of the top {\em immedB} stack entries are 
+pushed into the variable stack, but if a stack element being
+duplicated has name $N$, then its duplicate is given name
+\TT{next-}$N$.
+\end{indpar}
+
+\TT{END}/\TT{ENDL}
+\begin{indpar}
+At run-time these instruction's actions are as described in
+Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}.  At assembly-time,
+pop from the variable and function stacks all element with the
+same lexical level and depth as the \TT{END}/\TT{ENDL}
+instruction.
+\end{indpar}
+
+\TT{SET-TRACE} {\em trace-option}\STAR{}
+\begin{indpar}
+At run-time set the process \TT{trace\_flags} parameter to the
+flags given by the options (i.e., \TT{TRACE},
+\TT{TRACE\_PHRASE}, \TT{TRACE\_NOJMP}).  At assembly-time,
+do nothing.
+\end{indpar}
+
+\TT{ERROR} {\em immedA}\QMARK{}
+\begin{indpar}
+If {\em immedA} is given, pop {\em immedA} element from the
+variable stack at assembly-time and from the process stack
+at run-time ({\em immedA} may be \TT{0}).  
+If {\em immedA} is \underline{not} given, terminate the process
+at run-time and do nothing at assembly-time.
+\end{indpar}
+
+
+
+
 
 \clearpage
 
