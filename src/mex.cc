@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Jul  6 18:28:42 EDT 2023
+// Date:	Fri Jul  7 03:57:03 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -462,6 +462,48 @@ static bool optimized_run_process ( mex::process p )
 	    pc += immedC;
 	    -- pc;
 	}
+	case mex::ENDF:
+	{
+	    int immedA = pc->immedA;
+	    int immedB = pc->immedB;
+	    int rp = p->rp;
+	    if ( immedA > sp - spbegin )
+	        goto ERROR_EXIT;
+	    if ( immedB > mex::max_lexical_depth )
+	        goto ERROR_EXIT;
+	    if ( rp == 0 )
+	        goto ERROR_EXIT;
+	    const mex::ret & ret = p->return_stack[rp];
+	    mex::module em = ret.saved_pc.module;
+	    min::uns32 new_pc = ret.saved_pc.index;
+	    if ( em == min::NULL_STUB )
+	    {
+	        if ( new_pc != 0 )
+		    goto ERROR_EXIT;
+	    }
+	    else
+	    {
+	        if ( new_pc > em->length )
+		    goto ERROR_EXIT;
+	    }
+	    min::gen * new_sp = sp - immedA;
+	    min::uns32 new_fp = ret.saved_fp;
+	    if ( new_fp > new_sp - spbegin )
+		goto ERROR_EXIT;
+
+	    mex::set_pc ( p, ret.saved_pc );
+	    p->fp[immedB] = new_fp;
+	    -- p->rp;
+	    sp -= immedA;
+	    if ( em == min::NULL_STUB )
+	        goto RET_EXIT;
+
+            m = em;
+	    pcbegin = ~ ( m + 0 );
+	    pc = pcbegin + new_pc;
+	    pcend = pcbegin + m->length;
+	    -- pc;
+	}
 
 	} // end switch ( op_code )
 
@@ -472,6 +514,7 @@ ERROR_EXIT:
     result = false;
 EXIT:
     * (min::uns32 *) & p->pc.index = pc - pcbegin;
+RET_EXIT:
     p->sp = sp - spbegin;
     p->length = p->sp + 1;
     p->excepts_accumulator |= 
@@ -608,6 +651,10 @@ bool mex::run_process ( mex::process p )
     //
 #   define SAVE \
 	* (min::uns32 *) & p->pc.index = pc - pcbegin; \
+	p->sp = p->length = sp - spbegin; \
+	p->counter = p->limit - limit;
+
+#   define RET_SAVE \
 	p->sp = p->length = sp - spbegin; \
 	p->counter = p->limit - limit;
 
@@ -1272,6 +1319,36 @@ bool mex::run_process ( mex::process p )
 		    message = "immedB too large";
 		    goto INNER_FATAL;
 		}
+	    case mex::ENDF:
+	    {
+		int immedA = pc->immedA;
+		int immedB = pc->immedB;
+		int rp = p->rp;
+		if ( immedA > sp - spbegin )
+		    goto INNER_FATAL;
+		if ( immedB > mex::max_lexical_depth )
+		    goto INNER_FATAL;
+		if ( rp == 0 )
+		    goto INNER_FATAL;
+		const mex::ret & ret =
+		    p->return_stack[rp];
+		mex::module em = ret.saved_pc.module;
+		min::uns32 new_pc = ret.saved_pc.index;
+		if ( em == min::NULL_STUB )
+		{
+		    if ( new_pc != 0 )
+			goto INNER_FATAL;
+		}
+		else
+		{
+		    if ( new_pc > em->length )
+			goto INNER_FATAL;
+		}
+		min::gen * new_sp = sp - immedA;
+		min::uns32 new_fp = ret.saved_fp;
+		if ( new_fp > new_sp - spbegin )
+		    goto INNER_FATAL;
+	    }
 
 	    } // end switch ( op_code )
 
@@ -1446,6 +1523,34 @@ bool mex::run_process ( mex::process p )
 		pc += immedC;
 		-- pc;
 		break;
+	    }
+	    case mex::ENDF:
+	    {
+		int immedA = pc->immedA;
+		int immedB = pc->immedB;
+		int rp = p->rp;
+		const mex::ret & ret =
+		    p->return_stack[rp];
+		mex::module em = ret.saved_pc.module;
+		min::uns32 new_pc = ret.saved_pc.index;
+		min::uns32 new_fp = ret.saved_fp;
+
+		mex::set_pc ( p, ret.saved_pc );
+		p->fp[immedB] = new_fp;
+		-- p->rp;
+		sp -= immedA;
+		if ( em == min::NULL_STUB )
+		{
+		    RET_SAVE;
+		    p->finish_state = mex::CALL_END;
+		    return true;
+		}
+
+		m = em;
+		pcbegin = ~ ( m + 0 );
+		pc = pcbegin + new_pc;
+		pcend = pcbegin + m->length;
+		-- pc;
 	    }
 
 	    } // end switch ( op_code )
