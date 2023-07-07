@@ -73,18 +73,6 @@
 
 % End \tableofcontents surgery.
 
-\newsavebox{\LAQUOTEBOX}
-\begin{lrbox}{\LAQUOTEBOX}
-{\tt \guillemotleft}
-\end{lrbox}
-\newcommand{\LAQUOTE}{\usebox{\LAQUOTEBOX}}
-
-\newsavebox{\RAQUOTEBOX}
-\begin{lrbox}{\RAQUOTEBOX}
-{\tt \guillemotright}
-\end{lrbox}
-\newcommand{\RAQUOTE}{\usebox{\RAQUOTEBOX}}
-
 \newcommand{\CN}[2]%	Change Notice.
     {\hspace*{0in}\marginpar{\sloppy \raggedright \it \footnotesize
      $^{\mbox{#1}}$#2}}
@@ -250,7 +238,7 @@
 
 \author{Robert L. Walton}
 
-\date{July 6, 2023}
+\date{July 7, 2023}
  
 \maketitle
 
@@ -1511,6 +1499,77 @@ you can add to the end of \TT{m}
 and call \TT{run\_process} again to continue the execution of the code
 of \TT{m} (i.e., execute the added code).
 \end{enumerate}
+
+\section{MEXAS Language}
+\label{MEXAS Language}
+
+\key{MEXAS} is an assembly language for MEX.  The \ttkey{mexas}
+assembler can be use as a MEX compiler.
+
+\subsection{Lexemes}
+MEXAS programs are written in ASCII.  Control characters other
+than whitespace are forbidden.
+
+A MEXAS \key{lexeme} is a sequence of non-whitespace characters
+separated by whitespace.
+
+A \key{number} is a lexeme acceptable as an IEEE floating point
+number to the POSIX \TT{strtod} function.
+
+A \key{name} is a lexeme beginning with a letter that is
+\underline{not} a number (\TT{nan}, \TT{InF}, etc. are numbers
+and not names).
+
+\subsection{Syntax}
+
+A MEXAS program consists of statements which are instructions
+or declarations, each encoded as a sequence of lexemes on
+a line.  A line ending with the `\ttkey{\textbackslash}'
+is \key{continued} on the next line (the `\textbackslash' is
+otherwise ignored).
+If the first lexeme on a line is `\ttkey{//}', the entire line
+is a \key{comment line} and is ignored.  Blank lines are ignored.
+
+Instructions begin with an op code, and the program syntax
+of instructions is that of a code vector: see Code Vectors,
+\itemref{CODE-VECTORS}.
+
+Declarations associate names with stack locations and code
+locations.
+
+When `\key{::=}' is used in a syntax equation, the
+items of the equation are lexemes and \underline{not}
+characters.
+
+
+\subsection{Lexical Level and Depth}
+
+Functions are bracketted with \TT{BEGF} and \TT{ENDF}
+and have a \key{lexical level}.  The lexical level of a function
+that is \underline{not} inside any other function is \TT{1}.
+The lexical level of any other function $F$ is one plus the lexical
+level of the smallest function containing $F$.
+The lexical level of an instruction
+is that of the smallest function containing the instruction.
+The lexical level of instrucions
+that are \underline{not} inside any function is \TT{0}.
+
+Code also contains (non-function) \skey{block}s that are
+bracketted with either \TT{BEG} and \TT{END} or with
+\TT{BEGL} and \TT{ENDL}.  A blocks has a \key{container}
+and within the container a \key{depth}.
+A block not inside a function has the module as its container.
+The container of a block inside a function is the smallest
+function containing the block.
+
+The depth of a block that is not inside any other block with
+the same container is \TT{1}.  The depth of any other block $B$
+is one plus the depth of the smallest block containing $B$.
+The dept of an instruction
+is that of the smallest block containing the instruction.
+The depth of instrucions in a container
+that are \underline{not} inside any block that is in the container
+is \TT{0}.
 
 \clearpage
 
