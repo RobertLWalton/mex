@@ -940,6 +940,9 @@ are explained in Tracing and Exceptions, \itemref{TRACING-AND-EXCEPTIONS}.
       so \TT{immedA} = 0 \\
     & duplicates the top value).
 \\\hline
+\TT{PUSHL}
+    & Push the stack vector value with index \TT{fp[immedB] + immedA}.
+\\\hline
 \TT{PUSHI}
     & Push \TT{immedD} into the stack.
 \\\hline
@@ -1026,10 +1029,10 @@ are explained in Tracing and Exceptions, \itemref{TRACING-AND-EXCEPTIONS}.
     & \TT{saved\_fp} member of the value popped, and set the process \TT{pc} \\
     & member to the \TT{saved\_pc} member of the value popped.
 \\\hline
-\TT{CALL}
+\TT{CALLM}
     & Push a \TT{mex::ret} value into the return stack, setting its
       \TT{saved\_pc} \\
-    & member to point to the instruction after the \TT{CALL},
+    & member to point to the instruction after the \TT{CALLM},
       and setting its \\
     & \TT{nargs} member to \TT{immedA} and its \TT{nresults} member
       to \TT{immedB}.  \\
@@ -1046,7 +1049,7 @@ are explained in Tracing and Exceptions, \itemref{TRACING-AND-EXCEPTIONS}.
     & Lastly add +1 to the process current \TT{pc} to skip the \TT{BEGF}.
 \\\hline
 \TT{CALLG}
-    & Same as \TT{CALL} but also set the process's \TT{pc} member's 
+    & Same as \TT{CALLM} but also set the process's \TT{pc} member's 
                                                            \TT{module} \\
     & member from \TT{immedD} (which must convert to a \TT{mex::module}).
 \\\hline
@@ -1057,13 +1060,6 @@ are explained in Tracing and Exceptions, \itemref{TRACING-AND-EXCEPTIONS}.
     & and set the the process's \TT{pc} and \TT{fp[immedB]} members from the \\
     & \TT{saved\_pc} and \TT{saved\_fp} members of the value popped, \\
     & and check that the \TT{nresults} member equals \TT{immedC}.
-\\\hline
-\TT{PUSHL}
-    & Push the stack vector value with index \TT{fp[immedB] + immedA}.
-\\\hline
-\TT{POPL}
-    & Pop 1 value and store it into the stack vector element with index \\
-    & \TT{fp[immedB] + immedA}.
 \\\hline
 \TT{PUSHA}
     & Push the stack vector value with index \TT{fp[immedB] - immedA}.
@@ -1601,13 +1597,18 @@ the same lexical level and depth as the \TT{END} instruction.
 pushes arguments into the variable stack.
 
 Two instructions that treat the variable stack very differently
-from a process stack are \TT{CALL} and \TT{JMP}.  \TT{CALL}
+from a process stack are \TT{CALL\ldots} and \TT{JMP}.  \TT{CALL\ldots}
 pops arguments from the variable stack and pushes returned values.
 \TT{JMP} does nothing to the variable stack, and the conditional
 jumps \TT{JMP\ldots} just pops two elements.
 
+In order to locate arguments in the variable stack, the assembler variable
+\TT{FP[$L$]} is maintained when a \TT{BEGF} is assembled as the
+variable stack size after argument elements are pushed into the
+variable stack by \TT{BEGF}: see \TT{BEGF}, \pagref{BEGF}.
+
 The assembler's \key{function stack} specifies the functions that
-can be called by a \TT{CALL} instruction.  \TT{BEGF} pushs
+can be called by a \TT{CALL\ldots} instruction.  \TT{BEGF} pushs
 a element with a name, lexical level, and depth, and behaves
 for the function stack like \TT{PUSH\ldots} does for the variable stack.
 \TT{END\ldots} instructions pop the function stack in the same manner as
@@ -1743,32 +1744,6 @@ If {\em variable-name} is given, it becomes
 the name of the pushed element; otherwise the element has no name.
 \end{indpar}
 
-\TT{PUSHS} {\em variable-name}
-          {\em new-variable-name}\QMARK{}
-\begin{indpar}
-At run-time, pushes into the process stack a copy of the variable
-named in the variable stack.
-At assembly time, pushes into the variable stack an
-element whose name is the {\em new-variable-name} if that is
-given, or {\em variable-name} otherwise.
-
-The variable stack search for {\em variable-name} is restricted to
-elements with the same lexical level as the \TT{PUSH} instruction.
-\end{indpar}
-
-\TT{PUSHL} {\em variable-name}
-          {\em new-variable-name}\QMARK{}
-\begin{indpar}
-At run-time, pushes into the process stack a copy of the variable
-named in the variable stack.
-At assembly time, pushes into the variable stack an
-element whose name is the {\em new-variable-name} if that is
-given, or {\em variable-name} otherwise.
-
-The variable stack search for {\em variable-name} is \underline{not}
-restricted as to the lexical level of the elements searched.
-\end{indpar}
-
 \TT{PUSHM} {\em variable-name}
            {\em new-variable-name}\QMARK{}
 \begin{indpar}
@@ -1782,14 +1757,6 @@ The variable stack search for {\em variable-name} is restricted to
 elements with the lexical level \TT{0}.
 \end{indpar}
 
-\TT{PUSHI} {\em number} {\em variable-name}\QMARK{}
-\begin{indpar}
-At run-time, pushes into the process stack a copy of
-the {\em number}\pagnote{NUMBER}.
-At assembly time, pushes into the variable stack an element
-with the given {\em variable-name}, if provided.
-\end{indpar}
-
 \TT{PUSHG} {\em module-name} {\em variable-name}
            {\em new-variable-name}\QMARK{}
 \begin{indpar}
@@ -1798,6 +1765,9 @@ global variable in the named module.
 At assembly time, pushes into the variable stack an
 element with the {\em new-variable-name} if given, or 
 the {\em variable-name} otherwise.
+
+The variable stack searched for {\em variable-name} is the variable
+stack of the previously assembled module named.
 \end{indpar}
 
 \TT{PUSH} {\em variable-name}
@@ -1810,50 +1780,31 @@ element whose name is the {\em new-variable-name} if that is
 given, or {\em variable-name} otherwise.
 
 The search for {\em variable-name} begins with the entire variable
-stack and proceeds through the global variables of other modules
-in the order that the modules were compiled.
+stack and proceeds through the variable stacks of previously assembled modules
+in the order that the modules were assembled.  \TT{PUSH} assembles
+to the runtime instruction \TT{PUSHS}, \TT{PUSHL}, \TT{PUSHG},
+or \TT{PUSHA}, depending on the location of the variable.
 \end{indpar}
 
-\TT{POPS} {\em variable-name}
+\TT{PUSHI} {\em number} {\em variable-name}\QMARK{}
+\begin{indpar}
+At run-time, pushes into the process stack a copy of
+the {\em number}\pagnote{NUMBER}.
+At assembly time, pushes into the variable stack an element
+with the given {\em variable-name}, if provided.
+\end{indpar}
+
+\TT{POPS}/\TT{POP} {\em variable-name}
 \begin{indpar}
 At run-time, pops the process stack and stores the value popped
-into the named variable.
+into the variable names in the variable stack.
 At assembly time, pops the variable stack.
 
 The variable stack search for {\em variable-name} is restricted to
-elements with the same lexical level as the \TT{PUSH} instruction.
-\end{indpar}
+elements with the same lexical level as the \TT{POPS}/\TT{POP} instruction.
 
-\TT{POPL} {\em variable-name}
-\begin{indpar}
-At run-time, pops the process stack and stores the value popped
-into the named variable.
-At assembly time, pops the variable stack.
-
-The variable stack search for {\em variable-name} is \underline{not}
-restricted as to the lexical level of the elements searched.
-\end{indpar}
-
-\TT{POPM} {\em variable-name}
-\begin{indpar}
-At run-time, pops the process stack and stores the value popped
-in the named lexical level 0 variable.
-At assembly time, pops the variable stack.
-
-The variable stack search for {\em variable-name} is restricted to
-elements with lexical level \TT{0}.
-\end{indpar}
-
-\TT{POP} {\em variable-name}
-\begin{indpar}
-At run-time, pops the process stack and stores the value popped
-in the named variable.
-At assembly time, pops the variable stack.
-
-The search for {\em variable-name} begins with the entire variable
-stack and proceeds through the global variables of other modules
-in the order that the modules were compiled.
-
+Note: \TT{POPL}, \TT{POPG}, and \TT{POPA} do not exist as you cannot write
+      variables at a different lexical level or in a different module.
 \end{indpar}
 
 \TT{BEG}/\TT{NOP}/\TT{CONT}
@@ -1935,7 +1886,7 @@ process stack at run-time and from the variable stack
 at assembly-time.
 \end{indpar}
 
-\TT{BEGF} {\em function-name} {\em variable-name}\STAR{}
+\TT{BEGF}\label{BEGF} {\em function-name} {\em variable-name}\STAR{}
 \begin{indpar}
 At run-time this instruction's actions are as described in
 Figure~\itemref{FUNCTION-INSTRUCTIONS}.  At assembly-time,
@@ -1946,6 +1897,11 @@ represent the arguments to the function).
 It is \underline{not} necessary that the number of
 {\em variable-names} exactly equals the number of actual
 arguments.
+
+Lastly the instruction saves the current variable stack size
+in the assembly-time variable FP[$L$],
+where $L$ is the lexical level of the \TT{BEGF}
+instruction.  This is used to implement \TT{PUSHA}.
 \end{indpar}
 
 \TT{ENDF}
@@ -1956,7 +1912,7 @@ it pops from the variable and function stacks all elements with the
 same lexical level \TT{ENDF} instruction.
 \end{indpar}
 
-\TT{CALL} {\em function-name} {\em nargs} {\em variable-name}\STAR{}
+\TT{CALLM} {\em function-name} {\em nargs} {\em variable-name}\STAR{}
 \begin{indpar}
 At run-time this instruction's actions are as described in
 Figure~\itemref{FUNCTION-INSTRUCTIONS}.  At assembly-time,
@@ -1966,6 +1922,35 @@ and pushes into the stack one element for each {\em variable-name}
 The number of {\em variable-names} \underline{must} equal
 the number of actual results.
 same lexical level \TT{ENDF} instruction.
+
+The {\em function-name} is searched for in the function stack.
+\end{indpar}
+
+\TT{CALLG} {\em module-name} {\em function-name}
+           {\em nargs} {\em variable-name}\STAR{}
+\begin{indpar}
+At run-time this instruction's actions are as described in
+Figure~\itemref{FUNCTION-INSTRUCTIONS}.  At assembly-time,
+the actions are the same as for \TT{CALL}.
+
+The {\em function-name} is searched for in the function stack of
+the previously assembled module named.
+\end{indpar}
+
+\TT{CALL} {\em function-name}
+           {\em nargs} {\em variable-name}\STAR{}
+\begin{indpar}
+This instruction searches for the {\em function-name} first in the function
+stack and then in the function stacks of the previously assembled
+modules in the order in which they were assembled.  It then
+assembles to \TT{CALLM} or \TT{CALLG}.
+\end{indpar}
+
+\TT{RET} {\em nresults}
+\begin{indpar}
+At run-time this instruction's actions are as described in
+Figure~\itemref{FUNCTION-INSTRUCTIONS}.  At assembly-time,
+this instruction does nothing.
 \end{indpar}
 
 
