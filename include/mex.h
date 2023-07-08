@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Jul  6 18:30:30 EDT 2023
+// Date:	Sat Jul  8 07:04:46 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -140,6 +140,7 @@ struct ret
     mex::pc saved_pc;
     min::uns32 saved_fp;
     min::uns32 nargs;
+    min::uns32 nresults;
 };
 
 typedef void (* trace_function )

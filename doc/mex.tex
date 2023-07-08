@@ -737,6 +737,7 @@ a return stack, and other parameters.  Specifically:
 \verb|mex::pc | & \TTMKEY{saved\_pc}{in {\tt mex::ret}} \\
 \verb|min::uns32 | & \TTMKEY{saved\_fp}{in {\tt mex::ret}} \\
 \verb|min::uns32 | & \TTMKEY{nargs}{in {\tt mex::ret}} \\
+\verb|min::uns32 | & \TTMKEY{nresults}{in {\tt mex::ret}} \\
 \verb|}                   | \\
 \end{tabular}
 \\[1ex]
@@ -1033,9 +1034,10 @@ are explained in Tracing and Exceptions, \itemref{TRACING-AND-EXCEPTIONS}.
       \TT{saved\_pc} \\
     & member to point to the instruction after the \TT{CALL},
       and setting its \\
-    & \TT{nargs} member to \TT{immedA}.  Then set
-      the \TT{index} of the process's \TT{pc} \\
-    & member to \TT{immedC}, which must reference a \TT{BEGF} instruction.
+    & \TT{nargs} member to \TT{immedA} and its \TT{nresults} member
+      to \TT{immedB}.  \\
+    & Then set the \TT{index} of the process's \TT{pc} member to \TT{immedC}, \\
+    & which must reference a \TT{BEGF} instruction.
     \\[0.5ex]
     & Then take the target function's lexical level $L$ from the \TT{BEGF} \\
     & \TT{immedB} value, set the \TT{mex:ret} value's \TT{saved\_fp} member
@@ -1054,9 +1056,10 @@ are explained in Tracing and Exceptions, \itemref{TRACING-AND-EXCEPTIONS}.
 \TT{RET}
     & Pop \TT{immedC} values from the stack and save them.  Then add \\
     & \TT{immedA} to \TT{sp} (popping the stack \TT{immedA} times), then push \\
-    & the saved values into the stack, then pop the return stack \\
+    & the saved values into the stack.  Then pop the return stack \\
     & and set the the process's \TT{pc} and \TT{fp[immedB]} members from the \\
-    & \TT{saved\_pc} and \TT{saved\_fp} members of the value popped.
+    & \TT{saved\_pc} and \TT{saved\_fp} members of the value popped, \\
+    & and check that the \TT{nresults} member equals \TT{immedC}.
 \\\hline
 \TT{PUSHL}
     & Push the stack vector value with index \TT{fp[immedB] + immedA}.
