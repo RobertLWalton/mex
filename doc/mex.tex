@@ -158,6 +158,7 @@
 
 \newcommand{\itemref}[1]{\ref{#1}$\,^{p\pageref{#1}}$}
 \newcommand{\pagref}[1]{p\pageref{#1}}
+\newcommand{\pagnote}[1]{$\,^{p\pageref{#1}}$}
 
 \newcommand{\EOL}{\penalty \exhyphenpenalty}
 
@@ -1513,10 +1514,10 @@ than whitespace are forbidden.
 A MEXAS \key{lexeme} is a sequence of non-whitespace characters
 separated by whitespace.
 
-A \key{number} is a lexeme acceptable as an IEEE floating point
+A \key{number}\label{NUMBER} is a lexeme acceptable as an IEEE floating point
 number to the POSIX \TT{strtod} function.
 
-A \key{name} is a lexeme beginning with a letter that is
+A \key{name}\label{NAME} is a lexeme beginning with a letter that is
 \underline{not} a number (\TT{nan}, \TT{InF}, etc. are numbers
 and not names).
 
@@ -1629,7 +1630,7 @@ In the following decription of MEXAS instruction syntax and
 assembly actions:
 
 \begin{enumerate}
-\item Unless otherwise specified, when an instruction pushes an
+\item When an instruction pushes an
 element into the variable or function stacks, the element is given
 the lexical level and depth of the instruction.
 \item A \emkey{variable-name} is a name of a variable stack element.
@@ -1638,34 +1639,37 @@ the top of the stack hides the element lower down.
 \item A \emkey{function-name} is a name of a function stack element.
 If two elements have the same {\em function-name}, the element nearer
 the top of the stack hides the element lower down.
-\item An \emkey{aop} is an arithmetic intruction operation code,
-as in Figure~\itemref{ARITHMETIC-INSTRUCTIONS}.
-\item When an instruction pushes an element in an assembler stack,
-the element is assigned the lexical level and depth of the instruction.
 \item Modules are named by the name of the file assembled to produce
 the module, with the suffix \TT{.mex} deleted.  Such a name is
 a \emkey{module-name}.
 \item When a {\em variable-name} is assigned to a new variable stack
 element, `\TT{*}' can be used as the {\em variable-name} to indicate
-that the element has no name.
-\item The operands {\em immedA}, {\em immedB}, and {\em immedC},
-if given, must be integers in the range $[0,2^{16})$.
+that the element should have no name.
+\item The operands that take integer values must have values in the
+range $[0,2^{16})$ (so they will fit into \TT{immed\ldots} instruction
+members.
 \end{enumerate}
 
 {\em aop} {\em variable-name}\QMARK{}
 \begin{indpar}
-The same number of elements are popped from the variable stack
-as would be popped from the process stack during execution of the
-arithmetic instruction {\em aop}.
-Then one element is pushed.  If {\em variable-name} is given, it become
-the name of the pushed element, which otherwise has no name.
+Here {\em aop} is any arithmetic operation code from
+Figure~\itemref{ARITHMETIC-INSTRUCTIONS}, and the run-time
+action of the instruction is specified in that figure.
+
+At assembly-time the same number of elements are popped from the variable stack
+as are popped from the process stack during run-time.
+Then one element is pushed to the variable stack.
+If {\em variable-name} is given, it becomes
+the name of the pushed element; otherwise the element has no name.
 \end{indpar}
 
 \TT{PUSH} {\em variable-name}
+          {\em new-variable-name}\QMARK{}
 \begin{indpar}
 At run-time, pushes into the process stack a copy of the named
-variable.  At assembly time, pushes into the variable stack a
-duplicate of the named variable stack element.
+variable.  At assembly time, pushes into the variable stack an
+element whose name is the {\em new-variable-name} if that is
+given, or {\em variable-name} otherwise.
 
 The named variable stack element must have the same lexical
 level as the \TT{PUSH} instruction.
@@ -1673,7 +1677,8 @@ level as the \TT{PUSH} instruction.
 
 \TT{PUSHI} {\em number} {\em variable-name}\QMARK{}
 \begin{indpar}
-At run-time, pushes into the process stack a copy of the {\em number}.
+At run-time, pushes into the process stack a copy of
+the {\em number}\pagnote{NUMBER}.
 At assembly time, pushes into the variable stack an element
 with the given {\em variable-name}, if provided.
 \end{indpar}
@@ -1697,7 +1702,7 @@ At assembly time, pushes into the variable stack an
 element with the {\em new-variable-name} if given, or 
 the {\em variable-name} otherwise.
 
-The search of an element with the given {\em variable-name}
+The search for an element with the given {\em variable-name}
 is restricted to variable stack elements with lexical level 0.
 \end{indpar}
 
@@ -1717,7 +1722,7 @@ At run-time, pops the process stack and stores the value popped
 in the named lexical level 0 variable.
 At assembly time, pops the variable stack.
 
-The search of an element with the given {\em variable-name}
+The search for an element with the given {\em variable-name}
 is restricted to variable stack elements with lexical level 0.
 \end{indpar}
 
@@ -1726,23 +1731,44 @@ is restricted to variable stack elements with lexical level 0.
 At run-time these instruction's actions are as described in
 Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}.  At assembly-time,
 these instructions do nothing.
+
+The statement following a \TT{JMP} must
+be a \TT{LABEL} declaration, a \TT{BEG\ldots} instruction,
+or an \TT{END\ldots} instruction.
 \end{indpar}
 
-\TT{BEGL} {\em immedB}
+\TT{JMP\ldots}
 \begin{indpar}
-At run-time this instruction's action is as described in
+Here \ldots~denotes one of \TT{EQ}, \TT{NE}, etc.
+
+At run-time these instruction's actions are as described in
 Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}.  At assembly-time,
-duplicates of the top {\em immedB} stack entries are 
-pushed into the variable stack, but if a stack element being
-duplicated has name $N$, then its duplicate is given name
-\TT{next-}$N$.
+these instructions pop two elements from the variable stack.
+\end{indpar}
+
+\TT{BEGL} {\em nnext}
+\begin{indpar}
+Here {\em nnext} is the number of next variables
+(see Next Variables and Loops, \itemref{NEXT-VARIABLES-AND-LOOPS}).
+At run-time this instruction's action is as described in
+Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS} with \TT{immedB} equal
+to {\em nnext}.
+
+At assembly-time, this instruction pushes {\em nnext} variable
+stack elements.  For each of these, its name is derived from
+the name of the {\em nnext}'th predecessor in the variable
+stack by adding the prefix `\TT{next-}.'
+
+Thus for example, if the top two stack elements have names
+\TT{X} and \TT{Y} and {\em nnext} is \TT{2}, the two elements
+pushed would have names \TT{next-X} and \TT{next-Y}.
 \end{indpar}
 
 \TT{END}/\TT{ENDL}
 \begin{indpar}
 At run-time these instruction's actions are as described in
 Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}.  At assembly-time,
-pop from the variable and function stacks all element with the
+they pop from the variable and function stacks all elements with the
 same lexical level and depth as the \TT{END}/\TT{ENDL}
 instruction.
 \end{indpar}
@@ -1752,16 +1778,19 @@ instruction.
 At run-time set the process \TT{trace\_flags} parameter to the
 flags given by the options (i.e., \TT{TRACE},
 \TT{TRACE\_PHRASE}, \TT{TRACE\_NOJMP}).  At assembly-time,
-do nothing.
+this instruction does nothing.
 \end{indpar}
 
-\TT{ERROR} {\em immedA}\QMARK{}
+\TT{ERROR} {\em error-code} {\em nargs}\QMARK{}
 \begin{indpar}
-If {\em immedA} is given, pop {\em immedA} element from the
-variable stack at assembly-time and from the process stack
-at run-time ({\em immedA} may be \TT{0}).  
-If {\em immedA} is \underline{not} given, terminate the process
-at run-time and do nothing at assembly-time.
+If {\em error-code} is non-zero, this instruction terminates
+the process at run-time, {\em nargs} must \underline{not}
+be given, and this instruction does nothing at assembly-time.
+
+If {\em error-code} is \TT{0}, {\em nargs} must be given
+and this instruction pops {\em nargs} elements from the
+process stack at run-time and from the variable stack
+at assembly-time.
 \end{indpar}
 
 
