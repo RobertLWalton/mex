@@ -934,7 +934,7 @@ are explained in Tracing and Exceptions, \itemref{TRACING-AND-EXCEPTIONS}.
 \begin{center}
 \begin{tabular}{|l|l|}
 \hline
-\TT{PUSH}
+\TT{PUSHS}
     & Push the \TT{immedA}'th value in the stack below the top value \\
     & into the stack (i.e., \TT{sp[- immedA - 1]},
       so \TT{immedA} = 0 \\
@@ -948,7 +948,7 @@ are explained in Tracing and Exceptions, \itemref{TRACING-AND-EXCEPTIONS}.
     & global value stack of the module pointed at by \TT{immedD} \\
     & (i.e., \TT{m->globals[immedA]} where \TT{m} is the module)
 \\\hline
-\TT{POP}
+\TT{POPS}
     & Pop 1 value and store it in the \TT{immedA}'th value in the stack \\
     & below the value popped (i.e., store to \TT{sp[- immedA - 1]}, \\
     & so \TT{immedA} = 0 discards the top value).
@@ -1609,7 +1609,7 @@ jumps \TT{JMP\ldots} just pops two elements.
 The assembler's \key{function stack} specifies the functions that
 can be called by a \TT{CALL} instruction.  \TT{BEGF} pushs
 a element with a name, lexical level, and depth, and behaves
-for the function stack like \TT{PUSH} does for the variable stack.
+for the function stack like \TT{PUSH\ldots} does for the variable stack.
 \TT{END\ldots} instructions pop the function stack in the same manner as
 they pop the variable stack.
 
@@ -1717,6 +1717,8 @@ the top of the stack hides the element lower down.
 \item A \emkey{function-name} is a name of a function stack element.
 If two elements have the same {\em function-name}, the element nearer
 the top of the stack hides the element lower down.
+\item Stack searches always proceed from the topmost stack element
+the bottommost, and accept the first element found with the desired name.
 \item Modules are named by the name of the file assembled to produce
 the module, with the suffix \TT{.mex} deleted.  Such a name is
 a \emkey{module-name}.
@@ -1741,7 +1743,7 @@ If {\em variable-name} is given, it becomes
 the name of the pushed element; otherwise the element has no name.
 \end{indpar}
 
-\TT{PUSH} {\em variable-name}
+\TT{PUSHS} {\em variable-name}
           {\em new-variable-name}\QMARK{}
 \begin{indpar}
 At run-time, pushes into the process stack a copy of the variable
@@ -1798,7 +1800,21 @@ element with the {\em new-variable-name} if given, or
 the {\em variable-name} otherwise.
 \end{indpar}
 
-\TT{POP} {\em variable-name}
+\TT{PUSH} {\em variable-name}
+          {\em new-variable-name}\QMARK{}
+\begin{indpar}
+At run-time, pushes into the process stack a copy of the variable
+named in the variable stack or global variable vector.
+At assembly time, pushes into the variable stack an
+element whose name is the {\em new-variable-name} if that is
+given, or {\em variable-name} otherwise.
+
+The search for {\em variable-name} begins with the entire variable
+stack and proceeds through the global variables of other modules
+in the order that the modules were compiled.
+\end{indpar}
+
+\TT{POPS} {\em variable-name}
 \begin{indpar}
 At run-time, pops the process stack and stores the value popped
 into the named variable.
@@ -1826,6 +1842,18 @@ At assembly time, pops the variable stack.
 
 The variable stack search for {\em variable-name} is restricted to
 elements with lexical level \TT{0}.
+\end{indpar}
+
+\TT{POP} {\em variable-name}
+\begin{indpar}
+At run-time, pops the process stack and stores the value popped
+in the named variable.
+At assembly time, pops the variable stack.
+
+The search for {\em variable-name} begins with the entire variable
+stack and proceeds through the global variables of other modules
+in the order that the modules were compiled.
+
 \end{indpar}
 
 \TT{BEG}/\TT{NOP}/\TT{CONT}
