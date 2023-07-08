@@ -742,7 +742,10 @@ a return stack, and other parameters.  Specifically:
 \end{tabular}
 \\[1ex]
 \verb|typedef (* mex::|\MEXKEY{trace\_function}\verb|) ( mex::process p )|%
-\LABEL{MEX::TRACE_FUNCTION} \\
+\LABEL{MEX::TRACE_FUNCTION}
+\\[1ex]
+\verb|const unsigned mex::|\MEXKEY{max\_lexical\_depth}\verb| = 16|%
+\LABEL{MEX::MAX_LEXICAL_DEPTH}
 \\[1ex]
 \begin{tabular}{@{}r@{}l}
 \verb|struct                         mex::| & \MEXKEY{process\_header}%
@@ -756,7 +759,8 @@ a return stack, and other parameters.  Specifically:
 \verb|min::packed_vec_insptr<mex::ret> | & \TTMKEY{return\_stack}%
                                               {in {\tt mex::process\_header}} \\
 \verb|min::uns32 | & \TTMKEY{rp}{in {\tt mex::process\_header}} \\
-\verb|min::uns32 | & \TTMKEY{fp}{in {\tt mex::process\_header}}\TT{[16]} \\
+\verb|min::uns32 | & \TTMKEY{fp}{in {\tt mex::process\_header}}%
+                     \TT{[mex::max\_lexical\_depth+1]} \\
 \verb|mex::trace_function | & \TTMKEY{trace\_function}%
                                      {in {\tt mex::process\_header}} \\
 \verb|min::uns32 | & \TTMKEY{trace\_depth}{in {\tt mex::process\_header}} \\
@@ -825,9 +829,10 @@ The \TT{nargs} member is the number of function arguments.
 See the \TT{CALL} instruction in Figure~\ref{FUNCTION-INSTRUCTIONS}
 for more details.
 
-The process's frame pointer member, \TT{fp[16]} and the \TT{met::ret}
+The process's frame pointer member, \TT{fp[\ldots]} and the \TT{met::ret}
 value's \TT{saved\_fp} member are explained in Nested Functions,
-\itemref{NESTED-FUNCTIONS}.
+\itemref{NESTED-FUNCTIONS}.  Note that \TT{fp[0]}, the frame pointer
+for lexical level \TT{0} (outside all functions), is always \TT{0}.
 
 The process's \TT{counter} is incremented once every time an instruction
 finishes execution.  The process stops when \TT{counter >= limit}. 
@@ -943,18 +948,10 @@ are explained in Tracing and Exceptions, \itemref{TRACING-AND-EXCEPTIONS}.
     & global value stack of the module pointed at by \TT{immedD} \\
     & (i.e., \TT{m->globals[immedA]} where \TT{m} is the module)
 \\\hline
-\TT{PUSHM}
-    & Push the stack vector value with index \TT{immedA} \\
-    & (i.e., \TT{current\_process[immedA]}).
-\\\hline
 \TT{POP}
     & Pop 1 value and store it in the \TT{immedA}'th value in the stack \\
     & below the value popped (i.e., store to \TT{sp[- immedA - 1]}, \\
     & so \TT{immedA} = 0 discards the top value).
-\\\hline
-\TT{POPM}
-    & Pop 1 value and store it into the stack vector element with \\
-    & index \TT{immedA} (i.e., \TT{current\_process[immedA]}).
 \\\hline
 \TT{JMP}
     & Subtract \TT{immedA} to \TT{sp} (popping the stack \TT{immedA} times), \\
@@ -1415,7 +1412,7 @@ to change during process execution.
 The \TT{pc} member is set to \TT{\{min::NULL\_STUB,0\}}.
 The \TT{optimize} member is set to \TT{false}.
 The \TT{trace\_function} member is set to \TT{NULL}.
-The \TT{sp}, \TT{rp}, \TT{fp[16]}, \TT{trace\_depth},
+The \TT{sp}, \TT{rp}, \TT{fp[\ldots]}, \TT{trace\_depth},
 \TT{trace\_flags}, \TT{excepts}, and \TT{excepts\_accumulator}
 members are set to \TT{0}.
 \end{indpar}
@@ -1747,13 +1744,40 @@ the name of the pushed element; otherwise the element has no name.
 \TT{PUSH} {\em variable-name}
           {\em new-variable-name}\QMARK{}
 \begin{indpar}
-At run-time, pushes into the process stack a copy of the named
-variable.  At assembly time, pushes into the variable stack an
+At run-time, pushes into the process stack a copy of the variable
+named in the variable stack.
+At assembly time, pushes into the variable stack an
 element whose name is the {\em new-variable-name} if that is
 given, or {\em variable-name} otherwise.
 
-The named variable stack element must have the same lexical
-level as the \TT{PUSH} instruction.
+The variable stack search for {\em variable-name} is restricted to
+elements with the same lexical level as the \TT{PUSH} instruction.
+\end{indpar}
+
+\TT{PUSHL} {\em variable-name}
+          {\em new-variable-name}\QMARK{}
+\begin{indpar}
+At run-time, pushes into the process stack a copy of the variable
+named in the variable stack.
+At assembly time, pushes into the variable stack an
+element whose name is the {\em new-variable-name} if that is
+given, or {\em variable-name} otherwise.
+
+The variable stack search for {\em variable-name} is \underline{not}
+restricted as to the lexical level of the elements searched.
+\end{indpar}
+
+\TT{PUSHM} {\em variable-name}
+           {\em new-variable-name}\QMARK{}
+\begin{indpar}
+At run-time, pushes into the process stack a copy of the named
+lexical level 0 variable.
+At assembly time, pushes into the variable stack an
+element with the {\em new-variable-name} if given, or 
+the {\em variable-name} otherwise.
+
+The variable stack search for {\em variable-name} is restricted to
+elements with the lexical level \TT{0}.
 \end{indpar}
 
 \TT{PUSHI} {\em number} {\em variable-name}\QMARK{}
@@ -1774,27 +1798,24 @@ element with the {\em new-variable-name} if given, or
 the {\em variable-name} otherwise.
 \end{indpar}
 
-\TT{PUSHM} {\em variable-name}
-           {\em new-variable-name}\QMARK{}
-\begin{indpar}
-At run-time, pushes into the process stack a copy of the named
-lexical level 0 variable.
-At assembly time, pushes into the variable stack an
-element with the {\em new-variable-name} if given, or 
-the {\em variable-name} otherwise.
-
-The search for an element with the given {\em variable-name}
-is restricted to variable stack elements with lexical level 0.
-\end{indpar}
-
 \TT{POP} {\em variable-name}
 \begin{indpar}
 At run-time, pops the process stack and stores the value popped
 into the named variable.
 At assembly time, pops the variable stack.
 
-The named variable stack element must have the same lexical
-level as the \TT{PUSH} instruction.
+The variable stack search for {\em variable-name} is restricted to
+elements with the same lexical level as the \TT{PUSH} instruction.
+\end{indpar}
+
+\TT{POPL} {\em variable-name}
+\begin{indpar}
+At run-time, pops the process stack and stores the value popped
+into the named variable.
+At assembly time, pops the variable stack.
+
+The variable stack search for {\em variable-name} is \underline{not}
+restricted as to the lexical level of the elements searched.
 \end{indpar}
 
 \TT{POPM} {\em variable-name}
@@ -1803,11 +1824,11 @@ At run-time, pops the process stack and stores the value popped
 in the named lexical level 0 variable.
 At assembly time, pops the variable stack.
 
-The search for an element with the given {\em variable-name}
-is restricted to variable stack elements with lexical level 0.
+The variable stack search for {\em variable-name} is restricted to
+elements with lexical level \TT{0}.
 \end{indpar}
 
-\TT{BEG}/\TT{NOP}
+\TT{BEG}/\TT{NOP}/\TT{CONT}
 \begin{indpar}
 At run-time these instruction's actions are as described in
 Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}.  At assembly-time,
@@ -1892,8 +1913,11 @@ At run-time this instruction's actions are as described in
 Figure~\itemref{FUNCTION-INSTRUCTIONS}.  At assembly-time,
 this instruction pushes an element with the {\em function-name}
 into the function stack and pushes one element with each
-of the {\em variable-names} into the variable stack (there
+of the {\em variable-names} into the variable stack (they
 represent the arguments to the function).
+It is \underline{not} necessary that the number of
+{\em variable-names} exactly equals the number of actual
+arguments.
 \end{indpar}
 
 \TT{ENDF}
@@ -1901,6 +1925,18 @@ represent the arguments to the function).
 At run-time this instruction's actions are as described in
 Figure~\itemref{FUNCTION-INSTRUCTIONS}.  At assembly-time,
 it pops from the variable and function stacks all elements with the
+same lexical level \TT{ENDF} instruction.
+\end{indpar}
+
+\TT{CALL} {\em function-name} {\em nargs} {\em variable-name}\STAR{}
+\begin{indpar}
+At run-time this instruction's actions are as described in
+Figure~\itemref{FUNCTION-INSTRUCTIONS}.  At assembly-time,
+it pops from the variable variable stack {\em nargs} values
+and pushes into the stack one element for each {\em variable-name}
+(representing the results of the function execution).
+The number of {\em variable-names} \underline{must} equal
+the number of actual results.
 same lexical level \TT{ENDF} instruction.
 \end{indpar}
 
