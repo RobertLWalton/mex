@@ -1883,8 +1883,23 @@ process stack at run-time and from the variable stack
 at assembly-time.
 \end{indpar}
 
+\TT{BEGF} {\em function-name} {\em variable-name}\STAR{}
+\begin{indpar}
+At run-time this instruction's actions are as described in
+Figure~\itemref{FUNCTION-INSTRUCTIONS}.  At assembly-time,
+this instruction pushes an element with the {\em function-name}
+into the function stack and pushes one element with each
+of the {\em variable-names} into the variable stack (there
+represent the arguments to the function).
+\end{indpar}
 
-
+\TT{ENDF}
+\begin{indpar}
+At run-time this instruction's actions are as described in
+Figure~\itemref{FUNCTION-INSTRUCTIONS}.  At assembly-time,
+it pops from the variable and function stacks all elements with the
+same lexical level \TT{ENDF} instruction.
+\end{indpar}
 
 
 \clearpage
