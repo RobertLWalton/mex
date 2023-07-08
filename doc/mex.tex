@@ -239,7 +239,7 @@
 
 \author{Robert L. Walton}
 
-\date{July 7, 2023}
+\date{July 8, 2023}
  
 \maketitle
 
@@ -1623,6 +1623,84 @@ Lastly the assembler maintains a \key{block stack} whose only
 purpose is to check that \TT{BEG\ldots} and \TT{END\ldots} instructions
 occur in matching pairs.
 
+\subsection{JMP Targets}
+\label{JMP-TARGETS}
+
+A {\em jmp-target} is a name\pagnote{NAME} that identifies
+a code vector index value which can be used by \TT{JMP\ldots}
+instructions as the point in the code vector to jump to.
+
+{\em Jmp-targets} are defined by \TT{LABEL} declarations
+of the form:
+\begin{center}
+\TT{LABEL} {\em jmp-target}
+\end{center}
+
+\TT{JMP\ldots} instructions are forward-referencing: their
+{\em jmp-targets} are defined by \TT{LABEL} declaratios that
+occur in source code after the \TT{JMP\ldots} instruction.
+To manage \TT{JMP\ldots} instructions and their targets,
+the assembler maintains a list of \skey{pending jumps}:
+that is, jumps whose {\em jmp-target} has not yet been
+declared.  When a \TT{LABEL} declaration is processed,
+the pending jump list is searched for matching jumps,
+and those that are found are processed and removed from
+the list.  Processing involves calculating the distance
+between the jump and its target, and the number of
+process stack elements the jump should pop and push.
+
+To do this, an element of the pending jump list contains:
+\begin{enumerate}
+\item The location of the jump instruction so it can be updated
+when its target is found.
+\item The {\em jmp-target} name.
+\item The lexical level $L$ of the jump instruction.
+\item The maximum depth $D$ allowed for the target.
+\item The length $S$ of the variable stack when the jump instruction
+      was encountered.
+\item The minimum $M$ of all the variable stack lengths that have
+      occured since the jump instruction was encountered.
+      $M\le S$.
+\end{enumerate}
+
+A \TT{JMP\ldots} instruction for which a legal target exists
+is called \key{satisfied}.  Other \TT{JMP\ldots} instructions
+are \key{unsatisfied} and are in error.
+
+The following instructions/declarations act on the pending jump list:
+
+\TT{JMP\dots} {\em jmp-target}
+\begin{indpar}
+Add an element to the pending jmp list with $L$, $D$,
+$S$ set to their current values and $M=S$.
+\end{indpar}
+
+\TT{END}/\TT{ENDL}
+\begin{indpar}
+For all pending jumps whose $D$ is equal to that
+of the \TT{END}/\TT{ENDL}, decrement that $D$ by 1.
+
+For all pending jumps whose $M$ is greater than the
+variable stack length $s$ will be after the \TT{END}/\TT{ENDL},
+decrease their $M$ to $s$.
+\end{indpar}
+
+\TT{LABEL} {\em jmp-target}
+\begin{indpar}
+Search the pending jump list for matching elements with $L$ equal
+to the current lexical level and $D$ not less than the current
+depth, satisfy these, and remove them from
+the pending jmp list.
+\end{indpar}
+
+\TT{ENDF}
+\begin{indpar}
+Search the pending jump list for elements with $L$ equal to the
+lexical level of the \TT{ENDF} and remove them as being unsatisfied,
+and therefore in error.
+\end{indpar}
+
+
 \subsection{MEXAS Instructions}
 \label{MEXAS-INSTRUCTIONS}
 
@@ -1726,24 +1804,36 @@ The search for an element with the given {\em variable-name}
 is restricted to variable stack elements with lexical level 0.
 \end{indpar}
 
-\TT{JMP}/\TT{BEG}/\TT{NOP}
+\TT{BEG}/\TT{NOP}
 \begin{indpar}
 At run-time these instruction's actions are as described in
 Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}.  At assembly-time,
 these instructions do nothing.
+\end{indpar}
+
+\TT{JMP} {\em jmp-target}
+\begin{indpar}
+At run-time this instruction's actions are as described in
+Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}.  At assembly-time,
+this instruction adds an element to the pending jump
+list (see \itemref{JMP-TARGETS}).
 
 The statement following a \TT{JMP} must
 be a \TT{LABEL} declaration, a \TT{BEG\ldots} instruction,
 or an \TT{END\ldots} instruction.
 \end{indpar}
 
-\TT{JMP\ldots}
+\TT{JMP\ldots} {\em jmp-target}
 \begin{indpar}
 Here \ldots~denotes one of \TT{EQ}, \TT{NE}, etc.
 
 At run-time these instruction's actions are as described in
 Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}.  At assembly-time,
-these instructions pop two elements from the variable stack.
+these instructions pop two elements from the variable stack
+and then add an element to the pending jump list.  Note that
+the pending jump list element
+$S$ value is the length of the variable stack \underline{after}
+the two elements were popped.
 \end{indpar}
 
 \TT{BEGL} {\em nnext}
