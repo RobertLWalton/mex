@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Jul  9 07:24:38 EDT 2023
+// Date:	Sun Jul  9 16:13:55 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -86,11 +86,11 @@ static bool optimized_run_process ( mex::process p )
     mex::instr * pc = ~ ( m + i );
     mex::instr * pcend = ~ ( m + m->length );
 
-    i = p->sp;
+    i = p->length;
     if ( i > p->max_length ) return false;
     min::gen * spbegin = ~ ( p + 0 );
-    min::gen * sp = ~ ( p + i );
-    min::gen * spend = ~ ( p + p->max_length );
+    min::gen * sp = spbegin + i;
+    min::gen * spend = spbegin + p->max_length;
 
     min::uns32 limit = p->limit;
     if ( p->counter >= limit ) return false;
@@ -458,16 +458,18 @@ static bool optimized_run_process ( mex::process p )
 	{
 	    int immedA = pc->immedA;
 	    int immedB = pc->immedB;
-	    int rp = p->rp;
+	    min::uns32 rp = p->return_stack->length;
 	    if ( immedA > sp - spbegin )
 	        goto ERROR_EXIT;
 	    if ( immedB > mex::max_lexical_level )
 	        goto ERROR_EXIT;
 	    if ( rp == 0 )
 	        goto ERROR_EXIT;
-	    const mex::ret & ret = p->return_stack[rp];
-	    mex::module em = ret.saved_pc.module;
-	    min::uns32 new_pc = ret.saved_pc.index;
+	    -- rp;
+	    const mex::ret * ret =
+	       ~ ( p->return_stack + rp );
+	    mex::module em = ret->saved_pc.module;
+	    min::uns32 new_pc = ret->saved_pc.index;
 	    if ( em == min::NULL_STUB )
 	    {
 	        if ( new_pc != 0 )
@@ -479,13 +481,14 @@ static bool optimized_run_process ( mex::process p )
 		    goto ERROR_EXIT;
 	    }
 	    min::gen * new_sp = sp - immedA;
-	    min::uns32 new_fp = ret.saved_fp;
+	    min::uns32 new_fp = ret->saved_fp;
 	    if ( new_fp > new_sp - spbegin )
 		goto ERROR_EXIT;
 
-	    mex::set_pc ( p, ret.saved_pc );
+	    mex::set_pc ( p, ret->saved_pc );
 	    p->fp[immedB] = new_fp;
-	    -- p->rp;
+	    * (min::uns32 *)
+	      & p->return_stack->length = rp;
 	    sp -= immedA;
 	    if ( em == min::NULL_STUB )
 	        goto RET_EXIT;
@@ -514,7 +517,8 @@ static bool optimized_run_process ( mex::process p )
 	    int level = target->immedB;
 	    if ( level > mex::max_lexical_level )
 	        goto ERROR_EXIT;
-	    if ( p->rp >= p->return_stack->length )
+	    if (    p->return_stack->length
+	         >= p->return_stack->max_length )
 	        goto ERROR_EXIT;
 
 	    // TBD
@@ -532,8 +536,7 @@ ERROR_EXIT:
 EXIT:
     * (min::uns32 *) & p->pc.index = pc - pcbegin;
 RET_EXIT:
-    p->sp = sp - spbegin;
-    p->length = p->sp + 1;
+    p->length = sp - spbegin;
     p->excepts_accumulator |= 
 	fetestexcept ( FE_ALL_EXCEPT );
     p->counter = p->limit - limit;
@@ -640,15 +643,15 @@ bool mex::run_process ( mex::process p )
     pc = ~ ( m + i );
     pcend = ~ ( m + m->length );
 
-    i = p->sp;
+    i = p->length;
     if ( i > p->max_length )
     {
 	message = "Illegal SP: too large";
 	goto FATAL;
     }
     spbegin = ~ ( p + 0 );
-    sp = ~ ( p + i );
-    spend = ~ ( p + p->max_length );
+    sp = spbegin + i;
+    spend = spbegin + p->max_length;
 
     limit = p->limit;
     if ( p->counter >= limit )
@@ -668,11 +671,11 @@ bool mex::run_process ( mex::process p )
     //
 #   define SAVE \
 	* (min::uns32 *) & p->pc.index = pc - pcbegin; \
-	p->sp = p->length = sp - spbegin; \
+	p->length = sp - spbegin; \
 	p->counter = p->limit - limit;
 
 #   define RET_SAVE \
-	p->sp = p->length = sp - spbegin; \
+	p->length = sp - spbegin; \
 	p->counter = p->limit - limit;
 
 #   define RESTORE \
@@ -680,8 +683,8 @@ bool mex::run_process ( mex::process p )
 	pc = pcbegin + p->pc.index; \
 	pcend = pcbegin + m->length; \
 	spbegin = ~ ( p + 0 ); \
-	sp = spbegin + p->sp; \
-	spend = sp + p->max_length; \
+	sp = spbegin + p->length; \
+	spend = spbegin + p->max_length; \
         limit = p->limit - p->counter;
 
     while ( true ) // Inner loop.
@@ -1333,17 +1336,18 @@ bool mex::run_process ( mex::process p )
 	    {
 		int immedA = pc->immedA;
 		int immedB = pc->immedB;
-		int rp = p->rp;
+		min::uns32 rp = p->return_stack->length;
 		if ( immedA > sp - spbegin )
 		    goto INNER_FATAL;
 		if ( immedB > mex::max_lexical_level )
 		    goto INNER_FATAL;
 		if ( rp == 0 )
 		    goto INNER_FATAL;
-		const mex::ret & ret =
-		    p->return_stack[rp];
-		mex::module em = ret.saved_pc.module;
-		min::uns32 new_pc = ret.saved_pc.index;
+		-- rp;
+		const mex::ret * ret =
+		   ~ ( p->return_stack + rp );
+		mex::module em = ret->saved_pc.module;
+		min::uns32 new_pc = ret->saved_pc.index;
 		if ( em == min::NULL_STUB )
 		{
 		    if ( new_pc != 0 )
@@ -1355,7 +1359,7 @@ bool mex::run_process ( mex::process p )
 			goto INNER_FATAL;
 		}
 		min::gen * new_sp = sp - immedA;
-		min::uns32 new_fp = ret.saved_fp;
+		min::uns32 new_fp = ret->saved_fp;
 		if ( new_fp > new_sp - spbegin )
 		    goto INNER_FATAL;
 	    }
@@ -1532,16 +1536,18 @@ bool mex::run_process ( mex::process p )
 	    {
 		int immedA = pc->immedA;
 		int immedB = pc->immedB;
-		int rp = p->rp;
-		const mex::ret & ret =
-		    p->return_stack[rp];
-		mex::module em = ret.saved_pc.module;
-		min::uns32 new_pc = ret.saved_pc.index;
-		min::uns32 new_fp = ret.saved_fp;
+		min::uns32 rp = p->return_stack->length;
+		-- rp;
+		const mex::ret * ret =
+		    ~ ( p->return_stack + rp );
+		mex::module em = ret->saved_pc.module;
+		min::uns32 new_pc = ret->saved_pc.index;
+		min::uns32 new_fp = ret->saved_fp;
 
-		mex::set_pc ( p, ret.saved_pc );
+		mex::set_pc ( p, ret->saved_pc );
 		p->fp[immedB] = new_fp;
-		-- p->rp;
+		* (min::uns32 *)
+		  & p->return_stack->length = rp;
 		sp -= immedA;
 		if ( em == min::NULL_STUB )
 		{
@@ -1641,11 +1647,12 @@ FATAL:
 	       << min::indent
 	       << instr_buffer
 	       << min::indent
-	       << "SP = " << p->sp
+	       << "STACK POINTER = " << p->length
 	       << ", PROCESS MAX_LENGTH = "
 	       << p->max_length
 	       << min::indent
-	       << "RP = " << p->rp
+	       << "RETURN STACK POINTER = "
+	       << p->return_stack->length
 	       << ", RETURN STACK MAX_LENGTH = "
 	       << p->return_stack->max_length
 	       << min::eom;

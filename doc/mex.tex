@@ -755,7 +755,6 @@ a return stack, and other parameters.  Specifically:
 \verb|min::uns32 | & \TTMKEY{length}{in {\tt mex::process\_header}} \\
 \verb|min::uns32 | & \TTMKEY{max\_length}{in {\tt mex::process\_header}} \\
 \verb|mex::pc | & \TTMKEY{pc}{in {\tt mex::process\_header}} \\
-\verb|min::uns32 | & \TTMKEY{sp}{in {\tt mex::process\_header}} \\
 \verb|min::packed_vec_insptr<mex::ret> | & \TTMKEY{return\_stack}%
                                               {in {\tt mex::process\_header}} \\
 \verb|min::uns32 | & \TTMKEY{rp}{in {\tt mex::process\_header}} \\
@@ -799,16 +798,18 @@ is the process \key{stack}, with the last element being the top
 of the stack (\TT{process[sp]}) and the first element
 being the bottom of the stack (\TT{process[0]}).
 
-An \ttkey{sp}, or \key{stack pointer}, is the index of an element of
-the process vector which is just beyond the top of the stack.
-It is also the length of the stack.  If the stack is not empty,
-\TT{process[sp-1]} is the top of the stack.
-To push a value into you store the value in the element \TT{sp}
-indexes, and then +1 to \TT{sp}.
-To pop a value, you add -1 to \TT{sp}, and then
-remove the value indexed by \TT{sp}.
-\TT{sp} member of a
-process is the \key{current stack pointer} of that process.
+The value of \TT{p->length},
+a.k.a.~the \key{stack pointer}, is the index of an element of
+the process vector which is just beyond the top of the stack,
+and is also the length of the stack.  If the stack is not empty,
+\TT{process[p->length-1]} is the top of the stack.
+To push a value into the stack,
+you store the value in the element \TT{p->length}
+indexes, and then +1 to \TT{p->length}.
+To pop a value, you add -1 to \TT{p->length}, and then
+read the value indexed by \TT{p->length}.
+We require that \TT{0 <= p->length <= p->max\_length} at all times,
+and \underline{never} increase \TT{p->max\_length} during execution.
 
 A \ttkey{pc}, or \key{program counter}, is a pointer to a module,
 which is a code vector, and an index in that vector of an instruction.
@@ -816,8 +817,11 @@ Thus a \TT{pc} points at an instruction.  The \TT{pc} member of a
 process is the \key{current program counter} of that process.
 
 The \ttkey{return\_stack} is used by \TT{CALL} and \TT{RET}
-instructions, with \TT{rp} being the index of the element at the
-top of the stack (the last element pushed).
+instructions.  The value of \TT{return\_stack->\EOL length},
+a.k.a.~the \key{return stack pointer}, is the index of the element of
+the return stack which is just beyond the top of the stack,
+and is also the length of the stack.  If the stack is not empty,
+\TT{p->return\_stack[return\_stack->length-1]} is the top of the stack.
 A \TT{CALL} instruction pushes a \TT{mex::ret} value
 into the return stack.  This contains a \TT{saved\_pc} member
 pointing at the instruction after the \TT{CALL} into the
@@ -825,13 +829,14 @@ pointing at the instruction after the \TT{CALL} into the
 the \TT{return\_stack} and stores its \TT{saved\_pc}
 in the current program counter
 of the process (the \TT{pc} member of the \TT{process}).
-The \TT{nargs} member is the number of function arguments.
+The \TT{nargs} member is the number of function arguments,
+and the \TT{nresults} member is the number of function results.
 See the \TT{CALL} instruction in Figure~\ref{FUNCTION-INSTRUCTIONS}
 for more details.
 
 The process's frame pointer member, \TT{fp[\ldots]} and the \TT{met::ret}
 value's \TT{saved\_fp} member are explained in Nested Functions,
-\itemref{NESTED-FUNCTIONS}.  Note that \TT{fp[0]}, the frame pointer
+\itemref{NESTED-FUNCTIONS}.  The value of \TT{fp[0]}, the frame pointer
 for lexical level \TT{0} (outside all functions), is always \TT{0}.
 
 The process's \TT{counter} is incremented once every time an instruction

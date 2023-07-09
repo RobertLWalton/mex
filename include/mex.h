@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Jul  9 04:48:48 EDT 2023
+// Date:	Sun Jul  9 15:40:22 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -146,9 +146,7 @@ struct process_header
     min::uns32 max_length;
     min::printer printer;
     const mex::pc pc;
-    min::uns32 sp;
-    const min::packed_vec_insptr<mex::ret> return_stack;
-    min::uns32 rp;
+    min::packed_vec_insptr<mex::ret> return_stack;
     min::uns32 fp[mex::max_lexical_level + 1];
     mex::trace_function trace_function;
     min::uns32 trace_depth;
