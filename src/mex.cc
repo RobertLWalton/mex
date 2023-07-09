@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Jul  7 03:57:03 EDT 2023
+// Date:	Sun Jul  9 04:59:20 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -266,7 +266,7 @@ static bool optimized_run_process ( mex::process p )
 	    sp[-1] = GF
 	        ( powi ( FG ( sp[-1] ), pc->immedA ) );
 	    break;
-	case mex::PUSH:
+	case mex::PUSHS:
 	{
 	    int i = pc->immedA;
 	    if ( sp >= spend || i >= sp - spbegin )
@@ -299,33 +299,25 @@ static bool optimized_run_process ( mex::process p )
 	    * sp ++ = globals[i];
 	    break;
 	}
-	case mex::PUSHM:
+	case mex::PUSHL:
 	{
 	    int i = pc->immedA;
-	    if ( i >= sp - spbegin )
+	    int j = pc->immedB;
+	    if ( j > mex::max_lexical_level )
 	        goto ERROR_EXIT;
-	    if ( sp >= spend )
+	    i += p->fp[j];
+	    if ( i >= sp - spbegin )
 	        goto ERROR_EXIT;
 	    * sp ++ = spbegin[i];
 	    break;
 	}
-	case mex::POP:
+	case mex::POPS:
 	{
 	    int i = pc->immedA;
 	    if ( sp <= spbegin || i >= sp - spbegin )
 	        goto ERROR_EXIT;
 	    -- sp;
 	    sp[-i] = * sp;
-	    break;
-	}
-	case mex::POPM:
-	{
-	    int i = pc->immedA;
-	    if (    sp <= spbegin
-	         || i >= sp - 1 - spbegin )
-	        goto ERROR_EXIT;
-	    -- sp;
-	    spbegin[i] = * sp;
 	    break;
 	}
 	case mex::JMP:
@@ -457,7 +449,7 @@ static bool optimized_run_process ( mex::process p )
 	    int immedC = pc->immedC;
 	    if ( immedC > pc - pcbegin )
 	        goto ERROR_EXIT;
-	    if ( immedB > mex::max_lexical_depth )
+	    if ( immedB > mex::max_lexical_level )
 	        goto ERROR_EXIT;
 	    pc += immedC;
 	    -- pc;
@@ -469,7 +461,7 @@ static bool optimized_run_process ( mex::process p )
 	    int rp = p->rp;
 	    if ( immedA > sp - spbegin )
 	        goto ERROR_EXIT;
-	    if ( immedB > mex::max_lexical_depth )
+	    if ( immedB > mex::max_lexical_level )
 	        goto ERROR_EXIT;
 	    if ( rp == 0 )
 	        goto ERROR_EXIT;
@@ -1168,7 +1160,7 @@ bool mex::run_process ( mex::process p )
 	    //
 	    switch ( op_code )
 	    {
-	    case mex::PUSH:
+	    case mex::PUSHS:
 	        if ( immedA + 1 > sp - spbegin )
 		{
 		    message = "immedA too large";
@@ -1215,8 +1207,14 @@ bool mex::run_process ( mex::process p )
 		}
 		break;
 	    }
-	    case mex::PUSHM:
-	        if ( immedA >= sp - spbegin )
+	    case mex::PUSHL:
+		if ( immedB > mex::max_lexical_level )
+		{
+		    message = "immedB too large";
+		    goto INNER_FATAL;
+		}
+		if (    p->fp[immedB] + immedA
+		     >= sp - spbegin )
 		{
 		    message = "immedA too large";
 		    goto INNER_FATAL;
@@ -1228,7 +1226,7 @@ bool mex::run_process ( mex::process p )
 		    goto INNER_FATAL;
 		}
 		break;
-	    case mex::POP:
+	    case mex::POPS:
 		if ( sp <= spbegin )
 		{
 		    message =
@@ -1236,19 +1234,6 @@ bool mex::run_process ( mex::process p )
 		    goto INNER_FATAL;
 		}
 	        if ( immedA + 1 > sp - spbegin )
-		{
-		    message = "immedA too large";
-		    goto INNER_FATAL;
-		}
-		break;
-	    case mex::POPM:
-		if ( sp <= spbegin )
-		{
-		    message =
-		        "stack empty for pop";
-		    goto INNER_FATAL;
-		}
-	        if ( immedA >= sp - 1 - spbegin )
 		{
 		    message = "immedA too large";
 		    goto INNER_FATAL;
@@ -1314,7 +1299,7 @@ bool mex::run_process ( mex::process p )
 		    message = "immedC too large";
 		    goto INNER_FATAL;
 		}
-	        if ( immedB > mex::max_lexical_depth )
+	        if ( immedB > mex::max_lexical_level )
 		{
 		    message = "immedB too large";
 		    goto INNER_FATAL;
@@ -1326,7 +1311,7 @@ bool mex::run_process ( mex::process p )
 		int rp = p->rp;
 		if ( immedA > sp - spbegin )
 		    goto INNER_FATAL;
-		if ( immedB > mex::max_lexical_depth )
+		if ( immedB > mex::max_lexical_level )
 		    goto INNER_FATAL;
 		if ( rp == 0 )
 		    goto INNER_FATAL;
@@ -1434,7 +1419,7 @@ bool mex::run_process ( mex::process p )
 	    //
 	    switch ( op_code )
 	    {
-	    case mex::PUSH:
+	    case mex::PUSHS:
 	    {
 		int i = pc->immedA;
 		* sp = sp[-i-1];
@@ -1453,21 +1438,15 @@ bool mex::run_process ( mex::process p )
 		* sp ++ = mg->globals[pc->immedA];
 		break;
 	    }
-	    case mex::PUSHM:
-	        * sp ++ = spbegin[pc->immedA];
+	    case mex::PUSHL:
+	        * sp ++ =
+		    spbegin[p->fp[pc->immedB] + immedA];
 		break;
-	    case mex::POP:
+	    case mex::POPS:
 	    {
 		int i = pc->immedA;
 		-- sp;
 		sp[-i] = * sp;
-		break;
-	    }
-	    case mex::POPM:
-	    {
-		int i = pc->immedA;
-		-- sp;
-		spbegin[i] = * sp;
 		break;
 	    }
 	    case mex::BEG:

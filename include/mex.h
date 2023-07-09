@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat Jul  8 07:04:46 EDT 2023
+// Date:	Sun Jul  9 04:48:48 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -40,42 +40,35 @@ struct instr {
 // table in mex.cc.
 //
 enum op_code {
-    ADD    = 1,		MUL    = 2,
-    ADDI   = 3,		MULI   = 4,
-    SUB    = 5,		SUBR   = 6,
-    SUBI   = 7,		SUBRI  = 8,
-    DIV    = 9,		DIVR   = 10,
-    DIVI   = 11,	DIVRI  = 12,
-    MOD    = 13,	MODR   = 14,
-    MODI   = 15,	MODRI  = 16,
-    FLOOR  = 17,	CEIL   = 18,
-    TRUNC  = 19,	ROUND  = 20,
-    NEG    = 21,	ABS    = 22,
-    LOG    = 23,	EXP    = 24,
-    LOG10  = 25,	EXP10  = 26,
-    SIN    = 27,	ASIN   = 28,
-    COS    = 29,	ACOS   = 30,
-    TAN    = 31,	ATAN   = 32,
-    ATAN2  = 33,	ATAN2R = 34,
-    POWI   = 35,
-    PUSH   = 36,	PUSHI  = 37,
-    PUSHG  = 38,	PUSHM  = 39,
-    POP    = 40,	POPM   = 41,
-    JMP    = 42,
-    JMPEQ  = 43,	JMPNE  = 44,
-    JMPLT  = 45,	JMPLEQ = 46,
-    JMPGT  = 47,	JMPGEQ = 48,
-    BEG    = 49,	NOP    = 50,
-    END    = 51,
-    BEGL   = 52,
-    ENDL   = 53,	CONT   = 54,
-    SET_TRACE = 55,
-    ERROR  = 56,
+    _NONE_,
+    ADD, ADDI,
+    MUL, MULI,
+    SUB, SUBR, SUBI, SUBRI,
+    DIV, DIVR, DIVI, DIVRI,
+    MOD, MODR, MODI, MODRI,
+    FLOOR, CEIL, TRUNC, ROUND,
+    NEG, ABS,
+    LOG, LOG10, EXP, EXP10,
+    SIN, ASIN,
+    COS, ACOS,
+    TAN, ATAN,
+    ATAN2, ATAN2R,
+    POWI,
+    PUSHS, PUSHL, PUSHI, PUSHG,
+    POPS,
+    JMP,
+    JMPEQ, JMPNE,
+    JMPLT, JMPLEQ,
+    JMPGT, JMPGEQ,
+    BEG, NOP,
+    END,
+    BEGL,
+    ENDL, CONT,
+    SET_TRACE,
+    ERROR,
     BEGF, ENDF,
-    CALL, CALLG,
+    CALLM, CALLG,
     RET,
-    PUSHL,
-    POPL,
     PUSHA,
     PUSHNARGS,
     PUSHV
@@ -122,7 +115,7 @@ enum finish_state
     FORM_ERROR	= 6
 };
 
-const unsigned max_lexical_depth = 16;
+const unsigned max_lexical_level = 16;
 
 struct process_header;
 typedef min::packed_vec_insptr
@@ -156,7 +149,7 @@ struct process_header
     min::uns32 sp;
     const min::packed_vec_insptr<mex::ret> return_stack;
     min::uns32 rp;
-    min::uns32 fp[mex::max_lexical_depth + 1];
+    min::uns32 fp[mex::max_lexical_level + 1];
     mex::trace_function trace_function;
     min::uns32 trace_depth;
     min::uns8 trace_flags;

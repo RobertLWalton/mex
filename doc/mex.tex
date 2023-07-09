@@ -239,7 +239,7 @@
 
 \author{Robert L. Walton}
 
-\date{July 8, 2023}
+\date{July 9, 2023}
  
 \maketitle
 
@@ -744,7 +744,7 @@ a return stack, and other parameters.  Specifically:
 \verb|typedef (* mex::|\MEXKEY{trace\_function}\verb|) ( mex::process p )|%
 \LABEL{MEX::TRACE_FUNCTION}
 \\[1ex]
-\verb|const unsigned mex::|\MEXKEY{max\_lexical\_depth}\verb| = 16|%
+\verb|const unsigned mex::|\MEXKEY{max\_lexical\_level}\verb| = 16|%
 \LABEL{MEX::MAX_LEXICAL_DEPTH}
 \\[1ex]
 \begin{tabular}{@{}r@{}l}
@@ -760,7 +760,7 @@ a return stack, and other parameters.  Specifically:
                                               {in {\tt mex::process\_header}} \\
 \verb|min::uns32 | & \TTMKEY{rp}{in {\tt mex::process\_header}} \\
 \verb|min::uns32 | & \TTMKEY{fp}{in {\tt mex::process\_header}}%
-                     \TT{[mex::max\_lexical\_depth+1]} \\
+                     \TT{[mex::max\_lexical\_level+1]} \\
 \verb|mex::trace_function | & \TTMKEY{trace\_function}%
                                      {in {\tt mex::process\_header}} \\
 \verb|min::uns32 | & \TTMKEY{trace\_depth}{in {\tt mex::process\_header}} \\
@@ -1634,7 +1634,7 @@ instructions as the point in the code vector to jump to.
 {\em Jmp-targets} are defined by \TT{LABEL} declarations
 of the form:
 \begin{center}
-\TT{LABEL} {\em jmp-target}
+\ttkey{LABEL} {\em jmp-target}
 \end{center}
 
 \TT{JMP\ldots} instructions are forward-referencing: their
@@ -1670,13 +1670,13 @@ are \key{unsatisfied} and are in error.
 
 The following instructions/declarations act on the pending jump list:
 
-\TT{JMP\dots} {\em jmp-target}
+\ttkey{JMP\dots} {\em jmp-target}
 \begin{indpar}
 Add an element to the pending jmp list with $L$, $D$,
 $S$ set to their current values and $M=S$.
 \end{indpar}
 
-\TT{END}/\TT{ENDL}
+\ttkey{END}/\ttkey{ENDL}
 \begin{indpar}
 For all pending jumps whose $D$ is equal to that
 of the \TT{END}/\TT{ENDL}, decrement that $D$ by 1.
@@ -1686,7 +1686,7 @@ variable stack length $s$ will be after the \TT{END}/\TT{ENDL},
 decrease their $M$ to $s$.
 \end{indpar}
 
-\TT{LABEL} {\em jmp-target}
+\ttkey{LABEL} {\em jmp-target}\label{LABEL}
 \begin{indpar}
 Search the pending jump list for matching elements with $L$ equal
 to the current lexical level and $D$ not less than the current
@@ -1694,7 +1694,7 @@ depth, satisfy these, and remove them from
 the pending jmp list.
 \end{indpar}
 
-\TT{ENDF}
+\ttkey{ENDF}
 \begin{indpar}
 Search the pending jump list for elements with $L$ equal to the
 lexical level of the \TT{ENDF} and remove them as being unsatisfied,
@@ -1744,8 +1744,8 @@ If {\em variable-name} is given, it becomes
 the name of the pushed element; otherwise the element has no name.
 \end{indpar}
 
-\TT{PUSHM} {\em variable-name}
-           {\em new-variable-name}\QMARK{}
+\ttkey{PUSHM} {\em variable-name}
+              {\em new-variable-name}\QMARK{}
 \begin{indpar}
 At run-time, pushes into the process stack a copy of the named
 lexical level 0 variable.
@@ -1757,8 +1757,8 @@ The variable stack search for {\em variable-name} is restricted to
 elements with the lexical level \TT{0}.
 \end{indpar}
 
-\TT{PUSHG} {\em module-name} {\em variable-name}
-           {\em new-variable-name}\QMARK{}
+\ttkey{PUSHG} {\em module-name} {\em variable-name}
+              {\em new-variable-name}\QMARK{}
 \begin{indpar}
 At run-time, pushes into the process stack a copy of the named
 global variable in the named module.
@@ -1770,8 +1770,8 @@ The variable stack searched for {\em variable-name} is the variable
 stack of the previously assembled module named.
 \end{indpar}
 
-\TT{PUSH} {\em variable-name}
-          {\em new-variable-name}\QMARK{}
+\ttkey{PUSH} {\em variable-name}
+             {\em new-variable-name}\QMARK{}
 \begin{indpar}
 At run-time, pushes into the process stack a copy of the variable
 named in the variable stack or global variable vector.
@@ -1786,7 +1786,7 @@ to the runtime instruction \TT{PUSHS}, \TT{PUSHL}, \TT{PUSHG},
 or \TT{PUSHA}, depending on the location of the variable.
 \end{indpar}
 
-\TT{PUSHI} {\em number} {\em variable-name}\QMARK{}
+\ttkey{PUSHI} {\em number} {\em variable-name}\QMARK{}
 \begin{indpar}
 At run-time, pushes into the process stack a copy of
 the {\em number}\pagnote{NUMBER}.
@@ -1794,27 +1794,30 @@ At assembly time, pushes into the variable stack an element
 with the given {\em variable-name}, if provided.
 \end{indpar}
 
-\TT{POPS}/\TT{POP} {\em variable-name}
+\ttkey{POP} {\em variable-name}
 \begin{indpar}
 At run-time, pops the process stack and stores the value popped
 into the variable names in the variable stack.
 At assembly time, pops the variable stack.
 
 The variable stack search for {\em variable-name} is restricted to
-elements with the same lexical level as the \TT{POPS}/\TT{POP} instruction.
+elements with the same lexical level as the \TT{POP} instruction.
 
-Note: \TT{POPL}, \TT{POPG}, and \TT{POPA} do not exist as you cannot write
-      variables at a different lexical level or in a different module.
+\ttkey{POP} assembles to the run-time instruction \TT{POPS}.
+Note that \TT{POPL}, \TT{POPG}, and \TT{POPA} do
+\underline{not} exist as you cannot write
+variables that are arguments, or at a different lexical level,
+or in a different module.
 \end{indpar}
 
-\TT{BEG}/\TT{NOP}/\TT{CONT}
+\ttkey{BEG}/\ttkey{NOP}/\ttkey{CONT}
 \begin{indpar}
 At run-time these instruction's actions are as described in
 Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}.  At assembly-time,
 these instructions do nothing.
 \end{indpar}
 
-\TT{JMP} {\em jmp-target}
+\ttkey{JMP} {\em jmp-target}
 \begin{indpar}
 At run-time this instruction's actions are as described in
 Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}.  At assembly-time,
@@ -1826,7 +1829,7 @@ be a \TT{LABEL} declaration, a \TT{BEG\ldots} instruction,
 or an \TT{END\ldots} instruction.
 \end{indpar}
 
-\TT{JMP\ldots} {\em jmp-target}
+\ttkey{JMP\ldots} {\em jmp-target}
 \begin{indpar}
 Here \ldots~denotes one of \TT{EQ}, \TT{NE}, etc.
 
@@ -1839,7 +1842,7 @@ $S$ value is the length of the variable stack \underline{after}
 the two elements were popped.
 \end{indpar}
 
-\TT{BEGL} {\em nnext}
+\ttkey{BEGL} {\em nnext}
 \begin{indpar}
 Here {\em nnext} is the number of next variables
 (see Next Variables and Loops, \itemref{NEXT-VARIABLES-AND-LOOPS}).
@@ -1857,7 +1860,7 @@ Thus for example, if the top two stack elements have names
 pushed would have names \TT{next-X} and \TT{next-Y}.
 \end{indpar}
 
-\TT{END}/\TT{ENDL}
+\ttkey{END}/\ttkey{ENDL}
 \begin{indpar}
 At run-time these instruction's actions are as described in
 Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}.  At assembly-time,
@@ -1866,15 +1869,16 @@ same lexical level and depth as the \TT{END}/\TT{ENDL}
 instruction.
 \end{indpar}
 
-\TT{SET-TRACE} {\em trace-option}\STAR{}
+\ttkey{PROCESS\_TRACE} {\em trace-option}\STAR{}
 \begin{indpar}
 At run-time set the process \TT{trace\_flags} parameter to the
 flags given by the options (i.e., \TT{TRACE},
-\TT{TRACE\_PHRASE}, \TT{TRACE\_NOJMP}).  At assembly-time,
+\ttkey{TRACE\_PHRASE}, \TT{TRACE\_NOJMP}).  This is implemented
+by the run-time instruction \TT{SET\_TRACE}. At assembly-time,
 this instruction does nothing.
 \end{indpar}
 
-\TT{ERROR} {\em error-code} {\em nargs}\QMARK{}
+\ttkey{ERROR} {\em error-code} {\em nargs}\QMARK{}
 \begin{indpar}
 If {\em error-code} is non-zero, this instruction terminates
 the process at run-time, {\em nargs} must \underline{not}
@@ -1886,7 +1890,7 @@ process stack at run-time and from the variable stack
 at assembly-time.
 \end{indpar}
 
-\TT{BEGF}\label{BEGF} {\em function-name} {\em variable-name}\STAR{}
+\ttkey{BEGF}\label{BEGF} {\em function-name} {\em variable-name}\STAR{}
 \begin{indpar}
 At run-time this instruction's actions are as described in
 Figure~\itemref{FUNCTION-INSTRUCTIONS}.  At assembly-time,
@@ -1904,7 +1908,7 @@ where $L$ is the lexical level of the \TT{BEGF}
 instruction.  This is used to implement \TT{PUSHA}.
 \end{indpar}
 
-\TT{ENDF}
+\ttkey{ENDF}
 \begin{indpar}
 At run-time this instruction's actions are as described in
 Figure~\itemref{FUNCTION-INSTRUCTIONS}.  At assembly-time,
@@ -1912,7 +1916,7 @@ it pops from the variable and function stacks all elements with the
 same lexical level \TT{ENDF} instruction.
 \end{indpar}
 
-\TT{CALLM} {\em function-name} {\em nargs} {\em variable-name}\STAR{}
+\ttkey{CALLM} {\em function-name} {\em nargs} {\em variable-name}\STAR{}
 \begin{indpar}
 At run-time this instruction's actions are as described in
 Figure~\itemref{FUNCTION-INSTRUCTIONS}.  At assembly-time,
@@ -1926,8 +1930,8 @@ same lexical level \TT{ENDF} instruction.
 The {\em function-name} is searched for in the function stack.
 \end{indpar}
 
-\TT{CALLG} {\em module-name} {\em function-name}
-           {\em nargs} {\em variable-name}\STAR{}
+\ttkey{CALLG} {\em module-name} {\em function-name}
+              {\em nargs} {\em variable-name}\STAR{}
 \begin{indpar}
 At run-time this instruction's actions are as described in
 Figure~\itemref{FUNCTION-INSTRUCTIONS}.  At assembly-time,
@@ -1937,8 +1941,8 @@ The {\em function-name} is searched for in the function stack of
 the previously assembled module named.
 \end{indpar}
 
-\TT{CALL} {\em function-name}
-           {\em nargs} {\em variable-name}\STAR{}
+\ttkey{CALL} {\em function-name}
+             {\em nargs} {\em variable-name}\STAR{}
 \begin{indpar}
 This instruction searches for the {\em function-name} first in the function
 stack and then in the function stacks of the previously assembled
@@ -1946,11 +1950,60 @@ modules in the order in which they were assembled.  It then
 assembles to \TT{CALLM} or \TT{CALLG}.
 \end{indpar}
 
-\TT{RET} {\em nresults}
+\ttkey{RET} {\em nresults}
 \begin{indpar}
 At run-time this instruction's actions are as described in
 Figure~\itemref{FUNCTION-INSTRUCTIONS}.  At assembly-time,
 this instruction does nothing.
+\end{indpar}
+
+\ttkey{PUSHNARGS} {\em variable-name}
+\begin{indpar}
+At run-time this instruction's actions are as described in
+Figure~\itemref{FUNCTION-INSTRUCTIONS}.  At assembly-time,
+this instruction pushes into the variable stack an element
+with the given {\em variable-name}.
+\end{indpar}
+
+\ttkey{PUSHV} {\em level}\QMARK{} {\em variable-name}\QMARK{}
+\begin{indpar}
+Here {\em level} is an integer specifing the lexical level
+$L$ used as the \TT{immedB} parameter of the run-time
+\TT{PUSHV} instruction.  If {\em level} > 0, then $L$ = {\em level}.
+If {\em level} $\leq$ 0, $L$ = $K$ + {\em level} where
+$K$ is the lexical level of the \TT{PUSHV} instruction.
+If {\em level} is missing, $L$ = $K$.
+
+At run-time this instruction's actions are as described in
+Figure~\itemref{FUNCTION-INSTRUCTIONS}.  At assembly-time,
+this instruction does nothing if {\em variable-name} is
+not given, and otherwise changes the name of the top
+variable stack element to {\em variable-name}.
+\end{indpar}
+
+\subsection{MEXAS Declarations}
+\label{MEXAS-DECLARATIONS}
+
+\ttkey{LABEL} {\em jmp-target}
+\begin{indpar}
+See \pagref{LABEL}.
+\end{indpar}
+
+\ttkey{INSTRUCTION\_TRACE} {\em trace-option}\STAR{}
+\begin{indpar}
+Set the \TT{trace\_flags} of the next instruction to those
+given by the options (i.e., \TT{TRACE},
+\TT{TRACE\_PHRASE}, \TT{TRACE\_NOJMP}).
+\end{indpar}
+
+\ttkey{DEFAULT\_TRACE} {\em trace-option}\STAR{}
+\begin{indpar}
+Set the default trace flags to those
+given by the options (i.e., \TT{TRACE},
+\TT{TRACE\_PHRASE}, \TT{TRACE\_NOJMP}).
+In the absence of an immediately preceding \TT{INSTRUCTION\_TRACE}
+declaration, an instruction's \TT{trace\_flags} are set to the
+default trace flags.
 \end{indpar}
 
 
