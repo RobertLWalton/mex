@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Jul  9 16:13:55 EDT 2023
+// Date:	Sun Jul  9 16:30:22 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -502,7 +502,7 @@ static bool optimized_run_process ( mex::process p )
 	case mex::CALLM:
 	case mex::CALLG:
 	{
-	    int immedC = pc->immedC;
+	    min::uns32 immedC = pc->immedC;
 	    mex::module cm =
 	        ( op_code == mex::CALLG ?
 		  pc->immedD :
@@ -517,13 +517,23 @@ static bool optimized_run_process ( mex::process p )
 	    int level = target->immedB;
 	    if ( level > mex::max_lexical_level )
 	        goto ERROR_EXIT;
-	    if (    p->return_stack->length
-	         >= p->return_stack->max_length )
+	    min::uns32 rp = p->return_stack->length;
+	    if ( rp >= p->return_stack->max_length )
 	        goto ERROR_EXIT;
 
-	    // TBD
+	    mex::ret * ret = ~ ( p->return_stack + rp );
+	    mex::pc new_pc =
+	        { m, (min::uns32)
+		     ( pc - pcbegin + 1 ) };
+	    mex::set_saved_pc ( p, ret, new_pc );
+	    ret->saved_fp = p->fp[level];
+	    ret->nargs = pc->immedA;
+	    ret->nresults = pc->immedB;
+	    * (min::uns32 *) & p->return_stack->length =
+	        rp + 1;
 
-
+	    new_pc = { cm, immedC + 1 };
+	    mex::set_pc ( p, new_pc );
 	}
 
 	} // end switch ( op_code )

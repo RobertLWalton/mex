@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Jul  9 15:40:22 EDT 2023
+// Date:	Sun Jul  9 16:53:27 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -130,7 +130,7 @@ struct pc
 
 struct ret
 {
-    mex::pc saved_pc;
+    const mex::pc saved_pc;
     min::uns32 saved_fp;
     min::uns32 nargs;
     min::uns32 nresults;
@@ -168,6 +168,13 @@ inline void set_pc ( mex::process p, mex::pc pc )
     if ( pc.module != min::NULL_STUB )
         min::unprotected::acc_write_update
 	    ( p, pc.module );
+}
+inline void set_saved_pc
+    ( mex::process p, mex::ret * ret, mex::pc pc )
+{
+    * (mex::pc *) & ret->saved_pc = pc;
+    min::unprotected::acc_write_update
+	( p->return_stack, pc.module );
 }
 
 extern min::uns32 trace_indent;
