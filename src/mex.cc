@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Jul  9 04:59:20 EDT 2023
+// Date:	Sun Jul  9 07:24:38 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -495,6 +495,31 @@ static bool optimized_run_process ( mex::process p )
 	    pc = pcbegin + new_pc;
 	    pcend = pcbegin + m->length;
 	    -- pc;
+	}
+	case mex::CALLM:
+	case mex::CALLG:
+	{
+	    int immedC = pc->immedC;
+	    mex::module cm =
+	        ( op_code == mex::CALLG ?
+		  pc->immedD :
+		  m );
+	    if ( cm == min::NULL_STUB )
+	        goto ERROR_EXIT;
+	    if ( immedC >= cm->length )
+	        goto ERROR_EXIT;
+	    mex::instr * target = ~ ( cm + immedC );
+	    if ( target->op_code != mex::BEGF )
+	        goto ERROR_EXIT;
+	    int level = target->immedB;
+	    if ( level > mex::max_lexical_level )
+	        goto ERROR_EXIT;
+	    if ( p->rp >= p->return_stack->length )
+	        goto ERROR_EXIT;
+
+	    // TBD
+
+
 	}
 
 	} // end switch ( op_code )
