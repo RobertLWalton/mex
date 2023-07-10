@@ -239,7 +239,7 @@
 
 \author{Robert L. Walton}
 
-\date{July 9, 2023}
+\date{July 10, 2023}
  
 \maketitle
 
@@ -1508,12 +1508,19 @@ of \TT{m} (i.e., execute the added code).
 \key{MEXAS} is an assembly language for MEX.  The \ttkey{mexas}
 assembler can be use as a MEX compiler.
 
+MEXAS is a tool for debugging MEX and a prototype for more
+advanced MEX compilers.
+
 \subsection{Lexemes}
 MEXAS programs are written in ASCII.  Control characters other
 than whitespace are forbidden.
 
 A MEXAS \key{lexeme} is a sequence of non-whitespace characters
-separated by whitespace.
+surrounded by whitespace, or a single quote (\TT{'}) followed
+by a sequence of non-single-quote characters followed by a
+single quote, or a double quote (\TT{"}) followed by a 
+sequence of non-double-quote characters followed by a
+double quote.
 
 A \key{number}\label{NUMBER} is a lexeme acceptable as an IEEE floating point
 number to the POSIX \TT{strtod} function.
@@ -1522,23 +1529,31 @@ A \key{name}\label{NAME} is a lexeme beginning with a letter that is
 \underline{not} a number (\TT{nan}, \TT{InF}, etc. are numbers
 and not names).
 
+A \key{string}\label{STRING} is a lexeme beginning with quote and ending
+with the same kind of quote.
+
+All lexemes must be on a single line: they cannot be continued to the
+next line.
+
 \subsection{MEXAS Syntax}
 \label{MEXAS-SYNTAX}
 
 A MEXAS program consists of statements which are instructions
 or declarations, each encoded as a sequence of lexemes on
-a line.  A line ending with the `\ttkey{\textbackslash}'
+a line.  A line ending with the `\ttkey{\textbackslash}' lexeme
 is \key{continued} on the next line (the `\textbackslash' is
 otherwise ignored).
 If the first lexeme on a line is `\ttkey{//}', the entire line
-is a \key{comment line} and is ignored.  Blank lines are ignored.
+is a \key{comment line} and is ignored (comment lines cannot
+be continued).  Blank lines are ignored.
 
 Instructions begin with an op code, and the program syntax
-of instructions is that of a code vector: see Code Vectors,
+of all the instructions taken together
+is that of a code vector: see Code Vectors,
 \itemref{CODE-VECTORS}.
 
-Declarations associate names with stack locations and code
-locations.
+Declarations define jump instruction targets and instruction
+trace flags.
 
 When `\key{::=}' is used in a syntax equation, the
 items of the equation are lexemes and \underline{not}
