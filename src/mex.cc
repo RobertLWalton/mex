@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Jul 10 03:37:22 EDT 2023
+// Date:	Mon Jul 10 04:21:16 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1390,6 +1390,28 @@ bool mex::run_process ( mex::process p )
 		if ( new_fp > new_sp - spbegin )
 		    goto INNER_FATAL;
 	    }
+	    case mex::CALLM:
+	    case mex::CALLG:
+	    {
+		min::uns32 immedC = pc->immedC;
+		mex::module cm =
+		    ( op_code == mex::CALLG ?
+		      pc->immedD :
+		      m );
+		if ( cm == min::NULL_STUB )
+		    goto INNER_FATAL;
+		if ( immedC >= cm->length )
+		    goto INNER_FATAL;
+		mex::instr * target = ~ ( cm + immedC );
+		if ( target->op_code != mex::BEGF )
+		    goto INNER_FATAL;
+		int level = target->immedB;
+		if ( level > mex::max_lexical_level )
+		    goto INNER_FATAL;
+		min::uns32 rp = p->return_stack->length;
+		if ( rp >= p->return_stack->max_length )
+		    goto INNER_FATAL;
+	    }
 
 	    } // end switch ( op_code )
 
@@ -1599,6 +1621,32 @@ bool mex::run_process ( mex::process p )
 		pc = pcbegin + new_pc;
 		pcend = pcbegin + m->length;
 		-- pc;
+	    }
+	    case mex::CALLM:
+	    case mex::CALLG:
+	    {
+		min::uns32 immedC = pc->immedC;
+		mex::module cm =
+		    ( op_code == mex::CALLG ?
+		      pc->immedD :
+		      m );
+		mex::instr * target = ~ ( cm + immedC );
+		int level = target->immedB;
+		min::uns32 rp = p->return_stack->length;
+
+		mex::ret * ret = ~ ( p->return_stack + rp );
+		mex::pc new_pc =
+		    { m, (min::uns32)
+			 ( pc - pcbegin + 1 ) };
+		mex::set_saved_pc ( p, ret, new_pc );
+		ret->saved_fp = p->fp[level];
+		ret->nargs = pc->immedA;
+		ret->nresults = pc->immedB;
+		* (min::uns32 *) & p->return_stack->length =
+		    rp + 1;
+
+		new_pc = { cm, immedC + 1 };
+		mex::set_pc ( p, new_pc );
 	    }
 
 	    } // end switch ( op_code )
