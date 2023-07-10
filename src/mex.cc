@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Jul 10 04:21:16 EDT 2023
+// Date:	Mon Jul 10 07:06:29 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -311,6 +311,60 @@ static bool optimized_run_process ( mex::process p )
 	    if ( i >= sp - spbegin )
 	        goto ERROR_EXIT;
 	    * sp ++ = spbegin[i];
+	    break;
+	}
+	case mex::PUSHA:
+	{
+	    int i = pc->immedA;
+	    int j = pc->immedB;
+	    if ( j > mex::max_lexical_level )
+	        goto ERROR_EXIT;
+	    int k = p->fp[j];
+	    if ( i > k )
+	        goto ERROR_EXIT;
+	    k -= i;
+	    if ( i >= sp - spbegin )
+	        goto ERROR_EXIT;
+	    * sp ++ = spbegin[k];
+	    break;
+	}
+	case mex::PUSHNARGS:
+	{
+	    int rp = p->return_stack->length;
+	    if ( rp == 0 )
+	        goto ERROR_EXIT;
+	    if ( i >= sp - spbegin )
+	        goto ERROR_EXIT;
+	    -- rp;
+	    mex::ret * ret = ~ ( p->return_stack + rp );
+	    * sp ++ = GF ( ret->nargs );
+	    break;
+	}
+	case mex::PUSHV:
+	{
+	    int j = pc->immedB;
+	    int k = p->fp[j];
+	    if ( j > mex::max_lexical_level )
+	        goto ERROR_EXIT;
+	    if ( sp <= spbegin )
+	        goto ERROR_EXIT;
+	    min::float64 f = FG ( sp[-1] );
+	    min::float64 ff = floor ( f );
+	    if ( std::isnan ( ff )
+	         ||
+	         f != ff
+		 ||
+	         ff < 0 || ff > k )
+	    {
+	        sp[-1] = GF ( NAN );
+		feraiseexcept ( FE_INVALID );
+	    }
+	    else
+	    {
+		int i = (int) ff;
+		k -= i;
+		sp[-1] = spbegin[k];
+	    }
 	    break;
 	}
 	case mex::POPS:
@@ -1276,6 +1330,43 @@ bool mex::run_process ( mex::process p )
 		    goto INNER_FATAL;
 		}
 		break;
+	    case mex::PUSHA:
+		if ( immedB > mex::max_lexical_level )
+		{
+		    message = "immedB too large";
+		    goto INNER_FATAL;
+		}
+		if ( immedA > p->fp[i] )
+		{
+		    message = "immedA too large";
+		    goto INNER_FATAL;
+		}
+		break;
+	    case mex::PUSHNARGS:
+		if ( p->return_stack->length == 0 )
+		{
+		    message = "return stack empty";
+		    goto INNER_FATAL;
+		}
+		if ( sp >= spend )
+		{
+		    message =
+		        "stack too large for push";
+		    goto INNER_FATAL;
+		}
+		break;
+	    case mex::PUSHV:
+		if ( immedB > mex::max_lexical_level )
+		{
+		    message = "immedB too large";
+		    goto INNER_FATAL;
+		}
+		if ( sp <= spbegin )
+		{
+		    message = "stack is empty";
+		    goto INNER_FATAL;
+		}
+		break;
 	    case mex::POPS:
 		if ( sp <= spbegin )
 		{
@@ -1363,13 +1454,26 @@ bool mex::run_process ( mex::process p )
 		if ( op_code == mex::ENDF ) immedC = 0;
 		min::uns32 rp = p->return_stack->length;
 		if ( immedA > sp - spbegin )
+		{
+		    message = "immedA is too large";
 		    goto INNER_FATAL;
+		}
 		if ( immedB > mex::max_lexical_level )
+		{
+		    message = "immedA is too large";
 		    goto INNER_FATAL;
+		}
 		if ( immedC > immedA )
+		{
+		    message =
+		        "immedC is larger than immedA";
 		    goto INNER_FATAL;
+		}
 		if ( rp == 0 )
+		{
+		    message = "return stack is empty";
 		    goto INNER_FATAL;
+		}
 		-- rp;
 		const mex::ret * ret =
 		   ~ ( p->return_stack + rp );
@@ -1379,16 +1483,27 @@ bool mex::run_process ( mex::process p )
 		{
 		    if ( new_pc != 0 )
 			goto INNER_FATAL;
+		    {
+			message = "bad saved_pc value";
+			goto INNER_FATAL;
+		    }
 		}
 		else
 		{
 		    if ( new_pc > em->length )
 			goto INNER_FATAL;
+		    {
+			message = "bad saved_pc value";
+			goto INNER_FATAL;
+		    }
 		}
 		min::gen * new_sp = sp - immedA;
 		min::uns32 new_fp = ret->saved_fp;
 		if ( new_fp > new_sp - spbegin )
+		{
+		    message = "bad saved_fp value";
 		    goto INNER_FATAL;
+		}
 	    }
 	    case mex::CALLM:
 	    case mex::CALLG:
@@ -1399,18 +1514,35 @@ bool mex::run_process ( mex::process p )
 		      pc->immedD :
 		      m );
 		if ( cm == min::NULL_STUB )
+		{
+		    message = "immedD is not a module";
 		    goto INNER_FATAL;
+		}
 		if ( immedC >= cm->length )
+		{
+		    message = "immedC is too large";
 		    goto INNER_FATAL;
+		}
 		mex::instr * target = ~ ( cm + immedC );
 		if ( target->op_code != mex::BEGF )
+		{
+		    message =
+		        "transfer target is not a BEGF";
 		    goto INNER_FATAL;
+		}
 		int level = target->immedB;
 		if ( level > mex::max_lexical_level )
+		{
+		    message =
+		        "BEGF immedB is too large";
 		    goto INNER_FATAL;
+		}
 		min::uns32 rp = p->return_stack->length;
 		if ( rp >= p->return_stack->max_length )
+		{
+		    message = "return stack is full";
 		    goto INNER_FATAL;
+		}
 	    }
 
 	    } // end switch ( op_code )
@@ -1522,6 +1654,47 @@ bool mex::run_process ( mex::process p )
 	        * sp ++ =
 		    spbegin[p->fp[pc->immedB] + immedA];
 		break;
+	    case mex::PUSHA:
+	    {
+		* sp ++ =
+		    spbegin[p->fp[pc->immedB] - immedA];
+		break;
+	    }
+	    case mex::PUSHNARGS:
+	    {
+		int rp = p->return_stack->length;
+		-- rp;
+		mex::ret * ret =
+		    ~ ( p->return_stack + rp );
+		* sp ++ = min::new_direct_float_gen
+		               ( ret->nargs );
+		break;
+	    }
+	    case mex::PUSHV:
+	    {
+		int j = pc->immedB;
+		int k = p->fp[j];
+		min::float64 f = MUP::direct_float_of
+		                    ( sp[-1] );
+		min::float64 ff = floor ( f );
+		if ( std::isnan ( ff )
+		     ||
+		     f != ff
+		     ||
+		     ff < 0 || ff > k )
+		{
+		    sp[-1] = min::new_direct_float_gen
+		                ( NAN );
+		    feraiseexcept ( FE_INVALID );
+		}
+		else
+		{
+		    int i = (int) ff;
+		    k -= i;
+		    sp[-1] = spbegin[k];
+		}
+		break;
+	    }
 	    case mex::POPS:
 	    {
 		int i = pc->immedA;
