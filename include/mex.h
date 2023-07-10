@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Jul  9 16:53:27 EDT 2023
+// Date:	Mon Jul 10 03:31:43 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -162,6 +162,13 @@ struct process_header
 MIN_REF ( min::printer, printer, mex::process )
 MIN_REF ( min::packed_vec_insptr<mex::ret>,
           return_stack, mex::process )
+inline min::gen * process_push
+    ( mex::process p, min::gen * sp, min::gen v )
+{
+    * sp ++ = v;
+    min::unprotected::acc_write_update ( p, v );
+    return sp;
+}
 inline void set_pc ( mex::process p, mex::pc pc )
 {
     * (mex::pc *) & p->pc = pc;

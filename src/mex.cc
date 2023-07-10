@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Jul  9 16:30:22 EDT 2023
+// Date:	Mon Jul 10 03:14:21 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -279,7 +279,8 @@ static bool optimized_run_process ( mex::process p )
 	{
 	    if ( sp >= spend )
 	        goto ERROR_EXIT;
-	    * sp ++ = pc->immedD;
+	    sp = mex::process_push
+	        ( p, sp, pc->immedD );
 	    break;
 	}
 	case mex::PUSHG:
@@ -296,7 +297,8 @@ static bool optimized_run_process ( mex::process p )
 	        goto ERROR_EXIT;
 	    if ( sp >= spend )
 	        goto ERROR_EXIT;
-	    * sp ++ = globals[i];
+	    sp = mex::process_push
+	        ( p, sp, globals[i] );
 	    break;
 	}
 	case mex::PUSHL:
@@ -1467,14 +1469,16 @@ bool mex::run_process ( mex::process p )
 	    }
 	    case mex::PUSHI:
 	    {
-		* sp ++ = pc->immedD;
+		sp = mex::process_push
+		    ( p, sp, pc->immedD );
 		break;
 	    }
 	    case mex::PUSHG:
 	    {
 	        mex::module mg =
 		    (mex::module) pc->immedD;
-		* sp ++ = mg->globals[pc->immedA];
+		sp = mex::process_push
+		    ( p, sp, mg->globals[pc->immedA] );
 		break;
 	    }
 	    case mex::PUSHL:
