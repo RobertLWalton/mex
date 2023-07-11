@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Jul 10 03:31:43 EDT 2023
+// Date:	Tue Jul 11 17:25:30 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -23,6 +23,17 @@
 // Inclusions.
 //
 # include <min.h>
+
+namespace mex {
+
+extern min::uns32 trace_indent;
+extern char trace_mark;
+extern min::locatable_var<min::printer> default_printer;
+extern min::uns32 module_length;
+extern min::uns32 process_length;
+extern min::uns32 return_stack_length;
+
+}
 
 
 // Program Instructions
@@ -184,12 +195,12 @@ inline void set_saved_pc
 	( p->return_stack, pc.module );
 }
 
-extern min::uns32 trace_indent;
-extern char trace_mark;
-
 bool run_process ( mex::process p );
 
-extern min::locatable_var<min::printer> default_printer;
+mex::module create_module ( min::file f );
+
+mex::process create_process
+    ( min::printer printer = mex::default_printer );
 
 } // end mex namespace
 

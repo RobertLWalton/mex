@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Jul 11 04:41:44 EDT 2023
+// Date:	Tue Jul 11 17:22:17 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -14,6 +14,8 @@
 //	Support Functions
 //	Optimized Run Process
 //	Run Process
+//	Create Functions
+//	Init Functions
 
 
 // Setup
@@ -28,6 +30,38 @@
 # define MUP min::unprotected
 
 min::locatable_var<min::printer> mex::default_printer;
+min::uns32 mex::module_length = 1 << 16;
+min::uns32 mex::process_length = 1 << 16;
+min::uns32 mex::return_stack_length = 1 << 16;
+
+static min::uns32 instr_gen_disp[] =
+{
+    min::DISP ( & mex::instr::immedD ),
+    min::DISP_END
+};
+
+static min::uns32 module_gen_disp[] =
+{
+    min::DISP ( & mex::module_header::interface ),
+    min::DISP_END
+};
+
+static min::uns32 module_stub_disp[] =
+{
+    min::DISP ( & mex::module_header::position ),
+    min::DISP ( & mex::module_header::globals ),
+    min::DISP ( & mex::module_header::trace_info ),
+    min::DISP_END
+};
+
+static min::packed_vec<min::gen,mex::module_header>
+     module_vec_type
+         ( "module_vec_type",
+	   ::instr_gen_disp,
+	   NULL,
+	   ::module_gen_disp,
+	   ::module_stub_disp );
+    
 
 
 // Support Functions
@@ -1070,7 +1104,8 @@ bool mex::run_process ( mex::process p )
 	    case mex::PUSHV:
 	    {
 		int j = pc->immedB;
-		if ( j < 1 || j > mex::max_lexical_level )
+		if (    j < 1
+		     || j > mex::max_lexical_level )
 		{
 		    message = "invalid immedB";
 		    goto INNER_FATAL;
@@ -1859,7 +1894,8 @@ bool mex::run_process ( mex::process p )
 		int level = target->immedB;
 		min::uns32 rp = p->return_stack->length;
 
-		mex::ret * ret = ~ ( p->return_stack + rp );
+		mex::ret * ret =
+		    ~ ( p->return_stack + rp );
 		mex::pc new_pc =
 		    { m, (min::uns32)
 			 ( pc - pcbegin + 1 ) };
@@ -1867,8 +1903,8 @@ bool mex::run_process ( mex::process p )
 		ret->saved_fp = p->fp[level];
 		ret->nargs = pc->immedA;
 		ret->nresults = pc->immedB;
-		* (min::uns32 *) & p->return_stack->length =
-		    rp + 1;
+		* (min::uns32 *)
+		  & p->return_stack->length = rp + 1;
 
 		new_pc = { cm, immedC + 1 };
 		mex::set_pc ( p, new_pc );
@@ -1971,3 +2007,33 @@ FATAL:
     return false;
 
 } // mex::run_process
+
+// Create Functions
+// ------ ---------
+
+mex::module mex::create_module ( min::file f )
+{
+    min::locatable_var<mex::module> m =
+        ( (mex::module) ::module_vec_type.new_stub
+	     ( mex::module_length ) );
+    mex::interface_ref(m) = min::MISSING();
+    mex::globals_ref(m) = min::NULL_STUB;
+    mex::trace_info_ref(m) =
+        min::gen_packed_vec_type.new_stub
+	    ( mex::module_length );
+    min::locatable_var
+        <min::phrase_position_vec_insptr> position;
+
+    min::init
+        ( min::ref<min::phrase_position_vec_insptr>
+	      (position),
+	  f, min::MISSING_PHRASE_POSITION,
+	  mex::module_length );
+    mex::position_ref(m) = position;
+
+    return m;
+}
+
+// Init Functions
+// ---- ---------
+
