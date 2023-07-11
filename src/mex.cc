@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Jul 10 23:07:23 EDT 2023
+// Date:	Mon Jul 10 23:41:09 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -354,7 +354,7 @@ static bool optimized_run_process ( mex::process p )
 	         ||
 	         f != ff
 		 ||
-	         ff <= p->fp[j-1] || ff > k )
+	         ff <= 0 || ff > k - p->fp[j-1] )
 	    {
 	        sp[-1] = GF ( NAN );
 		feraiseexcept ( FE_INVALID );
@@ -1020,7 +1020,7 @@ bool mex::run_process ( mex::process p )
 		     ||
 		     arg1 != ff
 		     ||
-		     ff <= p->fp[j-1] || ff > k )
+		     ff <= 0 || ff > k - p->fp[j-1] )
 		{
 		    result = NAN;
 		    feraiseexcept ( FE_INVALID );

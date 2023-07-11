@@ -1075,9 +1075,10 @@ are explained in Tracing and Exceptions, \itemref{TRACING-AND-EXCEPTIONS}.
     & point.
 \\\hline
 \TT{PUSHV}
-    & Replace the top stack value \TT{V} with the value of \\
-    & the stack vector element with index \TT{fp[immedB] - V}. \\
-    & \TT{V} must convert to a non-negative integer.
+    & Replace the top stack value \TT{V} with the value of the stack vector \\
+    & element with index \TT{fp[immedB] - V}.  \TT{V} must convert to an \\
+    & integer in a suitable range, else an invalid exception is raised \\
+    & and the result is a \TT{NaN}.
 \\\hline
 \end{tabular}
 \end{center}
