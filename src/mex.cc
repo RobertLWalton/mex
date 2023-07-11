@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Jul 10 23:41:09 EDT 2023
+// Date:	Tue Jul 11 04:41:44 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -640,7 +640,7 @@ enum
                 // operands in that order.
     A2I =  4,	// sp[0] and immedD are the arithmetic
                 // operands in that order.
-    A2IR = 5,	// immedD and sp[0] are the arithmetic
+    A2RI = 5,	// immedD and sp[0] are the arithmetic
                 // operands in that order.
     A1 =   6,	// sp[0] is an arithmetic operand.
     J2 =   7,	// sp[-1] and sp[0] are the arithmetic
@@ -665,7 +665,68 @@ struct op_info
 } op_infos[] =
 {   { 0, 0, "", "" },
     { mex::ADD, A2, "ADD", "+" },
-    { mex::MUL, A2, "MUL", "*" }
+    { mex::ADDI, A2I, "ADDI", "+" },
+    { mex::MUL, A2, "MUL", "*" },
+    { mex::MULI, A2I, "MULI", "*" },
+    { mex::SUB, A2, "SUB", "-" },
+    { mex::SUBR, A2R, "SUBR", "-" },
+    { mex::SUBI, A2I, "SUBI", "-" },
+    { mex::SUBRI, A2RI, "SUBRI", "-" },
+    { mex::DIV, A2, "DIV", "/" },
+    { mex::DIVR, A2R, "DIVR", "/" },
+    { mex::DIVI, A2I, "DIVI", "/" },
+    { mex::DIVRI, A2RI, "DIVRI", "/" },
+    { mex::MOD, A2, "MOD", "fmod" },
+    { mex::MODR, A2R, "MODR", "fmod" },
+    { mex::MODI, A2I, "MODI", "fmod" },
+    { mex::MODRI, A2RI, "MODRI", "fmod" },
+    { mex::FLOOR, A1, "FLOOR", "floor" },
+    { mex::CEIL, A1, "CEIL", "ceil" },
+    { mex::TRUNC, A1, "TRUNC", "trunc" },
+    { mex::ROUND, A1, "ROUND", "round" },
+    { mex::NEG, A1, "NEG", "-" },
+    { mex::ABS, A1, "ABS", "abs" },
+    { mex::LOG, A1, "LOG", "log" },
+    { mex::LOG10, A1, "LOG10", "log10" },
+    { mex::EXP, A1, "EXP", "exp" },
+    { mex::EXP10, A1, "EXP10", "exp10" },
+    { mex::SIN, A1, "SIN", "sin" },
+    { mex::ASIN, A1, "ASIN", "asin" },
+    { mex::COS, A1, "COS", "cos" },
+    { mex::ACOS, A1, "ACOS", "acos" },
+    { mex::TAN, A1, "TAN", "tan" },
+    { mex::ATAN, A1, "ATAN", "atan" },
+    { mex::ATAN2, A2, "ATAN2", "atan2" },
+    { mex::ATAN2R, A2R, "ATAN2R", "atan2" },
+    { mex::POWI, A1, "POWI", "pow" },
+    { mex::PUSHS, NONA, "PUSHS", NULL },
+    { mex::PUSHL, NONA, "PUSHL", NULL },
+    { mex::PUSHI, NONA, "PUSHI", NULL },
+    { mex::PUSHG, NONA, "PUSHG", NULL },
+    { mex::POPS, NONA, "POPS", NULL },
+    { mex::JMP, J, "JMP", NULL },
+    { mex::JMPEQ, J2, "JMPEQ", "==" },
+    { mex::JMPNE, J2, "JMPNE", "!=" },
+    { mex::JMPLT, J2, "JMPLT", "<" },
+    { mex::JMPLEQ, J2, "JMPLEQ", "<=" },
+    { mex::JMPGT, J2, "JMPGT", ">" },
+    { mex::JMPGEQ, J2, "JMPGEQ", ">=" },
+    { mex::BEG, NONA, "BEG", NULL },
+    { mex::NOP, NONA, "NOP", NULL },
+    { mex::END, NONA, "END", NULL },
+    { mex::BEGL, NONA, "BEGL", NULL },
+    { mex::ENDL, NONA, "ENDL", NULL },
+    { mex::CONT, NONA, "CONT", NULL },
+    { mex::SET_TRACE, NONA, "SET_TRACE", NULL },
+    { mex::ERROR, NONA, "ERROR", NULL },
+    { mex::BEGF, NONA, "BEGF", NULL },
+    { mex::ENDF, NONA, "ENDF", NULL },
+    { mex::CALLM, NONA, "CALLM", NULL },
+    { mex::CALLG, NONA, "CALLG", NULL },
+    { mex::RET, NONA, "RET", NULL },
+    { mex::PUSHA, NONA, "PUSHA", NULL },
+    { mex::PUSHNARGS, NONA, "PUSHNARGS", NULL },
+    { mex::PUSHV, A1, "PUSHV", "pushv" },
 };
 
 static min::uns8 max_op_code = 0;
@@ -876,7 +937,7 @@ bool mex::run_process ( mex::process p )
 	    arg1 = FG ( new_sp[0] );
 	    arg2 = FG ( pc->immedD );
 	    goto ARITHMETIC;
-	case A2IR:
+	case A2RI:
 	    new_sp -= 1;
 	    if ( new_sp < spbegin )
 	    {
