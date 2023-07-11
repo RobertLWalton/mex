@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Jul 10 07:06:29 EDT 2023
+// Date:	Mon Jul 10 23:07:23 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -343,18 +343,18 @@ static bool optimized_run_process ( mex::process p )
 	case mex::PUSHV:
 	{
 	    int j = pc->immedB;
-	    int k = p->fp[j];
-	    if ( j > mex::max_lexical_level )
+	    if ( j < 1 || j > mex::max_lexical_level )
 	        goto ERROR_EXIT;
 	    if ( sp <= spbegin )
 	        goto ERROR_EXIT;
+	    int k = p->fp[j];
 	    min::float64 f = FG ( sp[-1] );
 	    min::float64 ff = floor ( f );
 	    if ( std::isnan ( ff )
 	         ||
 	         f != ff
 		 ||
-	         ff < 0 || ff > k )
+	         ff <= p->fp[j-1] || ff > k )
 	    {
 	        sp[-1] = GF ( NAN );
 		feraiseexcept ( FE_INVALID );
@@ -1006,6 +1006,34 @@ bool mex::run_process ( mex::process p )
 	    case mex::POWI:
 	        result = powi ( arg1, pc->immedA );
 		break;
+	    case mex::PUSHV:
+	    {
+		int j = pc->immedB;
+		if ( j < 1 || j > mex::max_lexical_level )
+		{
+		    message = "invalid immedB";
+		    goto INNER_FATAL;
+		}
+		int k = p->fp[j];
+		min::float64 ff = floor ( arg1 );
+		if ( std::isnan ( ff )
+		     ||
+		     arg1 != ff
+		     ||
+		     ff <= p->fp[j-1] || ff > k )
+		{
+		    result = NAN;
+		    feraiseexcept ( FE_INVALID );
+		}
+		else
+		{
+		    int i = (int) ff;
+		    k -= i;
+		    result = MUP::direct_float_of
+		                ( spbegin[k] );
+		}
+		break;
+	    }
 	    } // end switch ( op_code )
 
 	    int excepts =
@@ -1355,18 +1383,6 @@ bool mex::run_process ( mex::process p )
 		    goto INNER_FATAL;
 		}
 		break;
-	    case mex::PUSHV:
-		if ( immedB > mex::max_lexical_level )
-		{
-		    message = "immedB too large";
-		    goto INNER_FATAL;
-		}
-		if ( sp <= spbegin )
-		{
-		    message = "stack is empty";
-		    goto INNER_FATAL;
-		}
-		break;
 	    case mex::POPS:
 		if ( sp <= spbegin )
 		{
@@ -1668,31 +1684,6 @@ bool mex::run_process ( mex::process p )
 		    ~ ( p->return_stack + rp );
 		* sp ++ = min::new_direct_float_gen
 		               ( ret->nargs );
-		break;
-	    }
-	    case mex::PUSHV:
-	    {
-		int j = pc->immedB;
-		int k = p->fp[j];
-		min::float64 f = MUP::direct_float_of
-		                    ( sp[-1] );
-		min::float64 ff = floor ( f );
-		if ( std::isnan ( ff )
-		     ||
-		     f != ff
-		     ||
-		     ff < 0 || ff > k )
-		{
-		    sp[-1] = min::new_direct_float_gen
-		                ( NAN );
-		    feraiseexcept ( FE_INVALID );
-		}
-		else
-		{
-		    int i = (int) ff;
-		    k -= i;
-		    sp[-1] = spbegin[k];
-		}
 		break;
 	    }
 	    case mex::POPS:
