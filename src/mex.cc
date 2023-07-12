@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Jul 12 03:46:52 EDT 2023
+// Date:	Wed Jul 12 07:25:22 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -60,6 +60,29 @@ static min::packed_vec<min::gen,mex::module_header>
 	   ::instr_gen_disp,
 	   NULL,
 	   ::module_gen_disp,
+	   ::module_stub_disp );
+
+static min::uns32 process_element_gen_disp[] =
+{
+    0, min::DISP_END
+};
+
+static min::uns32 process_stub_disp[] =
+{
+    min::DISP ( & mex::process_header::printer ),
+    min::OFFSETOF ( & mex::process_header::pc )
+    +
+    min::DISP ( & mex::pc::module ),
+    min::DISP ( & mex::process_header::return_stack ),
+    min::DISP_END
+};
+
+static min::packed_vec<min::gen,mex::process_header>
+     process_vec_type
+         ( "process_vec_type",
+	   ::process_element_gen_disp,
+	   NULL,
+	   NULL,
 	   ::module_stub_disp );
     
 
@@ -2035,6 +2058,13 @@ mex::module mex::create_module ( min::file f )
     mex::position_ref(m) = position;
 
     return m;
+}
+
+mex::process mex_create_process ( min::printer printer )
+{
+    min::locatable_var<mex::process> p =
+        ( (mex::process) ::process_vec_type.new_stub
+	     ( mex::process_length ) );
 }
 
 // Init Functions
