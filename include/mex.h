@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Jul 12 03:46:39 EDT 2023
+// Date:	Wed Jul 12 18:16:22 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -30,8 +30,8 @@ extern min::uns32 trace_indent;
 extern char trace_mark;
 extern min::locatable_var<min::printer> default_printer;
 extern min::uns32 module_length;
-extern min::uns32 process_length;
-extern min::uns32 return_stack_length;
+extern min::uns32 stack_limit;
+extern min::uns32 return_stack_limit;
 
 }
 
@@ -150,14 +150,16 @@ void push_trace_info
     min::push(trace_info_ins) = info;
 }
 
-enum finish_state
+enum state
 {
-    MODULE_END	= 1,
-    CALL_END	= 2,
-    LIMIT_STOP	= 3,
-    ERROR_STOP	= 4,
-    JMP_ERROR	= 5,
-    FORM_ERROR	= 6
+    NEVER_STARTED,
+    RUNNING,
+    MODULE_END,
+    CALL_END,
+    LIMIT_STOP,
+    ERROR_STOP,
+    JMP_ERROR,
+    FORM_ERROR
 };
 
 const unsigned max_lexical_level = 16;
@@ -172,6 +174,12 @@ struct pc
     mex::module module;
     min::uns32 index;
 };
+template<typename S>
+min::uns32 DISP ( const mex::pc S::* d )
+{
+    return   min::OFFSETOF ( d )
+           + min::DISP ( & mex::pc::module );
+}
 
 struct ret
 {
@@ -180,6 +188,8 @@ struct ret
     min::uns32 nargs;
     min::uns32 nresults;
 };
+
+typedef min::packed_vec_insptr<mex::ret> return_stack;
 
 typedef void (* trace_function )
     ( mex::process p, min::gen info );
@@ -191,7 +201,7 @@ struct process_header
     min::uns32 max_length;
     min::printer printer;
     const mex::pc pc;
-    min::packed_vec_insptr<mex::ret> return_stack;
+    mex::return_stack return_stack;
     min::uns32 fp[mex::max_lexical_level + 1];
     mex::trace_function trace_function;
     min::uns32 trace_depth;
@@ -199,14 +209,14 @@ struct process_header
     int excepts;
     int excepts_accumulator;
     bool optimize;
-    mex::finish_state finish_state;
+    mex::state state;
     min::uns32 counter;
     min::uns32 limit;
 };
 
 MIN_REF ( min::printer, printer, mex::process )
-MIN_REF ( min::packed_vec_insptr<mex::ret>,
-          return_stack, mex::process )
+MIN_REF ( mex::return_stack, return_stack,
+          mex::process )
 inline min::gen * process_push
     ( mex::process p, min::gen * sp, min::gen v )
 {

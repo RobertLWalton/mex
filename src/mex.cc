@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Jul 12 07:25:22 EDT 2023
+// Date:	Wed Jul 12 18:16:05 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -30,9 +30,9 @@
 # define MUP min::unprotected
 
 min::locatable_var<min::printer> mex::default_printer;
-min::uns32 mex::module_length = 1 << 16;
-min::uns32 mex::process_length = 1 << 16;
-min::uns32 mex::return_stack_length = 1 << 16;
+min::uns32 mex::module_length = 1 << 12;
+min::uns32 mex::stack_limit = 1 << 14;
+min::uns32 mex::return_stack_limit = 1 << 12;
 
 static min::uns32 instr_gen_disp[] =
 {
@@ -70,9 +70,7 @@ static min::uns32 process_element_gen_disp[] =
 static min::uns32 process_stub_disp[] =
 {
     min::DISP ( & mex::process_header::printer ),
-    min::OFFSETOF ( & mex::process_header::pc )
-    +
-    min::DISP ( & mex::pc::module ),
+    mex::DISP ( & mex::process_header::pc ),
     min::DISP ( & mex::process_header::return_stack ),
     min::DISP_END
 };
@@ -83,8 +81,19 @@ static min::packed_vec<min::gen,mex::process_header>
 	   ::process_element_gen_disp,
 	   NULL,
 	   NULL,
-	   ::module_stub_disp );
+	   ::process_stub_disp );
     
+static min::uns32 return_stack_element_stub_disp[] =
+{
+    mex::DISP ( & mex::ret::saved_pc ),
+    min::DISP_END
+};
+
+static min::packed_vec<mex::ret>
+     return_stack_vec_type
+         ( "return_stack_vec_type",
+	   NULL,
+	   ::return_stack_element_stub_disp );
 
 
 // Support Functions
@@ -851,7 +860,7 @@ bool mex::run_process ( mex::process p )
     limit = p->limit;
     if ( p->counter >= limit )
     {
-        p->finish_state = mex::LIMIT_STOP;
+        p->state = mex::LIMIT_STOP;
 	return false;
     }
     limit -= p->counter;
@@ -882,18 +891,19 @@ bool mex::run_process ( mex::process p )
 	spend = spbegin + p->max_length; \
         limit = p->limit - p->counter;
 
+    p->state = mex::RUNNING;
     while ( true ) // Inner loop.
     {
         if ( pc == pcend )
 	{
 	    SAVE;
-	    p->finish_state = mex::MODULE_END;
+	    p->state = mex::MODULE_END;
 	    return true;
 	}
 	if ( limit == 0 )
 	{
 	    SAVE;
-	    p->finish_state = mex::LIMIT_STOP;
+	    p->state = mex::LIMIT_STOP;
 	    return false;
 	}
 
@@ -903,9 +913,9 @@ bool mex::run_process ( mex::process p )
 	    if ( optimized_run_process ( p ) )
 	    {
 	        if ( p->pc.module == min::NULL_STUB )
-		    p->finish_state = mex::CALL_END;
+		    p->state = mex::CALL_END;
 		else
-		    p->finish_state = mex::MODULE_END;
+		    p->state = mex::MODULE_END;
 	        return true;
 	    }
 	    min::interrupt();
@@ -915,7 +925,7 @@ bool mex::run_process ( mex::process p )
 	    {
 		if ( oi == 0 )
 		{
-		    p->finish_state = mex::CALL_END;
+		    p->state = mex::CALL_END;
 		    return true;
 		}
 		message = "Illegal PC: no module and"
@@ -926,7 +936,7 @@ bool mex::run_process ( mex::process p )
 	    {
 		if ( oi == m->length )
 		{
-		    p->finish_state = mex::MODULE_END;
+		    p->state = mex::MODULE_END;
 		    return true;
 		}
 		message = "Illegal PC: index too large";
@@ -935,7 +945,7 @@ bool mex::run_process ( mex::process p )
 
 	    if ( p->counter >= p->limit )
 	    {
-		p->finish_state = mex::LIMIT_STOP;
+		p->state = mex::LIMIT_STOP;
 		return false;
 	    }
 
@@ -1374,7 +1384,7 @@ bool mex::run_process ( mex::process p )
 
 		if ( bad_jmp )
 		{
-		    p->finish_state = mex::JMP_ERROR;
+		    p->state = mex::JMP_ERROR;
 		    return false;
 		}
 
@@ -1755,7 +1765,7 @@ bool mex::run_process ( mex::process p )
 
 		if ( fatal_error )
 		{
-		    p->finish_state = mex::ERROR_STOP;
+		    p->state = mex::ERROR_STOP;
 		    return false;
 		}
 
@@ -1897,7 +1907,7 @@ bool mex::run_process ( mex::process p )
 		if ( em == min::NULL_STUB )
 		{
 		    RET_SAVE;
-		    p->finish_state = mex::CALL_END;
+		    p->state = mex::CALL_END;
 		    return true;
 		}
 
@@ -1960,7 +1970,7 @@ bool mex::run_process ( mex::process p )
 // compiler has made a mistake.
 //
 FATAL:
-    p->finish_state = mex::FORM_ERROR;
+    p->state = mex::FORM_ERROR;
     char fatal_buffer[100];
     char instr_buffer[400];
     char * q = instr_buffer;
@@ -2062,9 +2072,30 @@ mex::module mex::create_module ( min::file f )
 
 mex::process mex_create_process ( min::printer printer )
 {
-    min::locatable_var<mex::process> p =
-        ( (mex::process) ::process_vec_type.new_stub
-	     ( mex::process_length ) );
+    mex::process p =
+        (mex::process) ::process_vec_type.new_stub
+	    ( mex::stack_limit );
+    mex::return_stack_ref(p) =
+        (mex::return_stack)
+	::return_stack_vec_type.new_stub
+	    ( mex::return_stack_limit );
+    mex::printer_ref(p) = printer;
+    mex::pc pc = { min::NULL_STUB, 0 };
+    mex::set_pc ( p, pc );
+    p->optimize = false;
+    p->trace_function = NULL;
+    for ( unsigned i = 0;
+          i <= mex::max_lexical_level; ++ i )
+        p->fp[i] = 0;
+    p->trace_depth = 0;
+    p->trace_flags = 0;
+    p->excepts = 0;
+    p->excepts_accumulator = 0;
+    p->state = mex::NEVER_STARTED;
+    p->counter = 0;
+    p->limit = 0;
+
+    return p;
 }
 
 // Init Functions

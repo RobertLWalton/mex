@@ -770,21 +770,23 @@ a return stack, and other parameters.  Specifically:
 \verb|bool | & \TTMKEY{optimize}{in {\tt mex::process\_header}} \\
 \verb|min::uns32 | & \TTMKEY{counter}{in {\tt mex::process\_header}} \\
 \verb|min::uns32 | & \TTMKEY{limit}{in {\tt mex::process\_header}} \\
-\verb|mex::finish_state | & \TTMKEY{finish\_state}%
+\verb|mex::state | & \TTMKEY{state}%
                                    {in {\tt mex::process\_header}} \\
 \verb|}                                    | \\
 \end{tabular}
 
 \begin{tabular}{@{}r@{}l}
-\verb|enum         mex::| & \MEXKEY{finish\_state}%
-\LABEL{MEX::FINISH_STATE} \\
+\verb|enum         mex::| & \MEXKEY{state}%
+\LABEL{MEX::STATE} \\
 \verb|{                 | \\
-\verb|mex::| & \TTMKEY{MODULE\_END}{in {\tt mex::finish\_state}} \\
-\verb|mex::| & \TTMKEY{CALL\_END}{in {\tt mex::finish\_state}} \\
-\verb|mex::| & \TTMKEY{LIMIT\_STOP}{in {\tt mex::finish\_state}} \\
-\verb|mex::| & \TTMKEY{ERROR\_STOP}{in {\tt mex::finish\_state}} \\
-\verb|mex::| & \TTMKEY{JMP\_ERROR}{in {\tt mex::finish\_state}} \\
-\verb|mex::| & \TTMKEY{FORM\_ERROR}{in {\tt mex::finish\_state}} \\
+\verb|mex::| & \TTMKEY{NEVER\_STARTED}{in {\tt mex::state}} \\
+\verb|mex::| & \TTMKEY{RUNNING}{in {\tt mex::state}} \\
+\verb|mex::| & \TTMKEY{MODULE\_END}{in {\tt mex::state}} \\
+\verb|mex::| & \TTMKEY{CALL\_END}{in {\tt mex::state}} \\
+\verb|mex::| & \TTMKEY{LIMIT\_STOP}{in {\tt mex::state}} \\
+\verb|mex::| & \TTMKEY{ERROR\_STOP}{in {\tt mex::state}} \\
+\verb|mex::| & \TTMKEY{JMP\_ERROR}{in {\tt mex::state}} \\
+\verb|mex::| & \TTMKEY{FORM\_ERROR}{in {\tt mex::state}} \\
 \verb|}                 | \\
 \end{tabular}
 
@@ -841,7 +843,7 @@ for lexical level \TT{0} (outside all functions), is always \TT{0}.
 
 The process's \TT{counter} is incremented once every time an instruction
 finishes execution.  The process stops when \TT{counter >= limit}. 
-When the process terminates, \TT{finish\_state} is set.  For details
+When the process terminates, \TT{state} is set.  For details
 see \TT{mex::run\_process}, \pagref{MEX::RUN_PROCESS},
 
 The \TT{trace\_function}, \TT{trace\_depth}, \TT{trace\_flags}, \TT{excepts},
@@ -1389,9 +1391,9 @@ Empty \TT{position} and \TT{trace\_info} vectors are created.
 The \TT{globals} member is set to \TT{min::NULL\_STUB} and the
 \TT{interface} member is set to \TT{min::MISSING()}.
 
-The \TT{max\_length} of the three empty vectors is set to:
+The \TT{max\_length} of the three empty vectors is intially set to:
 \begin{indpar}
-\verb|min::uns32 mex::|\MEXKEY{module\_length}\verb|    // Default == 1 << 16.|
+\verb|min::uns32 mex::|\MEXKEY{module\_length}\verb|    // Default == 1 << 12.|
 \end{indpar}
 
 Note that \TT{mex::module} and its components are read-only, so that
@@ -1418,6 +1420,9 @@ call \TT{min::acc\_write\_update} as necessary:
     \verb|( mex::module, min::gen info )|
 \end{indpar}
 
+These functions will increase the \TT{max\_length} of the vectors
+automatically if necessary.
+
 \end{indpar}
 
 {\tt mex::process mex::}\MEXKEY{create\_process} \\
@@ -1441,12 +1446,15 @@ is set to the value of the global variable:
 Note: the stack's \TT{max\_length} members are \underline{not} permitted
 to change during process execution.
 
+The \TT{printer} member is set to the \TT{printer} argument.
 The \TT{pc} member is set to \TT{\{min::NULL\_STUB,0\}}.
 The \TT{optimize} member is set to \TT{false}.
 The \TT{trace\_function} member is set to \TT{NULL}.
-The \TT{sp}, \TT{rp}, \TT{fp[\ldots]}, \TT{trace\_depth},
-\TT{trace\_flags}, \TT{excepts}, and \TT{excepts\_accumulator}
+The \TT{fp[\ldots]}, \TT{trace\_depth},
+\TT{trace\_flags}, \TT{excepts}, \TT{excepts\_\EOL accumulator},
+\TT{counter}, and \TT{limit}
 members are set to \TT{0}.
+The \TT{state} is set to \TT{NEVER\_\EOL STARTED}.
 \end{indpar}
 
 {\tt min::locatable\_var<min::printer> mex::}\MEXKEY{default\_printer}
@@ -1493,7 +1501,7 @@ is set to \TT{0}.
 \begin{indpar}
 Execute \TT{p} until it terminates.
 Returns \TT{true} on normal termination
-and \TT{false} otherwise.  The process \TT{finish\_state} is
+and \TT{false} otherwise.  The process \TT{state} is
 set as follows to indicate cause of termination:
 \begin{center}
 \begin{tabular}{lp{3.0in}l}
