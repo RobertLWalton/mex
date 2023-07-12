@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Jul 11 17:25:30 EDT 2023
+// Date:	Wed Jul 12 03:46:39 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -104,17 +104,51 @@ struct module_header
     const min::packed_vec_ptr<min::gen> trace_info;
 };
 
+typedef min::packed_vec_ptr
+	    <mex::instr, mex::module_header>
+	    module;
 typedef min::packed_vec_insptr
-               <mex::instr, mex::module_header>
-	       module;
+	    <mex::instr, mex::module_header>
+	    module_ins;
 
-MIN_REF ( min::phrase_position_vec, position,
-                                    mex::module )
-MIN_REF ( min::packed_vec_ptr<min::gen>, globals,
-                                         mex::module )
+MIN_REF ( min::phrase_position_vec,
+          position, mex::module_ins )
+MIN_REF ( min::packed_vec_ptr<min::gen>,
+          globals, mex::module_ins )
 MIN_REF ( min::gen, interface, mex::module )
-MIN_REF ( min::packed_vec_ptr<min::gen>, trace_info,
-                                         mex::module )
+MIN_REF ( min::packed_vec_ptr<min::gen>,
+          trace_info, mex::module_ins )
+
+void push_instr ( mex::module_ins m,
+                  mex::op_code op_code,
+		  min::uns8 trace_flags = 0,
+		  min::uns16 immedA = 0,
+		  min::uns16 immedB = 0,
+		  min::uns16 immedC = 0,
+		  min::gen immedD = min::MISSING() )
+{
+    mex::instr instr =
+        { op_code, trace_flags,
+	  immedA, immedB, immedC, immedD };
+    min::push(m) = instr;
+    min::unprotected::acc_write_update
+	( m, immedD );
+}
+void push_position ( mex::module_ins m,
+                     min::phrase_position pp )
+{
+    min::phrase_position_vec_insptr ppins =
+        (min::phrase_position_vec_insptr) m->position;
+    min::push(ppins) = pp;
+}
+void push_trace_info
+	( mex::module_ins m, min::gen info )
+{
+    min::packed_vec_insptr<min::gen> trace_info_ins =
+        (min::packed_vec_insptr<min::gen>)
+	m->trace_info;
+    min::push(trace_info_ins) = info;
+}
 
 enum finish_state
 {

@@ -239,7 +239,7 @@
 
 \author{Robert L. Walton}
 
-\date{July 10, 2023}
+\date{July 12, 2023}
  
 \maketitle
 
@@ -1382,12 +1382,42 @@ are \underline{not} fatal errors.
 \label{MEX Functions}
 
 {\tt mex::module mex::}\MEXKEY{create\_module}
-    \verb|( min::file f = min::NULL_STUB )|
+    \verb|( min::file f )|
 \begin{indpar}
 A \TT{mex::module} is created and returned.  The code vector is empty.
 Empty \TT{position} and \TT{trace\_info} vectors are created.
 The \TT{globals} member is set to \TT{min::NULL\_STUB} and the
 \TT{interface} member is set to \TT{min::MISSING()}.
+
+The \TT{max\_length} of the three empty vectors is set to:
+\begin{indpar}
+\verb|min::uns32 mex::|\MEXKEY{module\_length}\verb|    // Default == 1 << 16.|
+\end{indpar}
+
+Note that \TT{mex::module} and its components are read-only, so that
+to push intructions, positions, and info into the vectors the module type
+must be converted to \TT{mex::module\_ins}.  The following inline
+functions can be used to push elements into these vectors and
+call \TT{min::acc\_write\_update} as necessary:
+\begin{indpar}
+{\tt void mex::}\MEXKEY{push\_instr} \\
+\hspace*{2em}
+    \begin{tabular}[t]{@{}l@{}}
+    \verb|( mex::module_ins m, mex::op_code op_code,| \\
+    \verb|                     min::uns8 trace_flags = 0,| \\
+    \verb|                     min::uns16 immedA = 0,| \\
+    \verb|                     min::uns16 immedB = 0,| \\
+    \verb|                     min::uns16 immedC = 0,| \\
+    \verb|                     min::gen   immedD = min::MISSING() )| \\
+    \end{tabular}
+\\[0.5ex]
+{\tt void mex::}\MEXKEY{push\_position}
+    \verb|( mex::module, min::phrase_position pp )|
+\\[0.5ex]
+{\tt void mex::}\MEXKEY{push\_trace\_info}
+    \verb|( mex::module, min::gen info )|
+\end{indpar}
+
 \end{indpar}
 
 {\tt mex::process mex::}\MEXKEY{create\_process} \\

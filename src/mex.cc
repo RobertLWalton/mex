@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Jul 11 17:22:17 EDT 2023
+// Date:	Wed Jul 12 03:46:52 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -116,9 +116,9 @@ static bool optimized_run_process ( mex::process p )
     min::uns32 i = p->pc.index;
     if ( m == min::NULL_STUB ) return i == 0;
     if ( i >= m->length ) return i == m->length;
-    mex::instr * pcbegin = ~ ( m + 0 );
-    mex::instr * pc = ~ ( m + i );
-    mex::instr * pcend = ~ ( m + m->length );
+    const mex::instr * pcbegin = ~ ( m + 0 );
+    const mex::instr * pc = pcbegin + i;
+    const mex::instr * pcend = pcbegin + m->length;
 
     i = p->length;
     if ( i > p->max_length ) return false;
@@ -611,7 +611,8 @@ static bool optimized_run_process ( mex::process p )
 	        goto ERROR_EXIT;
 	    if ( immedC >= cm->length )
 	        goto ERROR_EXIT;
-	    mex::instr * target = ~ ( cm + immedC );
+	    const mex::instr * target =
+	        ~ ( cm + immedC );
 	    if ( target->op_code != mex::BEGF )
 	        goto ERROR_EXIT;
 	    int level = target->immedB;
@@ -789,9 +790,9 @@ bool mex::run_process ( mex::process p )
 {
     mex::module m = p->pc.module;
     min::uns32 i = p->pc.index;
-    mex::instr * pcbegin;
-    mex::instr * pc;
-    mex::instr * pcend;
+    const mex::instr * pcbegin;
+    const mex::instr * pc;
+    const mex::instr * pcend;
     min::gen * spbegin;
     min::gen * sp;
     min::gen * spend;
@@ -811,8 +812,8 @@ bool mex::run_process ( mex::process p )
 	goto FATAL;
     }
     pcbegin = ~ ( m + 0 );
-    pc = ~ ( m + i );
-    pcend = ~ ( m + m->length );
+    pc = pcbegin + i;
+    pcend = pcbegin + m->length;
 
     i = p->length;
     if ( i > p->max_length )
@@ -1635,7 +1636,8 @@ bool mex::run_process ( mex::process p )
 		    message = "immedC is too large";
 		    goto INNER_FATAL;
 		}
-		mex::instr * target = ~ ( cm + immedC );
+		const mex::instr * target =
+		    ~ ( cm + immedC );
 		if ( target->op_code != mex::BEGF )
 		{
 		    message =
@@ -1890,7 +1892,8 @@ bool mex::run_process ( mex::process p )
 		    ( op_code == mex::CALLG ?
 		      pc->immedD :
 		      m );
-		mex::instr * target = ~ ( cm + immedC );
+		const mex::instr * target =
+		    ~ ( cm + immedC );
 		int level = target->immedB;
 		min::uns32 rp = p->return_stack->length;
 
@@ -1945,7 +1948,7 @@ FATAL:
 	q += sprintf ( q, "<NOT AVAILABLE>" );
     else
     {
-        mex::instr * instr =
+        const mex::instr * instr =
 	    ~ ( p->pc.module + p->pc.index );
 	min::uns8 op_code = instr->op_code;
 	op_info * op_info = ( op_code <= max_op_code ?
@@ -2013,17 +2016,17 @@ FATAL:
 
 mex::module mex::create_module ( min::file f )
 {
-    min::locatable_var<mex::module> m =
-        ( (mex::module) ::module_vec_type.new_stub
+    min::locatable_var<mex::module_ins> m =
+        ( (mex::module_ins) ::module_vec_type.new_stub
 	     ( mex::module_length ) );
     mex::interface_ref(m) = min::MISSING();
     mex::globals_ref(m) = min::NULL_STUB;
     mex::trace_info_ref(m) =
         min::gen_packed_vec_type.new_stub
 	    ( mex::module_length );
+
     min::locatable_var
         <min::phrase_position_vec_insptr> position;
-
     min::init
         ( min::ref<min::phrase_position_vec_insptr>
 	      (position),
