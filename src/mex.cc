@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Jul 12 18:16:05 EDT 2023
+// Date:	Thu Jul 13 02:28:57 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -28,6 +28,9 @@
 # include <iostream>
 # include <mex.h>
 # define MUP min::unprotected
+
+# define RW_UNS32 * (min::uns32 *) &
+    // Change `const min::uns32' to `min::uns32'.
 
 min::locatable_var<min::printer> mex::default_printer;
 min::uns32 mex::module_length = 1 << 12;
@@ -614,8 +617,7 @@ static bool optimized_run_process ( mex::process p )
 
 	    mex::set_pc ( p, ret->saved_pc );
 	    p->fp[immedB] = new_fp;
-	    * (min::uns32 *)
-	      & p->return_stack->length = rp;
+	    RW_UNS32 p->return_stack->length = rp;
 
 	    min::gen * q = new_sp + immedC;
 	    while ( q > new_sp )
@@ -662,8 +664,7 @@ static bool optimized_run_process ( mex::process p )
 	    ret->saved_fp = p->fp[level];
 	    ret->nargs = pc->immedA;
 	    ret->nresults = pc->immedB;
-	    * (min::uns32 *) & p->return_stack->length =
-	        rp + 1;
+	    RW_UNS32 p->return_stack->length = rp + 1;
 
 	    new_pc = { cm, immedC + 1 };
 	    mex::set_pc ( p, new_pc );
@@ -677,9 +678,9 @@ static bool optimized_run_process ( mex::process p )
 ERROR_EXIT:
     result = false;
 EXIT:
-    * (min::uns32 *) & p->pc.index = pc - pcbegin;
+    RW_UNS32 p->pc.index = pc - pcbegin;
 RET_EXIT:
-    p->length = sp - spbegin;
+    RW_UNS32 p->length = sp - spbegin;
     p->excepts_accumulator |= 
 	fetestexcept ( FE_ALL_EXCEPT );
     p->counter = p->limit - limit;
@@ -874,12 +875,12 @@ bool mex::run_process ( mex::process p )
     // a RESTORE.
     //
 #   define SAVE \
-	* (min::uns32 *) & p->pc.index = pc - pcbegin; \
-	p->length = sp - spbegin; \
+	RW_UNS32 p->pc.index = pc - pcbegin; \
+	RW_UNS32 p->length = sp - spbegin; \
 	p->counter = p->limit - limit;
 
 #   define RET_SAVE \
-	p->length = sp - spbegin; \
+	RW_UNS32 p->length = sp - spbegin; \
 	p->counter = p->limit - limit;
 
 #   define RESTORE \
@@ -1895,8 +1896,7 @@ bool mex::run_process ( mex::process p )
 
 		mex::set_pc ( p, ret->saved_pc );
 		p->fp[immedB] = new_fp;
-		* (min::uns32 *)
-		  & p->return_stack->length = rp;
+		RW_UNS32 p->return_stack->length = rp;
 
 		min::gen * new_sp = sp - immedA;
 		min::gen * q = new_sp + immedC;
@@ -1939,8 +1939,8 @@ bool mex::run_process ( mex::process p )
 		ret->saved_fp = p->fp[level];
 		ret->nargs = pc->immedA;
 		ret->nresults = pc->immedB;
-		* (min::uns32 *)
-		  & p->return_stack->length = rp + 1;
+		RW_UNS32 p->return_stack->length =
+		    rp + 1;
 
 		new_pc = { cm, immedC + 1 };
 		mex::set_pc ( p, new_pc );

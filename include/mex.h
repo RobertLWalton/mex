@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Jul 12 18:16:22 EDT 2023
+// Date:	Thu Jul 13 02:19:43 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -95,9 +95,9 @@ enum trace_flag
 
 struct module_header
 {
-    min::uns32 control;
-    min::uns32 length;
-    min::uns32 max_length;
+    const min::uns32 control;
+    const min::uns32 length;
+    const min::uns32 max_length;
     const min::phrase_position_vec position;
     const min::packed_vec_ptr<min::gen> globals;
     const min::gen interface;
@@ -196,9 +196,9 @@ typedef void (* trace_function )
 
 struct process_header
 {
-    min::uns32 control;
-    min::uns32 length;
-    min::uns32 max_length;
+    const min::uns32 control;
+    const min::uns32 length;
+    const min::uns32 max_length;
     min::printer printer;
     const mex::pc pc;
     mex::return_stack return_stack;
