@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Jul 13 02:19:43 EDT 2023
+// Date:	Thu Jul 13 02:52:18 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -193,6 +193,8 @@ typedef min::packed_vec_insptr<mex::ret> return_stack;
 
 typedef void (* trace_function )
     ( mex::process p, min::gen info );
+void default_trace_function
+    ( mex::process p, min::gen info );
 
 struct process_header
 {
@@ -245,6 +247,12 @@ mex::module create_module ( min::file f );
 
 mex::process create_process
     ( min::printer printer = mex::default_printer );
+
+mex::process init_process
+    ( mex::module m, mex::process p = min::NULL_STUB );
+
+mex::process init_process
+    ( mex::pc pc, mex::process p = min::NULL_STUB );
 
 } // end mex namespace
 

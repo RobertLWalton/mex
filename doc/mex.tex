@@ -1449,12 +1449,13 @@ to change during process execution.
 The \TT{printer} member is set to the \TT{printer} argument.
 The \TT{pc} member is set to \TT{\{min::NULL\_STUB,0\}}.
 The \TT{optimize} member is set to \TT{false}.
-The \TT{trace\_function} member is set to \TT{NULL}.
-The \TT{fp[\ldots]}, \TT{trace\_depth},
+The \TT{fp[\ldots]}, \TT{trace\_\EOL depth},
 \TT{trace\_flags}, \TT{excepts}, \TT{excepts\_\EOL accumulator},
 \TT{counter}, and \TT{limit}
 members are set to \TT{0}.
 The \TT{state} is set to \TT{NEVER\_\EOL STARTED}.
+
+The \TT{trace\_function} member is set to \TT{mex::default\_trace}.
 \end{indpar}
 
 {\tt min::locatable\_var<min::printer> mex::}\MEXKEY{default\_printer}
@@ -1469,18 +1470,16 @@ Initialize \TT{p} (which is created by \TT{mex::create\_process}
 if that is \TT{NULL\_STUB}) to run the code in \TT{m}.
 Return the process.
 
-The process stack and \TT{return\_stack} are set to empty.
-The \TT{optimize} member is set to \TT{false}.
-The \TT{trace\_function} member is set to \TT{NULL}.
-The \TT{sp}, \TT{rp}, \TT{fp[0]}, \TT{trace\_depth},
-\TT{excepts}, and \TT{excepts\_accumulator}
-members are set to \TT{0}.
+The process members are set as they would be by \TT{mex::create\_process},
+except:
+\begin{itemize}
+\item The \TT{pc} member is set to \TT{\{m,0\}}.
+\item The following members are not set: \\
+\hspace*{2em}
+\TT{printer}, \TT{optimze}, \TT{trace\_flags}, \TT{trace\_function},
+\TT{excepts}
+\end{itemize}
 
-The \TT{pc} member is set to \TT{\{m,0\}}.
-
-The \TT{optimize} and \TT{trace\_flags} members are not set
-(but \TT{mex::create\_process} will set them to \TT{false} and
-\TT{0} respectively).
 \end{indpar}
 
 {\tt mex::process mex::}\MEXKEY{init\_process} \\
@@ -1489,11 +1488,16 @@ The \TT{optimize} and \TT{trace\_flags} members are not set
 Ditto, but does not set the process \TT{pc} member.
 
 Then emulates a \TT{CALL} to the \TT{pc} argument
-value, which must point at a \TT{BEGF} instruction.
+value, which must point at a \TT{BEGF} instruction with \TT{immedB == 1}
+(i.e., lexical level = 1).
 This creates a \TT{return\_stack} entry whose
 \TT{saved\_pc} is \TT{\{min::NULL\_STUB,0\}}, so a return
-will terminate the process normally.  The \TT{nargs} member
-is set to \TT{0}.
+will terminate the process normally.  The \TT{nargs} and \TT{nresults} members
+are set to \TT{0}.
+
+If there is an error in pointing at a \TT{BEGF} instruction of level 1,
+then instead the process \TT{pc} member is set to the illegal value
+\TT{\{ min::NULL\_STUB, 1 \}} and \TT{min::NULL\_STUB} is returned.
 \end{indpar}
 
 {\tt bool mex::}\MEXKEY{run\_process} \verb|( mex::process p )|%

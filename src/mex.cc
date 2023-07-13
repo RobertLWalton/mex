@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Jul 13 02:28:57 EDT 2023
+// Date:	Thu Jul 13 03:36:47 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -2083,7 +2083,7 @@ mex::process mex_create_process ( min::printer printer )
     mex::pc pc = { min::NULL_STUB, 0 };
     mex::set_pc ( p, pc );
     p->optimize = false;
-    p->trace_function = NULL;
+    p->trace_function = mex::default_trace_function;
     for ( unsigned i = 0;
           i <= mex::max_lexical_level; ++ i )
         p->fp[i] = 0;
@@ -2101,3 +2101,84 @@ mex::process mex_create_process ( min::printer printer )
 // Init Functions
 // ---- ---------
 
+mex::process mex::init_process
+	( mex::module m, mex::process p )
+{
+    if ( p == min::NULL_STUB )
+        p = mex::create_process();
+    RW_UNS32 p->length = 0;
+    RW_UNS32 p->return_stack->length = 0;
+    mex::pc pc = { m, 0 };
+    mex::set_pc ( p, pc );
+    for ( unsigned i = 0;
+          i <= mex::max_lexical_level; ++ i )
+        p->fp[i] = 0;
+    p->trace_depth = 0;
+    p->excepts_accumulator = 0;
+    p->state = mex::NEVER_STARTED;
+    p->counter = 0;
+    p->limit = 0;
+
+    return p;
+}
+
+mex::process mex::init_process
+	( mex::pc pc, mex::process p )
+{
+    if ( p == min::NULL_STUB )
+        p = mex::create_process();
+    RW_UNS32 p->length = 0;
+    RW_UNS32 p->return_stack->length = 0;
+    for ( unsigned i = 0;
+          i <= mex::max_lexical_level; ++ i )
+        p->fp[i] = 0;
+    p->trace_depth = 0;
+    p->excepts_accumulator = 0;
+    p->state = mex::NEVER_STARTED;
+    p->counter = 0;
+    p->limit = 0;
+
+    if ( pc.index >= pc.module->length )
+        goto ERROR_EXIT;
+    {
+	const mex::instr * instr =
+	    ~ ( pc.module + pc.index );
+	if ( instr->op_code != mex::BEGF )
+	    goto ERROR_EXIT;
+	if ( instr->immedB != 1 )
+	    goto ERROR_EXIT;
+    }
+
+    {   // Execute CALLG.
+
+	mex::ret * ret = (mex::ret *)
+	    ~ ( p->return_stack + 0 );
+	mex::pc saved_pc = { min::NULL_STUB, 0 };
+	mex::set_saved_pc ( p, ret, saved_pc );
+	ret->saved_fp = 0;
+	ret->nargs = ret->nresults = 0;
+	RW_UNS32 p->return_stack->length = 1;
+
+	RW_UNS32 pc.index = pc.index + 1;
+	mex::set_pc ( p, pc );
+
+	return p;
+    }
+
+ERROR_EXIT:
+    {   // Set p->pc illegal and return NULL_STUB.
+
+        pc = { min::NULL_STUB,1 };
+	set_pc ( p, pc );
+	return min::NULL_STUB;
+    }
+}
+
+
+// Default Trace Function
+//
+void mex::default_trace_function
+	( mex::process p, min::gen info )
+{
+    // TBD
+}
