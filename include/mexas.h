@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Jul 14 04:51:27 EDT 2023
+// Date:	Fri Jul 14 05:20:46 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -92,58 +92,40 @@ extern mexas::jump_list jump_list;
     // added they are added to the start, so the
     // list order is newest-first.
 
-// Current Lexeme
+// Statement Scanner
 //
-enum lexeme_type
-{
-    END_OF_LINE,
-    END_OF_FILE,
-    NAME,
-    NUMBER,
-    STRING,
-    OTHER
-};
-
-// Get the next lexeme.  Skip comment lines, and handle
-// continuations.  Store results in mexas::lexeme_type
-// and mexas::lexeme.  The latter is a MIN string or
-// number, and is undefined if the lexeme_type is
-// END_OF_... .
+// A statement is a sequence of physical lines ending
+// with a non-comment, non-blank line that is not
+// continued.  Blank lines at the beginning of a
+// statement are deleted, but comment lines are not,
+// and blank and comment lines can occur within a
+// statement between a statement line and its
+// continuation.
 //
-// Non-ASCII characters and non-whitespace ASCII control
-// characters produce an error message and are replaced
-// by #.  Each lexeme must be within a line, including
-// STRINGs.
+// A statement is scanned into a vector of lexemes.
+// The elements of the vector are min::gen values.
+// Numbers are MIN number general values; names are
+// MIN string general values; strings are two MIN string
+// general values: the first a single quote character,
+// either ' or ", and the second the string inside the
+// quotes.
 //
-// The lexeme_line_number of the first line is 1.
+// Illegal characters are replaced by # and cause error
+// messages.  Only ASCII non-control characters or ASCII
+// whitespace characters are legal.
 //
-// If called when lexeme_type is END_OF_FILE, will do
-// nothing, leaving the lexeme_type at END_OF_FILE.
+// A partial line at the end of a file is treated as a
+// full line but with a warning message.
 //
-// Partial line at end of file is treated as a file
-// line with error message.
+// The get_line function returns true if a line was
+// gotten and false if not because of end of file.
 //
-extern mexas::lexeme_type lexeme_type;
-    // Initialized to END_OF_LINE.
-extern min::uns32 lexeme_line_number;
-    // Initialized to 0.
-extern min::locatable_gen lexeme;
-void get_next_lexeme ( void );
-
-// Data on input file.
+// The first line in the file is number 0.
 //
-extern min::locatable_var<min::file> file;
-extern min::uns32 current_offset;
-    // Position in file->buffer of the next character
-    // to be scanned.
-extern min::uns32 line_end_offset;
-    // Offset just after the line ending NUL of the
-    // line currently being scanned.
-extern min::uns32 illegal_character_count;
-    // Number of illegal characters found in line
-    // so far.  Illegal characters are replaced by #.
-    // Error message is printed when first illegal
-    // character encountered.
+extern min::locatable_var<min::file> input_file;
+extern min::packed_vec_insptr<min::gen> line_lexemes;
+extern min::uns32 first_line_number, last_line_number;
+bool get_line ( void );
 
 } // end mexas namespace
 
