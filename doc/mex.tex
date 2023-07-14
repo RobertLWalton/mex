@@ -239,7 +239,7 @@
 
 \author{Robert L. Walton}
 
-\date{July 12, 2023}
+\date{July 14, 2023}
  
 \maketitle
 
@@ -1554,9 +1554,40 @@ assembler can be use as a MEX compiler.
 MEXAS is a tool for debugging MEX and a prototype for more
 advanced MEX compilers.
 
-\subsection{Lexemes}
+\subsection{MEXAS Syntax}
+\label{MEXAS-SYNTAX}
+
 MEXAS programs are written in ASCII.  Control characters other
 than whitespace are forbidden.
+
+A MEXAS program consists of statements which are instructions
+or declarations, each encoded as a sequence of lexemes.
+
+ A line ending with the `\ttkey{\textbackslash}' lexeme
+is \key{continued} on the next line (the `\TT{\textbackslash}' is
+otherwise ignored).
+If the first lexeme on a line is `\ttkey{//}', the entire line
+is a \key{comment line} and is ignored (comment lines cannot
+be continued).  Blank lines are ignored.
+
+A \key{statement} is a sequence of lines beginning with a non-blank
+line and ending with a non-blank, non-comment line that is
+\underline{not} continued.  Statements are either instructions or
+declarations.
+
+Instructions begin with an op code lexeme, and the program syntax
+of all the instructions taken together
+is that of a code vector: see Code Vectors,
+\itemref{CODE-VECTORS}.
+
+Declarations define jump instruction targets and instruction
+trace flags.
+
+When `\key{::=}' is used in a syntax equation, the
+items of the equation are lexemes and \underline{not}
+characters.
+
+\subsection{Lexemes}
 
 A MEXAS \key{lexeme} is a sequence of non-whitespace characters
 surrounded by whitespace, or a single quote (\TT{'}) followed
@@ -1576,32 +1607,14 @@ A \key{string}\label{STRING} is a lexeme beginning with quote and ending
 with the same kind of quote.
 
 All lexemes must be on a single line: they cannot be continued to the
-next line.
+next line.  Strings not terminated by an end of line are automatically
+terminated with an error message.
 
-\subsection{MEXAS Syntax}
-\label{MEXAS-SYNTAX}
+The comment beginning lexeme (\TT{//}) and the continuation
+lexeme (\TT{\textbackslash}) must be lexemes surrounded by whitespace.
 
-A MEXAS program consists of statements which are instructions
-or declarations, each encoded as a sequence of lexemes on
-a line.  A line ending with the `\ttkey{\textbackslash}' lexeme
-is \key{continued} on the next line (the `\textbackslash' is
-otherwise ignored).
-If the first lexeme on a line is `\ttkey{//}', the entire line
-is a \key{comment line} and is ignored (comment lines cannot
-be continued).  Blank lines are ignored.
-
-Instructions begin with an op code, and the program syntax
-of all the instructions taken together
-is that of a code vector: see Code Vectors,
-\itemref{CODE-VECTORS}.
-
-Declarations define jump instruction targets and instruction
-trace flags.
-
-When `\key{::=}' is used in a syntax equation, the
-items of the equation are lexemes and \underline{not}
-characters.
-
+Illegal characters are replaced by \TT{\#} and become part of the
+current lexeme.  An error message accompanies such replacement.
 
 \subsection{Lexical Level and Depth}
 \label{LEXICAL-LEVEL-AND-DEPTH}
