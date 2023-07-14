@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Jul 13 14:25:02 EDT 2023
+// Date:	Fri Jul 14 04:51:27 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -91,6 +91,59 @@ extern mexas::jump_list jump_list;
     // head of the active list.  When elements are
     // added they are added to the start, so the
     // list order is newest-first.
+
+// Current Lexeme
+//
+enum lexeme_type
+{
+    END_OF_LINE,
+    END_OF_FILE,
+    NAME,
+    NUMBER,
+    STRING,
+    OTHER
+};
+
+// Get the next lexeme.  Skip comment lines, and handle
+// continuations.  Store results in mexas::lexeme_type
+// and mexas::lexeme.  The latter is a MIN string or
+// number, and is undefined if the lexeme_type is
+// END_OF_... .
+//
+// Non-ASCII characters and non-whitespace ASCII control
+// characters produce an error message and are replaced
+// by #.  Each lexeme must be within a line, including
+// STRINGs.
+//
+// The lexeme_line_number of the first line is 1.
+//
+// If called when lexeme_type is END_OF_FILE, will do
+// nothing, leaving the lexeme_type at END_OF_FILE.
+//
+// Partial line at end of file is treated as a file
+// line with error message.
+//
+extern mexas::lexeme_type lexeme_type;
+    // Initialized to END_OF_LINE.
+extern min::uns32 lexeme_line_number;
+    // Initialized to 0.
+extern min::locatable_gen lexeme;
+void get_next_lexeme ( void );
+
+// Data on input file.
+//
+extern min::locatable_var<min::file> file;
+extern min::uns32 current_offset;
+    // Position in file->buffer of the next character
+    // to be scanned.
+extern min::uns32 line_end_offset;
+    // Offset just after the line ending NUL of the
+    // line currently being scanned.
+extern min::uns32 illegal_character_count;
+    // Number of illegal characters found in line
+    // so far.  Illegal characters are replaced by #.
+    // Error message is printed when first illegal
+    // character encountered.
 
 } // end mexas namespace
 
