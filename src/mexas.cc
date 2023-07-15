@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Jul 14 13:17:29 EDT 2023
+// Date:	Sat Jul 15 05:33:18 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -19,9 +19,6 @@
 
 # include <mexas.h>
 
-min::locatable_var<mexas::variable_stack>
-    mexas::variable_stack;
-
 static min::uns32 variable_element_gen_disp[] =
 {
     min::DISP ( & mexas::variable_element::name ),
@@ -33,8 +30,9 @@ static min::packed_vec<mexas::variable_element>
          ( "variable_stack_vec_type",
 	   ::variable_element_gen_disp );
 
-min::locatable_var<mexas::function_stack>
-    mexas::function_stack;
+min::locatable_var<mexas::variable_stack>
+    mexas::variables
+    ( ::variable_stack_vec_type.new_stub ( 1000 ) );
 
 static min::uns32 function_element_gen_disp[] =
 {
@@ -42,9 +40,9 @@ static min::uns32 function_element_gen_disp[] =
     min::DISP_END
 };
 
-static min::uns32 function_element_stub[] =
+static min::uns32 function_element_stub_disp[] =
 {
-    min::DISP ( & mexas::function_element::pc ),
+    mex::DISP ( & mexas::function_element::pc ),
     min::DISP_END
 };
 
@@ -54,15 +52,17 @@ static min::packed_vec<mexas::function_element>
 	   ::function_element_gen_disp,
 	   ::function_element_stub_disp );
 
-min::locatable_var<mexas::block_stack>
-    mexas::block_stack;
+min::locatable_var<mexas::function_stack>
+    mexas::functions
+    ( ::function_stack_vec_type.new_stub ( 100 ) );
 
 static min::packed_vec<mex::op_code>
      block_stack_vec_type
          ( "block_stack_vec_type" );
 
-min::locatable_var<mexas::module_stack>
-    mexas::module_stack;
+min::locatable_var<mexas::block_stack>
+    mexas::blocks
+    ( ::block_stack_vec_type.new_stub ( 100 ) );
 
 static min::uns32 module_stack_element_stub_disp[] =
 {
@@ -75,12 +75,13 @@ static min::packed_vec<mex::module>
 	   NULL,
 	   ::module_stack_element_stub_disp );
 
-min::locatable_var<mexas::jump_list>
-    mexas::jump_list;
+min::locatable_var<mexas::module_stack>
+    mexas::modules
+    ( ::module_stack_vec_type.new_stub ( 500 ) );
 
 static min::uns32 jump_element_gen_disp[] =
 {
-    min::DISP ( & mexas::jump_element::name ),
+    min::DISP ( & mexas::jump_element::target_name ),
     min::DISP_END
 };
 
@@ -89,10 +90,37 @@ static min::packed_vec<mexas::jump_element>
          ( "jump_list_vec_type",
 	   ::jump_element_gen_disp );
 
+min::locatable_var<mexas::jump_list>
+    mexas::jumps
+    ( ::jump_list_vec_type.new_stub ( 500 ) );
+
 min::locatable_var<min::file> mexas::input_file;
 min::locatable_var<mexas::statement_lexemes>
-    mexas::statement_lexemes;
-    // Use min::gen_packed_vector_type.
-min::uns32 mexas::first_line, mexas::last_line;
+    mexas::statement
+    ( min::gen_packed_vec_type.new_stub ( 500 ) );
+min::uns32 mexas::first_line_number,
+           mexas::last_line_number;
+
+bool mexas::next_statement ( void )
+{
+    bool statement_started = false;
+    min::pop ( mexas::statement,
+               mexas::statement->length );
+
+    while ( true )
+    {
+        // Process next line.
+	
+	if ( ! statement_started )
+	    mexas::first_line_number =
+	        mexas::input_file->next_line_number;
+	mexas::last_line_number =
+	    mexas::input_file->next_line_number;
+	min::uns32 begin_offset =
+	    min::next_line ( mexas::input_file );
+	// TBD
+    }
+    return true;
+}
 
 

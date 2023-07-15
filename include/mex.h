@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Jul 13 02:52:18 EDT 2023
+// Date:	Sat Jul 15 04:22:33 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -171,8 +171,17 @@ typedef min::packed_vec_insptr
 
 struct pc
 {
-    mex::module module;
+    const mex::module module;
     min::uns32 index;
+    mex::pc & operator = ( const mex::pc pc )
+    {
+        // Implicit = is not defined because 
+        // module is const.
+        //
+        * (mex::module *) & this->module = pc.module;
+        this->index = pc.index;
+	return * this;
+    }
 };
 template<typename S>
 min::uns32 DISP ( const mex::pc S::* d )

@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Jul 14 13:04:04 EDT 2023
+// Date:	Sat Jul 15 05:34:02 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -33,18 +33,29 @@ struct variable_element
 {
     const min::gen name;  // min::MISSING() if none.
     min::uns32 level, depth;
+    variable_element & operator =
+	    ( const variable_element & e )
+    {
+        // Implicit operator = not defined because
+	// of const members.
+	//
+        * (min::gen *) & this->name = e.name;
+	this->level = e.level;
+	this->depth = e.depth;
+	return * this;
+    }
 };
 typedef min::packed_vec_insptr<mexas::variable_element>
     variable_stack;
 extern min::locatable_var<mexas::variable_stack>
-    variable_stack;
+    variables;
 inline void push
 	( mexas::variable_stack s, min::gen name,
 	  min::uns32 level, min::uns32 depth )
 {
     mexas::variable_element e = { name, level, depth };
     min::push(s) = e;
-    min::unprotected_write_acc ( s, name );
+    min::unprotected::acc_write_update ( s, name );
 }
 
 // Function Stack
@@ -54,11 +65,23 @@ struct function_element
     const min::gen name;
     min::uns32 level, depth;
     const mex::pc pc;
+    function_element & operator =
+	    ( const function_element & e )
+    {
+        // Implicit operator = not defined because
+	// of const members.
+	//
+        * (min::gen *) & this->name = e.name;
+	this->level = e.level;
+	this->depth = e.depth;
+	* (mex::pc *) & this->pc = e.pc;
+	return * this;
+    }
 };
 typedef min::packed_vec_insptr<mexas::function_element>
     function_stack;
 extern min::locatable_var<mexas::function_stack>
-    function_stack;
+    functions;
 inline void push
 	( mexas::function_stack s, min::gen name,
 	  min::uns32 level, min::uns32 depth,
@@ -67,8 +90,8 @@ inline void push
     mexas::function_element e =
         { name, level, depth, pc };
     min::push(s) = e;
-    min::unprotected_write_acc ( s, name );
-    min::unprotected_write_acc ( s, pc.module );
+    min::unprotected::acc_write_update ( s, name );
+    min::unprotected::acc_write_update ( s, pc.module );
 }
 
 // Block Stack
@@ -76,7 +99,7 @@ inline void push
 typedef min::packed_vec_insptr<mex::op_code>
     block_stack;
 extern min::locatable_var<mexas::block_stack>
-    block_stack;
+    blocks;
     // Top of stack is BEG... instruction for the last
     // block that has not yet seen its END...
     // instruction.   BEG... instructions are pushed
@@ -88,7 +111,7 @@ extern min::locatable_var<mexas::block_stack>
 typedef min::packed_vec_insptr<mex::module>
     module_stack;
 extern min::locatable_var<mexas::module_stack>
-    module_stack;
+    modules;
     // After module is assembled it is pushed into this
     // stack, which is therefore a list of modules
     // in the order they were assembled: most recent
@@ -107,7 +130,7 @@ struct jump_element
 typedef min::packed_vec_insptr<mexas::jump_element>
     jump_list;
 extern min::locatable_var<mexas::jump_list>
-    jump_list;
+    jumps;
     // The jump list is a singly linked list in the
     // jump_list vector, with jump_list[0] being a
     // dummy element that is head of the free list,
@@ -120,7 +143,7 @@ extern min::locatable_var<min::file> input_file;
 typedef min::packed_vec_insptr<min::gen>
     statement_lexemes;
 extern min::locatable_var<mexas::statement_lexemes>
-    statement_lexemes;
+    statement;
     // Vector of all the lexemes in a statement.
     // A MEXAS string lexeme takes two elements that are
     // MIN strings, the first a "'" or "\"", and the
