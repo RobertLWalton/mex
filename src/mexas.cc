@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat Jul 15 05:33:18 EDT 2023
+// Date:	Sat Jul 15 17:51:17 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -106,8 +106,9 @@ bool mexas::next_statement ( void )
     bool statement_started = false;
     min::pop ( mexas::statement,
                mexas::statement->length );
+    bool partial_line_found = false;
 
-    while ( true )
+    while ( ! partial_line_found )
     {
         // Process next line.
 	
@@ -118,6 +119,17 @@ bool mexas::next_statement ( void )
 	    mexas::input_file->next_line_number;
 	min::uns32 begin_offset =
 	    min::next_line ( mexas::input_file );
+	min::uns32 end_offset =
+	    mexas::input_file->next_offset - 1;
+	    // Do not include NUL character.
+	if ( begin_offset == min::NO_LINE )
+	{
+	    begin_offset = min::remaining_offset
+		( mexas::input_file );
+	    end_offset = begin_offset
+	               + min::remaining_length
+			     ( mexas::input_file );
+	}
 	// TBD
     }
     return true;
