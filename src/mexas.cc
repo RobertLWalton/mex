@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Jul 16 06:37:26 EDT 2023
+// Date:	Sun Jul 16 16:53:42 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -31,8 +31,7 @@ static min::packed_vec<mexas::variable_element>
 	   ::variable_element_gen_disp );
 
 min::locatable_var<mexas::variable_stack>
-    mexas::variables
-    ( ::variable_stack_vec_type.new_stub ( 1000 ) );
+    mexas::variables;
 
 static min::uns32 function_element_gen_disp[] =
 {
@@ -53,16 +52,14 @@ static min::packed_vec<mexas::function_element>
 	   ::function_element_stub_disp );
 
 min::locatable_var<mexas::function_stack>
-    mexas::functions
-    ( ::function_stack_vec_type.new_stub ( 100 ) );
+    mexas::functions;
 
 static min::packed_vec<mex::op_code>
      block_stack_vec_type
          ( "block_stack_vec_type" );
 
 min::locatable_var<mexas::block_stack>
-    mexas::blocks
-    ( ::block_stack_vec_type.new_stub ( 100 ) );
+    mexas::blocks;
 
 static min::uns32 module_stack_element_stub_disp[] =
 {
@@ -76,8 +73,7 @@ static min::packed_vec<mex::module>
 	   ::module_stack_element_stub_disp );
 
 min::locatable_var<mexas::module_stack>
-    mexas::modules
-    ( ::module_stack_vec_type.new_stub ( 500 ) );
+    mexas::modules;
 
 static min::uns32 jump_element_gen_disp[] =
 {
@@ -91,13 +87,11 @@ static min::packed_vec<mexas::jump_element>
 	   ::jump_element_gen_disp );
 
 min::locatable_var<mexas::jump_list>
-    mexas::jumps
-    ( ::jump_list_vec_type.new_stub ( 500 ) );
+    mexas::jumps;
 
 min::locatable_var<min::file> mexas::input_file;
 min::locatable_var<mexas::statement_lexemes>
-    mexas::statement
-    ( min::gen_packed_vec_type.new_stub ( 500 ) );
+    mexas::statement;
 min::uns32 mexas::first_line_number,
            mexas::last_line_number;
 
@@ -110,6 +104,19 @@ static void initialize ( void )
     ::single_quote = min::new_str_gen ( "'" );
     ::double_quote = min::new_str_gen ( "\"" );
     ::backslash = min::new_str_gen ( "\\" );
+
+    mexas::variables =
+	::variable_stack_vec_type.new_stub ( 1000 );
+    mexas::functions =
+	::function_stack_vec_type.new_stub ( 100 );
+    mexas::blocks =
+	::block_stack_vec_type.new_stub ( 100 );
+    mexas::modules =
+	::module_stack_vec_type.new_stub ( 500 );
+    mexas::jumps =
+	::jump_list_vec_type.new_stub ( 500 );
+    mexas::statement =
+	min::gen_packed_vec_type.new_stub ( 500 );
 }
 static min::initializer initializer ( ::initialize );
 
@@ -228,7 +235,7 @@ bool mexas::next_statement ( void )
 		    }
 		    * q ++ = c;
 		}
-		if ( p = endp )
+		if ( p == endp )
 		{
 		    SAVE;
 		    ::scan_warning
@@ -313,4 +320,25 @@ bool mexas::next_statement ( void )
     return true;
 }
 
+// Main
+// ----
 
+int main ( int argc, char * argv[] )
+{
+    min::initialize();
+
+    min::init_ostream
+        ( mex::default_printer, std::cout );
+    min::init_printer
+        ( mexas::input_file,
+          mex::default_printer );
+    min::init_input_named_file
+        ( mexas::input_file,
+	  min::new_str_gen ( argv[1] ) );
+
+    while ( mexas::next_statement() )
+    {
+        mex::default_printer << mexas::statement[0] << min::eol;
+    }
+    return 0;
+}

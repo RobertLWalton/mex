@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat Jul 15 04:22:33 EDT 2023
+// Date:	Sun Jul 16 16:56:49 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -119,13 +119,14 @@ MIN_REF ( min::gen, interface, mex::module )
 MIN_REF ( min::packed_vec_ptr<min::gen>,
           trace_info, mex::module_ins )
 
-void push_instr ( mex::module_ins m,
-                  mex::op_code op_code,
-		  min::uns8 trace_flags = 0,
-		  min::uns16 immedA = 0,
-		  min::uns16 immedB = 0,
-		  min::uns16 immedC = 0,
-		  min::gen immedD = min::MISSING() )
+inline void push_instr
+        ( mex::module_ins m,
+          mex::op_code op_code,
+	  min::uns8 trace_flags = 0,
+	  min::uns16 immedA = 0,
+	  min::uns16 immedB = 0,
+	  min::uns16 immedC = 0,
+	  min::gen immedD = min::MISSING() )
 {
     mex::instr instr =
         { op_code, trace_flags,
@@ -134,14 +135,14 @@ void push_instr ( mex::module_ins m,
     min::unprotected::acc_write_update
 	( m, immedD );
 }
-void push_position ( mex::module_ins m,
-                     min::phrase_position pp )
+inline void push_position ( mex::module_ins m,
+                            min::phrase_position pp )
 {
     min::phrase_position_vec_insptr ppins =
         (min::phrase_position_vec_insptr) m->position;
     min::push(ppins) = pp;
 }
-void push_trace_info
+inline void push_trace_info
 	( mex::module_ins m, min::gen info )
 {
     min::packed_vec_insptr<min::gen> trace_info_ins =

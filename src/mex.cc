@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Jul 16 08:41:28 EDT 2023
+// Date:	Sun Jul 16 14:32:57 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -36,6 +36,8 @@ min::locatable_var<min::printer> mex::default_printer;
 min::uns32 mex::module_length = 1 << 12;
 min::uns32 mex::stack_limit = 1 << 14;
 min::uns32 mex::return_stack_limit = 1 << 12;
+min::uns32 mex::trace_indent = 2;
+char mex::trace_mark = '*';
 
 static min::uns32 instr_gen_disp[] =
 {
@@ -822,6 +824,7 @@ static void init_op_infos ( void )
 		      << std::endl;
 	    std::exit ( 1 );
 	}
+	++ p;
     }
 }
 
@@ -2059,7 +2062,7 @@ mex::module mex::create_module ( min::file f )
     return m;
 }
 
-mex::process mex_create_process ( min::printer printer )
+mex::process mex::create_process ( min::printer printer )
 {
     mex::process p =
         (mex::process) ::process_vec_type.new_stub

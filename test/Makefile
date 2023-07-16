@@ -2,7 +2,7 @@
 #
 # File:		Makefile
 # Author:	Bob Walton (walton@acm.org)
-# Date:		Sun Jul 16 08:07:46 EDT 2023
+# Date:		Sun Jul 16 09:17:36 EDT 2023
 #
 # The authors have placed this program in the public
 # domain; they make no warranty and accept no liability
@@ -127,7 +127,7 @@ mexas:	\
 	Makefile
 	g++ -g ${GFLAGS} ${WFLAGS} \
 	    -I ../include -I ${MIN}/include \
-	    -o mexas ../src/mexas.cc mex.o
+	    -o mexas ../src/mexas.cc mex.o ${MIN_O}
 
 mex_scanner_test.out:
 		mexas \
