@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat Jul 15 23:16:18 EDT 2023
+// Date:	Sun Jul 16 05:01:38 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -110,7 +110,7 @@ bool mexas::next_statement ( void )
     while ( true )
     {
         // Process next line.
-	
+
 	if ( ! statement_started )
 	    mexas::first_line_number =
 	        mexas::input_file->next_line_number;
@@ -147,8 +147,118 @@ bool mexas::next_statement ( void )
 	             ( mexas::input_file );
 	}
 
-	// TBD
+	char work[end_offset - begin_offset + 10];
+
+	const char * p =
+	    ~ ( input_file->buffer + begin_offset );
+	const char * endp =
+	    ~ ( input_file->buffer + end_offset );
+	bool illegal_character_found = false;
+	bool lexeme_found = false;
+
+	while ( true )
+	{
+	    // Loop through lexemes in a line.
+
+	    // Skip whitespace.
+	    //
+	    while ( p < endp && std::isspace ( * p ) )
+	        ++ p;
+
+	    if ( p >= endp ) break;
+
+	    // Scan lexeme into work.
+	    //
+	    char * q = work;
+	    char type = * p;
+	    if ( type == '\'' || type == '"' )
+	    {
+	        ++ p;
+		while ( p < endp && * p != type )
+		{
+		    char c = * p ++;
+		    if ( ( c < ' ' || c >= 0177 )
+		         &&
+			 ! isspace ( c ) )
+		    {
+		        c = '#';
+			illegal_character_found = true;
+		    }
+		    * q ++ = c;
+		}
+		if ( p = endp )
+		    ::scan_warning
+		        ( "string does not have"
+			  " string-ending quote;"
+			  " quote added" );
+		else ++ p;
+	    }
+	    else
+	    {
+	        type = 0;
+		while ( p < endp && ! isspace ( * p ) )
+		{
+		    char c = * p ++;
+		    if ( ( c < ' ' || c >= 0177 )
+		         &&
+			 ! isspace ( c ) )
+		    {
+		        c = '#';
+			illegal_character_found = true;
+		    }
+		    * q ++ = c;
+		}
+	    }
+	    * q = 0;
+	   
+	    if ( ! lexeme_found
+	         &&
+		 type == 0
+		 &&
+		 ::strcmp ( work, "//" ) == 0 )
+	    {
+	        // Comment Line
+		//
+		while ( p < endp )
+		{
+		    char c = * p ++;
+		    if ( ( c < ' ' || c >= 0177 )
+		         &&
+			 ! isspace ( c ) )
+			illegal_character_found = true;
+		}
+		goto END_LINE;
+	    }
+
+	    // Put lexeme in statement.
+	    //
+	    if ( type != 0 )
+	        min::push ( statement ) =
+		    ( type == '\'' ? ::single_quote :
+		                     ::double_quote );
+	    min::push ( statement ) =
+	        min::new_str_gen ( work );
+
+	    lexeme_found = true;
+	}
+
+	END_LINE:
+
+	if ( illegal_character_found )
+	    ::scan_error
+		( "illegal character found in line;"
+		  " changed to `#'" );
+
+	if ( lexeme_found )
+	{
+	    if (    statement[statement->length - 1]
+	         == ::backslash )
+		min::pop ( statement );
+	    else
+	        break; // End of statement.
+	}
     }
+
     return true;
 }
 
