@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat Jul 15 17:51:17 EDT 2023
+// Date:	Sat Jul 15 23:16:18 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -103,12 +103,11 @@ min::uns32 mexas::first_line_number,
 
 bool mexas::next_statement ( void )
 {
-    bool statement_started = false;
     min::pop ( mexas::statement,
                mexas::statement->length );
-    bool partial_line_found = false;
+    bool statement_started = false;
 
-    while ( ! partial_line_found )
+    while ( true )
     {
         // Process next line.
 	
@@ -129,7 +128,25 @@ bool mexas::next_statement ( void )
 	    end_offset = begin_offset
 	               + min::remaining_length
 			     ( mexas::input_file );
+	    if ( begin_offset == end_offset )	
+	    {
+	        // EOF
+		//
+		if ( statement->length == 0 )
+		    return false;
+	        mexas::input_file->printer
+		    << min::bol << "ERROR: "
+		    << min::bom
+		    << "file ended while seeking"
+		       " statement continuation;"
+		       " statement terminated"
+		    << min::eom;
+		return true;
+	    }
+	    else min::skip_remaining
+	             ( mexas::input_file );
 	}
+
 	// TBD
     }
     return true;
