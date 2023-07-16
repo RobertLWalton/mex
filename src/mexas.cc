@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Jul 16 05:01:38 EDT 2023
+// Date:	Sun Jul 16 05:06:15 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -105,7 +105,13 @@ bool mexas::next_statement ( void )
 {
     min::pop ( mexas::statement,
                mexas::statement->length );
+    min::packed_vec_ptr<char> buffer =
+        mexas::input_file->buffer;
+
     bool statement_started = false;
+        // A statement is started by any non-blank line.
+    bool continuation_mark_found = false;
+        // I.e., ::backslash.
 
     while ( true )
     {
@@ -132,16 +138,12 @@ bool mexas::next_statement ( void )
 	    {
 	        // EOF
 		//
-		if ( statement->length == 0 )
-		    return false;
-	        mexas::input_file->printer
-		    << min::bol << "ERROR: "
-		    << min::bom
-		    << "file ended while seeking"
-		       " statement continuation;"
-		       " statement terminated"
-		    << min::eom;
-		return true;
+		if ( continuation_mark_found )
+		    ::scan_warning
+			( "file ended while seeking"
+			  " statement continuation;"
+			  " statement terminated" );
+		return statement->length != 0;
 	    }
 	    else min::skip_remaining
 	             ( mexas::input_file );
@@ -149,12 +151,16 @@ bool mexas::next_statement ( void )
 
 	char work[end_offset - begin_offset + 10];
 
-	const char * p =
-	    ~ ( input_file->buffer + begin_offset );
-	const char * endp =
-	    ~ ( input_file->buffer + end_offset );
+	const char * p = ~ ( buffer + begin_offset );
+	const char * endp = ~ ( buffer + end_offset );
 	bool illegal_character_found = false;
 	bool lexeme_found = false;
+
+#	define SAVE \
+	    begin_offset = end_offset - ( endp - p );
+#	define RESTORE \
+	    p = ~ ( buffer + begin_offset ); \
+	    endp = ~ ( buffer + end_offset );
 
 	while ( true )
 	{
@@ -165,7 +171,8 @@ bool mexas::next_statement ( void )
 	    while ( p < endp && std::isspace ( * p ) )
 	        ++ p;
 
-	    if ( p >= endp ) break;
+	    if ( p >= endp ) goto END_LINE;
+	    statement_started = true;
 
 	    // Scan lexeme into work.
 	    //
@@ -187,10 +194,14 @@ bool mexas::next_statement ( void )
 		    * q ++ = c;
 		}
 		if ( p = endp )
+		{
+		    SAVE;
 		    ::scan_warning
 		        ( "string does not have"
 			  " string-ending quote;"
 			  " quote added" );
+		    RESTORE;
+		}
 		else ++ p;
 	    }
 	    else
@@ -230,16 +241,18 @@ bool mexas::next_statement ( void )
 		goto END_LINE;
 	    }
 
+	    lexeme_found = true;
+
 	    // Put lexeme in statement.
 	    //
+	    SAVE;
 	    if ( type != 0 )
 	        min::push ( statement ) =
 		    ( type == '\'' ? ::single_quote :
 		                     ::double_quote );
 	    min::push ( statement ) =
 	        min::new_str_gen ( work );
-
-	    lexeme_found = true;
+	    RESTORE;
 	}
 
 	END_LINE:
@@ -253,7 +266,10 @@ bool mexas::next_statement ( void )
 	{
 	    if (    statement[statement->length - 1]
 	         == ::backslash )
+	    {
+		continuation_mark_found = true;
 		min::pop ( statement );
+	    }
 	    else
 	        break; // End of statement.
 	}
