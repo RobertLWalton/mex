@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Jul 16 05:06:15 EDT 2023
+// Date:	Sun Jul 16 06:37:26 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -100,6 +100,41 @@ min::locatable_var<mexas::statement_lexemes>
     ( min::gen_packed_vec_type.new_stub ( 500 ) );
 min::uns32 mexas::first_line_number,
            mexas::last_line_number;
+
+static min::locatable_gen single_quote;
+static min::locatable_gen double_quote;
+static min::locatable_gen backslash;
+
+static void initialize ( void )
+{
+    ::single_quote = min::new_str_gen ( "'" );
+    ::double_quote = min::new_str_gen ( "\"" );
+    ::backslash = min::new_str_gen ( "\\" );
+}
+static min::initializer initializer ( ::initialize );
+
+
+// Statement Scanner
+// --------- -------
+
+static void scan_error
+        ( const char * message,
+	  const char * header = "ERROR" )
+{
+    mexas::input_file->printer
+        << min::bol << header << ": " << min::bom
+	<< "line " << mexas::last_line_number
+	<< ": " << message << min::eom;
+    print_line ( mexas::input_file->printer,
+                 mexas::input_file,
+		 mexas::last_line_number );
+}
+
+static void scan_warning
+        ( const char * message )
+{
+    ::scan_error ( message, "WARNING" );
+}
 
 bool mexas::next_statement ( void )
 {

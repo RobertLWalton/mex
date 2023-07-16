@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Jul 13 03:36:47 EDT 2023
+// Date:	Sun Jul 16 06:20:06 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -98,6 +98,12 @@ static min::packed_vec<mex::ret>
 	   NULL,
 	   ::return_stack_element_stub_disp );
 
+static void init_op_infos ( void );
+static void initialize ( void )
+{
+    init_op_infos();
+}
+static min::initializer initializer ( ::initialize );
 
 // Support Functions
 //
@@ -801,7 +807,7 @@ static min::uns8 max_op_code = 0;
     // Set by init_op_infos.
 
 
-void init_op_infos ( void )
+static void init_op_infos ( void )
 {
     op_info * p = op_infos;
     op_info * endp = (op_info *)
