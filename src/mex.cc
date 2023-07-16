@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Jul 16 06:20:06 EDT 2023
+// Date:	Sun Jul 16 08:41:28 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -343,7 +343,7 @@ static bool optimized_run_process ( mex::process p )
 	    break;
 	case mex::PUSHS:
 	{
-	    int i = pc->immedA;
+	    min::uns32 i = pc->immedA;
 	    if ( sp >= spend || i >= sp - spbegin )
 	        goto ERROR_EXIT;
 	    * sp = sp[-i-1];
@@ -360,7 +360,7 @@ static bool optimized_run_process ( mex::process p )
 	}
 	case mex::PUSHG:
 	{
-	    int i = pc->immedA;
+	    min::uns32 i = pc->immedA;
 	    mex::module mg = (mex::module) pc->immedD;
 	    if ( mg == min::NULL_STUB )
 	        goto ERROR_EXIT;
@@ -378,8 +378,8 @@ static bool optimized_run_process ( mex::process p )
 	}
 	case mex::PUSHL:
 	{
-	    int i = pc->immedA;
-	    int j = pc->immedB;
+	    min::uns32 i = pc->immedA;
+	    min::uns32 j = pc->immedB;
 	    if ( j > mex::max_lexical_level )
 	        goto ERROR_EXIT;
 	    i += p->fp[j];
@@ -390,11 +390,11 @@ static bool optimized_run_process ( mex::process p )
 	}
 	case mex::PUSHA:
 	{
-	    int i = pc->immedA;
-	    int j = pc->immedB;
+	    min::uns32 i = pc->immedA;
+	    min::uns32 j = pc->immedB;
 	    if ( j > mex::max_lexical_level )
 	        goto ERROR_EXIT;
-	    int k = p->fp[j];
+	    min::uns32 k = p->fp[j];
 	    if ( i > k )
 	        goto ERROR_EXIT;
 	    k -= i;
@@ -405,10 +405,10 @@ static bool optimized_run_process ( mex::process p )
 	}
 	case mex::PUSHNARGS:
 	{
-	    int rp = p->return_stack->length;
+	    min::uns32 rp = p->return_stack->length;
 	    if ( rp == 0 )
 	        goto ERROR_EXIT;
-	    if ( i >= sp - spbegin )
+	    if ( sp >= spend )
 	        goto ERROR_EXIT;
 	    -- rp;
 	    mex::ret * ret = ~ ( p->return_stack + rp );
@@ -417,12 +417,12 @@ static bool optimized_run_process ( mex::process p )
 	}
 	case mex::PUSHV:
 	{
-	    int j = pc->immedB;
+	    min::uns32 j = pc->immedB;
 	    if ( j < 1 || j > mex::max_lexical_level )
 	        goto ERROR_EXIT;
 	    if ( sp <= spbegin )
 	        goto ERROR_EXIT;
-	    int k = p->fp[j];
+	    min::uns32 k = p->fp[j];
 	    min::float64 f = FG ( sp[-1] );
 	    min::float64 ff = floor ( f );
 	    if ( std::isnan ( ff )
@@ -436,7 +436,7 @@ static bool optimized_run_process ( mex::process p )
 	    }
 	    else
 	    {
-		int i = (int) ff;
+		min::uns32 i = (int) ff;
 		k -= i;
 		sp[-1] = spbegin[k];
 	    }
@@ -444,7 +444,7 @@ static bool optimized_run_process ( mex::process p )
 	}
 	case mex::POPS:
 	{
-	    int i = pc->immedA;
+	    min::uns32 i = pc->immedA;
 	    if ( sp <= spbegin || i >= sp - spbegin )
 	        goto ERROR_EXIT;
 	    -- sp;
@@ -459,9 +459,9 @@ static bool optimized_run_process ( mex::process p )
 	case mex::JMPGT:
 	case mex::JMPGEQ:
 	{
-	    int immedA = pc->immedA;
-	    int immedB = pc->immedB;
-	    int immedC = pc->immedC;
+	    min::uns32 immedA = pc->immedA;
+	    min::uns32 immedB = pc->immedB;
+	    min::uns32 immedC = pc->immedC;
 	    min::gen immedD = pc->immedD;
 	    min::gen * new_sp = sp;
 	    bool execute_jmp = true;
@@ -530,7 +530,7 @@ static bool optimized_run_process ( mex::process p )
 	    break;
 	case mex::END:
 	{
-	    int i = pc->immedA;
+	    min::uns32 i = pc->immedA;
 	    if ( i > sp - spbegin )
 	        goto ERROR_EXIT;
 	    sp -= i;
@@ -538,7 +538,7 @@ static bool optimized_run_process ( mex::process p )
 	}
 	case mex::BEGL:
 	{
-	    int i = pc->immedB;
+	    min::uns32 i = pc->immedB;
 	    if ( i > sp - spbegin )
 	        goto ERROR_EXIT;
 	    if ( i > spend - sp )
@@ -554,9 +554,9 @@ static bool optimized_run_process ( mex::process p )
 	{
 	    if ( min::pending() )
 	        goto ERROR_EXIT;
-	    int immedA = pc->immedA;
-	    int immedB = pc->immedB;
-	    int immedC = pc->immedC;
+	    min::uns32 immedA = pc->immedA;
+	    min::uns32 immedB = pc->immedB;
+	    min::uns32 immedC = pc->immedC;
 	    if ( immedA > sp - spbegin )
 	        goto ERROR_EXIT;
 	    if (   immedA + 2 * immedB
@@ -565,7 +565,7 @@ static bool optimized_run_process ( mex::process p )
 	    if ( immedC > pc - pcbegin )
 	        goto ERROR_EXIT;
 	    sp -= immedA;
-	    for ( int i = immedB; 0 < i; -- i )
+	    for ( min::uns32 i = immedB; 0 < i; -- i )
 	        sp[-immedB-i] = sp[-i];
 	    pc -= immedC;
 	    -- pc;
@@ -576,8 +576,8 @@ static bool optimized_run_process ( mex::process p )
 	    goto ERROR_EXIT;
 	case mex::BEGF:
 	{
-	    int immedB = pc->immedB;
-	    int immedC = pc->immedC;
+	    min::uns32 immedB = pc->immedB;
+	    min::uns32 immedC = pc->immedC;
 	    if ( immedC > pc - pcbegin )
 	        goto ERROR_EXIT;
 	    if ( immedB > mex::max_lexical_level )
@@ -588,9 +588,9 @@ static bool optimized_run_process ( mex::process p )
 	case mex::ENDF:
 	case mex::RET:
 	{
-	    int immedA = pc->immedA;
-	    int immedB = pc->immedB;
-	    int immedC = pc->immedC;
+	    min::uns32 immedA = pc->immedA;
+	    min::uns32 immedB = pc->immedB;
+	    min::uns32 immedC = pc->immedC;
 	    if ( op_code == mex::ENDF ) immedC = 0;
 	    min::uns32 rp = p->return_stack->length;
 	    if ( immedA > sp - spbegin )
@@ -655,7 +655,7 @@ static bool optimized_run_process ( mex::process p )
 	        ~ ( cm + immedC );
 	    if ( target->op_code != mex::BEGF )
 	        goto ERROR_EXIT;
-	    int level = target->immedB;
+	    min::uns32 level = target->immedB;
 	    if ( level > mex::max_lexical_level )
 	        goto ERROR_EXIT;
 	    min::uns32 rp = p->return_stack->length;
@@ -1144,14 +1144,14 @@ bool mex::run_process ( mex::process p )
 		break;
 	    case mex::PUSHV:
 	    {
-		int j = pc->immedB;
+		min::uns32 j = pc->immedB;
 		if (    j < 1
 		     || j > mex::max_lexical_level )
 		{
 		    message = "invalid immedB";
 		    goto INNER_FATAL;
 		}
-		int k = p->fp[j];
+		min::uns32 k = p->fp[j];
 		min::float64 ff = floor ( arg1 );
 		if ( std::isnan ( ff )
 		     ||
@@ -1164,7 +1164,7 @@ bool mex::run_process ( mex::process p )
 		}
 		else
 		{
-		    int i = (int) ff;
+		    min::uns32 i = (int) ff;
 		    k -= i;
 		    result = MUP::direct_float_of
 		                ( spbegin[k] );
@@ -1254,9 +1254,9 @@ bool mex::run_process ( mex::process p )
 	{
 	    // Process JMP.
 
-	    int immedA = pc->immedA;
-	    int immedB = pc->immedB;
-	    int immedC = pc->immedC;
+	    min::uns32 immedA = pc->immedA;
+	    min::uns32 immedB = pc->immedB;
+	    min::uns32 immedC = pc->immedC;
 	    min::gen immedD = pc->immedD;
 
 	    if ( immedA > new_sp - spbegin )
@@ -1418,9 +1418,9 @@ bool mex::run_process ( mex::process p )
 	    // Process instructions that push and
 	    // pop.
 
-	    int immedA = pc->immedA;
-	    int immedB = pc->immedB;
-	    int immedC = pc->immedC;
+	    min::uns32 immedA = pc->immedA;
+	    min::uns32 immedB = pc->immedB;
+	    min::uns32 immedC = pc->immedC;
 	    min::gen immedD = pc->immedD;
 
 	    bool fatal_error = false;
@@ -1601,9 +1601,6 @@ bool mex::run_process ( mex::process p )
 	    case mex::RET:
 	    case mex::ENDF:
 	    {
-		int immedA = pc->immedA;
-		int immedB = pc->immedB;
-		int immedC = pc->immedC;
 		if ( op_code == mex::ENDF ) immedC = 0;
 		min::uns32 rp = p->return_stack->length;
 		if ( immedA > sp - spbegin )
@@ -1684,7 +1681,7 @@ bool mex::run_process ( mex::process p )
 		        "transfer target is not a BEGF";
 		    goto INNER_FATAL;
 		}
-		int level = target->immedB;
+		min::uns32 level = target->immedB;
 		if ( level > mex::max_lexical_level )
 		{
 		    message =
@@ -1785,33 +1782,31 @@ bool mex::run_process ( mex::process p )
 	    {
 	    case mex::PUSHS:
 	    {
-		int i = pc->immedA;
-		* sp = sp[-i-1];
+		* sp = sp[-immedA-1];
 		++ sp;
 		break;
 	    }
 	    case mex::PUSHI:
 	    {
 		sp = mex::process_push
-		    ( p, sp, pc->immedD );
+		    ( p, sp, immedD );
 		break;
 	    }
 	    case mex::PUSHG:
 	    {
-	        mex::module mg =
-		    (mex::module) pc->immedD;
+	        mex::module mg = (mex::module) immedD;
 		sp = mex::process_push
-		    ( p, sp, mg->globals[pc->immedA] );
+		    ( p, sp, mg->globals[immedA] );
 		break;
 	    }
 	    case mex::PUSHL:
 	        * sp ++ =
-		    spbegin[p->fp[pc->immedB] + immedA];
+		    spbegin[p->fp[immedB] + immedA];
 		break;
 	    case mex::PUSHA:
 	    {
 		* sp ++ =
-		    spbegin[p->fp[pc->immedB] - immedA];
+		    spbegin[p->fp[immedB] - immedA];
 		break;
 	    }
 	    case mex::PUSHNARGS:
@@ -1826,9 +1821,8 @@ bool mex::run_process ( mex::process p )
 	    }
 	    case mex::POPS:
 	    {
-		int i = pc->immedA;
 		-- sp;
-		sp[-i] = * sp;
+		sp[-immedA] = * sp;
 		break;
 	    }
 	    case mex::BEG:
@@ -1837,14 +1831,12 @@ bool mex::run_process ( mex::process p )
 	        break;
 	    case mex::END:
 	    {
-		int i = pc->immedA;
-		sp -= i;
+		sp -= immedA;
 		break;
 	    }
 	    case mex::BEGL:
 	    {
-	        int i = pc->immedB;
-		min::gen * q1 = sp - i;
+		min::gen * q1 = sp - immedB;
 		min::gen * q2 = sp;
 		while ( q1 < q2 )
 		    * sp ++ = * q1 ++;
@@ -1859,9 +1851,6 @@ bool mex::run_process ( mex::process p )
 		    min::interrupt();
 		    RESTORE;
 		}
-		int immedA = pc->immedA;
-		int immedB = pc->immedB;
-		int immedC = pc->immedC;
 		sp -= immedA;
 		for ( int i = immedB; 0 < i; -- i )
 		    sp[-immedB-i] = sp[-i];
@@ -1870,17 +1859,15 @@ bool mex::run_process ( mex::process p )
 		break;
 	    }
 	    case mex::SET_TRACE:
-	        p->trace_flags = (min::uns8) pc->immedA;
+	        p->trace_flags = (min::uns8) immedA;
 	        break;
 	    case mex::ERROR:
 	    {
-		int immedA = pc->immedA;
 	        sp -= immedA;
 	        break;
 	    }
 	    case mex::BEGF:
 	    {
-		int immedC = pc->immedC;
 		pc += immedC;
 		-- pc;
 		break;
@@ -1888,9 +1875,6 @@ bool mex::run_process ( mex::process p )
 	    case mex::RET:
 	    case mex::ENDF:
 	    {
-		int immedA = pc->immedA;
-		int immedB = pc->immedB;
-		int immedC = pc->immedC;
 		if ( op_code == mex::ENDF ) immedC = 0;
 		min::uns32 rp = p->return_stack->length;
 		-- rp;
@@ -1926,10 +1910,9 @@ bool mex::run_process ( mex::process p )
 	    case mex::CALLM:
 	    case mex::CALLG:
 	    {
-		min::uns32 immedC = pc->immedC;
 		mex::module cm =
 		    ( op_code == mex::CALLG ?
-		      pc->immedD :
+		      immedD :
 		      m );
 		const mex::instr * target =
 		    ~ ( cm + immedC );
@@ -1943,8 +1926,8 @@ bool mex::run_process ( mex::process p )
 			 ( pc - pcbegin + 1 ) };
 		mex::set_saved_pc ( p, ret, new_pc );
 		ret->saved_fp = p->fp[level];
-		ret->nargs = pc->immedA;
-		ret->nresults = pc->immedB;
+		ret->nargs = immedA;
+		ret->nresults = immedB;
 		RW_UNS32 p->return_stack->length =
 		    rp + 1;
 
