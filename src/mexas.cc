@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Jul 16 16:53:42 EDT 2023
+// Date:	Sun Jul 16 22:46:25 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -318,27 +318,4 @@ bool mexas::next_statement ( void )
     }
 
     return true;
-}
-
-// Main
-// ----
-
-int main ( int argc, char * argv[] )
-{
-    min::initialize();
-
-    min::init_ostream
-        ( mex::default_printer, std::cout );
-    min::init_printer
-        ( mexas::input_file,
-          mex::default_printer );
-    min::init_input_named_file
-        ( mexas::input_file,
-	  min::new_str_gen ( argv[1] ) );
-
-    while ( mexas::next_statement() )
-    {
-        mex::default_printer << mexas::statement[0] << min::eol;
-    }
-    return 0;
 }

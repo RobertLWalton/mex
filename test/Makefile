@@ -2,7 +2,7 @@
 #
 # File:		Makefile
 # Author:	Bob Walton (walton@acm.org)
-# Date:		Sun Jul 16 09:17:36 EDT 2023
+# Date:		Sun Jul 16 22:43:02 EDT 2023
 #
 # The authors have placed this program in the public
 # domain; they make no warranty and accept no liability
@@ -28,17 +28,18 @@ DIFFOPT ?= -u
 
 TESTS = mexas_scanner_test
 
-MIN_H =	${MIN}/lib/libmin.a
+MIN_H =	${MIN}/include/min.h
 
 MIN_O =	${MIN}/lib/libmin.a
 
-MEX_H =	${MIN_H} \
+MEXAS_H = ${MIN_H} \
 		../include/mex.h \
 		../include/mexas.h
 
-MEX_O =	${MIN_O} \
+MEXAS_O = \
 		mex.o \
-		mexas.o
+		mexas.o \
+		${MIN_O}
 
 .SECONDARY:	${TESTS:=.out}
 
@@ -118,25 +119,32 @@ mex.o:	\
 	    -I ../include -I ${MIN}/include \
 	    -c ../src/mex.cc
 
-mexas:	\
+mexas.o:	\
 	${MIN_H} \
 	../include/mex.h \
 	../include/mexas.h \
 	../src/mexas.cc \
-	mex.o \
 	Makefile
 	g++ -g ${GFLAGS} ${WFLAGS} \
 	    -I ../include -I ${MIN}/include \
-	    -o mexas ../src/mexas.cc mex.o ${MIN_O}
+	    -c ../src/mexas.cc
 
-mex_scanner_test.out:
-		mexas \
-		mex_scanner_test.in \
+mexas_scanner_test:	\
+	${MEXAS_H} \
+	${MEXAS_O} \
+	mexas_scanner_test.cc \
+	Makefile
+	g++ -g ${GFLAGS} ${WFLAGS} \
+	    -I ../include -I ${MIN}/include \
+	    -o $@ $@.cc ${MEXAS_O}
+
+mexas_scanner_test.out:	\
+		mexas_scanner_test \
+		mexas_scanner_test.in \
 		Makefile
 	rm -f $*.out
-	${RUNENV} $* -p < mex_scanner_test.in \
-	             > $*.out
+	${RUNENV} $* < $*.in > $*.out
 
 
 clean:
-	rm -f mexas ${TESTS:=.out} *.o
+	rm -f ${TESTS:=.out} *.o
