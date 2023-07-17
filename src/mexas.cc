@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Jul 17 06:59:46 EDT 2023
+// Date:	Mon Jul 17 14:53:56 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -20,6 +20,30 @@
 # include <mexas.h>
 
 min::locatable_gen mexas::op_code_table;
+
+static void init_op_code_table ( void )
+{
+    mexas::op_code_table = min::new_obj_gen
+        ( 10 * mex::NUMBER_OF_OP_CODES,
+	  4 * mex::NUMBER_OF_OP_CODES,
+	  1 * mex::NUMBER_OF_OP_CODES );
+
+    min::obj_vec_insptr vp ( mexas::op_code_table );
+    min::attr_insptr ap ( vp );
+
+    mex::op_info * p = mex::op_infos;
+    mex::op_info * endp = p + mex::NUMBER_OF_OP_CODES;
+    min::locatable_gen tmp;
+    while  ( p < endp )
+    {
+        tmp = min::new_str_gen ( p->name );
+        min::attr_push(vp) = tmp;
+	min::locate ( ap, tmp );
+	tmp = min::new_num_gen ( p->op_code );
+	min::set ( ap, tmp );
+	++ p;
+    }
+}
 
 static min::uns32 variable_element_gen_disp[] =
 {
@@ -106,6 +130,8 @@ static void initialize ( void )
     ::single_quote = min::new_str_gen ( "'" );
     ::double_quote = min::new_str_gen ( "\"" );
     ::backslash = min::new_str_gen ( "\\" );
+
+    ::init_op_code_table();
 
     mexas::variables =
 	::variable_stack_vec_type.new_stub ( 1000 );

@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Jul 17 06:58:29 EDT 2023
+// Date:	Mon Jul 17 14:35:55 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -27,7 +27,7 @@
 namespace mexas {
 
 extern min::locatable_gen op_code_table;
-    // For an op_code OP,
+    // For op_code OP < mex::NUMBER_OF_OP_CODES:
     //   op_code_table[OP] == new_str_gen ( "OP" )
     // and
     //   get ( op_code_table, new_str_gen ( "OP" ) )

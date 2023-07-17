@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Jul 17 12:30:27 EDT 2023
+// Date:	Mon Jul 17 14:54:19 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -707,24 +707,6 @@ RET_EXIT:
 
 // Operation Information Table.
 //
-enum
-{
-    NONA = 1,	// No arithmetic operands, not a JMP.
-    A2 =   2,	// sp[0] and sp[-1] are the arithmetic
-                // operands in that order.
-    A2R =  3,	// sp[-1] and sp[0] are the arithmetic
-                // operands in that order.
-    A2I =  4,	// sp[0] and immedD are the arithmetic
-                // operands in that order.
-    A2RI = 5,	// immedD and sp[0] are the arithmetic
-                // operands in that order.
-    A1 =   6,	// sp[0] is an arithmetic operand.
-    J2 =   7,	// sp[-1] and sp[0] are the arithmetic
-                // operands in that order, and the
-		// operation is a jump.
-    J =    8,	// JMP, no arithmetic operands.
-};
-
 mex::op_info mex::op_infos [ mex::NUMBER_OF_OP_CODES ] =
 {   { 0, 0, "", "" },
     { mex::ADD, A2, "ADD", "+" },
