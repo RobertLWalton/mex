@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Jul 16 16:56:49 EDT 2023
+// Date:	Mon Jul 17 04:12:29 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -12,6 +12,9 @@
 //
 //	Setup
 //	Program Instructions
+//	Modules
+//	Processes
+//	Functions
 
 
 // Setup
@@ -85,6 +88,22 @@ enum op_code {
     PUSHV
 };
 
+struct op_info
+{
+    min::uns8 op_code;
+        // Op code as a check: e.g., mex::POP.
+	// It should be true that:
+	//     op_infos[mex::POP].op_code = mex::POP
+    min::uns8 op_type;
+        // See above.
+    const char * name;
+        // Name of op_code: e.g, "POP".
+    const char * oper;
+        // Name of op_code operator: e.g, "+" or "<=".
+};
+
+extern op_info op_infos[];
+
 enum trace_flag
 {
     TRACE_DEPTH = 7 << 0,
@@ -92,6 +111,10 @@ enum trace_flag
     TRACE_NOJUMP = 1 << 4,
     TRACE        = 1 << 7
 };
+
+
+// Modules
+// -------
 
 struct module_header
 {
@@ -150,6 +173,10 @@ inline void push_trace_info
 	m->trace_info;
     min::push(trace_info_ins) = info;
 }
+
+
+// Processes
+// ---------
 
 enum state
 {
@@ -250,6 +277,9 @@ inline void set_saved_pc
     min::unprotected::acc_write_update
 	( p->return_stack, pc.module );
 }
+
+// Functions
+// ---------
 
 bool run_process ( mex::process p );
 

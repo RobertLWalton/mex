@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat Jul 15 05:34:02 EDT 2023
+// Date:	Mon Jul 17 04:04:24 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -157,6 +157,12 @@ extern min::uns32 first_line_number,
 bool next_statement ( void );
     // Get the next statement and return true.  Or
     // return false if end of file.
+
+mex::module compile ( min::file );
+    // Compile file and return module.  Also push
+    // module into module stack.  If there is a compile
+    // error, to not produce a new module and return
+    // NULL_STUB.
 
 } // end mexas namespace
 

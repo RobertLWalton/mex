@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Jul 16 14:32:57 EDT 2023
+// Date:	Mon Jul 17 04:10:52 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -725,20 +725,7 @@ enum
     J =    8,	// JMP, no arithmetic operands.
 };
 
-static
-struct op_info
-{
-    min::uns8 op_code;
-        // Op code as a check: e.g., mex::POP.
-	// It should be true that:
-	//     op_infos[mex::POP].op_code = mex::POP
-    min::uns8 op_type;
-        // See above.
-    const char * name;
-        // Name of op_code: e.g, "POP".
-    const char * oper;
-        // Name of op_code operator: e.g, "+" or "<=".
-} op_infos[] =
+mex::op_info mex::op_infos[] =
 {   { 0, 0, "", "" },
     { mex::ADD, A2, "ADD", "+" },
     { mex::ADDI, A2I, "ADDI", "+" },
@@ -811,15 +798,17 @@ static min::uns8 max_op_code = 0;
 
 static void init_op_infos ( void )
 {
-    op_info * p = op_infos;
-    op_info * endp = (op_info *)
-        ((char *) op_infos + sizeof ( op_infos ) );
+    mex::op_info * p = mex::op_infos;
+    mex::op_info * endp = (mex::op_info *)
+        (  (char *) mex::op_infos
+	 + sizeof ( mex::op_infos ) );
     max_op_code = endp - p - 1;
     while  ( p < endp )
     {
-        if ( p - op_infos != p->op_code )
+        if ( p - mex::op_infos != p->op_code )
 	{
-	    std::cerr << "BAD OP_INFOS[" << p - op_infos
+	    std::cerr << "BAD OP_INFOS["
+	              << p - mex::op_infos
 	              << "] != " << p->op_code
 		      << std::endl;
 	    std::exit ( 1 );
@@ -2062,7 +2051,8 @@ mex::module mex::create_module ( min::file f )
     return m;
 }
 
-mex::process mex::create_process ( min::printer printer )
+mex::process mex::create_process
+	( min::printer printer )
 {
     mex::process p =
         (mex::process) ::process_vec_type.new_stub
