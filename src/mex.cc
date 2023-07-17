@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Jul 17 04:10:52 EDT 2023
+// Date:	Mon Jul 17 12:30:27 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -100,10 +100,10 @@ static min::packed_vec<mex::ret>
 	   NULL,
 	   ::return_stack_element_stub_disp );
 
-static void init_op_infos ( void );
+static void check_op_infos ( void );
 static void initialize ( void )
 {
-    init_op_infos();
+    check_op_infos();
 }
 static min::initializer initializer ( ::initialize );
 
@@ -725,7 +725,7 @@ enum
     J =    8,	// JMP, no arithmetic operands.
 };
 
-mex::op_info mex::op_infos[] =
+mex::op_info mex::op_infos [ mex::NUMBER_OF_OP_CODES ] =
 {   { 0, 0, "", "" },
     { mex::ADD, A2, "ADD", "+" },
     { mex::ADDI, A2I, "ADDI", "+" },
@@ -792,17 +792,11 @@ mex::op_info mex::op_infos[] =
     { mex::PUSHV, A1, "PUSHV", "pushv" },
 };
 
-static min::uns8 max_op_code = 0;
-    // Set by init_op_infos.
 
-
-static void init_op_infos ( void )
+static void check_op_infos ( void )
 {
     mex::op_info * p = mex::op_infos;
-    mex::op_info * endp = (mex::op_info *)
-        (  (char *) mex::op_infos
-	 + sizeof ( mex::op_infos ) );
-    max_op_code = endp - p - 1;
+    mex::op_info * endp = p + mex::NUMBER_OF_OP_CODES;
     while  ( p < endp )
     {
         if ( p - mex::op_infos != p->op_code )
@@ -957,7 +951,7 @@ bool mex::run_process ( mex::process p )
 	min::gen * new_sp = sp;
 	min::uns8 trace_flags = pc->trace_flags; 
 
-	if ( op_code > max_op_code )
+	if ( op_code >= mex::NUMBER_OF_OP_CODES )
 	{
 	    message = "Illegal op code: too large";
 	    goto INNER_FATAL;
@@ -1965,9 +1959,9 @@ FATAL:
         const mex::instr * instr =
 	    ~ ( p->pc.module + p->pc.index );
 	min::uns8 op_code = instr->op_code;
-	op_info * op_info = ( op_code <= max_op_code ?
-	                   op_infos + op_code :
-			   NULL );
+	op_info * op_info =
+	    ( op_code < NUMBER_OF_OP_CODES ?
+	      op_infos + op_code : NULL );
 	if ( op_info != NULL )
 	    q += sprintf ( q, "%s", op_info->name );
 	else

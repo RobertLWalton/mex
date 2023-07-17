@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Jul 17 04:12:29 EDT 2023
+// Date:	Mon Jul 17 12:27:31 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -85,7 +85,8 @@ enum op_code {
     RET,
     PUSHA,
     PUSHNARGS,
-    PUSHV
+    PUSHV,
+    NUMBER_OF_OP_CODES
 };
 
 struct op_info
