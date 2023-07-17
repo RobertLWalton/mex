@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Jul 17 02:29:21 EDT 2023
+// Date:	Mon Jul 17 06:59:46 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -18,6 +18,8 @@
 // -----
 
 # include <mexas.h>
+
+min::locatable_gen mexas::op_code_table;
 
 static min::uns32 variable_element_gen_disp[] =
 {
