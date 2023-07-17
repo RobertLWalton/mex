@@ -1,0 +1,19 @@
+line #:
+line1
+    line1
+ERROR: line #: illegal character found in line; changed to `#'
+line2 x<0AB>y<0BB> 'hello there' "I said: 'hello there'" 4 5 6 1.1 2.2 -7.4 NaN
+line #:
+line2 x<0AB>y<0BB> 'hello there' "I said: 'hello there'" 4 5 6 1.1 2.2 -7.4 NaN
+    line2 x##y## "'" "hello there" "<Q>"
+    "I said: 'hello there'" 4 5 6 1.1 2.2 -7.4 nan
+ERROR: line #: illegal character found in line; changed to `#'
+line3 x<SOH>y z<FF>w hoho \
+ERROR: line #: illegal character found in line; changed to `#'
+      hehe x<222D>y
+lines #-#:
+// A comment included in statement 3
+
+line3 x<SOH>y z<FF>w hoho \
+      hehe x<222D>y
+    line3 x#y z w hoho hehe x###y

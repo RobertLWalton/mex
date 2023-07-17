@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Jul 16 22:46:25 EDT 2023
+// Date:	Mon Jul 17 02:29:21 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -130,7 +130,7 @@ static void scan_error
 {
     mexas::input_file->printer
         << min::bol << header << ": " << min::bom
-	<< "line " << mexas::last_line_number
+	<< "line " << mexas::last_line_number + 1
 	<< ": " << message << min::eom;
     print_line ( mexas::input_file->printer,
                  mexas::input_file,
@@ -289,11 +289,25 @@ bool mexas::next_statement ( void )
 	    //
 	    SAVE;
 	    if ( type != 0 )
+	    {
 	        min::push ( statement ) =
 		    ( type == '\'' ? ::single_quote :
 		                     ::double_quote );
-	    min::push ( statement ) =
-	        min::new_str_gen ( work );
+		min::push ( statement ) =
+		    min::new_str_gen ( work );
+	    }
+	    else
+	    {
+	        char * endptr;
+		double val = std::strtod
+		    ( work, & endptr );
+		if ( * endptr == 0 )
+		    min::push ( statement ) =
+			min::new_num_gen ( val );
+		else
+		    min::push ( statement ) =
+			min::new_str_gen ( work );
+	    }
 	    RESTORE;
 	}
 
