@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Jul 18 01:08:14 EDT 2023
+// Date:	Tue Jul 18 03:31:38 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -132,7 +132,7 @@ struct jump_element
 {
     const min::gen target_name;
     min::uns16 jmp_location;
-    min::uns8 lexical_level, minimum_depth;
+    min::uns8 lexical_level, maximum_depth;
     min::uns16 stack_length, stack_minimum;
     min::uns32 next;
     jump_element & operator =
@@ -145,7 +145,7 @@ struct jump_element
 	      e.target_name;
 	this->jmp_location = e.jmp_location;
 	this->lexical_level = e.lexical_level;
-	this->minimum_depth = e.minimum_depth;
+	this->maximum_depth = e.maximum_depth;
 	this->stack_length = e.stack_length;
 	this->stack_minimum = e.stack_minimum;
 	this->next = e.next;
@@ -171,7 +171,7 @@ inline void push
 	  min::gen target_name,
 	  min::uns16 jmp_location,
 	  min::uns8 lexical_level,
-	  min::uns8 minimum_depth,
+	  min::uns8 maximum_depth,
 	  min::uns16 stack_length,
 	  min::uns16 stack_minimum )
 {
@@ -179,7 +179,7 @@ inline void push
     mexas::jump_element * active = free + 1;
     mexas::jump_element enew =
 	{ target_name, jmp_location,
-	  lexical_level, minimum_depth,
+	  lexical_level, maximum_depth,
 	  stack_length, stack_minimum,
 	  active->next };
     min::uns32 next = free->next;
