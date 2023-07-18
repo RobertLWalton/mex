@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Jul 17 14:53:56 EDT 2023
+// Date:	Tue Jul 18 01:08:35 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -11,7 +11,8 @@
 // Table of Contents:
 //
 //	Setup
-//	Statement Scanner
+//	Scanner Function
+//	Compile Function
 
 
 // Setup
@@ -25,8 +26,8 @@ static void init_op_code_table ( void )
 {
     mexas::op_code_table = min::new_obj_gen
         ( 10 * mex::NUMBER_OF_OP_CODES,
-	  4 * mex::NUMBER_OF_OP_CODES,
-	  1 * mex::NUMBER_OF_OP_CODES );
+	   4 * mex::NUMBER_OF_OP_CODES,
+	   1 * mex::NUMBER_OF_OP_CODES );
 
     min::obj_vec_insptr vp ( mexas::op_code_table );
     min::attr_insptr ap ( vp );
@@ -149,8 +150,8 @@ static void initialize ( void )
 static min::initializer initializer ( ::initialize );
 
 
-// Statement Scanner
-// --------- -------
+// Scanner Function
+// ------- --------
 
 static void scan_error
         ( const char * message,
@@ -360,4 +361,27 @@ bool mexas::next_statement ( void )
     }
 
     return true;
+}
+
+// Compile Function
+// ------- --------
+
+mex::module mexas::compile
+	( min::file, min::uns8 default_flags,
+	             min::uns8 compile_flags )
+{
+    min::pop ( mexas::variables,
+               mexas::variables->length );
+    min::pop ( mexas::functions,
+               mexas::functions->length );
+    min::pop ( mexas::blocks,
+               mexas::blocks->length );
+    min::pop ( mexas::jumps,
+               mexas::jumps->length );
+    mexas::jump_element e =
+        { min::MISSING(), 0, 0, 0, 0, 0, 0 };
+    min::push ( jumps ) = e;  // Free head.
+    min::push ( jumps ) = e;  // Active head.
+
+    return min::NULL_STUB;  // TBD
 }

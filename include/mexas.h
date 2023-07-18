@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Jul 17 14:35:55 EDT 2023
+// Date:	Tue Jul 18 01:08:14 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -11,7 +11,8 @@
 // Table of Contents:
 //
 //	Setup
-//	Program Instructions
+//	Data
+//	Functions
 
 
 // Setup
@@ -20,9 +21,11 @@
 # ifndef MEXAS_H
 # define MEXAS_H
 
-// Inclusions.
-//
 # include <mex.h>
+
+
+// Data
+// ----
 
 namespace mexas {
 
@@ -132,6 +135,22 @@ struct jump_element
     min::uns8 lexical_level, minimum_depth;
     min::uns16 stack_length, stack_minimum;
     min::uns32 next;
+    jump_element & operator =
+	    ( const jump_element & e )
+    {
+        // Implicit operator = not defined because
+	// of const members.
+	//
+        * (min::gen *) & this->target_name =
+	      e.target_name;
+	this->jmp_location = e.jmp_location;
+	this->lexical_level = e.lexical_level;
+	this->minimum_depth = e.minimum_depth;
+	this->stack_length = e.stack_length;
+	this->stack_minimum = e.stack_minimum;
+	this->next = e.next;
+	return * this;
+    }
 };
 typedef min::packed_vec_insptr<mexas::jump_element>
     jump_list;
@@ -144,6 +163,44 @@ extern min::locatable_var<mexas::jump_list>
     // head of the active list.  When elements are
     // added they are added to the start, so the
     // list order is newest-first.
+
+// Push jump_element to head of active list.
+//
+inline void push
+	( mexas::jump_list lst,
+	  min::gen target_name,
+	  min::uns16 jmp_location,
+	  min::uns8 lexical_level,
+	  min::uns8 minimum_depth,
+	  min::uns16 stack_length,
+	  min::uns16 stack_minimum )
+{
+    mexas::jump_element * free = ~ ( lst + 0 );
+    mexas::jump_element * active = free + 1;
+    mexas::jump_element enew =
+	{ target_name, jmp_location,
+	  lexical_level, minimum_depth,
+	  stack_length, stack_minimum,
+	  active->next };
+    min::uns32 next = free->next;
+    if ( next == 0 )
+    {
+        next = lst->length;
+	min::push(lst) = enew;
+    }
+    else
+    {
+	mexas::jump_element * ep = ~ ( lst + next );
+	free->next = ep->next;
+        * ep = enew;
+    }
+    active->next = next;
+    min::unprotected::acc_write_update
+        ( lst, target_name );
+}
+
+// Functions
+// ---------
 
 extern min::locatable_var<min::file> input_file;
 typedef min::packed_vec_insptr<min::gen>
@@ -164,13 +221,19 @@ bool next_statement ( void );
     // Get the next statement and return true.  Or
     // return false if end of file.
 
-mex::module compile ( min::file );
+mex::module compile
+    ( min::file, min::uns8 default_flags = 0,
+                 min::uns8 compile_flags = 0 );
     // Compile file and return module.  Also push
     // module into module stack.  If there is a compile
     // error, to not produce a new module and return
     // NULL_STUB.
+    //
+    // Default_flags become the initial default trace
+    // flags, as per the DEFAULT_TRACE instruction.
+    // Compile_flags trace the compilation: not the
+    // execution (TRACE_NOJMP has no effect).
 
 } // end mexas namespace
 
 # endif // MEXAS_H
-
