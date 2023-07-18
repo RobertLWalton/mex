@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Jul 17 14:54:19 EDT 2023
+// Date:	Mon Jul 17 22:53:14 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1186,7 +1186,7 @@ bool mex::run_process ( mex::process p )
 		if ( pp
 		     &&
 		     (   trace_flags
-		       & mex::TRACE_PHRASE ) )
+		       & mex::TRACE_LINES ) )
 		    min::print_phrase_lines
 		        ( p->printer,
 			  m->position->file,
@@ -1268,7 +1268,7 @@ bool mex::run_process ( mex::process p )
 
 	    if ( bad_jmp )
 	        trace_flags |= mex::TRACE
-		             + mex::TRACE_PHRASE;
+		             + mex::TRACE_LINES;
 	    else
 	    {
 	        trace_flags &= pc->trace_flags;
@@ -1301,7 +1301,7 @@ bool mex::run_process ( mex::process p )
 		if ( pp
 		     &&
 		     (   trace_flags
-		       & mex::TRACE_PHRASE ) )
+		       & mex::TRACE_LINES ) )
 		    min::print_phrase_lines
 		        ( p->printer,
 			  m->position->file,
@@ -1668,7 +1668,7 @@ bool mex::run_process ( mex::process p )
 
 	    if ( fatal_error )
 	        trace_flags |= mex::TRACE
-		             + mex::TRACE_PHRASE;
+		             + mex::TRACE_LINES;
 	    else
 	        trace_flags &= pc->trace_flags;
 
@@ -1692,7 +1692,7 @@ bool mex::run_process ( mex::process p )
 		if ( pp
 		     &&
 		     (   trace_flags
-		       & mex::TRACE_PHRASE ) )
+		       & mex::TRACE_LINES ) )
 		    min::print_phrase_lines
 		        ( p->printer,
 			  m->position->file,

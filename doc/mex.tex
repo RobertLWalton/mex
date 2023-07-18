@@ -239,7 +239,7 @@
 
 \author{Robert L. Walton}
 
-\date{July 14, 2023}
+\date{July 17, 2023}
  
 \maketitle
 
@@ -662,7 +662,7 @@ The interface to a MEX module and its code vector is:
 \verb|{                   | \\
 \verb|mex:|\TTMKEY{TRACE\_DEPTH}{in {\tt mex::trace\_flag}} & \tt = 7 <{}< 0
 \label{MEX::TRACE_DEPTH} \\
-\verb|mex:|\TTMKEY{TRACE\_PHRASE}{in {\tt mex::trace\_flag}} & \tt = 1 <{}< 3 \\
+\verb|mex:|\TTMKEY{TRACE\_LINES}{in {\tt mex::trace\_flag}} & \tt = 1 <{}< 3 \\
 \verb|mex:|\TTMKEY{TRACE\_NOJMP}{in {\tt mex::trace\_flag}} & \tt = 1 <{}< 4 \\
 \verb|mex:|\TTMKEY{TRACE}{in {\tt mex::trace\_flag}} & \tt = 1 <{}< 7 \\
 \verb|}                   | \\
@@ -1158,7 +1158,7 @@ when the process terminates if any exception flags have been raised.
 \label{ARITHMETIC-TRACING}
 
 When an arithmetic instruction is traced and the effective
-trace flag's \TT{TRACE\_PHRASE} flag is on,
+trace flag's \TT{TRACE\_LINES} flag is on,
 the instruction source lines are output
 using \TT{min::\EOL print\_\EOL phrase\_\EOL lines} and the
 instruction's \TT{min::\EOL phrase\_\EOL position} value from its module's
@@ -1167,7 +1167,7 @@ a message such as:
 \begin{center}
 \tt 1 + 2 ===> 3
 \end{center}
-If the \TT{TRACE\_PHRASE} flag is off, a message such as:
+If the \TT{TRACE\_LINES} flag is off, a message such as:
 \begin{center}
 \tt Line 53: 1 + 2 ===> 3
 \end{center}
@@ -1254,7 +1254,7 @@ counter is incremented at the end of \TT{CALL} execution.
 The remainder of this section describes the behavior of
 the \TT{mex::\EOL default\_\EOL trace\_\EOL function}.
 
-Default tracing uses the \TT{TRACE\_PHRASE} flag in the
+Default tracing uses the \TT{TRACE\_LINES} flag in the
 same manner as Arithmetic Tracing, \itemref{ARITHMETIC-TRACING}.
 
 To produce the companion message,
@@ -1949,7 +1949,7 @@ instruction.
 \begin{indpar}
 At run-time set the process \TT{trace\_flags} parameter to the
 flags given by the options (i.e., \TT{TRACE},
-\ttkey{TRACE\_PHRASE}, \TT{TRACE\_NOJMP}).  This is implemented
+\ttkey{TRACE\_LINES}, \TT{TRACE\_NOJMP}).  This is implemented
 by the run-time instruction \TT{SET\_TRACE}. At assembly-time,
 this instruction does nothing.
 \end{indpar}
@@ -2069,14 +2069,14 @@ See \pagref{LABEL}.
 \begin{indpar}
 Set the \TT{trace\_flags} of the next instruction to those
 given by the options (i.e., \TT{TRACE},
-\TT{TRACE\_PHRASE}, \TT{TRACE\_NOJMP}).
+\TT{TRACE\_LINES}, \TT{TRACE\_NOJMP}).
 \end{indpar}
 
 \ttkey{DEFAULT\_TRACE} {\em trace-option}\STAR{}
 \begin{indpar}
 Set the default trace flags to those
 given by the options (i.e., \TT{TRACE},
-\TT{TRACE\_PHRASE}, \TT{TRACE\_NOJMP}).
+\TT{TRACE\_LINES}, \TT{TRACE\_NOJMP}).
 In the absence of an immediately preceding \TT{INSTRUCTION\_TRACE}
 declaration, an instruction's \TT{trace\_flags} are set to the
 default trace flags.

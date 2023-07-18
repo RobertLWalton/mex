@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Jul 17 14:39:11 EDT 2023
+// Date:	Mon Jul 17 22:52:32 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -125,8 +125,8 @@ extern op_info op_infos[];
 
 enum trace_flag
 {
-    TRACE_DEPTH = 7 << 0,
-    TRACE_PHRASE = 1 << 3,
+    TRACE_DEPTH  = 7 << 0,
+    TRACE_LINES  = 1 << 3,
     TRACE_NOJUMP = 1 << 4,
     TRACE        = 1 << 7
 };
