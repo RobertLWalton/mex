@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Jul 18 01:08:35 EDT 2023
+// Date:	Wed Jul 19 02:19:18 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -10,17 +10,49 @@
 
 // Table of Contents:
 //
-//	Setup
+//	Setup and Data
 //	Scanner Function
 //	Compile Function
 
 
-// Setup
-// -----
+// Setup and Data
+// ----- --- ----
 
 # include <mexas.h>
 
+min::uns32 mexas::lexical_level;
+min::uns32 mexas::depth;
+min::uns32 mexas::lp[mex::max_lexical_level+1];
+min::uns32 mexas::fp[mex::max_lexical_level+1];
+
 min::locatable_gen mexas::op_code_table;
+
+enum op_code
+    // Extends mex::op_code to include pseudo-ops and
+    // declarations.
+{
+    PUSHM = mex::NUMBER_OF_OP_CODES,
+    PUSH,
+    POP,
+    CALL,
+    LABEL,
+    INSTRUCTION_TRACE,
+    DEFAULT_TRACE,
+    NUMBER_OF_OP_CODES
+};
+
+static mex::op_info op_infos[] =
+{
+    { ::PUSHM, mex::NONA, "PUSHM" },
+    { ::PUSH, mex::NONA, "PUSH" },
+    { ::POP, mex::NONA, "POP" },
+    { ::CALL, mex::NONA, "CALL" },
+    { ::LABEL, mex::NONA, "LABEL" },
+    { ::INSTRUCTION_TRACE, mex::NONA,
+                           "INSTRUCTION_TRACE" },
+    { ::DEFAULT_TRACE, mex::NONA,
+                            "DEFAULT_TRACE" }
+};
 
 static void init_op_code_table ( void )
 {
@@ -32,9 +64,21 @@ static void init_op_code_table ( void )
     min::obj_vec_insptr vp ( mexas::op_code_table );
     min::attr_insptr ap ( vp );
 
+    min::locatable_gen tmp;
     mex::op_info * p = mex::op_infos;
     mex::op_info * endp = p + mex::NUMBER_OF_OP_CODES;
-    min::locatable_gen tmp;
+    while  ( p < endp )
+    {
+        tmp = min::new_str_gen ( p->name );
+        min::attr_push(vp) = tmp;
+	min::locate ( ap, tmp );
+	tmp = min::new_num_gen ( p->op_code );
+	min::set ( ap, tmp );
+	++ p;
+    }
+    p = ::op_infos;
+    endp = p + (   ::NUMBER_OF_OP_CODES
+	         - mex::NUMBER_OF_OP_CODES );
     while  ( p < endp )
     {
         tmp = min::new_str_gen ( p->name );
@@ -367,8 +411,8 @@ bool mexas::next_statement ( void )
 // ------- --------
 
 mex::module mexas::compile
-	( min::file, min::uns8 default_flags,
-	             min::uns8 compile_flags )
+	( min::file file, min::uns8 default_flags,
+	                  min::uns8 compile_flags )
 {
     min::pop ( mexas::variables,
                mexas::variables->length );
@@ -382,6 +426,29 @@ mex::module mexas::compile
         { min::MISSING(), 0, 0, 0, 0, 0, 0 };
     min::push ( jumps ) = e;  // Free head.
     min::push ( jumps ) = e;  // Active head.
+
+    mexas::lexical_level = 0;
+    mexas::depth = 0;
+    mexas::lp[0] = 0;
+    mexas::fp[0] = 0;
+
+    mexas::input_file = file;
+
+    while ( next_statement() )
+    {
+        min::gen v = min::get
+	    ( mexas::op_code_table,
+	      mexas::statement[0] );
+	if ( v == min::NONE() )
+	{
+	    // TBD error
+	}
+	min::uns32 op_code =
+	    (min::uns32) min::int_of ( v );
+	switch ( op_code )
+	{
+	}
+    }
 
     return min::NULL_STUB;  // TBD
 }

@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Jul 18 03:31:38 EDT 2023
+// Date:	Wed Jul 19 02:18:47 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -29,8 +29,18 @@
 
 namespace mexas {
 
+extern min::uns32 lexical_level;
+extern min::uns32 depth;
+    // Current lexical_level and depth.
+
+extern min::uns32 lp[mex::max_lexical_level+1];
+extern min::uns32 fp[mex::max_lexical_level+1];
+    // lp[L] is stack pointer when lexical level begun.
+    // fp[L] is frame pointer when lexical level begun.
+    // fp[L] - lp[L] is number of arguments.
+
 extern min::locatable_gen op_code_table;
-    // For op_code OP < mex::NUMBER_OF_OP_CODES:
+    // For op_code OP < ::NUMBER_OF_OP_CODES:
     //   op_code_table[OP] == new_str_gen ( "OP" )
     // and
     //   get ( op_code_table, new_str_gen ( "OP" ) )
@@ -222,8 +232,8 @@ bool next_statement ( void );
     // return false if end of file.
 
 mex::module compile
-    ( min::file, min::uns8 default_flags = 0,
-                 min::uns8 compile_flags = 0 );
+    ( min::file file, min::uns8 default_flags = 0,
+                      min::uns8 compile_flags = 0 );
     // Compile file and return module.  Also push
     // module into module stack.  If there is a compile
     // error, to not produce a new module and return
