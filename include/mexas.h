@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Jul 19 02:18:47 EDT 2023
+// Date:	Wed Jul 19 22:45:52 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -178,35 +178,26 @@ extern min::locatable_var<mexas::jump_list>
 //
 inline void push
 	( mexas::jump_list lst,
-	  min::gen target_name,
-	  min::uns16 jmp_location,
-	  min::uns8 lexical_level,
-	  min::uns8 maximum_depth,
-	  min::uns16 stack_length,
-	  min::uns16 stack_minimum )
+	  const mexas::jump_element & e )
 {
     mexas::jump_element * free = ~ ( lst + 0 );
     mexas::jump_element * active = free + 1;
-    mexas::jump_element enew =
-	{ target_name, jmp_location,
-	  lexical_level, maximum_depth,
-	  stack_length, stack_minimum,
-	  active->next };
     min::uns32 next = free->next;
     if ( next == 0 )
     {
         next = lst->length;
-	min::push(lst) = enew;
+	min::push(lst) = e;
     }
     else
     {
 	mexas::jump_element * ep = ~ ( lst + next );
 	free->next = ep->next;
-        * ep = enew;
+        * ep = e;
     }
+    (lst + next)->next = active->next;
     active->next = next;
     min::unprotected::acc_write_update
-        ( lst, target_name );
+        ( lst, e.target_name );
 }
 
 // Functions

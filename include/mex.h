@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Jul 17 22:52:32 EDT 2023
+// Date:	Wed Jul 19 22:47:37 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -163,19 +163,11 @@ MIN_REF ( min::packed_vec_ptr<min::gen>,
 
 inline void push_instr
         ( mex::module_ins m,
-          mex::op_code op_code,
-	  min::uns8 trace_flags = 0,
-	  min::uns16 immedA = 0,
-	  min::uns16 immedB = 0,
-	  min::uns16 immedC = 0,
-	  min::gen immedD = min::MISSING() )
+	  const mex::instr & instr )
 {
-    mex::instr instr =
-        { op_code, trace_flags,
-	  immedA, immedB, immedC, immedD };
     min::push(m) = instr;
     min::unprotected::acc_write_update
-	( m, immedD );
+	( m, instr.immedD );
 }
 inline void push_position ( mex::module_ins m,
                             min::phrase_position pp )
