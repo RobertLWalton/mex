@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Jul 19 22:45:52 EDT 2023
+// Date:	Thu Jul 20 03:46:55 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -22,6 +22,7 @@
 # define MEXAS_H
 
 # include <mex.h>
+# include <cctype>
 
 
 // Data
@@ -38,6 +39,12 @@ extern min::uns32 fp[mex::max_lexical_level+1];
     // lp[L] is stack pointer when lexical level begun.
     // fp[L] is frame pointer when lexical level begun.
     // fp[L] - lp[L] is number of arguments.
+
+extern min::uns32 error_count;
+extern min::uns32 warning_count;
+
+extern min::locatable_gen star;
+    // new_str_gen ( "*" );
 
 extern min::locatable_gen op_code_table;
     // For op_code OP < ::NUMBER_OF_OP_CODES:
@@ -203,6 +210,38 @@ inline void push
 // Functions
 // ---------
 
+// Print error message.  If pp != min::MISSING_PHRASE_
+// POSITION, print source lines after error message.
+// Increment mexas::error_count.  Printer used is
+// mexas::input_file->printer.
+//
+void compile_error
+	( const min::phrase_position & pp,
+	  const char * message1,
+	  const min::op & message2 = min::pnop,
+	  const char * message3 = "",
+	  const min::op & message4 = min::pnop,
+	  const char * message5 = "",
+	  const min::op & message6 = min::pnop,
+	  const char * message7 = "",
+	  const min::op & message8 = min::pnop,
+	  const char * message9 = "" );
+
+// Ditto but its a warning message and mexas::warning_
+// count is incremented.
+//
+void compile_warn
+	( const min::phrase_position & pp,
+	  const char * message1,
+	  const min::op & message2 = min::pnop,
+	  const char * message3 = "",
+	  const min::op & message4 = min::pnop,
+	  const char * message5 = "",
+	  const min::op & message6 = min::pnop,
+	  const char * message7 = "",
+	  const min::op & message8 = min::pnop,
+	  const char * message9 = "" );
+
 extern min::locatable_var<min::file> input_file;
 typedef min::packed_vec_insptr<min::gen>
     statement_lexemes;
@@ -221,6 +260,19 @@ extern min::uns32 first_line_number,
 bool next_statement ( void );
     // Get the next statement and return true.  Or
     // return false if end of file.
+
+inline min::gen get_name ( min::uns32 i )
+{
+    if ( i < mexas::statement->length )
+    {
+	min::gen n = mexas::statement[i];
+        min::str_ptr sp ( n );
+        if ( sp && strlen ( sp ) >= 1
+                && isalpha ( sp[0] ) )
+	    return n;
+    }
+    return min::NONE();
+}
 
 mex::module compile
     ( min::file file, min::uns8 default_flags = 0,

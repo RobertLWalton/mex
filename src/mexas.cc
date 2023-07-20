@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Jul 19 02:19:18 EDT 2023
+// Date:	Thu Jul 20 02:48:23 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -11,6 +11,7 @@
 // Table of Contents:
 //
 //	Setup and Data
+//	Support Functions
 //	Scanner Function
 //	Compile Function
 
@@ -20,10 +21,15 @@
 
 # include <mexas.h>
 
+min::uns32 mexas::error_count;
+min::uns32 mexas::warning_count;
+
 min::uns32 mexas::lexical_level;
 min::uns32 mexas::depth;
 min::uns32 mexas::lp[mex::max_lexical_level+1];
 min::uns32 mexas::fp[mex::max_lexical_level+1];
+
+min::locatable_gen mexas::star;
 
 min::locatable_gen mexas::op_code_table;
 
@@ -172,6 +178,7 @@ static min::locatable_gen backslash;
 
 static void initialize ( void )
 {
+    mexas::star = min::new_str_gen ( "*" );
     ::single_quote = min::new_str_gen ( "'" );
     ::double_quote = min::new_str_gen ( "\"" );
     ::backslash = min::new_str_gen ( "\\" );
@@ -192,6 +199,82 @@ static void initialize ( void )
 	min::gen_packed_vec_type.new_stub ( 500 );
 }
 static min::initializer initializer ( ::initialize );
+
+
+// Support Functions
+// ------- ---------
+
+static void print_error_or_warning
+	( const min::phrase_position & pp,
+	  const char * message1,
+	  const min::op & message2,
+	  const char * message3,
+	  const min::op & message4,
+	  const char * message5,
+	  const min::op & message6,
+	  const char * message7,
+	  const min::op & message8,
+	  const char * message9 )
+{
+    min::printer printer = mexas::input_file->printer;
+    printer << min::bom;
+    if ( pp )
+        printer << "in "
+		<< min::pline_numbers
+		       ( mexas::input_file, pp )
+	        << ": ";
+    printer << message1 << message2 << message3
+            << message4 << message5 << message6
+	    << message7 << message8 << message9;
+    if ( pp ) printer << ":";
+    printer << min::eom;
+
+    if ( pp )
+	min::print_phrase_lines
+	    ( printer, mexas::input_file, pp );
+}
+
+void mexas::compile_error
+	( const min::phrase_position & pp,
+	  const char * message1,
+	  const min::op & message2,
+	  const char * message3,
+	  const min::op & message4,
+	  const char * message5,
+	  const min::op & message6,
+	  const char * message7,
+	  const min::op & message8,
+	  const char * message9 )
+{
+    mexas::input_file->printer << min::bol << "ERROR: ";
+    ::print_error_or_warning
+        ( pp, message1, message2, message3,
+	      message4, message5, message6,
+	      message7, message8, message9 );
+    ++ mexas::error_count;
+}
+
+void mexas::compile_warn
+	( const min::phrase_position & pp,
+	  const char * message1,
+	  const min::op & message2,
+	  const char * message3,
+	  const min::op & message4,
+	  const char * message5,
+	  const min::op & message6,
+	  const char * message7,
+	  const min::op & message8,
+	  const char * message9 )
+{
+    mexas::input_file->printer
+        << min::bol << "WARNING: ";
+    ::print_error_or_warning
+        ( pp, message1, message2, message3,
+	      message4, message5, message6,
+	      message7, message8, message9 );
+    ++ mexas::warning_count;
+}
+
 
 
 // Scanner Function
@@ -414,6 +497,9 @@ mex::module mexas::compile
 	( min::file file, min::uns8 default_flags,
 	                  min::uns8 compile_flags )
 {
+    mexas::error_count = 0;
+    mexas::warning_count = 0;
+
     min::pop ( mexas::variables,
                mexas::variables->length );
     min::pop ( mexas::functions,
@@ -434,19 +520,63 @@ mex::module mexas::compile
 
     mexas::input_file = file;
 
+    mex::module_ins m = (mex::module_ins)
+        mex::create_module ( file );
+
     while ( next_statement() )
     {
+        min::phrase_position pp =
+	    { { mexas::first_line_number, 0 },
+	      { mexas::last_line_number + 1, 0 } };
+
         min::gen v = min::get
 	    ( mexas::op_code_table,
 	      mexas::statement[0] );
 	if ( v == min::NONE() )
 	{
-	    // TBD error
+	    mexas::compile_error
+	        ( pp, "undefined operation code"
+		      " or declaration name;"
+		      " statement ignored" );
+	    continue;
 	}
 	min::uns32 op_code =
 	    (min::uns32) min::int_of ( v );
-	switch ( op_code )
+        min::uns8 op_type = mex::NONA;
+	mex::instr instr =
+	    { 0, default_flags,
+	      0, 0, 0, min::MISSING() };
+	min::uns32 fp = mexas::fp[mexas::lexical_level];
+	if ( op_code < mex::NUMBER_OF_OP_CODES )
 	{
+	    op_type = mex::op_infos[op_code].op_type;
+	    instr.op_code = op_code;
+	}
+	switch ( op_type )
+	{
+	case mex::A2:
+	    if ( variables->length < fp + 2 )
+	        goto STACK_TOO_SHORT;
+	    min::pop ( variables, 2 );
+	    goto ARITHMETIC;
+	}
+
+	STACK_TOO_SHORT:
+	{
+	    mexas::compile_error
+	        ( pp, "stack too empty to pop required"
+		      " arguments" );
+	    continue;
+	}
+	ARITHMETIC:
+	{
+	    min::gen name = mexas::get_name ( 1 );
+	    if ( name == min::NONE() )
+	        name = mexas::star;
+	    mexas::push ( mexas::variables, name,
+	                  mexas::lexical_level,
+	                  mexas::depth );
+	    mex::push_instr ( m, instr );
 	}
     }
 
