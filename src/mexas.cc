@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Jul 20 02:48:23 EDT 2023
+// Date:	Thu Jul 20 16:11:53 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -25,7 +25,8 @@ min::uns32 mexas::error_count;
 min::uns32 mexas::warning_count;
 
 min::uns32 mexas::lexical_level;
-min::uns32 mexas::depth;
+# define L mexas::lexical_level
+min::uns32 mexas::depth[mex::max_lexical_level+1];
 min::uns32 mexas::lp[mex::max_lexical_level+1];
 min::uns32 mexas::fp[mex::max_lexical_level+1];
 
@@ -513,8 +514,8 @@ mex::module mexas::compile
     min::push ( jumps ) = e;  // Free head.
     min::push ( jumps ) = e;  // Active head.
 
-    mexas::lexical_level = 0;
-    mexas::depth = 0;
+    L = 0;
+    mexas::depth[0] = 0;
     mexas::lp[0] = 0;
     mexas::fp[0] = 0;
 
@@ -546,7 +547,7 @@ mex::module mexas::compile
 	mex::instr instr =
 	    { 0, default_flags,
 	      0, 0, 0, min::MISSING() };
-	min::uns32 fp = mexas::fp[mexas::lexical_level];
+	min::uns32 fp = mexas::fp[L];
 	if ( op_code < mex::NUMBER_OF_OP_CODES )
 	{
 	    op_type = mex::op_infos[op_code].op_type;
@@ -555,17 +556,35 @@ mex::module mexas::compile
 	switch ( op_type )
 	{
 	case mex::A2:
+	case mex::A2R:
 	    if ( variables->length < fp + 2 )
 	        goto STACK_TOO_SHORT;
 	    min::pop ( variables, 2 );
 	    goto ARITHMETIC;
+
+	case mex::A2I:
+	case mex::A2RI:
+	case mex::A1:
+	    if ( variables->length < fp + 1 )
+	        goto STACK_TOO_SHORT;
+	    min::pop ( variables );
+	    goto ARITHMETIC;
+
+	case mex::J2:
+	    if ( variables->length < fp + 2 )
+	        goto STACK_TOO_SHORT;
+	    min::pop ( variables, 2 );
+	    // Fall through.
+	case mex::J:
+	    goto JUMP;
 	}
 
 	STACK_TOO_SHORT:
 	{
 	    mexas::compile_error
 	        ( pp, "stack too empty to pop required"
-		      " arguments" );
+		      " arguments; instruction"
+		      " ignored" );
 	    continue;
 	}
 	ARITHMETIC:
@@ -574,10 +593,38 @@ mex::module mexas::compile
 	    if ( name == min::NONE() )
 	        name = mexas::star;
 	    mexas::push ( mexas::variables, name,
-	                  mexas::lexical_level,
-	                  mexas::depth );
+	                  L, mexas::depth[L] );
 	    mex::push_instr ( m, instr );
+	    goto TRACE;
 	}
+	JUMP:
+	{
+	    min::gen target = mexas::get_name ( 1 );
+	    if ( target == min::NONE() )
+	    {
+		mexas::compile_error
+		    ( pp, "jmp... does not have a "
+		          " jmp-target that is a name;"
+			  " target unsatisfied" );
+	    }
+	    else
+	    {
+		mexas::jump_element je =
+		    { target,
+		      (min::uns16) m->length,
+		      (min::uns8) L,
+		      (min::uns8) depth[L],
+		      (min::uns16) variables->length,
+		      (min::uns16) variables->length };
+		mexas::push_jump ( mexas::jumps, je );
+	    }
+	    mex::push_instr ( m, instr );
+	    goto TRACE;
+	}
+	TRACE:
+	{
+	}
+
     }
 
     return min::NULL_STUB;  // TBD

@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Jul 20 03:46:55 EDT 2023
+// Date:	Thu Jul 20 15:52:28 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -31,8 +31,10 @@
 namespace mexas {
 
 extern min::uns32 lexical_level;
-extern min::uns32 depth;
-    // Current lexical_level and depth.
+    // Current lexical_level.
+extern min::uns32 depth[mex::max_lexical_level+1];
+    // depth[L] is the current depth of lexical level
+    // L.
 
 extern min::uns32 lp[mex::max_lexical_level+1];
 extern min::uns32 fp[mex::max_lexical_level+1];
@@ -183,7 +185,7 @@ extern min::locatable_var<mexas::jump_list>
 
 // Push jump_element to head of active list.
 //
-inline void push
+inline void push_jump
 	( mexas::jump_list lst,
 	  const mexas::jump_element & e )
 {
