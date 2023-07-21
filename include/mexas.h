@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Jul 20 15:52:28 EDT 2023
+// Date:	Fri Jul 21 05:29:17 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -12,7 +12,8 @@
 //
 //	Setup
 //	Data
-//	Functions
+//	Main Functions
+//	Support Functions
 
 
 // Setup
@@ -209,8 +210,25 @@ inline void push_jump
         ( lst, e.target_name );
 }
 
-// Functions
-// ---------
+// Main Functions
+// ---- ---------
+
+mex::module compile
+    ( min::file file, min::uns8 default_flags = 0,
+                      min::uns8 compile_flags = 0 );
+    // Compile file and return module.  Also push
+    // module into module stack.  If there is a compile
+    // error, to not produce a new module and return
+    // NULL_STUB.
+    //
+    // Default_flags become the initial default trace
+    // flags, as per the DEFAULT_TRACE instruction.
+    // Compile_flags trace the compilation: not the
+    // execution (TRACE_NOJMP has no effect).
+
+
+// Support Functions
+// ------- ---------
 
 // Print error message.  If pp != min::MISSING_PHRASE_
 // POSITION, print source lines after error message.
@@ -276,18 +294,45 @@ inline min::gen get_name ( min::uns32 i )
     return min::NONE();
 }
 
-mex::module compile
-    ( min::file file, min::uns8 default_flags = 0,
-                      min::uns8 compile_flags = 0 );
-    // Compile file and return module.  Also push
-    // module into module stack.  If there is a compile
-    // error, to not produce a new module and return
-    // NULL_STUB.
+unsigned jump_list_delete
+	( mexas::jump_list jlist,
+	  min::uns8 lexical_level );
+    // Go through jlist and delete all jump_elements
+    // that have the given lexical level.  This is
+    // to be called with the current lexical level
+    // just before the current level is decremented.
+    // If this is done, the jump_elements in jlist
+    // will be sorted in lexical level order, highest
+    // first.  This is assumed by this function.
     //
-    // Default_flags become the initial default trace
-    // flags, as per the DEFAULT_TRACE instruction.
-    // Compile_flags trace the compilation: not the
-    // execution (TRACE_NOJMP has no effect).
+    // For each element deleted, call compile_error
+    // indicating that the jump target was undefined
+    // and referencing the jump instruction involved.
+    //
+    // Return the number of elements deleted.
+
+unsigned jump_list_update
+	( mexas::jump_list jlist,
+	  min::uns8 lexical_level,
+	  min::uns8 maximum_depth,
+	  min::uns16 stack_minimum );
+    // Go through jlist and for all jump_elements je of
+    // the given lexical level, perform:
+    //
+    //     je.maximum_depth =
+    //         min ( je.maximum_depth, maximum_depth )
+    //     je.stack_minimum =
+    //         min ( je.stack_minimum, stack_minimum )
+    //
+    // Assume that the elements of jlist are sorted by
+    // lexical level, highest first, and the lexical_
+    // level argument is equal to or higher than that
+    // of the first element on jlist.
+    //
+    // Return the number of elements of the given
+    // lexical level (counted even if they are not
+    // modified).
+    
 
 } // end mexas namespace
 
