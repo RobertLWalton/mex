@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Jul 21 05:57:48 EDT 2023
+// Date:	Fri Jul 21 06:34:57 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -307,28 +307,28 @@ unsigned mexas::jump_list_delete
     return count;
 }
 
-unsigned jump_list_update
+unsigned mexas::jump_list_update
 	( mexas::jump_list jlist,
 	  min::uns8 lexical_level,
 	  min::uns8 maximum_depth,
-	  min::uns16 stack_minimum );
-    // Go through jlist and for all jump_elements je of
-    // the given lexical level, perform:
-    //
-    //     je.maximum_depth =
-    //         min ( je.maximum_depth, maximum_depth )
-    //     je.stack_minimum =
-    //         min ( je.stack_minimum, stack_minimum )
-    //
-    // Assume that the elements of jlist are sorted by
-    // lexical level, highest first, and the lexical_
-    // level argument is equal to or higher than that
-    // of the first element on jlist.
-    //
-    // Return the number of elements of the given
-    // lexical level (counted even if they are not
-    // modified).
+	  min::uns16 stack_minimum )
+{
+    min::ptr<mexas::jump_element> previous = jlist + 1;
 
+    unsigned count = 0;
+    while ( min::uns32 n = previous->next )
+    {
+        min::ptr<mexas::jump_element> next = jlist + n;
+	if ( next->lexical_level < lexical_level )
+	    break;
+	if ( next->maximum_depth > maximum_depth )
+	    next->maximum_depth = maximum_depth;
+	if ( next->stack_minimum > stack_minimum )
+	    next->stack_minimum = stack_minimum;
+	++ count;
+    }
+    return count;
+}
 
 
 // Scanner Function
