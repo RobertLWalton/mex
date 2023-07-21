@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Jul 21 05:29:17 EDT 2023
+// Date:	Fri Jul 21 06:15:12 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -295,7 +295,8 @@ inline min::gen get_name ( min::uns32 i )
 }
 
 unsigned jump_list_delete
-	( mexas::jump_list jlist,
+	( mex::module m,
+	  mexas::jump_list jlist,
 	  min::uns8 lexical_level );
     // Go through jlist and delete all jump_elements
     // that have the given lexical level.  This is

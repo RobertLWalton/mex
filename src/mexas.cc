@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Jul 21 05:27:00 EDT 2023
+// Date:	Fri Jul 21 05:57:48 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -275,6 +275,59 @@ void mexas::compile_warn
 	      message7, message8, message9 );
     ++ mexas::warning_count;
 }
+
+unsigned mexas::jump_list_delete
+	( mex::module m,
+	  mexas::jump_list jlist,
+	  min::uns8 lexical_level )
+{
+    min::ptr<mexas::jump_element> free = jlist + 0;
+    min::ptr<mexas::jump_element> previous = jlist + 1;
+
+    unsigned count = 0;
+    while ( min::uns32 n = previous->next )
+    {
+        min::ptr<mexas::jump_element> next = jlist + n;
+	if ( next->lexical_level < lexical_level )
+	    break;
+	mexas::compile_error
+	    ( m->position[next->jmp_location],
+	      "jump target undefined: ",
+	      min::pgen ( next->target_name ),
+	      "; JMP... changed to terminating ERROR" );
+	min::ptr<mex::instr> instr =
+	    m + next->jmp_location;
+	instr->op_code = mex::ERROR;
+	instr->immedB = 1;
+	previous->next = next->next;
+	next->next = free->next;
+	free->next = n;
+	++ count;
+    }
+    return count;
+}
+
+unsigned jump_list_update
+	( mexas::jump_list jlist,
+	  min::uns8 lexical_level,
+	  min::uns8 maximum_depth,
+	  min::uns16 stack_minimum );
+    // Go through jlist and for all jump_elements je of
+    // the given lexical level, perform:
+    //
+    //     je.maximum_depth =
+    //         min ( je.maximum_depth, maximum_depth )
+    //     je.stack_minimum =
+    //         min ( je.stack_minimum, stack_minimum )
+    //
+    // Assume that the elements of jlist are sorted by
+    // lexical level, highest first, and the lexical_
+    // level argument is equal to or higher than that
+    // of the first element on jlist.
+    //
+    // Return the number of elements of the given
+    // lexical level (counted even if they are not
+    // modified).
 
 
 
