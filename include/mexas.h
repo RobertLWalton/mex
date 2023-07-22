@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat Jul 22 07:31:14 EDT 2023
+// Date:	Sat Jul 22 14:42:25 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -37,7 +37,7 @@ extern min::locatable_var<mex::module_ins>
 
 inline void push_instr
         ( const mex::instr & instr,
-	  min::phrase_position pp =
+	  const min::phrase_position & pp =
 	      min::MISSING_PHRASE_POSITION,
 	  min::gen trace_info = min::MISSING() )
 {
@@ -382,11 +382,19 @@ unsigned jump_list_resolve
     // elements are removed from jlist.  The number
     // of resolved elements is returned.
 
-void beg ( void );
-void begl ( min::uns32 nvars );
-void begf ( void );
+void beg ( const min::phrase_position & pp =
+	       min::MISSING_PHRASE_POSITION,
+	   min::gen trace_info = min::MISSING() );
+void begl ( min::uns32 nvars,
+            const min::phrase_position & pp =
+	        min::MISSING_PHRASE_POSITION,
+	    min::gen trace_info = min::MISSING() );
+void begf ( const min::phrase_position & pp =
+	        min::MISSING_PHRASE_POSITION,
+	    min::gen trace_info = min::MISSING() );
     // Push a block stack entry for BEG, BEGL, or BEGF
-    // respectively, and output a BEG... instruction.
+    // respectively, and output a BEG... instruction
+    // with given phrase position and trace info.
     //
     // Begf increments mexas::lexical level to be L,
     // sets depth[L] to 0, sets lp[L] = fp[L] =
@@ -398,18 +406,20 @@ void begf ( void );
     // variable with name N (not equal *) the name
     // `next-N'.
 
-bool check_block ( min::uns8 op_code );
-    // Return true if the op_code is ENDx and the top
-    // of the block stack is for a BEGx that matches
-    // (e.g., ENDL matches BEGL).  Return false
-    // otherwise.
+unsigned check_block ( min::uns8 op_code );
+    // Check block stack entries, top most first,
+    // until one is found that matches the given
+    // ENDx op_code (e.g., ENDL matches BEGL).
+    // Return the number of block stack entries
+    // checked.  If the top matches, return 1.
 
-void endx ( void );
+void endx ( const min::phrase_position & pp =
+	        min::MISSING_PHRASE_POSITION,
+	    min::gen trace_info = min::MISSING() );
     // Pop a block stack entry, adjusting any BEG...
-    // instruction with that entry, and adjusting
-    // the END... instruction, which should be the
-    // last instruction output.  The END... instruction
-    // should match the BEG... instruction.
+    // instruction with that entry, and ouput the
+    // corresponding END... instruction with given
+    // phrase position and trace info.
     
 
 } // end mexas namespace
