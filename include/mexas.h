@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat Jul 22 04:27:15 EDT 2023
+// Date:	Sat Jul 22 05:04:46 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -150,15 +150,23 @@ inline void push
 
 // Block Stack
 //
-typedef min::packed_vec_insptr<mex::op_code>
+struct block_element
+{
+    min::uns8 op_code;
+    min::uns16 begin_location;
+    min::uns16 stack_length;
+    min::uns16 nargs;
+};
+typedef min::packed_vec_insptr<mexas::block_element>
     block_stack;
 extern min::locatable_var<mexas::block_stack>
     blocks;
-    // Top of stack is BEG... instruction for the last
-    // block that has not yet seen its END...
-    // instruction.   BEG... instructions are pushed
-    // into stack.  END... instructions check stack
-    // and pop stack.
+    // BEG... instructions are pushed into the stack.
+    // Begin_location is used allow backward jump and
+    // error messages.  Stack_length is used to
+    // allow block stacks to be popped and traced.
+    // Nargs is the number of next-arguments for a
+    // BEGL.
 
 // Module Stack
 //
@@ -373,6 +381,30 @@ unsigned jump_list_resolve
     // target_name equal to the argument.  Resolved
     // elements are removed from jlist.  The number
     // of resolved elements is returned.
+
+void beg ( void );
+void begl ( min::uns32 nvars );
+void begf ( void );
+    // Push a block stack entry for BEG, BEGL, or BEGF
+    // respectively, and output a BEG... instruction.
+    //
+    // Begf increments mexas::lexical level to be L,
+    // sets depth[L] to 0, sets lp[L] = fp[L] =
+    // variables->length.  Beg and begl increment
+    // depth[L] for the current lexical level L.
+    // Begl takes the top nvars elements of the
+    // variables stack and pushes them in order into
+    // the variables stack giving the copy of any
+    // variable with name N (not equal *) the name
+    // `next-N'.
+
+void end ( void );
+void endl ( void );
+void endf ( void );
+    // Pop a block stack entry, adjusting any BEG...
+    // instruction with that entry, and output an
+    // END... instruction.
+    
 
 } // end mexas namespace
 
