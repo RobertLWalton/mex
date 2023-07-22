@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Jul 21 05:50:32 EDT 2023
+// Date:	Sat Jul 22 03:53:41 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -163,23 +163,11 @@ MIN_REF ( min::packed_vec_ptr<min::gen>,
 
 inline void push_instr
         ( mex::module_ins m,
-	  const mex::instr & instr,
-	  min::phrase_position pp =
-	      min::MISSING_PHRASE_POSITION,
-	  min::gen trace_info = min::MISSING() )
+	  const mex::instr & instr )
 {
     min::push(m) = instr;
     min::unprotected::acc_write_update
 	( m, instr.immedD );
-
-    min::phrase_position_vec_insptr ppins =
-        (min::phrase_position_vec_insptr) m->position;
-    min::push(ppins) = pp;
-
-    min::packed_vec_insptr<min::gen> trace_info_ins =
-        (min::packed_vec_insptr<min::gen>)
-	m->trace_info;
-    min::push(trace_info_ins) = trace_info;
 }
 
 

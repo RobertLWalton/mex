@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Jul 21 22:25:32 EDT 2023
+// Date:	Sat Jul 22 03:42:18 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -23,6 +23,10 @@
 
 min::uns32 mexas::error_count;
 min::uns32 mexas::warning_count;
+
+min::locatable_var<min::file> mexas::input_file;
+min::locatable_var<mex::module_ins>
+    mexas::output_module;
 
 min::uns32 mexas::lexical_level;
 # define L mexas::lexical_level
@@ -167,7 +171,6 @@ static min::packed_vec<mexas::jump_element>
 min::locatable_var<mexas::jump_list>
     mexas::jumps;
 
-min::locatable_var<min::file> mexas::input_file;
 min::locatable_var<mexas::statement_lexemes>
     mexas::statement;
 min::uns32 mexas::first_line_number,
@@ -277,11 +280,12 @@ void mexas::compile_warn
 }
 
 unsigned mexas::jump_list_delete
-	( mex::module m,
-	  mexas::jump_list jlist )
+	( mexas::jump_list jlist )
 {
     min::ptr<mexas::jump_element> free = jlist + 0;
     min::ptr<mexas::jump_element> previous = jlist + 1;
+
+    mex::module_ins m = mexas::output_module;
 
     unsigned count = 0;
     while ( min::uns32 n = previous->next )
@@ -571,8 +575,9 @@ mex::module mexas::compile
 
     mexas::input_file = file;
 
-    mex::module_ins m = (mex::module_ins)
+    mexas::output_module = (mex::module_ins)
         mex::create_module ( file );
+    mex::module_ins m = mexas::output_module;
 
     while ( next_statement() )
     {
@@ -644,7 +649,7 @@ mex::module mexas::compile
 	        name = mexas::star;
 	    mexas::push ( mexas::variables, name,
 	                  L, mexas::depth[L] );
-	    mex::push_instr ( m, instr, pp );
+	    mexas::push_instr ( instr, pp );
 	    goto TRACE;
 	}
 	JUMP:
@@ -668,7 +673,7 @@ mex::module mexas::compile
 		      (min::uns16) variables->length };
 		mexas::push_jump ( mexas::jumps, je );
 	    }
-	    mex::push_instr ( m, instr, pp );
+	    mexas::push_instr ( instr, pp );
 	    goto TRACE;
 	}
 	TRACE:

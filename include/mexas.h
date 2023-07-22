@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Jul 21 22:40:50 EDT 2023
+// Date:	Sat Jul 22 03:39:56 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -30,6 +30,31 @@
 // ----
 
 namespace mexas {
+
+extern min::locatable_var<min::file> input_file;
+extern min::locatable_var<mex::module_ins>
+    output_module;
+
+inline void push_instr
+        ( const mex::instr & instr,
+	  min::phrase_position pp =
+	      min::MISSING_PHRASE_POSITION,
+	  min::gen trace_info = min::MISSING() )
+{
+    mex::module_ins m = mexas::output_module;
+    min::push(m) = instr;
+    min::unprotected::acc_write_update
+	( m, instr.immedD );
+
+    min::phrase_position_vec_insptr ppins =
+        (min::phrase_position_vec_insptr) m->position;
+    min::push(ppins) = pp;
+
+    min::packed_vec_insptr<min::gen> trace_info_ins =
+        (min::packed_vec_insptr<min::gen>)
+	m->trace_info;
+    min::push(trace_info_ins) = trace_info;
+}
 
 extern min::uns32 lexical_level;
     // Current lexical_level.
@@ -262,7 +287,6 @@ void compile_warn
 	  const min::op & message8 = min::pnop,
 	  const char * message9 = "" );
 
-extern min::locatable_var<min::file> input_file;
 typedef min::packed_vec_insptr<min::gen>
     statement_lexemes;
 extern min::locatable_var<mexas::statement_lexemes>
@@ -295,8 +319,7 @@ inline min::gen get_name ( min::uns32 i )
 }
 
 unsigned jump_list_delete
-	( mex::module m,
-	  mexas::jump_list jlist );
+	( mexas::jump_list jlist );
     // Go through jlist and delete all jump_elements
     // that have lexical level greater than mexas::
     // lexical_level.  This is to be called just AFTER
