@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat Jul 22 05:04:46 EDT 2023
+// Date:	Sat Jul 22 07:31:14 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -398,12 +398,18 @@ void begf ( void );
     // variable with name N (not equal *) the name
     // `next-N'.
 
-void end ( void );
-void endl ( void );
-void endf ( void );
+bool check_block ( min::uns8 op_code );
+    // Return true if the op_code is ENDx and the top
+    // of the block stack is for a BEGx that matches
+    // (e.g., ENDL matches BEGL).  Return false
+    // otherwise.
+
+void endx ( void );
     // Pop a block stack entry, adjusting any BEG...
-    // instruction with that entry, and output an
-    // END... instruction.
+    // instruction with that entry, and adjusting
+    // the END... instruction, which should be the
+    // last instruction output.  The END... instruction
+    // should match the BEG... instruction.
     
 
 } // end mexas namespace
