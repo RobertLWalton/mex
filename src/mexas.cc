@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat Jul 22 16:30:29 EDT 2023
+// Date:	Sat Jul 22 17:51:57 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -371,6 +371,53 @@ unsigned mexas::jump_list_resolve
 	    previous = next;
     }
     return count;
+}
+
+void mexas::begx ( mex::instr & instr,
+                   const min::phrase_position & pp,
+	           min::gen trace_info )
+{
+    mexas::block_element e =
+        { instr.op_code,
+	  (min::uns16) mexas::output_module->length,
+	  (min::uns16) mexas::variables->length };
+
+    if ( instr.op_code == mex::BEGF )
+    {
+        MIN_ASSERT ( mexas::lexical_level
+	             <
+		     mex::max_lexical_level,
+		     "mex::max_lexical_level"
+		     " exceeded" );
+	++ L;
+	mexas::depth[L] = 0;
+	mexas::lp[L] = mexas::fp[L] =
+	    mexas::variables->length;
+    }
+    else if ( instr.op_code == mex::BEGL )
+    {
+	min::uns16 nargs = instr.immedB;
+	// TBD check nargs too large.
+	e.nargs = nargs;
+	// TBD
+        ++ mexas::depth[L];
+    }
+    else if ( instr.op_code == mex::BEG )
+        ++ mexas::depth[L];
+    else
+        MIN_ABORT
+	    ( "bad instr.op_code to mexas::begx" );
+
+    min::push ( mexas::blocks ) = e;
+    mexas::push_instr ( instr, pp, trace_info );
+}
+
+unsigned mexas::endx ( mex::instr & instr,
+                       const min::phrase_position & pp,
+	               min::gen trace_info )
+{
+    // TBD
+    return 0;
 }
 
 

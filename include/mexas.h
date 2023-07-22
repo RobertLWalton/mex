@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat Jul 22 16:28:52 EDT 2023
+// Date:	Sat Jul 22 17:32:27 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -395,7 +395,7 @@ unsigned jump_list_resolve
     // elements are removed from jlist.  The number
     // of resolved elements is returned.
 
-void begx ( const mex::instr & instr,
+void begx ( mex::instr & instr,
             const min::phrase_position & pp =
 	       min::MISSING_PHRASE_POSITION,
 	   min::gen trace_info = min::MISSING() );
@@ -413,7 +413,7 @@ void begx ( const mex::instr & instr,
     // variable with name N (not equal *) the name
     // `next-N'.
 
-unsigned endx ( const mex::instr & instr,
+unsigned endx ( mex::instr & instr,
                 const min::phrase_position & pp =
 	            min::MISSING_PHRASE_POSITION,
 	        min::gen trace_info = min::MISSING() );
