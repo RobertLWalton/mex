@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Jul 21 06:15:12 EDT 2023
+// Date:	Fri Jul 21 22:40:50 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -296,12 +296,12 @@ inline min::gen get_name ( min::uns32 i )
 
 unsigned jump_list_delete
 	( mex::module m,
-	  mexas::jump_list jlist,
-	  min::uns8 lexical_level );
+	  mexas::jump_list jlist );
     // Go through jlist and delete all jump_elements
-    // that have the given lexical level.  This is
-    // to be called with the current lexical level
-    // just before the current level is decremented.
+    // that have lexical level greater than mexas::
+    // lexical_level.  This is to be called just AFTER
+    // mexas::lexical_level is decremented.
+    //
     // If this is done, the jump_elements in jlist
     // will be sorted in lexical level order, highest
     // first.  This is assumed by this function.
@@ -313,22 +313,28 @@ unsigned jump_list_delete
     // Return the number of elements deleted.
 
 unsigned jump_list_update
-	( mexas::jump_list jlist,
-	  min::uns8 lexical_level,
-	  min::uns8 maximum_depth,
-	  min::uns16 stack_minimum );
+	( mexas::jump_list jlist );
+    // Let L be the value of mexas::lexical_level.
+    //
     // Go through jlist and for all jump_elements je of
-    // the given lexical level, perform:
+    // lexical level equal to L, perform:
     //
     //     je.maximum_depth =
-    //         min ( je.maximum_depth, maximum_depth )
+    //         min ( je.maximum_depth,
+    //               mexas::depth[L] )
     //     je.stack_minimum =
-    //         min ( je.stack_minimum, stack_minimum )
+    //         min ( je.stack_minimum,
+    //               variables->length );
     //
-    // Assume that the elements of jlist are sorted by
-    // lexical level, highest first, and the lexical_
-    // level argument is equal to or higher than that
-    // of the first element on jlist.
+    // This function should be called just AFTER 
+    // mexas::depth[L] has been decremented and the
+    // stack lengt, variables->length, has been
+    // reduced.
+    //
+    // Assumes that the elements of jlist are sorted by
+    // lexical level, highest first, and L is equal to
+    // or higher than the lexical level of the first
+    // element on jlist.
     //
     // Return the number of elements of the given
     // lexical level (counted even if they are not

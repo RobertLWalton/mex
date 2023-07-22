@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Jul 21 06:34:57 EDT 2023
+// Date:	Fri Jul 21 22:25:32 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -278,8 +278,7 @@ void mexas::compile_warn
 
 unsigned mexas::jump_list_delete
 	( mex::module m,
-	  mexas::jump_list jlist,
-	  min::uns8 lexical_level )
+	  mexas::jump_list jlist )
 {
     min::ptr<mexas::jump_element> free = jlist + 0;
     min::ptr<mexas::jump_element> previous = jlist + 1;
@@ -288,7 +287,8 @@ unsigned mexas::jump_list_delete
     while ( min::uns32 n = previous->next )
     {
         min::ptr<mexas::jump_element> next = jlist + n;
-	if ( next->lexical_level < lexical_level )
+	if (    next->lexical_level
+	     <= mexas::lexical_level )
 	    break;
 	mexas::compile_error
 	    ( m->position[next->jmp_location],
@@ -308,10 +308,7 @@ unsigned mexas::jump_list_delete
 }
 
 unsigned mexas::jump_list_update
-	( mexas::jump_list jlist,
-	  min::uns8 lexical_level,
-	  min::uns8 maximum_depth,
-	  min::uns16 stack_minimum )
+	( mexas::jump_list jlist )
 {
     min::ptr<mexas::jump_element> previous = jlist + 1;
 
@@ -319,12 +316,12 @@ unsigned mexas::jump_list_update
     while ( min::uns32 n = previous->next )
     {
         min::ptr<mexas::jump_element> next = jlist + n;
-	if ( next->lexical_level < lexical_level )
+	if ( next->lexical_level <= L )
 	    break;
-	if ( next->maximum_depth > maximum_depth )
-	    next->maximum_depth = maximum_depth;
-	if ( next->stack_minimum > stack_minimum )
-	    next->stack_minimum = stack_minimum;
+	if ( next->maximum_depth > depth[L] )
+	    next->maximum_depth = depth[L];
+	if ( next->stack_minimum > variables->length )
+	    next->stack_minimum = variables->length;
 	++ count;
     }
     return count;
