@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat Jul 22 04:45:52 EDT 2023
+// Date:	Sat Jul 22 16:30:29 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -24,6 +24,8 @@
 # define L mexas::lexical_level
 # define SP mexas::variables->length
 
+min::uns8 mexas::default_trace_flags = 0;
+min::uns8 mexas::next_trace_flags = 0;
 min::uns32 mexas::error_count;
 min::uns32 mexas::warning_count;
 
@@ -595,6 +597,9 @@ mex::module mexas::compile
     mexas::error_count = 0;
     mexas::warning_count = 0;
 
+    mexas::default_trace_flags = default_flags;
+    mexas::next_trace_flags = default_flags;
+
     min::pop ( mexas::variables,
                mexas::variables->length );
     min::pop ( mexas::functions,
@@ -621,6 +626,8 @@ mex::module mexas::compile
 
     while ( next_statement() )
     {
+	mex::instr instr =
+	    { 0, 0, 0, 0, 0, min::MISSING() };
         min::phrase_position pp =
 	    { { mexas::first_line_number, 0 },
 	      { mexas::last_line_number + 1, 0 } };
@@ -638,16 +645,15 @@ mex::module mexas::compile
 	}
 	min::uns32 op_code =
 	    (min::uns32) min::int_of ( v );
+
         min::uns8 op_type = mex::NONA;
-	mex::instr instr =
-	    { 0, default_flags,
-	      0, 0, 0, min::MISSING() };
-	min::uns32 fp = mexas::fp[L];
 	if ( op_code < mex::NUMBER_OF_OP_CODES )
 	{
 	    op_type = mex::op_infos[op_code].op_type;
 	    instr.op_code = op_code;
 	}
+
+	min::uns32 fp = mexas::fp[L];
 	switch ( op_type )
 	{
 	case mex::A2:

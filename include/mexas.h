@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat Jul 22 14:42:25 EDT 2023
+// Date:	Sat Jul 22 16:28:52 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -35,12 +35,25 @@ extern min::locatable_var<min::file> input_file;
 extern min::locatable_var<mex::module_ins>
     output_module;
 
+extern min::uns8 default_trace_flags;
+extern min::uns8 next_trace_flags;
+    // An instruction is given next_trace_flags which
+    // is then immediately reset to default_trace_
+    // flags.
+
+// The following pushes an instruction into the module
+// after first setting its trace flags.
+//
 inline void push_instr
-        ( const mex::instr & instr,
+        ( mex::instr & instr,
 	  const min::phrase_position & pp =
 	      min::MISSING_PHRASE_POSITION,
 	  min::gen trace_info = min::MISSING() )
 {
+    instr.trace_flags = mexas::next_trace_flags;
+    mexas::next_trace_flags =
+        mexas::default_trace_flags;
+
     mex::module_ins m = mexas::output_module;
     min::push(m) = instr;
     min::unprotected::acc_write_update
@@ -382,45 +395,54 @@ unsigned jump_list_resolve
     // elements are removed from jlist.  The number
     // of resolved elements is returned.
 
-void beg ( const min::phrase_position & pp =
+void begx ( const mex::instr & instr,
+            const min::phrase_position & pp =
 	       min::MISSING_PHRASE_POSITION,
 	   min::gen trace_info = min::MISSING() );
-void begl ( min::uns32 nvars,
-            const min::phrase_position & pp =
-	        min::MISSING_PHRASE_POSITION,
-	    min::gen trace_info = min::MISSING() );
-void begf ( const min::phrase_position & pp =
-	        min::MISSING_PHRASE_POSITION,
-	    min::gen trace_info = min::MISSING() );
     // Push a block stack entry for BEG, BEGL, or BEGF
-    // respectively, and output a BEG... instruction
-    // with given phrase position and trace info.
+    // respectively, according to instr.op_code,
+    // and execute mexas::push_instr on the arguments.
     //
-    // Begf increments mexas::lexical level to be L,
+    // BEGF increments mexas::lexical level to be L,
     // sets depth[L] to 0, sets lp[L] = fp[L] =
-    // variables->length.  Beg and begl increment
+    // variables->length.  BEG and BEGL increment
     // depth[L] for the current lexical level L.
-    // Begl takes the top nvars elements of the
+    // BEGL takes the top instr.immedB elements of the
     // variables stack and pushes them in order into
     // the variables stack giving the copy of any
     // variable with name N (not equal *) the name
     // `next-N'.
 
-unsigned check_block ( min::uns8 op_code );
-    // Check block stack entries, top most first,
-    // until one is found that matches the given
-    // ENDx op_code (e.g., ENDL matches BEGL).
-    // Return the number of block stack entries
-    // checked.  If the top matches, return 1.
-
-void endx ( const min::phrase_position & pp =
-	        min::MISSING_PHRASE_POSITION,
-	    min::gen trace_info = min::MISSING() );
-    // Pop a block stack entry, adjusting any BEG...
-    // instruction with that entry, and ouput the
-    // corresponding END... instruction with given
-    // phrase position and trace info.
-    
+unsigned endx ( const mex::instr & instr,
+                const min::phrase_position & pp =
+	            min::MISSING_PHRASE_POSITION,
+	        min::gen trace_info = min::MISSING() );
+    // If instr.op_code matches the op_code of the top
+    // block stack entry (e.g., ENDL matches BEGL), pop
+    // the top block stack entry, adjusting the BEG...
+    // instruction associated with that entry and the
+    // END... instr argument, and execute mexas::push_
+    // instr on the arguments.  Only instr.op_code and
+    // instr.trace_flags are used: all other instr
+    // fields are set by this function.
+    //
+    // If instr.op_code does not match the top of the
+    // stack, and if it does match a block stack entry,
+    // iteratively change instr.op_code to match the
+    // top of the stack and execute the previous para-
+    // graph, until a block stack entry matching the
+    // original instr.op_code is popped.  Note that END
+    // and ENDL can only match block stack entries with
+    // the current lexical level.  Issue an error
+    // message in this case.  The trace_flags of all
+    // instructions pushed will be those of instr.
+    //
+    // Return the number of block stack entries popped.
+    // Normally this will be 1.
+    //
+    // If instr.op_code does not match ANY block stack
+    // entries, just issue an error message and return
+    // 0.  No instructions are pushed.
 
 } // end mexas namespace
 
