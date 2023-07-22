@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat Jul 22 03:42:18 EDT 2023
+// Date:	Sat Jul 22 04:45:52 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -21,6 +21,9 @@
 
 # include <mexas.h>
 
+# define L mexas::lexical_level
+# define SP mexas::variables->length
+
 min::uns32 mexas::error_count;
 min::uns32 mexas::warning_count;
 
@@ -29,7 +32,6 @@ min::locatable_var<mex::module_ins>
     mexas::output_module;
 
 min::uns32 mexas::lexical_level;
-# define L mexas::lexical_level
 min::uns32 mexas::depth[mex::max_lexical_level+1];
 min::uns32 mexas::lp[mex::max_lexical_level+1];
 min::uns32 mexas::fp[mex::max_lexical_level+1];
@@ -324,9 +326,47 @@ unsigned mexas::jump_list_update
 	    break;
 	if ( next->maximum_depth > depth[L] )
 	    next->maximum_depth = depth[L];
-	if ( next->stack_minimum > variables->length )
-	    next->stack_minimum = variables->length;
+	if ( next->stack_minimum > SP )
+	    next->stack_minimum = SP;
+	previous = next;
 	++ count;
+    }
+    return count;
+}
+
+unsigned mexas::jump_list_resolve
+	( mexas::jump_list jlist,
+	  min::gen target_name )
+{
+    min::ptr<mexas::jump_element> free = jlist + 0;
+    min::ptr<mexas::jump_element> previous = jlist + 1;
+
+    mex::module_ins m = mexas::output_module;
+    unsigned count = 0;
+    while ( min::uns32 n = previous->next )
+    {
+        min::ptr<mexas::jump_element> next = jlist + n;
+	if ( next->lexical_level < L )
+	    break;
+	if ( target_name == next->target_name
+	     &&
+	     next->maximum_depth >= depth[L] )
+	{
+	    min::ptr<mex::instr> instr =
+		m + next->jmp_location;
+	    instr->immedA = next->stack_length
+	                  - next->stack_minimum;
+	    instr->immedB = SP - next->stack_minimum;
+	    instr->immedC = m->length
+	                  - next->jmp_location;
+
+	    previous->next = next->next;
+	    next->next = free->next;
+	    free->next = n;
+	    ++ count;
+	}
+	else
+	    previous = next;
     }
     return count;
 }
@@ -612,7 +652,7 @@ mex::module mexas::compile
 	{
 	case mex::A2:
 	case mex::A2R:
-	    if ( variables->length < fp + 2 )
+	    if ( SP < fp + 2 )
 	        goto STACK_TOO_SHORT;
 	    min::pop ( variables, 2 );
 	    goto ARITHMETIC;
@@ -620,13 +660,13 @@ mex::module mexas::compile
 	case mex::A2I:
 	case mex::A2RI:
 	case mex::A1:
-	    if ( variables->length < fp + 1 )
+	    if ( SP < fp + 1 )
 	        goto STACK_TOO_SHORT;
 	    min::pop ( variables );
 	    goto ARITHMETIC;
 
 	case mex::J2:
-	    if ( variables->length < fp + 2 )
+	    if ( SP < fp + 2 )
 	        goto STACK_TOO_SHORT;
 	    min::pop ( variables, 2 );
 	    // Fall through.
@@ -669,8 +709,8 @@ mex::module mexas::compile
 		      (min::uns16) m->length,
 		      (min::uns8) L,
 		      (min::uns8) depth[L],
-		      (min::uns16) variables->length,
-		      (min::uns16) variables->length };
+		      (min::uns16) SP,
+		      (min::uns16) SP };
 		mexas::push_jump ( mexas::jumps, je );
 	    }
 	    mexas::push_instr ( instr, pp );

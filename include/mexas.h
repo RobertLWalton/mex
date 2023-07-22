@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat Jul 22 03:39:56 EDT 2023
+// Date:	Sat Jul 22 04:27:15 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -363,6 +363,16 @@ unsigned jump_list_update
     // lexical level (counted even if they are not
     // modified).
     
+
+unsigned jump_list_resolve
+	( mexas::jump_list jlist,
+	  min::gen target_name );
+    // Go through jlist and resolve all jump_elements
+    // that have the current lexical level, a depth
+    // not greater than their maximum_depth, and a
+    // target_name equal to the argument.  Resolved
+    // elements are removed from jlist.  The number
+    // of resolved elements is returned.
 
 } // end mexas namespace
 
