@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Jul 23 15:21:18 EDT 2023
+// Date:	Sun Jul 23 16:14:33 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -454,7 +454,64 @@ unsigned mexas::endx ( mex::instr & instr,
                        const min::phrase_position & pp,
 	               min::gen trace_info )
 {
+    if ( mexas::blocks->length == 0 )
+    {
+	mexas::compile_error
+	    ( pp, "there is no block to end here" );
+	return 0;
+    }
+    min::ptr<mexas::block_element> bp =
+        mexas::blocks + ( mexas::blocks->length - 1 );
+    if ( bp->end_op_code != instr.op_code )
+    {
+        // Check that ending other blocks will
+	// succeed.
+	//
+	bool match_found = false;
+	for ( int i = 2;
+	      i <= (int) mexas::blocks->length; ++ i )
+	{
+	    bp = mexas::blocks
+	       + ( mexas::blocks->length - i );
+	    min::uns8 end_op_code = bp->end_op_code;
+	    if ( end_op_code == instr.op_code )
+	    {
+	        match_found = true;
+		break;
+	    }
+	    else if ( end_op_code == mex::ENDF )
+	        break;
+	}
+	if ( ! match_found )
+	{
+	    mexas::compile_error
+		( pp, "there is no block to end here" );
+	    return 0;
+	}
+	min::uns8 end_op_code = instr.op_code;
+	unsigned count = 0;
+	do {
+	    bp = mexas::blocks
+	       + ( mexas::blocks->length - 1 );
+	    instr.op_code = bp->end_op_code;
+	    if ( instr.op_code != end_op_code )
+	    {
+	        min::obj_vec_ptr vp =
+		    mexas::op_code_table;
+		mexas::compile_error
+		    ( pp, "inserting ",
+			  min::pgen
+			      ( vp[instr.op_code] ),
+			  " before here" );
+	    }
+	    mexas::endx ( instr, pp, trace_info );
+	    ++ count;
+	} while ( instr.op_code != end_op_code );
+	return count;
+    }
+ 
     // TBD
+
     return 0;
 }
 
