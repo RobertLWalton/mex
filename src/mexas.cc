@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Jul 23 16:14:33 EDT 2023
+// Date:	Sun Jul 23 16:24:08 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -393,7 +393,8 @@ void mexas::begx ( mex::instr & instr,
 		     " exceeded" );
 	e.end_op_code = mex::ENDF;
 	++ L;
-	e.nargs = instr.immedC;
+	instr.immedB = L;
+	e.nargs = instr.immedA;
 	mexas::depth[L] = 0;
 	mexas::lp[L] = mexas::variables->length;
 	mexas::fp[L] = mexas::lp[L] + e.nargs;
@@ -509,8 +510,37 @@ unsigned mexas::endx ( mex::instr & instr,
 	} while ( instr.op_code != end_op_code );
 	return count;
     }
+
+    mexas::block_element e = min::pop ( mexas::blocks );
+    min::ptr<mex::instr> ip =
+        mexas::output_module + e.begin_location;
  
-    // TBD
+    if ( instr.op_code == mex::ENDF )
+    {
+        ip->immedC = mexas::output_module->length + 1
+	           - e.begin_location;
+	instr.immedA = mexas::variables->length
+	             - e.stack_limit - e.nargs;
+    }
+    else if ( instr.op_code == mex::ENDL )
+    {
+	instr.immedA = mexas::variables->length
+	             - e.stack_limit;
+	instr.immedB = e.nargs;
+        instr.immedC = mexas::output_module->length
+	             - e.begin_location - 1;
+    }
+    else // if mex::END
+    {
+	instr.immedA = mexas::variables->length
+	             - e.stack_limit;
+    }
+
+    min::uns32 len = mexas::blocks->length;
+    mexas::stack_limit =
+        ( len == 0 ? 0 : 
+	  (mexas::blocks+(len-1))->stack_limit );
+    mexas::push_instr ( instr, pp, trace_info );
 
     return 0;
 }

@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Jul 23 06:20:56 EDT 2023
+// Date:	Sun Jul 23 16:36:13 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -660,7 +660,7 @@ static bool optimized_run_process ( mex::process p )
 	    min::uns32 level = target->immedB;
 	    if ( level > mex::max_lexical_level )
 	        goto ERROR_EXIT;
-	    if ( pc->immedA < target->immedC )
+	    if ( pc->immedA < target->immedA )
 	        goto ERROR_EXIT;
 	    min::uns32 rp = p->return_stack->length;
 	    if ( rp >= p->return_stack->max_length )
@@ -1657,10 +1657,10 @@ bool mex::run_process ( mex::process p )
 		        "BEGF immedB is too large";
 		    goto INNER_FATAL;
 		}
-		if ( immedA < target->immedC )
+		if ( immedA < target->immedA )
 		{
 		    message =
-		        "immedA < BEGF immedC";
+		        "immedA < BEGF immedA";
 		    goto INNER_FATAL;
 		}
 		min::uns32 rp = p->return_stack->length;
