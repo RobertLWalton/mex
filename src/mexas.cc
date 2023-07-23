@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat Jul 22 17:51:57 EDT 2023
+// Date:	Sun Jul 23 05:40:35 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -146,6 +146,8 @@ static min::packed_vec<mex::op_code>
 
 min::locatable_var<mexas::block_stack>
     mexas::blocks;
+
+min::uns32 mexas::stack_limit;
 
 static min::uns32 module_stack_element_stub_disp[] =
 {
@@ -379,8 +381,8 @@ void mexas::begx ( mex::instr & instr,
 {
     mexas::block_element e =
         { instr.op_code,
-	  (min::uns16) mexas::output_module->length,
-	  (min::uns16) mexas::variables->length };
+	  (min::uns16) mexas::variables->length, 0,
+	  (min::uns16) mexas::output_module->length };
 
     if ( instr.op_code == mex::BEGF )
     {
@@ -399,6 +401,7 @@ void mexas::begx ( mex::instr & instr,
 	min::uns16 nargs = instr.immedB;
 	// TBD check nargs too large.
 	e.nargs = nargs;
+	e.stack_limit += nargs;
 	// TBD
         ++ mexas::depth[L];
     }
@@ -409,6 +412,7 @@ void mexas::begx ( mex::instr & instr,
 	    ( "bad instr.op_code to mexas::begx" );
 
     min::push ( mexas::blocks ) = e;
+    mexas::stack_limit = e.stack_limit;
     mexas::push_instr ( instr, pp, trace_info );
 }
 
@@ -653,6 +657,7 @@ mex::module mexas::compile
                mexas::functions->length );
     min::pop ( mexas::blocks,
                mexas::blocks->length );
+    mexas::stack_limit = 0;
     min::pop ( mexas::jumps,
                mexas::jumps->length );
     mexas::jump_element e =
@@ -700,12 +705,11 @@ mex::module mexas::compile
 	    instr.op_code = op_code;
 	}
 
-	min::uns32 fp = mexas::fp[L];
 	switch ( op_type )
 	{
 	case mex::A2:
 	case mex::A2R:
-	    if ( SP < fp + 2 )
+	    if ( SP < mexas::stack_limit + 2 )
 	        goto STACK_TOO_SHORT;
 	    min::pop ( variables, 2 );
 	    goto ARITHMETIC;
@@ -713,13 +717,13 @@ mex::module mexas::compile
 	case mex::A2I:
 	case mex::A2RI:
 	case mex::A1:
-	    if ( SP < fp + 1 )
+	    if ( SP < mexas::stack_limit + 1 )
 	        goto STACK_TOO_SHORT;
 	    min::pop ( variables );
 	    goto ARITHMETIC;
 
 	case mex::J2:
-	    if ( SP < fp + 2 )
+	    if ( SP < mexas::stack_limit + 2 )
 	        goto STACK_TOO_SHORT;
 	    min::pop ( variables, 2 );
 	    // Fall through.
@@ -730,8 +734,9 @@ mex::module mexas::compile
 	STACK_TOO_SHORT:
 	{
 	    mexas::compile_error
-	        ( pp, "stack too empty to pop required"
-		      " arguments; instruction"
+	        ( pp, "portion of stack in the current"
+		      " block is too little to pop"
+		      " required arguments; instruction"
 		      " ignored" );
 	    continue;
 	}

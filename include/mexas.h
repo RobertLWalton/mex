@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat Jul 22 17:32:27 EDT 2023
+// Date:	Sun Jul 23 05:39:58 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -166,20 +166,37 @@ inline void push
 struct block_element
 {
     min::uns8 op_code;
-    min::uns16 begin_location;
-    min::uns16 stack_length;
+    min::uns32 stack_limit;
     min::uns16 nargs;
+    min::uns16 begin_location;
 };
 typedef min::packed_vec_insptr<mexas::block_element>
     block_stack;
 extern min::locatable_var<mexas::block_stack>
     blocks;
-    // BEG... instructions are pushed into the stack.
-    // Begin_location is used allow backward jump and
-    // error messages.  Stack_length is used to
-    // allow block stacks to be popped and traced.
-    // Nargs is the number of next-arguments for a
-    // BEGL.
+    // BEG... instructions push an element into this
+    // stack.
+    //
+    // Begin_location is the location of the BEG...
+    // instruction and is used allow backward jump and
+    // error messages.
+    //
+    // Stack_limit is the stack bounary below which
+    //   (1) elements cannot be popped by instructions
+    //       that do not decrease depth or lexical
+    //       level
+    //   (2) elements cannot be hidden by elements above
+    //       the limit
+    // Nargs is the number of stack elements holding
+    // arguments to a function (BEGF) or next-variables
+    // for a loop (BEGL).  Nargs is 0 for BEG.  Upon
+    // encountering the BEG...  the stack pointer is at
+    // stack_limit - nargs.
+
+extern min::uns32 stack_limit;
+    // This is a cache of the stack_limit of the top
+    // element of the block stack.  If the block stack
+    // is empty, this is 0.
 
 // Module Stack
 //
