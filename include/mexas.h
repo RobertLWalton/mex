@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Jul 23 12:19:37 EDT 2023
+// Date:	Sun Jul 23 15:04:38 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -116,7 +116,7 @@ typedef min::packed_vec_insptr<mexas::variable_element>
     variable_stack;
 extern min::locatable_var<mexas::variable_stack>
     variables;
-inline void push
+inline void push_variable
 	( mexas::variable_stack s, min::gen name,
 	  min::uns32 level, min::uns32 depth )
 {
@@ -149,7 +149,7 @@ typedef min::packed_vec_insptr<mexas::function_element>
     function_stack;
 extern min::locatable_var<mexas::function_stack>
     functions;
-inline void push
+inline void push_function
 	( mexas::function_stack s, min::gen name,
 	  min::uns32 level, min::uns32 depth,
 	  mex::pc pc )

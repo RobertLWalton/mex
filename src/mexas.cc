@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Jul 23 12:32:14 EDT 2023
+// Date:	Sun Jul 23 15:21:18 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -402,10 +402,38 @@ void mexas::begx ( mex::instr & instr,
     {
 	e.end_op_code = mex::ENDL;
 	min::uns32 nargs = instr.immedB;
-	// TBD check nargs too large.
+	if ( nargs > SP - mexas::stack_limit )
+	    mexas::compile_error
+	        ( pp, "portion of stack in the"
+		      " containing block is smaller"
+		      " than the number of"
+		      " next-variables" );
 	e.nargs = nargs;
-	// TBD
         ++ mexas::depth[L];
+	for ( min::uns32 i = 0; i < nargs; ++ i )
+	{
+	    min::locatable_gen name;
+	    if ( nargs > SP - mexas::stack_limit )
+	        name = mexas::star;
+            else
+	    {
+	        name = (   mexas::variables
+		         + ( SP - nargs ) )->name;
+		if ( name != mexas::star )
+		{
+		    min::str_ptr sp ( name );
+		    min::unsptr len =
+		        min::strlen ( sp );
+		    char buffer[len+10];
+		    std::strcpy ( buffer, "next-" );
+		    min::strcpy ( buffer + 5, sp );
+		    name = min::new_str_gen ( buffer );
+		}
+	    }
+	    mexas::push_variable
+	        ( mexas::variables, name,
+		  L, mexas::depth[L] );
+	}
     }
     else if ( instr.op_code == mex::BEG )
     {
@@ -751,8 +779,9 @@ mex::module mexas::compile
 	    min::gen name = mexas::get_name ( 1 );
 	    if ( name == min::NONE() )
 	        name = mexas::star;
-	    mexas::push ( mexas::variables, name,
-	                  L, mexas::depth[L] );
+	    mexas::push_variable
+	        ( mexas::variables, name,
+	          L, mexas::depth[L] );
 	    mexas::push_instr ( instr, pp );
 	    goto TRACE;
 	}
