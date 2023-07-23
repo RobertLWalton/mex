@@ -239,7 +239,7 @@
 
 \author{Robert L. Walton}
 
-\date{July 17, 2023}
+\date{July 23, 2023}
  
 \maketitle
 
@@ -1027,7 +1027,9 @@ are explained in Tracing and Exceptions, \itemref{TRACING-AND-EXCEPTIONS}.
     & Add \TT{immedC} to the \TT{pc} (skipping \TT{immedC} instructions).
     \\[0.5ex]
     & Also used to provided data for \TT{CALL} as follows: \TT{immedB} is the \\
-    & target functions lexical nesting level (\pagref{LEXICAL-NESTING-LEVEL}).
+    & target function's lexical nesting level (\pagref{LEXICAL-NESTING-LEVEL}),
+      and \TT{immedC} is the \\
+    & minimum number of arguments expected.
 \\\hline
 \TT{ENDF}
     & Add \TT{immedA} to \TT{sp} (popping the stack \TT{immedA} times),
@@ -1046,12 +1048,15 @@ are explained in Tracing and Exceptions, \itemref{TRACING-AND-EXCEPTIONS}.
     & Then set the \TT{index} of the process's \TT{pc} member to \TT{immedC}, \\
     & which must reference a \TT{BEGF} instruction.
     \\[0.5ex]
-    & Then take the target function's lexical level $L$ from the \TT{BEGF} \\
-    & \TT{immedB} value, set the \TT{mex:ret} value's \TT{saved\_fp} member
-      to the \\
-    & process's \TT{fp[$L$]} member, and set the process's \TT{fp[$L$]}
-      member to \\
-    & the process's \TT{sp} member.
+    & Check that the \TT{nargs} value is at least as great as the \TT{BEGF}
+      \TT{immedC}, \\
+    & the minimum number of expected arguments.  Then take the target \\
+    & function's lexical level $L$ from the \TT{BEGF} \TT{immedB} value,
+      set the \\
+    & \TT{mex:ret} value's \TT{saved\_fp} member to the process's
+      \TT{fp[$L$]} member, \\
+    & and set the process's \TT{fp[$L$]} member to the process's
+      \TT{sp} member.
     \\[0.5ex]
     & Lastly add +1 to the process current \TT{pc} to skip the \TT{BEGF}.
 \\\hline

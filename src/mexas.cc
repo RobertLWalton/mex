@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Jul 23 05:40:35 EDT 2023
+// Date:	Sun Jul 23 06:30:45 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -392,16 +392,16 @@ void mexas::begx ( mex::instr & instr,
 		     "mex::max_lexical_level"
 		     " exceeded" );
 	++ L;
+	e.nargs = instr.immedC;
 	mexas::depth[L] = 0;
-	mexas::lp[L] = mexas::fp[L] =
-	    mexas::variables->length;
+	mexas::lp[L] = mexas::variables->length;
+	mexas::fp[L] = mexas::lp[L] + e.nargs;
     }
     else if ( instr.op_code == mex::BEGL )
     {
 	min::uns16 nargs = instr.immedB;
 	// TBD check nargs too large.
 	e.nargs = nargs;
-	e.stack_limit += nargs;
 	// TBD
         ++ mexas::depth[L];
     }
@@ -411,6 +411,7 @@ void mexas::begx ( mex::instr & instr,
         MIN_ABORT
 	    ( "bad instr.op_code to mexas::begx" );
 
+    e.stack_limit += e.nargs;
     min::push ( mexas::blocks ) = e;
     mexas::stack_limit = e.stack_limit;
     mexas::push_instr ( instr, pp, trace_info );

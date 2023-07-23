@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Jul 23 05:39:58 EDT 2023
+// Date:	Sun Jul 23 06:23:29 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -421,14 +421,20 @@ void begx ( mex::instr & instr,
     // and execute mexas::push_instr on the arguments.
     //
     // BEGF increments mexas::lexical level to be L,
-    // sets depth[L] to 0, sets lp[L] = fp[L] =
-    // variables->length.  BEG and BEGL increment
-    // depth[L] for the current lexical level L.
+    // sets depth[L] to 0, sets lp[L] = variables->
+    // length and fp[L] = lp[L] + instr.immedC.
+    //
+    // *** Immediately AFTER a call to this function,
+    // BEGF must push instr.immedC variables stack
+    // elements.
+    //
+    // BEG and BEGL increment depth[L] for the current
+    // lexical level L.
+    //
     // BEGL takes the top instr.immedB elements of the
-    // variables stack and pushes them in order into
-    // the variables stack giving the copy of any
-    // variable with name N (not equal *) the name
-    // `next-N'.
+    // variables stack and pushes them in order into the
+    // variables stack giving the copy of any variable
+    // with name N (not equal *) the name `next-N'.
 
 unsigned endx ( mex::instr & instr,
                 const min::phrase_position & pp =
