@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Jul 23 06:30:45 EDT 2023
+// Date:	Sun Jul 23 12:32:14 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -33,8 +33,8 @@ min::locatable_var<min::file> mexas::input_file;
 min::locatable_var<mex::module_ins>
     mexas::output_module;
 
-min::uns32 mexas::lexical_level;
-min::uns32 mexas::depth[mex::max_lexical_level+1];
+min::uns8 mexas::lexical_level;
+min::uns8 mexas::depth[mex::max_lexical_level+1];
 min::uns32 mexas::lp[mex::max_lexical_level+1];
 min::uns32 mexas::fp[mex::max_lexical_level+1];
 
@@ -380,9 +380,9 @@ void mexas::begx ( mex::instr & instr,
 	           min::gen trace_info )
 {
     mexas::block_element e =
-        { instr.op_code,
-	  (min::uns16) mexas::variables->length, 0,
-	  (min::uns16) mexas::output_module->length };
+        { instr.op_code, 0,
+	  mexas::variables->length, 0,
+	  mexas::output_module->length };
 
     if ( instr.op_code == mex::BEGF )
     {
@@ -391,6 +391,7 @@ void mexas::begx ( mex::instr & instr,
 		     mex::max_lexical_level,
 		     "mex::max_lexical_level"
 		     " exceeded" );
+	e.end_op_code = mex::ENDF;
 	++ L;
 	e.nargs = instr.immedC;
 	mexas::depth[L] = 0;
@@ -399,14 +400,18 @@ void mexas::begx ( mex::instr & instr,
     }
     else if ( instr.op_code == mex::BEGL )
     {
-	min::uns16 nargs = instr.immedB;
+	e.end_op_code = mex::ENDL;
+	min::uns32 nargs = instr.immedB;
 	// TBD check nargs too large.
 	e.nargs = nargs;
 	// TBD
         ++ mexas::depth[L];
     }
     else if ( instr.op_code == mex::BEG )
+    {
+	e.end_op_code = mex::END;
         ++ mexas::depth[L];
+    }
     else
         MIN_ABORT
 	    ( "bad instr.op_code to mexas::begx" );
@@ -680,7 +685,7 @@ mex::module mexas::compile
     while ( next_statement() )
     {
 	mex::instr instr =
-	    { 0, 0, 0, 0, 0, min::MISSING() };
+	    { 0, 0, 0, 0, 0, 0, 0, min::MISSING() };
         min::phrase_position pp =
 	    { { mexas::first_line_number, 0 },
 	      { mexas::last_line_number + 1, 0 } };
@@ -765,11 +770,11 @@ mex::module mexas::compile
 	    {
 		mexas::jump_element je =
 		    { target,
-		      (min::uns16) m->length,
-		      (min::uns8) L,
-		      (min::uns8) depth[L],
-		      (min::uns16) SP,
-		      (min::uns16) SP };
+		      m->length,
+		      L,
+		      depth[L],
+		      SP,
+		      SP };
 		mexas::push_jump ( mexas::jumps, je );
 	    }
 	    mexas::push_instr ( instr, pp );

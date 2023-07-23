@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Jul 23 06:23:29 EDT 2023
+// Date:	Sun Jul 23 12:19:37 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -69,9 +69,9 @@ inline void push_instr
     min::push(trace_info_ins) = trace_info;
 }
 
-extern min::uns32 lexical_level;
+extern min::uns8 lexical_level;
     // Current lexical_level.
-extern min::uns32 depth[mex::max_lexical_level+1];
+extern min::uns8 depth[mex::max_lexical_level+1];
     // depth[L] is the current depth of lexical level
     // L.
 
@@ -165,17 +165,19 @@ inline void push
 //
 struct block_element
 {
-    min::uns8 op_code;
+    min::uns8 begin_op_code;
+    min::uns8 end_op_code;
     min::uns32 stack_limit;
-    min::uns16 nargs;
-    min::uns16 begin_location;
+    min::uns32 nargs;
+    min::uns32 begin_location;
 };
 typedef min::packed_vec_insptr<mexas::block_element>
     block_stack;
 extern min::locatable_var<mexas::block_stack>
     blocks;
     // BEG... instructions push an element into this
-    // stack.
+    // stack.  Begin_op_code is the BEG... op code and
+    // end_op_code is the corresponding END... op code.
     //
     // Begin_location is the location of the BEG...
     // instruction and is used allow backward jump and
@@ -187,6 +189,7 @@ extern min::locatable_var<mexas::block_stack>
     //       level
     //   (2) elements cannot be hidden by elements above
     //       the limit
+    //
     // Nargs is the number of stack elements holding
     // arguments to a function (BEGF) or next-variables
     // for a loop (BEGL).  Nargs is 0 for BEG.  Upon
@@ -214,9 +217,9 @@ extern min::locatable_var<mexas::module_stack>
 struct jump_element
 {
     const min::gen target_name;
-    min::uns16 jmp_location;
+    min::uns32 jmp_location;
     min::uns8 lexical_level, maximum_depth;
-    min::uns16 stack_length, stack_minimum;
+    min::uns32 stack_length, stack_minimum;
     min::uns32 next;
     jump_element & operator =
 	    ( const jump_element & e )

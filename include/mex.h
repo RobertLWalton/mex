@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat Jul 22 03:53:41 EDT 2023
+// Date:	Sun Jul 23 12:01:34 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -45,8 +45,8 @@ extern min::uns32 return_stack_limit;
 namespace mex {
 
 struct instr {
-    min::uns8 op_code, trace_flags;
-    min::uns16 immedA, immedB, immedC;
+    min::uns8 op_code, trace_flags, unused1, unused2;
+    min::uns32 immedA, immedB, immedC;
     min::gen immedD;
 };
 
