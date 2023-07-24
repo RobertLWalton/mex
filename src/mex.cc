@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Jul 23 16:36:13 EDT 2023
+// Date:	Mon Jul 24 03:53:51 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -382,6 +382,16 @@ static bool optimized_run_process ( mex::process p )
 	{
 	    min::uns32 i = pc->immedA;
 	    min::uns32 j = pc->immedB;
+	    if ( sp >= spend )
+	        goto ERROR_EXIT;
+	    if (    j == 0
+	         && m->globals != min::NULL_STUB )
+	    {
+		if ( i >= m->globals->length )
+		    goto ERROR_EXIT;
+		* sp ++ = m->globals[i];
+		break;
+	    }
 	    if ( j > mex::max_lexical_level )
 	        goto ERROR_EXIT;
 	    i += p->fp[j];
@@ -678,6 +688,7 @@ static bool optimized_run_process ( mex::process p )
 
 	    new_pc = { cm, immedC + 1 };
 	    mex::set_pc ( p, new_pc );
+	    m = cm;
 	}
 
 	} // end switch ( op_code )
@@ -1447,6 +1458,22 @@ bool mex::run_process ( mex::process p )
 		break;
 	    }
 	    case mex::PUSHL:
+		if ( sp >= spend )
+		{
+		    message =
+		        "stack too large for push";
+		    goto INNER_FATAL;
+		}
+		if (    immedB == 0
+		     && m->globals != min::NULL_STUB )
+		{
+		    if ( immedA >= m->globals->length )
+		    {
+			message = "immedA too large";
+			goto INNER_FATAL;
+		    }
+		    break;
+		}
 		if ( immedB > mex::max_lexical_level )
 		{
 		    message = "immedB too large";
@@ -1456,12 +1483,6 @@ bool mex::run_process ( mex::process p )
 		     >= sp - spbegin )
 		{
 		    message = "immedA too large";
-		    goto INNER_FATAL;
-		}
-		if ( sp >= spend )
-		{
-		    message =
-		        "stack too large for push";
 		    goto INNER_FATAL;
 		}
 		break;
@@ -1775,8 +1796,13 @@ bool mex::run_process ( mex::process p )
 		break;
 	    }
 	    case mex::PUSHL:
-	        * sp ++ =
-		    spbegin[p->fp[immedB] + immedA];
+	        if ( immedB == 0
+		     &&
+		     m->globals != min::NULL_STUB )
+		    * sp ++ = m->globals[immedA];
+		else
+		    * sp ++ =
+			spbegin[p->fp[immedB] + immedA];
 		break;
 	    case mex::PUSHA:
 	    {
@@ -1908,6 +1934,7 @@ bool mex::run_process ( mex::process p )
 
 		new_pc = { cm, immedC + 1 };
 		mex::set_pc ( p, new_pc );
+		m = cm;
 	    }
 
 	    } // end switch ( op_code )

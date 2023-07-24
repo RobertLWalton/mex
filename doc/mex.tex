@@ -239,7 +239,7 @@
 
 \author{Robert L. Walton}
 
-\date{July 23, 2023}
+\date{July 24, 2023}
  
 \maketitle
 
@@ -948,7 +948,10 @@ are explained in Tracing and Exceptions, \itemref{TRACING-AND-EXCEPTIONS}.
     & duplicates the top value).
 \\\hline
 \TT{PUSHL}
-    & Push the stack vector value with index \TT{fp[immedB] + immedA}.
+    & Push the stack vector value with index \TT{fp[immedB] + immedA}. \\
+    & But if \TT{immedB == 0} and \TT{m->globals} is not \TT{min::NULL\_STUB} \\
+    & for the module \TT{m} of the current program counter, push \\
+    & \TT{m->globals[immedA]} instead.
 \\\hline
 \TT{PUSHI}
     & Push \TT{immedD} into the stack.

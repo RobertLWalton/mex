@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Jul 23 22:42:48 EDT 2023
+// Date:	Mon Jul 24 04:00:59 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -346,7 +346,10 @@ bool next_statement ( void );
     // Get the next statement and return true.  Or
     // return false if end of file.
 
-inline min::gen get_name ( min::uns32 i )
+// If statement[i] exists and is a name, return the name
+// and increment i.  Otherwise return min::NONE().
+//
+inline min::gen get_name ( min::uns32 & i )
 {
     if ( i < mexas::statement->length )
     {
@@ -354,7 +357,10 @@ inline min::gen get_name ( min::uns32 i )
         min::str_ptr sp ( n );
         if ( sp && strlen ( sp ) >= 1
                 && isalpha ( sp[0] ) )
+	{
+	    ++ i;
 	    return n;
+	}
     }
     return min::NONE();
 }
@@ -491,6 +497,15 @@ inline min::uns32 search ( min::gen name, min::uns32 i )
     }
     return mexas::NOT_FOUND;
 }
+
+bool check_new_name
+	( min::gen name, min::phrase_position pp );
+    // Test whether name is a variable name in the
+    // variables stack below mexas::stack_limit.  If
+    // yes, print `improper hidding' error message using
+    // pp and return false.  Otherwise return true.
+    //
+    // But if name == '*', just return true.
 
 } // end mexas namespace
 

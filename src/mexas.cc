@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Jul 23 16:24:08 EDT 2023
+// Date:	Mon Jul 24 04:03:24 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -283,6 +283,23 @@ void mexas::compile_warn
 	      message4, message5, message6,
 	      message7, message8, message9 );
     ++ mexas::warning_count;
+}
+
+bool mexas::check_new_name
+	( min::gen name, min::phrase_position pp )
+{
+    if ( name == mexas::star ) return true;
+
+    if (    mexas::search ( name, mexas::stack_limit )
+         == mexas::NOT_FOUND )
+        return true;
+
+    mexas::compile_error
+	( pp,
+	  "new variable with name ",
+	  min::pgen ( name ),
+	  " improperly hides previous variable" );
+    return false;
 }
 
 unsigned mexas::jump_list_delete
@@ -828,6 +845,8 @@ mex::module mexas::compile
 
 	switch ( op_type )
 	{
+	case mex::NONA:
+	    goto NON_ARITHMETIC;
 	case mex::A2:
 	case mex::A2R:
 	    if ( SP < mexas::stack_limit + 2 )
@@ -863,9 +882,11 @@ mex::module mexas::compile
 	}
 	ARITHMETIC:
 	{
-	    min::gen name = mexas::get_name ( 1 );
+	    min::uns32 i = 1;
+	    min::gen name = mexas::get_name ( i );
 	    if ( name == min::NONE() )
 	        name = mexas::star;
+	    check_new_name ( name, pp );
 	    mexas::push_variable
 	        ( mexas::variables, name,
 	          L, mexas::depth[L] );
@@ -874,7 +895,8 @@ mex::module mexas::compile
 	}
 	JUMP:
 	{
-	    min::gen target = mexas::get_name ( 1 );
+	    min::uns32 i = 1;
+	    min::gen target = mexas::get_name ( i );
 	    if ( target == min::NONE() )
 	    {
 		mexas::compile_error
@@ -895,6 +917,14 @@ mex::module mexas::compile
 	    }
 	    mexas::push_instr ( instr, pp );
 	    goto TRACE;
+	}
+	NON_ARITHMETIC:
+	{
+	    switch ( op_code )
+	    {
+	    case ::PUSHM:
+	        ;
+	    }
 	}
 	TRACE:
 	{
