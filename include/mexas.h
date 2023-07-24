@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Jul 23 15:04:38 EDT 2023
+// Date:	Sun Jul 23 22:42:48 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -469,6 +469,28 @@ unsigned endx ( mex::instr & instr,
     // If instr.op_code does not match ANY block stack
     // entries, just issue an error message and return
     // 0.  No instructions are pushed.
+
+// Search the variables stack top down for an element
+// with the given name, and return the index of the
+// first element found.  Return NOT_FOUND if no element
+// found.
+//
+// The elements searched are those with indices i-1,
+// i-2, i-3, ..., 0 in that order.  Suitable values for
+// the argument i are mexas::variables->length and
+// mexas::stack_limit.
+//
+const min::uns32 NOT_FOUND = 0xFFFFFFFF;
+inline min::uns32 search ( min::gen name, min::uns32 i )
+{
+    while ( i != 0 )
+    {
+        -- i;
+	if ( (&mexas::variables[i])->name == name )
+	    return i;
+    }
+    return mexas::NOT_FOUND;
+}
 
 } // end mexas namespace
 
