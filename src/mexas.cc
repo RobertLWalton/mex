@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Jul 24 04:03:24 EDT 2023
+// Date:	Mon Jul 24 04:30:11 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -923,7 +923,44 @@ mex::module mexas::compile
 	    switch ( op_code )
 	    {
 	    case ::PUSHM:
-	        ;
+	    {
+		min::uns32 i = 1;
+		min::gen name = mexas::get_name ( i );
+		if ( name == min::NONE() )
+		{
+		    mexas::compile_error
+			( pp, "no variable name:"
+			      " instruction ignored" );
+		    break;
+		}
+
+	        min::uns32 limit =
+		    ( L == 0 ? mexas::stack_limit :
+		               mexas::lp[1] );
+		min::uns32 j = search ( name, limit );
+		if ( j == mexas::NOT_FOUND )
+		{
+		    mexas::compile_error
+			( pp, "variable named ",
+			      min::pgen ( name ),
+			      " not globally defined;"
+			      " instruction ignored" );
+		    break;
+		}
+		instr.op_code = mex::PUSHL;
+		instr.immedA = j;
+		instr.immedB = 0;
+		mexas::push_instr ( instr, pp );
+		min::gen new_name =
+		    mexas::get_name ( i );
+		if ( new_name == min::NONE() )
+		    new_name = name;
+		check_new_name ( name, pp );
+		mexas::push_variable
+		    ( mexas::variables, name,
+		      L, mexas::depth[L] );
+		break;
+	    }
 	    }
 	}
 	TRACE:
