@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Jul 24 04:30:11 EDT 2023
+// Date:	Mon Jul 24 07:30:05 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -890,7 +890,7 @@ mex::module mexas::compile
 	    mexas::push_variable
 	        ( mexas::variables, name,
 	          L, mexas::depth[L] );
-	    mexas::push_instr ( instr, pp );
+	    mexas::push_instr ( instr, pp, name );
 	    goto TRACE;
 	}
 	JUMP:
