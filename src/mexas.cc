@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Jul 24 07:30:05 EDT 2023
+// Date:	Mon Jul 24 16:52:59 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -903,6 +903,8 @@ mex::module mexas::compile
 		    ( pp, "jmp... does not have a "
 		          " jmp-target that is a name;"
 			  " target unsatisfied" );
+		target = min::MISSING();
+		    // For trace_info
 	    }
 	    else
 	    {
@@ -915,7 +917,7 @@ mex::module mexas::compile
 		      SP };
 		mexas::push_jump ( mexas::jumps, je );
 	    }
-	    mexas::push_instr ( instr, pp );
+	    mexas::push_instr ( instr, pp, target );
 	    goto TRACE;
 	}
 	NON_ARITHMETIC:
@@ -965,6 +967,29 @@ mex::module mexas::compile
 	}
 	TRACE:
 	{
+	    if ( ( compile_flags & mex::TRACE ) == 0 )
+	        continue;
+	    min::printer printer =
+	        mexas::input_file->printer;
+	    if ( compile_flags & mex::TRACE_LINES )
+		min::print_phrase_lines
+		    ( printer, mexas::input_file, pp );
+	    printer << min::bol << "    " << min::bom;
+	    mex::instr instr = m[m->length-1];
+	    printer << mex::op_infos[instr.op_code].name;
+	    if ( instr.trace_flags & mex::TRACE )
+	        printer << " TRACE";
+	    if ( instr.trace_flags & mex::TRACE_LINES )
+	        printer << " TRACE_LINES";
+	    if ( instr.trace_flags & mex::TRACE_NOJUMP )
+	        printer << " TRACE_NOJUMP";
+	    printer << " " << instr.immedA
+	            << " " << instr.immedB
+	            << " " << instr.immedC
+	            << " " << instr.immedD
+	            << "; "
+		    << m->trace_info[m->length-1]
+		    << min::eom;
 	}
 
     }

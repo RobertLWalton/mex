@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Jul 24 07:26:14 EDT 2023
+// Date:	Mon Jul 24 17:28:01 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -520,7 +520,9 @@ static bool optimized_run_process ( mex::process p )
 	         ||
 		 immedB - immedA > spend - new_sp
 		 ||
-		 immedC > pcend - pc )
+		 immedC > pcend - pc
+		 ||
+		 immedC == 0 )
 	        goto ERROR_EXIT;
 
 	    if ( ! execute_jmp )
@@ -1266,6 +1268,11 @@ bool mex::run_process ( mex::process p )
 	        message = "immedC too large";
 	        goto INNER_FATAL;
 	    }
+	    if ( immedC == 0 )
+	    {
+	        message = "immedC == 0";
+	        goto INNER_FATAL;
+	    }
 
 	    bool bad_jmp = false;
 	    bool execute_jmp = true;
@@ -1339,53 +1346,38 @@ bool mex::run_process ( mex::process p )
 			    ( m->position->file, pp )
 			<< ": ";
 
-		min::gen tinfo  = min::MISSING();
-		if (   p->pc.index
-		     < m->trace_info->length)
-		    tinfo = m->trace_info[p->pc.index];
-		min::gen name = min::MISSING();
-		min::uns32 tinfo_length = 0;
-		if ( min::is_obj ( tinfo ) )
-		{
-		    min::obj_vec_ptr vp ( tinfo );
-		    tinfo_length = min::size_of ( vp );
-		    if ( tinfo_length >= 1 )
-		        name = vp[0];
-		}
-		else if ( min::is_str ( tinfo ) )
-		    name = tinfo;
-
-		if ( execute_jmp )
-		    p->printer << "successful ";
-		else if ( ! bad_jmp )
-		    p->printer << "UNsuccessful ";
-
-		if ( name == min::MISSING() )
-		    p->printer << op_info->name;
-		else
-		    p->printer << name;
-
-		if ( bad_jmp )
-		    p->printer << " with invalid"
-		                  " operand(s)";
-
-		char buffer[200];
-	        sprintf ( buffer, ": %.15g %s %.15g",
-			  arg1, op_info->oper, arg2 );
-		p->printer << buffer;
-
-		if ( tinfo_length > 1
+		p->printer << op_info->name;
+		if ( m->trace_info != min::NULL_STUB
 		     &&
-		     p->trace_function != NULL )
-		    (* p->trace_function) ( p, tinfo );
-
-		p->printer << min::eom;
+		       p->pc.index
+		     < m->trace_info->length )
+		{
+		    min::gen trace_info =
+		        m->trace_info[p->pc.index];
+		    if ( min::is_str ( trace_info ) )
+		        p->printer << " " << trace_info;
+		}
 
 		if ( bad_jmp )
 		{
+		    p->printer << " with invalid"
+		                  " operand(s)"
+			       << min::eom;
 		    p->state = mex::JMP_ERROR;
 		    return false;
 		}
+
+		if ( execute_jmp )
+		    p->printer
+		        << " is successful: true";
+		else if ( ! bad_jmp )
+		    p->printer
+		        << " is UNsuccessful: false";
+
+		char buffer[200];
+	        sprintf ( buffer, " <= %.15g %s %.15g",
+			  arg1, op_info->oper, arg2 );
+		p->printer << buffer << min::eom;
 
 		RESTORE;
 	    }
