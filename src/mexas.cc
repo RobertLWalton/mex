@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Jul 24 16:52:59 EDT 2023
+// Date:	Tue Jul 25 06:04:23 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -371,8 +371,19 @@ unsigned mexas::jump_list_resolve
 	    break;
 	if ( target_name == next->target_name
 	     &&
-	     next->maximum_depth >= depth[L] )
+	     next->maximum_depth >= mexas::depth[L] )
 	{
+	    min::uns32 depth_diff =
+	        next->depth - mexas::depth[L];
+	    if ( depth_diff > mex::TRACE_DEPTH )
+	    {
+		min::phrase_position pp =
+		    m->position[next->jmp_location];
+		mexas::compile_error
+		    ( pp, "jump exits too many"
+		          " blocks" );
+	    }
+
 	    min::ptr<mex::instr> instr =
 		m + next->jmp_location;
 	    instr->immedA = next->stack_length
@@ -380,6 +391,8 @@ unsigned mexas::jump_list_resolve
 	    instr->immedB = SP - next->stack_minimum;
 	    instr->immedC = m->length
 	                  - next->jmp_location;
+	    instr->trace_flags &= ~ mex::TRACE_DEPTH;
+	    instr->trace_flags |= depth_diff;
 
 	    previous->next = next->next;
 	    next->next = free->next;
@@ -912,6 +925,7 @@ mex::module mexas::compile
 		    { target,
 		      m->length,
 		      L,
+		      depth[L],
 		      depth[L],
 		      SP,
 		      SP };

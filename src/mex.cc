@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Jul 24 17:28:01 EDT 2023
+// Date:	Tue Jul 25 05:52:11 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1392,6 +1392,9 @@ bool mex::run_process ( mex::process p )
 		    * new_sp ++ = immedD;
 		pc += immedC;
 		-- pc;
+		p->trace_depth -=
+		    (   pc->trace_flags
+		      & mex::TRACE_DEPTH );
 	    }
 
 	    goto LOOP;
