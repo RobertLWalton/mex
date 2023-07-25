@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Jul 25 05:55:34 EDT 2023
+// Date:	Tue Jul 25 18:08:52 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -365,6 +365,21 @@ inline min::gen get_name ( min::uns32 & i )
     }
     return min::NONE();
 }
+//
+// If statement[i] exists and is "*", return "*" and
+// increment i.  Otherwise return min::NONE().
+//
+inline min::gen get_star ( min::uns32 & i )
+{
+    if ( i < mexas::statement->length
+         &&
+	 statement[i] == mexas::star )
+    {
+        ++ i;
+	return mexas::star;
+    }
+    return min::NONE();
+}
 
 unsigned jump_list_delete
 	( mexas::jump_list jlist );
@@ -477,6 +492,9 @@ unsigned endx ( mex::instr & instr,
     // entries, just issue an error message and return
     // 0.  No instructions are pushed.
 
+const min::uns32 NOT_FOUND = 0xFFFFFFFF;
+    // Returned by search functions when not found.
+
 // Search the variables stack top down for an element
 // with the given name, and return the index of the
 // first element found.  Return NOT_FOUND if no element
@@ -487,7 +505,6 @@ unsigned endx ( mex::instr & instr,
 // the argument i are mexas::variables->length and
 // mexas::stack_limit.
 //
-const min::uns32 NOT_FOUND = 0xFFFFFFFF;
 inline min::uns32 search ( min::gen name, min::uns32 i )
 {
     while ( i != 0 )
@@ -498,6 +515,33 @@ inline min::uns32 search ( min::gen name, min::uns32 i )
     }
     return mexas::NOT_FOUND;
 }
+
+min::uns32 global_internal_search
+	( mex::module & m, min::gen module_name,
+	                   min::gen name,
+			   min::uns32 search_type );
+inline min::uns32 global_variable_search
+	( mex::module & m, min::gen module_name,
+	                   min::gen name )
+{
+    return global_internal_search
+        ( m, module_name, name, 0 );
+}
+inline min::uns32 global_function_search
+	( mex::module & m, min::gen module_name,
+	                   min::gen name )
+{
+    return global_internal_search
+        ( m, module_name, name, 1 );
+}
+    // Search the modules stack for a variable or
+    // function with a given name.  If module_name
+    // is a name, it must match the module file name.
+    // If it is `*', all modules are searched, most
+    // recently compiled first.  Returns NOT_FOUND
+    // if not found.  Returns index in module globals
+    // for variables or module code (of BEGF) for
+    // functions and returns module in m, if found.
 
 bool check_new_name
 	( min::gen name, min::phrase_position pp );

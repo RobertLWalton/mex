@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Jul 25 06:04:23 EDT 2023
+// Date:	Tue Jul 25 18:09:43 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -834,6 +834,8 @@ mex::module mexas::compile
         min::phrase_position pp =
 	    { { mexas::first_line_number, 0 },
 	      { mexas::last_line_number + 1, 0 } };
+	min::uns32 index = 1;
+	    // statement[index] is next lexeme
 
         min::gen v = min::get
 	    ( mexas::op_code_table,
@@ -895,11 +897,14 @@ mex::module mexas::compile
 	}
 	ARITHMETIC:
 	{
-	    min::uns32 i = 1;
-	    min::gen name = mexas::get_name ( i );
+	    min::gen name = mexas::get_name ( index );
 	    if ( name == min::NONE() )
+	    {
+	        mexas::get_star ( index );
 	        name = mexas::star;
-	    check_new_name ( name, pp );
+	    }
+	    else
+		check_new_name ( name, pp );
 	    mexas::push_variable
 	        ( mexas::variables, name,
 	          L, mexas::depth[L] );
@@ -908,14 +913,14 @@ mex::module mexas::compile
 	}
 	JUMP:
 	{
-	    min::uns32 i = 1;
-	    min::gen target = mexas::get_name ( i );
+	    min::gen target = mexas::get_name ( index );
 	    if ( target == min::NONE() )
 	    {
 		mexas::compile_error
 		    ( pp, "jmp... does not have a "
-		          " jmp-target that is a name;"
-			  " target unsatisfied" );
+		          " jmp-target that is a name"
+			  " instruction will fail" );
+		    // instr fails because immedC = 0
 		target = min::MISSING();
 		    // For trace_info
 	    }
@@ -940,42 +945,70 @@ mex::module mexas::compile
 	    {
 	    case ::PUSHM:
 	    {
-		min::uns32 i = 1;
-		min::gen name = mexas::get_name ( i );
+		min::gen name =
+		    mexas::get_name ( index );
 		if ( name == min::NONE() )
 		{
 		    mexas::compile_error
 			( pp, "no variable name:"
 			      " instruction ignored" );
-		    break;
+		    continue;
 		}
-
-	        min::uns32 limit =
-		    ( L == 0 ? mexas::stack_limit :
-		               mexas::lp[1] );
-		min::uns32 j = search ( name, limit );
-		if ( j == mexas::NOT_FOUND )
+		switch ( op_code )
 		{
-		    mexas::compile_error
-			( pp, "variable named ",
-			      min::pgen ( name ),
-			      " not globally defined;"
-			      " instruction ignored" );
+		case ::PUSHM:
+		{
+		    min::uns32 limit =
+			( L == 0 ? mexas::stack_limit :
+				   mexas::lp[1] );
+		    min::uns32 j = search ( name, limit );
+		    if ( j == mexas::NOT_FOUND )
+		    {
+			mexas::compile_error
+			    ( pp, "variable named ",
+				  min::pgen ( name ),
+				  " not globally defined;"
+				  " instruction ignored" );
+			continue;
+		    }
+		    instr.op_code = mex::PUSHL;
+		    instr.immedA = j;
+		    instr.immedB = 0;
 		    break;
 		}
-		instr.op_code = mex::PUSHL;
-		instr.immedA = j;
-		instr.immedB = 0;
+		case mex::PUSHG:
+		{
+		    min::gen mod_name =
+			mexas::get_name ( index );
+		    if ( name == min::NONE() )
+		        name = mexas::get_star
+			    ( index );
+		    if ( name == min::NONE() )
+		    {
+			mexas::compile_error
+			    ( pp, "no module name:"
+				  " instruction ignored" );
+			continue;
+		    }
+		    // TBD
+
+		    break;
+		}
+		}
 		mexas::push_instr ( instr, pp );
 		min::gen new_name =
-		    mexas::get_name ( i );
+		    mexas::get_name ( index );
+		if ( new_name != min::NONE() )
+		    check_new_name ( new_name, pp );
+		else
+		    new_name =
+		        mexas::get_star ( index );
 		if ( new_name == min::NONE() )
 		    new_name = name;
-		check_new_name ( name, pp );
 		mexas::push_variable
-		    ( mexas::variables, name,
+		    ( mexas::variables, new_name,
 		      L, mexas::depth[L] );
-		break;
+		goto TRACE;
 	    }
 	    }
 	}
@@ -1004,6 +1037,7 @@ mex::module mexas::compile
 	            << "; "
 		    << m->trace_info[m->length-1]
 		    << min::eom;
+	    continue;
 	}
 
     }

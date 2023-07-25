@@ -239,7 +239,7 @@
 
 \author{Robert L. Walton}
 
-\date{July 24, 2023}
+\date{July 25, 2023}
  
 \maketitle
 
@@ -967,9 +967,11 @@ are explained in Tracing and Exceptions, \itemref{TRACING-AND-EXCEPTIONS}.
     & so \TT{immedA} = 0 discards the top value).
 \\\hline
 \TT{JMP}
-    & Subtract \TT{immedA} to \TT{sp} (popping the stack \TT{immedA} times), \\
-    & then push \TT{immedD} into the stack \TT{immedB} times, \\
-    & then add \TT{immedC} to the \TT{pc} (skipping \TT{immedC} instructions).
+    & Subtract \TT{immedA} to \TT{sp} (popping the stack \TT{immedA} times),
+      then \\
+    & push \TT{immedD} into the stack \TT{immedB} times, then add
+      \TT{immedC} \\
+    & (which must \TT{!= 0}) to the \TT{pc} (skipping \TT{immedC} instructions).
 \\\hline
 \TT{JMPEQ/JMPNE}
     & Pop 2 values and compare them.  If they are equal/not-equal \\
