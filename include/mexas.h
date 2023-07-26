@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Jul 25 18:08:52 EDT 2023
+// Date:	Tue Jul 25 22:37:42 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -516,32 +516,31 @@ inline min::uns32 search ( min::gen name, min::uns32 i )
     return mexas::NOT_FOUND;
 }
 
-min::uns32 global_internal_search
+min::locatable_gen V, F;  // global search types.
+
+min::uns32 global_search
 	( mex::module & m, min::gen module_name,
+			   min::gen type,
 	                   min::gen name,
 			   min::uns32 search_type );
-inline min::uns32 global_variable_search
-	( mex::module & m, min::gen module_name,
-	                   min::gen name )
-{
-    return global_internal_search
-        ( m, module_name, name, 0 );
-}
-inline min::uns32 global_function_search
-	( mex::module & m, min::gen module_name,
-	                   min::gen name )
-{
-    return global_internal_search
-        ( m, module_name, name, 1 );
-}
-    // Search the modules stack for a variable or
-    // function with a given name.  If module_name
-    // is a name, it must match the module file name.
-    // If it is `*', all modules are searched, most
-    // recently compiled first.  Returns NOT_FOUND
-    // if not found.  Returns index in module globals
-    // for variables or module code (of BEGF) for
-    // functions and returns module in m, if found.
+    // Search the modules stack for a variable (type
+    // mexas::V) or function (type mexas::F)  with the
+    // given name.  If module_name is a name, it must
+    // match the module file name.  If it is `*', all
+    // modules are searched, most recently compiled
+    // first.  Returns NOT_FOUND if not found.  Returns
+    // index in module globals for variables or module
+    // code (of BEGF) for functions and returns module
+    // in m, if found.
+
+void make_module_interface ( void );
+    // Make output_module->interface from variables
+    // stack and functions stack.  The interface is
+    // an object used as a hash table to map MIN
+    // labels of the form [mexas::V name] for variables
+    // or [mexas::F name] for functions onto min::uns32
+    // index values.  If a name appears more than once
+    // in a stack, the topmost (most recent) is used.
 
 bool check_new_name
 	( min::gen name, min::phrase_position pp );
