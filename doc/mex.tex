@@ -239,7 +239,7 @@
 
 \author{Robert L. Walton}
 
-\date{July 25, 2023}
+\date{July 26, 2023}
  
 \maketitle
 
@@ -1883,11 +1883,14 @@ with the given {\em variable-name}, if provided.
 \ttkey{POP} {\em variable-name}
 \begin{indpar}
 At run-time, pops the process stack and stores the value popped
-into the variable names in the variable stack.
+into the variable named in the variable stack.  Or if the
+variable name is `\TT{*}', discards the value popped.
+
 At assembly time, pops the variable stack.
 
 The variable stack search for {\em variable-name} is restricted to
-elements with the same lexical level as the \TT{POP} instruction.
+elements with the same lexical level as the \TT{POP} instruction
+that are not arguments to that lexical level.
 
 \ttkey{POP} assembles to the run-time instruction \TT{POPS}.
 Note that \TT{POPL}, \TT{POPG}, and \TT{POPA} do

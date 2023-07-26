@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Jul 26 13:26:16 EDT 2023
+// Date:	Wed Jul 26 15:15:53 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1134,6 +1134,83 @@ mex::module mexas::compile
 		mexas::push_variable
 		    ( mexas::variables, new_name,
 		      L, mexas::depth[L] );
+		goto TRACE;
+	    }
+	    case mex::PUSHI:
+	    {
+	        min::gen D = mexas::get_num ( index );
+		if ( D == min::NONE() )
+		{
+		    mexas::compile_error
+			( pp, "no number to push:"
+			      " instruction ignored" );
+		    continue;
+		}
+		instr.immedD = D;
+		mexas::push_instr ( instr, pp );
+		min::gen new_name =
+		    mexas::get_name ( index );
+		if ( new_name != min::NONE() )
+		    check_new_name ( new_name, pp );
+		else
+		    new_name =
+		        mexas::get_star ( index );
+		if ( new_name == min::NONE() )
+		    new_name = mexas::star;
+		mexas::push_variable
+		    ( mexas::variables, new_name,
+		      L, mexas::depth[L] );
+		goto TRACE;
+	    }
+	    case ::POP:
+	    {
+		min::gen name =
+		    mexas::get_name ( index );
+		if ( name == min::NONE() )
+		    name = mexas::get_star ( index );
+		if ( name == min::NONE() )
+		{
+		    mexas::compile_error
+			( pp, "no variable name:"
+			      " instruction ignored" );
+		    continue;
+		}
+		if ( name != mexas::star )
+		{
+		    min::uns32 j = search ( name, SP );
+		    if ( j == mexas::NOT_FOUND )
+		    {
+			mexas::compile_error
+			    ( pp, "variable named ",
+				  min::pgen ( name ),
+				  " not defined within;"
+				  " module; instruction"
+				  " ignored" );
+			continue;
+		    }
+		    if ( j < mexas::fp[L] )
+		    {
+			mexas::compile_error
+			    ( pp, "variable named ",
+				  min::pgen ( name ),
+				  " is of lower than"
+				  " current lexical"
+				  " level, or is"
+				  " argument to current"
+				  " lexical level, and"
+				  " as such cannot"
+				  " legally be written;"
+				  " instruction"
+				  " ignored" );
+			continue;
+		    }
+		    instr.immedA = SP - j;
+		}
+		else
+		    instr.immedA = 0;
+		instr.op_code = mex::POPS;
+		mexas::push_instr ( instr, pp );
+		min::pop ( mexas::variables );
 		goto TRACE;
 	    }
 	    }

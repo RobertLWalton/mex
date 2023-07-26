@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Jul 26 02:19:37 EDT 2023
+// Date:	Wed Jul 26 15:34:30 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -364,7 +364,7 @@ inline min::gen get_name ( min::uns32 & i )
     }
     return min::NONE();
 }
-//
+
 // If statement[i] exists and is "*", return "*" and
 // increment i.  Otherwise return min::NONE().
 //
@@ -378,6 +378,20 @@ inline min::gen get_star ( min::uns32 & i )
 	return mexas::star;
     }
     return min::NONE();
+}
+
+// If statement[i] exists and is a number, return the
+// number and increment i.  Otherwise return
+// min::NONE().
+//
+inline min::gen get_num ( min::uns32 & i )
+{
+    if ( i < mexas::statement->length
+         &&
+	 min::is_num ( statement[i] ) )
+	return statement[i++];
+    else
+	return min::NONE();
 }
 
 unsigned jump_list_delete
