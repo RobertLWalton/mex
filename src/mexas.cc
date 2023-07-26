@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Jul 26 06:05:38 EDT 2023
+// Date:	Wed Jul 26 13:26:16 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1020,6 +1020,40 @@ mex::module mexas::compile
 		}
 		switch ( op_code )
 		{
+		case ::PUSH:
+		{
+		    min::uns32 j = search ( name, SP );
+		    if ( j == mexas::NOT_FOUND )
+		    {
+			mexas::compile_error
+			    ( pp, "variable named ",
+				  min::pgen ( name ),
+				  " not defined within;"
+				  " module; instruction"
+				  " ignored" );
+			continue;
+		    }
+		    min::uns32 k = L;
+		    while ( j < mexas::lp[k] ) -- k;
+		    if ( k == L )
+		    {
+			instr.op_code = mex::PUSHS;
+			instr.immedA = SP - j;
+		    }
+		    else if ( j >= mexas::fp[k] )
+		    {
+			instr.op_code = mex::PUSHL;
+			instr.immedA = j - mexas::fp[k];
+			instr.immedB = k;
+		    }
+		    else
+		    {
+			instr.op_code = mex::PUSHA;
+			instr.immedA = mexas::fp[k] - j;
+			instr.immedB = k;
+		    }
+		    break;
+		}
 		case ::PUSHM:
 		{
 		    min::uns32 limit =
