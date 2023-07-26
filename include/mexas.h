@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Jul 25 22:37:42 EDT 2023
+// Date:	Wed Jul 26 02:19:37 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -98,7 +98,7 @@ extern min::locatable_gen op_code_table;
 //
 struct variable_element
 {
-    const min::gen name;  // min::MISSING() if none.
+    const min::gen name;  // mexas::star if none.
     min::uns32 level, depth;
     variable_element & operator =
 	    ( const variable_element & e )
@@ -131,7 +131,7 @@ struct function_element
 {
     const min::gen name;
     min::uns32 level, depth;
-    const mex::pc pc;
+    min::uns32 index;  // of BEGF in code vector
     function_element & operator =
 	    ( const function_element & e )
     {
@@ -141,7 +141,7 @@ struct function_element
         * (min::gen *) & this->name = e.name;
 	this->level = e.level;
 	this->depth = e.depth;
-	* (mex::pc *) & this->pc = e.pc;
+	this->index = e.index;
 	return * this;
     }
 };
@@ -152,13 +152,12 @@ extern min::locatable_var<mexas::function_stack>
 inline void push_function
 	( mexas::function_stack s, min::gen name,
 	  min::uns32 level, min::uns32 depth,
-	  mex::pc pc )
+	  min::uns32 index )
 {
     mexas::function_element e =
-        { name, level, depth, pc };
+        { name, level, depth, index };
     min::push(s) = e;
     min::unprotected::acc_write_update ( s, name );
-    min::unprotected::acc_write_update ( s, pc.module );
 }
 
 // Block Stack
@@ -516,13 +515,12 @@ inline min::uns32 search ( min::gen name, min::uns32 i )
     return mexas::NOT_FOUND;
 }
 
-min::locatable_gen V, F;  // global search types.
+extern min::locatable_gen V, F;  // global search types.
 
 min::uns32 global_search
 	( mex::module & m, min::gen module_name,
 			   min::gen type,
-	                   min::gen name,
-			   min::uns32 search_type );
+	                   min::gen name );
     // Search the modules stack for a variable (type
     // mexas::V) or function (type mexas::F)  with the
     // given name.  If module_name is a name, it must

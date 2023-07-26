@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Jul 25 18:09:43 EDT 2023
+// Date:	Wed Jul 26 02:21:17 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -39,6 +39,8 @@ min::uns32 mexas::lp[mex::max_lexical_level+1];
 min::uns32 mexas::fp[mex::max_lexical_level+1];
 
 min::locatable_gen mexas::star;
+min::locatable_gen mexas::V;
+min::locatable_gen mexas::F;
 
 min::locatable_gen mexas::op_code_table;
 
@@ -125,17 +127,10 @@ static min::uns32 function_element_gen_disp[] =
     min::DISP_END
 };
 
-static min::uns32 function_element_stub_disp[] =
-{
-    mex::DISP ( & mexas::function_element::pc ),
-    min::DISP_END
-};
-
 static min::packed_vec<mexas::function_element>
      function_stack_vec_type
          ( "function_stack_vec_type",
-	   ::function_element_gen_disp,
-	   ::function_element_stub_disp );
+	   ::function_element_gen_disp );
 
 min::locatable_var<mexas::function_stack>
     mexas::functions;
@@ -189,6 +184,8 @@ static min::locatable_gen backslash;
 static void initialize ( void )
 {
     mexas::star = min::new_str_gen ( "*" );
+    mexas::V = min::new_str_gen ( "V" );
+    mexas::F = min::new_str_gen ( "F" );
     ::single_quote = min::new_str_gen ( "'" );
     ::double_quote = min::new_str_gen ( "\"" );
     ::backslash = min::new_str_gen ( "\\" );
@@ -300,6 +297,73 @@ bool mexas::check_new_name
 	  min::pgen ( name ),
 	  " improperly hides previous variable" );
     return false;
+}
+
+min::uns32 mexas::global_search
+	( mex::module & m, min::gen module_name,
+	                   min::gen type,
+			   min::gen name )
+{
+    min::gen labbuf[2] = { type, name };
+    min::locatable_gen label
+        ( min::new_lab_gen ( labbuf, 2 ) );
+
+    for ( min::uns32 i = mexas::modules->length;
+          0 < i; )
+    {
+	-- i;
+        mex::module m = mexas::modules[i];
+	if ( m->name != module_name
+	     &&
+	     mexas::star != module_name )
+	    continue;
+	if ( ! min::is_obj ( m->interface ) )
+	    continue;
+	min::gen result =
+	    min::get ( m->interface, label );
+	if ( result == min::NONE() )
+	    continue;
+	return (min::uns32) min::int_of ( result );
+    }
+    return mexas::NOT_FOUND;
+}
+
+void mexas::make_module_interface ( void )
+{
+    min::locatable_gen interface
+        ( min::new_obj_gen ( 16000, 4000 ) );
+
+    for ( min::uns32 i = 0;
+          i < mexas::variables->length; ++ i )
+    {
+	min::gen name = (mexas::variables + i)->name;
+	if ( name == mexas::star ) continue;
+
+	// Overrides previous setting.
+	//
+	min::gen labbuf[2] = { mexas::V, name };
+	min::locatable_gen label
+	    ( min::new_lab_gen ( labbuf, 2 ) );
+	min::locatable_gen index
+	    ( min::new_num_gen ( i ) );
+	min::set ( interface, label, index );
+    }
+
+    for ( min::uns32 i = 0;
+          i < mexas::functions->length; ++ i )
+    {
+	min::ptr<mexas::function_element> p =
+	    mexas::functions + i;
+
+	min::gen labbuf[2] = { mexas::F, p->name };
+	min::locatable_gen label
+	    ( min::new_lab_gen ( labbuf, 2 ) );
+	min::locatable_gen index
+	    ( min::new_num_gen ( p->index ) );
+	min::set ( interface, label, index );
+    }
+
+    mex::interface_ref ( output_module ) = interface;
 }
 
 unsigned mexas::jump_list_delete

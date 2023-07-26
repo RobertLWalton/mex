@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Jul 23 12:01:34 EDT 2023
+// Date:	Wed Jul 26 02:28:52 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -140,6 +140,7 @@ struct module_header
     const min::uns32 control;
     const min::uns32 length;
     const min::uns32 max_length;
+    const min::gen name;  // From input file->file_name.
     const min::phrase_position_vec position;
     const min::packed_vec_ptr<min::gen> globals;
     const min::gen interface;
@@ -153,6 +154,7 @@ typedef min::packed_vec_insptr
 	    <mex::instr, mex::module_header>
 	    module_ins;
 
+MIN_REF ( min::gen, name, mex::module )
 MIN_REF ( min::phrase_position_vec,
           position, mex::module_ins )
 MIN_REF ( min::packed_vec_ptr<min::gen>,

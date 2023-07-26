@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Jul 25 05:52:11 EDT 2023
+// Date:	Wed Jul 26 02:29:49 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -47,6 +47,7 @@ static min::uns32 instr_gen_disp[] =
 
 static min::uns32 module_gen_disp[] =
 {
+    min::DISP ( & mex::module_header::name ),
     min::DISP ( & mex::module_header::interface ),
     min::DISP_END
 };
@@ -2049,6 +2050,7 @@ mex::module mex::create_module ( min::file f )
     min::locatable_var<mex::module_ins> m =
         ( (mex::module_ins) ::module_vec_type.new_stub
 	     ( mex::module_length ) );
+    mex::name_ref(m) = f->file_name;
     mex::interface_ref(m) = min::MISSING();
     mex::globals_ref(m) = min::NULL_STUB;
     mex::trace_info_ref(m) =
