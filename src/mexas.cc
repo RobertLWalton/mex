@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Jul 26 02:21:17 EDT 2023
+// Date:	Wed Jul 26 06:05:38 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1044,17 +1044,45 @@ mex::module mexas::compile
 		{
 		    min::gen mod_name =
 			mexas::get_name ( index );
-		    if ( name == min::NONE() )
-		        name = mexas::get_star
+		    if ( mod_name == min::NONE() )
+		        mod_name = mexas::get_star
 			    ( index );
-		    if ( name == min::NONE() )
+		    if ( mod_name == min::NONE() )
 		    {
 			mexas::compile_error
 			    ( pp, "no module name:"
 				  " instruction ignored" );
 			continue;
 		    }
-		    // TBD
+		    min::gen name =
+			mexas::get_name ( index );
+		    if ( name == min::NONE() )
+		    {
+			mexas::compile_error
+			    ( pp, "no variable name:"
+				  " instruction ignored" );
+			continue;
+		    }
+		    mex::module gm;
+		    min::uns32 index =
+		        mexas::global_search
+			    ( gm, mod_name,
+			      mexas::V, name );
+		    if ( index == mexas::NOT_FOUND )
+		    {
+			mexas::compile_error
+			    ( pp, "variable named ",
+				  min::pgen ( name ),
+				  " in module named ",
+				  min::pgen ( mod_name ),
+				  " not defined;"
+				  " instruction ignored" );
+			continue;
+		    }
+
+		    instr.immedA = index;
+		    instr.immedD =
+		        min::new_stub_gen ( gm );
 
 		    break;
 		}
@@ -1106,5 +1134,9 @@ mex::module mexas::compile
 
     }
 
-    return min::NULL_STUB;  // TBD
+    mexas::make_module_interface();
+
+    min::push ( mexas::modules ) = m;
+
+    return m;
 }
