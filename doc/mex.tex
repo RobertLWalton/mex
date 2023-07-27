@@ -1035,7 +1035,7 @@ are explained in Tracing and Exceptions, \itemref{TRACING-AND-EXCEPTIONS}.
     & minimum number of arguments expected.
 \\\hline
 \TT{ENDF}
-    & Add \TT{immedA} to \TT{sp} (popping the stack \TT{immedA} times),
+    & Subtract \TT{immedA} to \TT{sp} (popping the stack \TT{immedA} times),
     					then pop \\
     & the return stack, set the process \TT{fp[immedB]} member to the \\
     & \TT{saved\_fp} member of the value popped, and set the process \TT{pc} \\
@@ -1069,7 +1069,7 @@ are explained in Tracing and Exceptions, \itemref{TRACING-AND-EXCEPTIONS}.
     & member from \TT{immedD} (which must convert to a \TT{mex::module}).
 \\\hline
 \TT{RET}
-    & Pop \TT{immedC} values from the stack and save them.  Then add \\
+    & Pop \TT{immedC} values from the stack and save them.  Then subtract \\
     & \TT{immedA} to \TT{sp} (popping the stack \TT{immedA} times), then push \\
     & the saved values into the stack.  Then pop the return stack \\
     & and set the the process's \TT{pc} and \TT{fp[immedB]} members from the \\
