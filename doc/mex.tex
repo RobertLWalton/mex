@@ -239,7 +239,7 @@
 
 \author{Robert L. Walton}
 
-\date{July 26, 2023}
+\date{July 27, 2023}
  
 \maketitle
 
@@ -978,23 +978,21 @@ are explained in Tracing and Exceptions, \itemref{TRACING-AND-EXCEPTIONS}.
     & continue as per the \TT{JMP} instruction.  Otherwise do nothing.
 \\\hline
 \TT{JMPLT/JMPLEQ}
-    & Pop 2 values and compare them.  If the first popped is \\
-    & less-than/less-than-or-equal-to the second popped, \\
-    & continue as per the \TT{JMP} instruction.  Otherwise do nothing.
+    & Ditto, but \TT{JMP} if the first popped is \\
+    & less-than/less-than-or-equal-to the second popped.
 \\\hline
 \TT{JMPGT/JMPGEQ}
-    & Pop 2 values and compare them.  If the first popped is \\
-    & greater-than/greater-than-or-equal-to the second popped, \\
-    & continue as per the \TT{JMP} instruction.  Otherwise do nothing.
+    & Ditto, but \TT{JMP} if the first popped is \\
+    & greater-than/greater-than-or-equal-to the second popped.
 \\\hline
-\TT{BEG}/\TT{NOP}
-    & Do nothing.
-\\\hline
-\TT{END}
-    & Subtract \TT{immedA} to \TT{sp} (popping the stack \TT{immedA} times).
+\TT{BEG}/\TT{NOP}/\TT{END}
+    & Subtract \TT{immedA} to \TT{sp} (popping the stack \TT{immedA} times). \\
+    & For \TT{BEG}/\TT{END} the values popped are always trace values.
 \\\hline
 \TT{BEGL}
-    & Take the top \TT{immedB} values in the stack and push a copy of \\
+    & Subtract \TT{immedA} to \TT{sp} (popping the stack \TT{immedA} times).
+      Then \\
+    & take the top \TT{immedB} values in the stack and push a copy of \\
     & them all into the stack, preserving stack ordering.
 \\\hline
 \TT{ENDL}/\TT{CONT}
