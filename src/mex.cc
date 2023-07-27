@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Jul 26 02:29:49 EDT 2023
+// Date:	Thu Jul 27 03:17:25 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1412,6 +1412,11 @@ bool mex::run_process ( mex::process p )
 	    min::gen immedD = pc->immedD;
 
 	    bool fatal_error = false;
+	        // Set true by terminating ERROR.
+	    min::gen value;
+	        // Value to be pushed or popped.
+		// Computed early for tracing.
+	     
 
 	    // Pre-trace check for fatal errors.
 	    //
@@ -1429,6 +1434,7 @@ bool mex::run_process ( mex::process p )
 		        "stack too large for push";
 		    goto INNER_FATAL;
 		}
+		value = sp[-immedA-1];
 		break;
 	    case mex::PUSHI:
 		if ( sp >= spend )
@@ -1437,6 +1443,7 @@ bool mex::run_process ( mex::process p )
 		        "stack too large for push";
 		    goto INNER_FATAL;
 		}
+		value = immedD;
 		break;
 	    case mex::PUSHG:
 	    {
@@ -1462,6 +1469,7 @@ bool mex::run_process ( mex::process p )
 		        "stack too large for push";
 		    goto INNER_FATAL;
 		}
+		value = mg->globals[immedA];
 		break;
 	    }
 	    case mex::PUSHL:
@@ -1492,6 +1500,13 @@ bool mex::run_process ( mex::process p )
 		    message = "immedA too large";
 		    goto INNER_FATAL;
 		}
+	        if ( immedB == 0
+		     &&
+		     m->globals != min::NULL_STUB )
+		    value = m->globals[immedA];
+		else
+		    value =
+			spbegin[p->fp[immedB] + immedA];
 		break;
 	    case mex::PUSHA:
 		if ( immedB > mex::max_lexical_level )
@@ -1504,6 +1519,7 @@ bool mex::run_process ( mex::process p )
 		    message = "immedA too large";
 		    goto INNER_FATAL;
 		}
+		value = spbegin[p->fp[immedB] - immedA];
 		break;
 	    case mex::PUSHNARGS:
 		if ( p->return_stack->length == 0 )
@@ -1517,6 +1533,14 @@ bool mex::run_process ( mex::process p )
 		        "stack too large for push";
 		    goto INNER_FATAL;
 		}
+		{
+		    int rp = p->return_stack->length;
+		    -- rp;
+		    mex::ret * ret =
+			~ ( p->return_stack + rp );
+		    value = min::new_direct_float_gen
+				   ( ret->nargs );
+		}
 		break;
 	    case mex::POPS:
 		if ( sp <= spbegin )
@@ -1525,11 +1549,12 @@ bool mex::run_process ( mex::process p )
 		        "stack empty for pop";
 		    goto INNER_FATAL;
 		}
-	        if ( immedA + 1 > sp - spbegin )
+	        if ( immedA >= sp - spbegin )
 		{
 		    message = "immedA too large";
 		    goto INNER_FATAL;
 		}
+		value = sp[-1];
 		break;
 	    case mex::BEG:
 	        break;
@@ -1716,7 +1741,7 @@ bool mex::run_process ( mex::process p )
 		    p->printer
 		        << "!!! FATAL ERROR: "
 			   " ERROR instruction with"
-			   " zero immedB"
+			   " non-zero immedB"
 			<< min::eol;
 
 		min::phrase_position pp =
@@ -1784,53 +1809,24 @@ bool mex::run_process ( mex::process p )
 	    switch ( op_code )
 	    {
 	    case mex::PUSHS:
+	    case mex::PUSHA:
+	    case mex::PUSHNARGS:
 	    {
-		* sp = sp[-immedA-1];
-		++ sp;
+		* sp ++ = value;
 		break;
 	    }
 	    case mex::PUSHI:
-	    {
-		sp = mex::process_push
-		    ( p, sp, immedD );
-		break;
-	    }
 	    case mex::PUSHG:
-	    {
-	        mex::module mg = (mex::module) immedD;
-		sp = mex::process_push
-		    ( p, sp, mg->globals[immedA] );
-		break;
-	    }
 	    case mex::PUSHL:
-	        if ( immedB == 0
-		     &&
-		     m->globals != min::NULL_STUB )
-		    * sp ++ = m->globals[immedA];
-		else
-		    * sp ++ =
-			spbegin[p->fp[immedB] + immedA];
-		break;
-	    case mex::PUSHA:
 	    {
-		* sp ++ =
-		    spbegin[p->fp[immedB] - immedA];
-		break;
-	    }
-	    case mex::PUSHNARGS:
-	    {
-		int rp = p->return_stack->length;
-		-- rp;
-		mex::ret * ret =
-		    ~ ( p->return_stack + rp );
-		* sp ++ = min::new_direct_float_gen
-		               ( ret->nargs );
+		sp = mex::process_push
+		    ( p, sp, value );
 		break;
 	    }
 	    case mex::POPS:
 	    {
 		-- sp;
-		sp[-immedA] = * sp;
+		sp[-immedA] = value;
 		break;
 	    }
 	    case mex::BEG:

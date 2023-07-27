@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Jul 26 15:15:53 EDT 2023
+// Date:	Thu Jul 27 02:37:31 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1007,7 +1007,9 @@ mex::module mexas::compile
 	{
 	    switch ( op_code )
 	    {
+	    case ::PUSH:
 	    case ::PUSHM:
+	    case mex::PUSHG:
 	    {
 		min::gen name =
 		    mexas::get_name ( index );
@@ -1121,7 +1123,6 @@ mex::module mexas::compile
 		    break;
 		}
 		}
-		mexas::push_instr ( instr, pp );
 		min::gen new_name =
 		    mexas::get_name ( index );
 		if ( new_name != min::NONE() )
@@ -1131,6 +1132,11 @@ mex::module mexas::compile
 		        mexas::get_star ( index );
 		if ( new_name == min::NONE() )
 		    new_name = name;
+
+		min::gen labbuf[2] = { new_name, name };
+		min::locatable_gen trace_info
+		    ( min::new_lab_gen ( labbuf, 2 ) );
+		mexas::push_instr ( instr, pp, trace_info );
 		mexas::push_variable
 		    ( mexas::variables, new_name,
 		      L, mexas::depth[L] );
@@ -1147,7 +1153,7 @@ mex::module mexas::compile
 		    continue;
 		}
 		instr.immedD = D;
-		mexas::push_instr ( instr, pp );
+
 		min::gen new_name =
 		    mexas::get_name ( index );
 		if ( new_name != min::NONE() )
@@ -1157,6 +1163,9 @@ mex::module mexas::compile
 		        mexas::get_star ( index );
 		if ( new_name == min::NONE() )
 		    new_name = mexas::star;
+
+		mexas::push_instr
+		    ( instr, pp, new_name );
 		mexas::push_variable
 		    ( mexas::variables, new_name,
 		      L, mexas::depth[L] );
@@ -1209,7 +1218,18 @@ mex::module mexas::compile
 		else
 		    instr.immedA = 0;
 		instr.op_code = mex::POPS;
-		mexas::push_instr ( instr, pp );
+
+		min::gen old_name =
+		    ( mexas::variables
+		      +
+		      ( mexas::variables->length - 1 ) )
+		    ->name;
+		min::gen labbuf[2] = { name, old_name };
+		min::locatable_gen trace_info
+		    ( min::new_lab_gen ( labbuf, 2 ) );
+
+		mexas::push_instr
+		    ( instr, pp, trace_info );
 		min::pop ( mexas::variables );
 		goto TRACE;
 	    }
