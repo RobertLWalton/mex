@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Jul 27 03:17:25 EDT 2023
+// Date:	Thu Jul 27 14:17:50 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1419,6 +1419,8 @@ bool mex::run_process ( mex::process p )
 	     
 
 	    // Pre-trace check for fatal errors.
+	    // Also compute value for PUSH... and
+	    // POP... .
 	    //
 	    switch ( op_code )
 	    {
@@ -1764,12 +1766,46 @@ bool mex::run_process ( mex::process p )
 		    p->printer
 		        << min::pline_numbers
 			    ( m->position->file, pp )
-			<< ": ";
+			<< ": "
+		        << mex::op_infos[op_code].name;
 
 		min::gen tinfo  = min::MISSING();
 		if (   p->pc.index
 		     < m->trace_info->length )
 		    tinfo = m->trace_info[p->pc.index];
+
+		switch ( op_code )
+		{
+		case mex::PUSHS:
+		case mex::PUSHL:
+		case mex::PUSHG:
+		case mex::PUSHA:
+		{
+		    min::lab_ptr lp ( tinfo );
+		    if ( lp != min::NULL_STUB
+		         &&
+			 lablen ( lp ) == 2 )
+		    {
+		        p->printer << " "
+			           << lp[0]
+				   << " <=== "
+				   << lp[1];
+		    }
+		    p->printer << " " << value;
+		}
+		case mex::PUSHI:
+		case mex::PUSHNARGS:
+		{
+		    if ( min::is_str ( tinfo ) )
+		        p->printer << " "
+			           << tinfo
+				   << " <===";
+		    p->printer << " " << value;
+		}
+		// TBD
+
+		}
+
 		min::gen name = min::MISSING();
 		min::uns32 tinfo_length = 0;
 		if ( min::is_obj ( tinfo ) )
