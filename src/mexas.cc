@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Jul 28 15:37:07 EDT 2023
+// Date:	Fri Jul 28 16:18:28 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1030,7 +1030,7 @@ mex::module mexas::compile
 			mexas::compile_error
 			    ( pp, "variable named ",
 				  min::pgen ( name ),
-				  " not defined within;"
+				  " not defined within"
 				  " module; instruction"
 				  " ignored" );
 			continue;
@@ -1192,7 +1192,7 @@ mex::module mexas::compile
 			mexas::compile_error
 			    ( pp, "variable named ",
 				  min::pgen ( name ),
-				  " not defined within;"
+				  " not defined within"
 				  " module; instruction"
 				  " ignored" );
 			continue;
