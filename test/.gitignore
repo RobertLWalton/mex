@@ -1,4 +1,4 @@
 *.o
 *.out
 mex_test_math_signals
-mexas_scanner_test
+mexas_*_test
