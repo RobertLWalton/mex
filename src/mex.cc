@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Jul 28 01:37:15 EDT 2023
+// Date:	Fri Jul 28 02:02:53 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -129,12 +129,16 @@ static min::float64 powi ( min::float64 x, unsigned i )
 
 inline void print_indent ( mex::process p )
 {
-    unsigned i = ( p->trace_depth + 1 )
-	       * mex::trace_indent;
-    while ( 1 < i )
+    unsigned i = p->trace_depth % 10;
+    if ( p->optimize ) i = 0;
+       // In optimize mode an instruction might
+       // occassionally be executed in non-optimize
+       // mode and change the depth.
+    unsigned j = ( i + 1 ) * mex::trace_indent;
+    while ( 1 < j )
     {
 	p->printer << mex::trace_mark;
-	-- i;
+	-- j;
     }
     p->printer << ' ';
 }
@@ -1892,12 +1896,14 @@ bool mex::run_process ( mex::process p )
 		break;
 	    }
 	    case mex::BEG:
+		++ p->trace_depth;
 	        break;
 	    case mex::NOP:
 	        break;
 	    case mex::END:
 	    {
 		sp -= immedA;
+		-- p->trace_depth;
 		break;
 	    }
 	    case mex::BEGL:
@@ -1906,6 +1912,7 @@ bool mex::run_process ( mex::process p )
 		min::gen * q2 = sp;
 		while ( q1 < q2 )
 		    * sp ++ = * q1 ++;
+		++ p->trace_depth;
 	        break;
 	    }
 	    case mex::ENDL:
@@ -1922,6 +1929,7 @@ bool mex::run_process ( mex::process p )
 		    sp[-immedB-i] = sp[-i];
 		pc -= immedC;
 		-- pc;
+		-- p->trace_depth;
 		break;
 	    }
 	    case mex::SET_TRACE:
@@ -1936,10 +1944,13 @@ bool mex::run_process ( mex::process p )
 	    {
 		pc += immedC;
 		-- pc;
+		++ p->trace_depth;
 		break;
 	    }
-	    case mex::RET:
 	    case mex::ENDF:
+		-- p->trace_depth;
+		// Fall through.
+	    case mex::RET:
 	    {
 		if ( op_code == mex::ENDF ) immedC = 0;
 		min::uns32 rp = p->return_stack->length;
@@ -1972,6 +1983,7 @@ bool mex::run_process ( mex::process p )
 		pc = pcbegin + new_pc;
 		pcend = pcbegin + m->length;
 		-- pc;
+		break;
 	    }
 	    case mex::CALLM:
 	    case mex::CALLG:
@@ -2000,6 +2012,7 @@ bool mex::run_process ( mex::process p )
 		new_pc = { cm, immedC + 1 };
 		mex::set_pc ( p, new_pc );
 		m = cm;
+		break;
 	    }
 
 	    } // end switch ( op_code )
