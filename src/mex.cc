@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Jul 27 21:41:26 EDT 2023
+// Date:	Fri Jul 28 01:37:15 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1834,39 +1834,26 @@ bool mex::run_process ( mex::process p )
 			for ( min::uns32 i = 1;
 			      i < len; ++ i )
 			{
-			    min::uns32 j =
-			        p->length - i - 1;
+			    min::uns32 j = len - i;
 			    p->printer
 			        << ", " << lp[i]
-			        << " = " << p[j];
+				<< " = ";
+			    if ( j <= p->length )
+			        p->printer
+				    << p[p->length-j];
+			    else
+			        p->printer << "?";
 			}
+		    }
+		    else switch ( op_code )
+		    {
+		    case mex::ERROR:
+		        p->printer << " " << immedB;
+			break;
 		    }
 		}
 
 		}
-
-		min::gen name = min::MISSING();
-		min::uns32 tinfo_length = 0;
-		if ( min::is_obj ( tinfo ) )
-		{
-		    min::obj_vec_ptr vp ( tinfo );
-		    tinfo_length = min::size_of ( vp );
-		    if ( tinfo_length >= 1 )
-		        name = vp[0];
-		}
-		else if ( min::is_str ( tinfo ) )
-		    name = tinfo;
-
-		if ( name == min::MISSING() )
-		    p->printer << op_info->name;
-		else
-		    p->printer << name;
-
-		if ( tinfo_length > 1
-		     &&
-		     p->trace_function != NULL )
-		    (* p->trace_function)
-		        ( p, tinfo );     
 
 		p->printer << min::eom;
 
