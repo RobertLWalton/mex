@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Jul 27 14:17:50 EDT 2023
+// Date:	Thu Jul 27 21:41:26 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1784,7 +1784,7 @@ bool mex::run_process ( mex::process p )
 		    min::lab_ptr lp ( tinfo );
 		    if ( lp != min::NULL_STUB
 		         &&
-			 lablen ( lp ) == 2 )
+			 min::lablen ( lp ) == 2 )
 		    {
 		        p->printer << " "
 			           << lp[0]
@@ -1802,7 +1802,46 @@ bool mex::run_process ( mex::process p )
 				   << " <===";
 		    p->printer << " " << value;
 		}
-		// TBD
+		case mex::SET_TRACE:
+		{
+		    const char * prefix = ": ";
+		    if ( immedA & mex::TRACE )
+		    {
+		        p->printer << prefix << "TRACE";
+			prefix = ", ";
+		    }
+		    if ( immedA & mex::TRACE_LINES )
+		    {
+		        p->printer << prefix
+			           << "TRACE_LINES";
+			prefix = ", ";
+		    }
+		    if ( immedA & mex::TRACE_NOJUMP )
+		        p->printer << prefix
+			           << "TRACE_NOJUMP";
+		}
+
+		default:
+		{
+		    min::lab_ptr lp ( tinfo );
+		    if ( lp != min::NULL_STUB
+		         &&
+			 min::lablen ( lp ) > 0 )
+		    {
+		        min::uns32 len =
+			    min::lablen ( lp );
+		        p->printer << ":  " << lp[0];
+			for ( min::uns32 i = 1;
+			      i < len; ++ i )
+			{
+			    min::uns32 j =
+			        p->length - i - 1;
+			    p->printer
+			        << ", " << lp[i]
+			        << " = " << p[j];
+			}
+		    }
+		}
 
 		}
 
