@@ -1,0 +1,13 @@
+// MEXAS Compile Test 1 Input
+//
+// File:	mexas_compile_test_1.in
+// Author:	Bob Walton (walton@acm.org)
+// Date:	Fri Jul 28 15:19:37 EDT 2023
+//
+// The authors have placed this program in the public
+// domain; they make no warranty and accept no liability
+// for this program.
+
+PUSHI 2 X
+PUSHI 2 Y
+ADD Z

@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Jul 28 02:02:53 EDT 2023
+// Date:	Fri Jul 28 15:36:53 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -60,7 +60,7 @@ static min::uns32 module_stub_disp[] =
     min::DISP_END
 };
 
-static min::packed_vec<min::gen,mex::module_header>
+static min::packed_vec<mex::instr,mex::module_header>
      module_vec_type
          ( "module_vec_type",
 	   ::instr_gen_disp,

@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Jul 27 02:37:31 EDT 2023
+// Date:	Fri Jul 28 15:37:07 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -135,7 +135,7 @@ static min::packed_vec<mexas::function_element>
 min::locatable_var<mexas::function_stack>
     mexas::functions;
 
-static min::packed_vec<mex::op_code>
+static min::packed_vec<mexas::block_element>
      block_stack_vec_type
          ( "block_stack_vec_type" );
 

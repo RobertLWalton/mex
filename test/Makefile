@@ -2,7 +2,7 @@
 #
 # File:		Makefile
 # Author:	Bob Walton (walton@acm.org)
-# Date:		Fri Jul 28 15:09:48 EDT 2023
+# Date:		Fri Jul 28 15:36:08 EDT 2023
 #
 # The authors have placed this program in the public
 # domain; they make no warranty and accept no liability
@@ -26,7 +26,8 @@ OPTIMIZE = -O3
 
 DIFFOPT ?= -u
 
-TESTS = mexas_scanner_test_1
+TESTS = mexas_scanner_test_1 \
+        mexas_compile_test_1
 
 MIN_H =	${MIN}/include/min.h
 
@@ -129,10 +130,10 @@ mexas.o:	\
 	    -I ../include -I ${MIN}/include \
 	    -c ../src/mexas.cc
 
-mexas_scanner_test:	\
+mexas_%_test:	\
 	${MEXAS_H} \
 	${MEXAS_O} \
-	mexas_scanner_test.cc \
+	mexas_%_test.cc \
 	Makefile
 	g++ -g ${GFLAGS} ${WFLAGS} \
 	    -I ../include -I ${MIN}/include \
@@ -146,6 +147,15 @@ mexas_scanner_test_%.out:	\
 	${RUNENV} mexas_scanner_test \
 	    < mexas_scanner_test_$*.in \
 	    > mexas_scanner_test_$*.out
+
+mexas_compile_test_%.out:	\
+		mexas_compile_test \
+		mexas_compile_test_%.in \
+		Makefile
+	rm -f mexas_compile_test_$*.out
+	${RUNENV} mexas_compile_test \
+	    < mexas_compile_test_$*.in \
+	    > mexas_compile_test_$*.out
 
 
 clean:
