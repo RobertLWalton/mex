@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat Jul 29 15:56:29 EDT 2023
+// Date:	Sat Jul 29 16:49:14 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1226,12 +1226,7 @@ mex::module mexas::compile
 		if ( name == min::NONE() )
 		    name = mexas::get_star ( index );
 		if ( name == min::NONE() )
-		{
-		    mexas::compile_error
-			( pp, "no variable name:"
-			      " instruction ignored" );
-		    continue;
-		}
+		    name = mexas::star;
 		if ( name != mexas::star )
 		{
 		    min::uns32 j = search ( name, SP );

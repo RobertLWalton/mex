@@ -4,12 +4,14 @@ Compile module and dump instructions
 //
 // File:        mexas_compile_test_1.in
 // Author:      Bob Walton (walton@acm.org)
-// Date:        Sat Jul 29 04:43:27 EDT 2023
+// Date:        Sat Jul 29 17:27:40 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
 // for this program.
 
+// PUSH, POP, ARITHMETIC OP TEST
+//
 PUSHI 2 X
     [0]PUSHI 0 0 0 2; X
 PUSHI 2 Y
@@ -29,4 +31,18 @@ PUSH Z W
 SUB
     [4]SUB 0 0 0 [$ MISSING $]; *
     STACK: *
+POP
+    [5]POPS 0 0 0 [$ MISSING $]; [< * * >]
+    STACK:
+// JMP TEST
+//
+PUSHI 2 X
+    [6]PUSHI 0 0 0 2; X
+JMP BY-Y
+    [7]JMP 0 0 0 [$ MISSING $]; BY-Y
+PUSHI 4 Y
+    [8]PUSHI 0 0 0 4; Y
+JMP BY-Y
+    [7]JMP 0 1 2 [$ MISSING $]; BY-Y
+    STACK: Y X
 Compile returned true
