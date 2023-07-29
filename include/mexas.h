@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Jul 26 15:34:30 EDT 2023
+// Date:	Sat Jul 29 15:56:11 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -393,6 +393,13 @@ inline min::gen get_num ( min::uns32 & i )
     else
 	return min::NONE();
 }
+
+extern min::uns8 compile_trace_flags;
+    // mex::TRACE and mex::TRACE_LINES to print
+    // compiled instructions as they are assembled.
+void trace_instr ( min::uns32 location );
+    // Print trace of instruction at mexas::ouput_
+    // _module[location], as per compile_trace_flags.
 
 unsigned jump_list_delete
 	( mexas::jump_list jlist );

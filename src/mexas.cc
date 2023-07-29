@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat Jul 29 13:30:59 EDT 2023
+// Date:	Sat Jul 29 15:56:29 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -460,6 +460,8 @@ unsigned mexas::jump_list_resolve
 	    instr->trace_flags &= ~ mex::TRACE_DEPTH;
 	    instr->trace_flags |= depth_diff;
 
+	    mexas::trace_instr ( next->jmp_location );
+
 	    previous->next = next->next;
 	    next->next = free->next;
 	    free->next = n;
@@ -641,14 +643,18 @@ unsigned mexas::endx ( mex::instr & instr,
     return 0;
 }
 
-void trace_instruction
-	( min::uns32 location, min::uns8 compile_flags )
+min::uns8 mexas::compile_trace_flags;
+void mexas::trace_instr ( min::uns32 location )
 {
+    min::uns8 trace_flags = mexas::compile_trace_flags;
     min::printer printer =
 	mexas::input_file->printer;
     mex::module m = mexas::output_module;
 
-    if ( compile_flags & mex::TRACE_LINES )
+    if ( ( trace_flags & mex::TRACE ) == 0 )
+	return;
+
+    if ( trace_flags & mex::TRACE_LINES )
 	min::print_phrase_lines
 	    ( printer, mexas::input_file,
 	      m->position[location] );
@@ -898,6 +904,7 @@ mex::module mexas::compile
 
     mexas::default_trace_flags = default_flags;
     mexas::next_trace_flags = default_flags;
+    mexas::compile_trace_flags = compile_flags;
 
     min::pop ( mexas::variables,
                mexas::variables->length );
@@ -1274,6 +1281,23 @@ mex::module mexas::compile
 		min::pop ( mexas::variables );
 		goto TRACE;
 	    }
+	    case ::LABEL:
+	    {
+		min::gen target =
+		    mexas::get_name ( index );
+		if ( target == min::NONE() )
+		{
+		    mexas::compile_error
+			( pp, "label does not have a "
+			      " jmp-target that is a"
+			      " name; declaraton"
+			      " ignored" );
+		    continue;
+		}
+		mexas::jump_list_resolve
+		    ( mexas::jumps, target );
+		continue;
+	    }
 	    case ::STACK:
 	    {
 		min::printer printer =
@@ -1303,10 +1327,7 @@ mex::module mexas::compile
 	}
 	TRACE:
 	{
-	    if ( ( compile_flags & mex::TRACE ) == 0 )
-	        continue;
-	    trace_instruction
-	        ( m->length - 1, compile_flags );
+	    trace_instr ( m->length - 1 );
 	    continue;
 	}
 
