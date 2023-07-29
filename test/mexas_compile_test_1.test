@@ -11,12 +11,12 @@ Compile module and dump instructions
 // for this program.
 
 PUSHI 2 X
-    PUSHI 0 0 0 2; X
+    [0]PUSHI 0 0 0 2; X
 PUSHI 2 Y
-    PUSHI 0 0 0 2; Y
+    [1]PUSHI 0 0 0 2; Y
     STACK: Y X
 ADD Z
-    ADD 0 0 0 [$ MISSING $]; Z
+    [2]ADD 0 0 0 [$ MISSING $]; Z
     STACK: Z
 ERROR: in line ##: variable named X not defined within module;
        instruction ignored:
@@ -25,8 +25,8 @@ ERROR: in line ##: portion of stack in the current block is too little
        to pop required arguments; instruction ignored:
 ADD
 PUSH Z W
-    PUSHS 1 0 0 [$ MISSING $]; [< W Z >]
+    [3]PUSHS 1 0 0 [$ MISSING $]; [< W Z >]
 SUB
-    SUB 0 0 0 [$ MISSING $]; *
+    [4]SUB 0 0 0 [$ MISSING $]; *
     STACK: *
 Compile returned true

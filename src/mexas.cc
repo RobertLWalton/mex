@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat Jul 29 04:26:21 EDT 2023
+// Date:	Sat Jul 29 13:30:59 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -641,6 +641,37 @@ unsigned mexas::endx ( mex::instr & instr,
     return 0;
 }
 
+void trace_instruction
+	( min::uns32 location, min::uns8 compile_flags )
+{
+    min::printer printer =
+	mexas::input_file->printer;
+    mex::module m = mexas::output_module;
+
+    if ( compile_flags & mex::TRACE_LINES )
+	min::print_phrase_lines
+	    ( printer, mexas::input_file,
+	      m->position[location] );
+    printer << min::bol << "    " << min::bom;
+    mex::instr instr = m[location];
+    printer
+	<< "[" << location << "]"
+	<< mex::op_infos[instr.op_code].name;
+    if ( instr.trace_flags & mex::TRACE )
+	printer << " TRACE";
+    if ( instr.trace_flags & mex::TRACE_LINES )
+	printer << " TRACE_LINES";
+    if ( instr.trace_flags & mex::TRACE_NOJUMP )
+	printer << " TRACE_NOJUMP";
+    printer << " " << instr.immedA
+	    << " " << instr.immedB
+	    << " " << instr.immedC
+	    << " " << instr.immedD
+	    << "; "
+	    << m->trace_info[location]
+	    << min::eom;
+}
+
 
 // Scanner Function
 // ------- --------
@@ -1274,28 +1305,8 @@ mex::module mexas::compile
 	{
 	    if ( ( compile_flags & mex::TRACE ) == 0 )
 	        continue;
-	    min::printer printer =
-	        mexas::input_file->printer;
-	    if ( compile_flags & mex::TRACE_LINES )
-		min::print_phrase_lines
-		    ( printer, mexas::input_file, pp );
-	    printer << min::bol << "    " << min::bom;
-	    mex::instr instr = m[m->length-1];
-	    printer
-	        << mex::op_infos[instr.op_code].name;
-	    if ( instr.trace_flags & mex::TRACE )
-	        printer << " TRACE";
-	    if ( instr.trace_flags & mex::TRACE_LINES )
-	        printer << " TRACE_LINES";
-	    if ( instr.trace_flags & mex::TRACE_NOJUMP )
-	        printer << " TRACE_NOJUMP";
-	    printer << " " << instr.immedA
-	            << " " << instr.immedB
-	            << " " << instr.immedC
-	            << " " << instr.immedD
-	            << "; "
-		    << m->trace_info[m->length-1]
-		    << min::eom;
+	    trace_instruction
+	        ( m->length - 1, compile_flags );
 	    continue;
 	}
 
