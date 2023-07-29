@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Jul 28 16:18:28 EDT 2023
+// Date:	Sat Jul 29 04:26:21 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -55,6 +55,7 @@ enum op_code
     LABEL,
     INSTRUCTION_TRACE,
     DEFAULT_TRACE,
+    STACK,
     NUMBER_OF_OP_CODES
 };
 
@@ -68,7 +69,8 @@ static mex::op_info op_infos[] =
     { ::INSTRUCTION_TRACE, mex::NONA,
                            "INSTRUCTION_TRACE" },
     { ::DEFAULT_TRACE, mex::NONA,
-                            "DEFAULT_TRACE" }
+                            "DEFAULT_TRACE" },
+    { ::STACK, mex::NONA, "STACK" }
 };
 
 static void init_op_code_table ( void )
@@ -1061,14 +1063,17 @@ mex::module mexas::compile
 		    min::uns32 limit =
 			( L == 0 ? mexas::stack_limit :
 				   mexas::lp[1] );
-		    min::uns32 j = search ( name, limit );
+		    min::uns32 j =
+		        search ( name, limit );
 		    if ( j == mexas::NOT_FOUND )
 		    {
 			mexas::compile_error
 			    ( pp, "variable named ",
 				  min::pgen ( name ),
-				  " not globally defined;"
-				  " instruction ignored" );
+				  " not globally"
+				  " defined;"
+				  " instruction"
+				  " ignored" );
 			continue;
 		    }
 		    instr.op_code = mex::PUSHL;
@@ -1087,7 +1092,8 @@ mex::module mexas::compile
 		    {
 			mexas::compile_error
 			    ( pp, "no module name:"
-				  " instruction ignored" );
+				  " instruction"
+				  " ignored" );
 			continue;
 		    }
 		    min::gen name =
@@ -1096,7 +1102,8 @@ mex::module mexas::compile
 		    {
 			mexas::compile_error
 			    ( pp, "no variable name:"
-				  " instruction ignored" );
+				  " instruction"
+				  " ignored" );
 			continue;
 		    }
 		    mex::module gm;
@@ -1110,9 +1117,11 @@ mex::module mexas::compile
 			    ( pp, "variable named ",
 				  min::pgen ( name ),
 				  " in module named ",
-				  min::pgen ( mod_name ),
+				  min::pgen
+				      ( mod_name ),
 				  " not defined;"
-				  " instruction ignored" );
+				  " instruction"
+				  " ignored" );
 			continue;
 		    }
 
@@ -1136,7 +1145,8 @@ mex::module mexas::compile
 		min::gen labbuf[2] = { new_name, name };
 		min::locatable_gen trace_info
 		    ( min::new_lab_gen ( labbuf, 2 ) );
-		mexas::push_instr ( instr, pp, trace_info );
+		mexas::push_instr
+		    ( instr, pp, trace_info );
 		mexas::push_variable
 		    ( mexas::variables, new_name,
 		      L, mexas::depth[L] );
@@ -1233,6 +1243,31 @@ mex::module mexas::compile
 		min::pop ( mexas::variables );
 		goto TRACE;
 	    }
+	    case ::STACK:
+	    {
+		min::printer printer =
+		    mexas::input_file->printer;
+		printer << min::bol << "    STACK: "
+		        << min::bom;
+		min::uns32 ell = L;
+		for ( min::uns32 i = variables->length;
+		      0 < i; )
+		{
+		    if ( i == mexas::fp[ell] )
+		        printer << "; ";
+		    if ( i == mexas::lp[ell] )
+		    {
+		        printer << "| ";
+			-- ell;
+		    }
+		    -- i;
+		    min::gen name = (variables+i)->name;
+		    printer << min::pgen ( name );
+		    if ( i > 0 ) printer << " ";
+		}
+		printer << min::eom;
+		continue;
+	    }
 	    }
 	}
 	TRACE:
@@ -1246,7 +1281,8 @@ mex::module mexas::compile
 		    ( printer, mexas::input_file, pp );
 	    printer << min::bol << "    " << min::bom;
 	    mex::instr instr = m[m->length-1];
-	    printer << mex::op_infos[instr.op_code].name;
+	    printer
+	        << mex::op_infos[instr.op_code].name;
 	    if ( instr.trace_flags & mex::TRACE )
 	        printer << " TRACE";
 	    if ( instr.trace_flags & mex::TRACE_LINES )

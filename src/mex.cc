@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Jul 28 15:36:53 EDT 2023
+// Date:	Sat Jul 29 04:44:32 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1236,8 +1236,10 @@ bool mex::run_process ( mex::process p )
 
 		char buffer[200];
 	        sprintf
-		    ( buffer, " = %.15g <= %.15g %s %.15g",
-		      result, arg1, op_info->oper, arg2 );
+		    ( buffer,
+		      " = %.15g <= %.15g %s %.15g",
+		      result,
+		      arg1, op_info->oper, arg2 );
 		p->printer << buffer << min::eom;
 
 	        RESTORE;

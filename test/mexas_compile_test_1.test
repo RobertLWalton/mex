@@ -4,7 +4,7 @@ Compile module and dump instructions
 //
 // File:        mexas_compile_test_1.in
 // Author:      Bob Walton (walton@acm.org)
-// Date:        Fri Jul 28 17:49:50 EDT 2023
+// Date:        Sat Jul 29 04:43:27 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -14,8 +14,10 @@ PUSHI 2 X
     PUSHI 0 0 0 2; X
 PUSHI 2 Y
     PUSHI 0 0 0 2; Y
+    STACK: Y X
 ADD Z
     ADD 0 0 0 [$ MISSING $]; Z
+    STACK: Z
 ERROR: in line ##: variable named X not defined within module;
        instruction ignored:
 PUSH X
@@ -26,4 +28,5 @@ PUSH Z W
     PUSHS 1 0 0 [$ MISSING $]; [< W Z >]
 SUB
     SUB 0 0 0 [$ MISSING $]; *
+    STACK: *
 Compile returned true
