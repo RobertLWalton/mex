@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat Jul 29 21:48:52 EDT 2023
+// Date:	Sun Jul 30 04:36:11 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1278,6 +1278,13 @@ mex::module mexas::compile
 	    }
 	    case ::LABEL:
 	    {
+		if ( mexas::compile_trace_flags
+		     &
+		     mex::TRACE_LINES )
+		    min::print_phrase_lines
+			( mexas::input_file->printer,
+			  mexas::input_file, pp );
+
 		min::gen target =
 		    mexas::get_name ( index );
 		if ( target == min::NONE() )
@@ -1297,6 +1304,12 @@ mex::module mexas::compile
 	    {
 		min::printer printer =
 		    mexas::input_file->printer;
+		if ( mexas::compile_trace_flags
+		     &
+		     mex::TRACE_LINES )
+		    min::print_phrase_lines
+			( printer,
+			  mexas::input_file, pp );
 		printer << min::bol << "    STACK: "
 		        << min::bom;
 		min::uns32 ell = L;

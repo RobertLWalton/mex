@@ -16,9 +16,11 @@ PUSHI 2 X
     [0]PUSHI 0 0 0 2; X
 PUSHI 2 Y
     [1]PUSHI 0 0 0 2; Y
+STACK
     STACK: Y X
 ADD Z
     [2]ADD 0 0 0 [$ MISSING $]; Z
+STACK
     STACK: Z
 ERROR: in line ##: variable named X not defined within module;
        instruction ignored:
@@ -30,9 +32,11 @@ PUSH Z W
     [3]PUSHS 0 0 0 [$ MISSING $]; [< W Z >]
 SUB
     [4]SUB 0 0 0 [$ MISSING $]; *
+STACK
     STACK: *
 POP
     [5]POPS 0 0 0 [$ MISSING $]; [< * * >]
+STACK
     STACK:
 // JMP TEST 1
 // Z = MIN ( X, Y )
@@ -43,11 +47,13 @@ PUSHI 23 Y
     [7]PUSHI 0 0 0 23; Y
 PUSHI NaN Z
     [8]PUSHI 0 0 0 nan; Z
+STACK
     STACK: Z Y X
 PUSH X
     [9]PUSHS 2 0 0 [$ MISSING $]; [< X X >]
 PUSH Y
     [10]PUSHS 2 0 0 [$ MISSING $]; [< Y Y >]
+STACK
     STACK: Y X Z Y X
 JMPLT ITS-X
     [11]JMPLT 0 0 0 [$ MISSING $]; ITS-X
@@ -57,17 +63,24 @@ POP Z
     [13]POPS 1 0 0 [$ MISSING $]; [< Z Y >]
 JMP DONE
     [14]JMP 0 0 0 [$ MISSING $]; DONE
+LABEL ITS-X
 JMPLT ITS-X
     [11]JMPLT 0 0 4 [$ MISSING $]; ITS-X
 PUSH X
     [15]PUSHS 2 0 0 [$ MISSING $]; [< X X >]
 POP Z
     [16]POPS 1 0 0 [$ MISSING $]; [< Z X >]
+LABEL DONE
 JMP DONE
     [14]JMP 0 0 3 [$ MISSING $]; DONE
+STACK
     STACK: Z Y X
 POP
     [17]POPS 0 0 0 [$ MISSING $]; [< * Z >]
+// JMP TEST 2
+// Z = MIN ( X, Y )
+//
+STACK
     STACK: Y X
 PUSH X Z
     [18]PUSHS 1 0 0 [$ MISSING $]; [< Z X >]
@@ -81,6 +94,7 @@ POP
     [22]POPS 0 0 0 [$ MISSING $]; [< * Z >]
 PUSH Y Z
     [23]PUSHS 0 0 0 [$ MISSING $]; [< Z Y >]
+LABEL ITS-X
 JMPLT ITS-X
     [21]JMPLT 0 0 3 [$ MISSING $]; ITS-X
 Compile returned true
