@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat Jul 29 15:56:11 EDT 2023
+// Date:	Sun Jul 30 04:43:18 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -215,6 +215,12 @@ extern min::locatable_var<mexas::module_stack>
 //
 struct jump_element
 {
+    // When a JMP... instruction is pushed to the end of
+    // the code vector, it has immedC == 0, which will
+    // trigger a run-time error if the JMP... is
+    // executed.  Thus unresolved JMP... instructions 
+    // will trigger fatal run-time error.
+    //
     const min::gen target_name;
     min::uns32 jmp_location;
     min::uns8 lexical_level, depth, maximum_depth;
@@ -404,9 +410,10 @@ void trace_instr ( min::uns32 location );
 unsigned jump_list_delete
 	( mexas::jump_list jlist );
     // Go through jlist and delete all jump_elements
-    // that have lexical level greater than mexas::
-    // lexical_level.  This is to be called just AFTER
-    // mexas::lexical_level is decremented.
+    // that have lexical level equal to mexas::
+    // lexical_level.  This is to be called just BEFORE
+    // mexas::lexical_level is decremented, or at the
+    // end of compilation.
     //
     // If this is done, the jump_elements in jlist
     // will be sorted in lexical level order, highest

@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Jul 30 04:36:11 EDT 2023
+// Date:	Sun Jul 30 04:54:41 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -380,18 +380,17 @@ unsigned mexas::jump_list_delete
     while ( min::uns32 n = previous->next )
     {
         min::ptr<mexas::jump_element> next = jlist + n;
-	if (    next->lexical_level
-	     <= mexas::lexical_level )
+	if (   next->lexical_level
+	     < mexas::lexical_level )
 	    break;
 	mexas::compile_error
 	    ( m->position[next->jmp_location],
 	      "jump target undefined: ",
 	      min::pgen ( next->target_name ),
-	      "; JMP... changed to terminating ERROR" );
-	min::ptr<mex::instr> instr =
-	    m + next->jmp_location;
-	instr->op_code = mex::ERROR;
-	instr->immedB = 1;
+	      "; JMP... is unresolved" );
+	    // Unresolved JMP... instructions have
+	    // immedC == 0 which triggers a fatal
+	    // run-time error.
 	previous->next = next->next;
 	next->next = free->next;
 	free->next = n;
@@ -619,6 +618,8 @@ unsigned mexas::endx ( mex::instr & instr,
 	           - e.begin_location;
 	instr.immedA = mexas::variables->length
 	             - e.stack_limit - e.nargs;
+	mexas::jump_list_delete ( mexas::jumps );
+	-- L;
     }
     else if ( instr.op_code == mex::ENDL )
     {
@@ -627,11 +628,13 @@ unsigned mexas::endx ( mex::instr & instr,
 	instr.immedB = e.nargs;
         instr.immedC = mexas::output_module->length
 	             - e.begin_location - 1;
+	-- mexas::depth[L];
     }
     else // if mex::END
     {
 	instr.immedA = mexas::variables->length
 	             - e.stack_limit;
+	-- mexas::depth[L];
     }
 
     min::uns32 len = mexas::blocks->length;
@@ -1340,6 +1343,8 @@ mex::module mexas::compile
 	}
 
     }
+
+    mexas::jump_list_delete ( mexas::jumps );
 
     mexas::make_module_interface();
 
