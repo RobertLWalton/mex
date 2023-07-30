@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Jul 30 06:16:35 EDT 2023
+// Date:	Sun Jul 30 16:41:42 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -179,8 +179,8 @@ min::locatable_var<mexas::statement_lexemes>
 min::uns32 mexas::first_line_number,
            mexas::last_line_number;
 
-static min::locatable_gen single_quote;
-static min::locatable_gen double_quote;
+min::locatable_gen mexas::single_quote;
+min::locatable_gen mexas::double_quote;
 static min::locatable_gen backslash;
 
 static void initialize ( void )
@@ -188,8 +188,8 @@ static void initialize ( void )
     mexas::star = min::new_str_gen ( "*" );
     mexas::V = min::new_str_gen ( "V" );
     mexas::F = min::new_str_gen ( "F" );
-    ::single_quote = min::new_str_gen ( "'" );
-    ::double_quote = min::new_str_gen ( "\"" );
+    mexas::single_quote = min::new_str_gen ( "'" );
+    mexas::double_quote = min::new_str_gen ( "\"" );
     ::backslash = min::new_str_gen ( "\\" );
 
     ::init_op_code_table();
@@ -863,8 +863,9 @@ bool mexas::next_statement ( void )
 	    if ( type != 0 )
 	    {
 	        min::push ( statement ) =
-		    ( type == '\'' ? ::single_quote :
-		                     ::double_quote );
+		    ( type == '\'' ?
+		      mexas::single_quote :
+		      mexas::double_quote );
 		min::push ( statement ) =
 		    min::new_str_gen ( work );
 	    }
@@ -1344,6 +1345,20 @@ mex::module mexas::compile
 		}
 		printer << min::eom;
 		continue;
+	    }
+	    case mex::BEG:
+	    {
+	        min::locatable_gen trace_info
+		    ( mexas::get_trace_info ( index ) );
+		// TBD trace variables
+		mexas::begx ( instr, pp, trace_info );
+	    }
+	    case mex::END:
+	    {
+	        min::locatable_gen trace_info
+		    ( mexas::get_trace_info ( index ) );
+		// TBD trace variables
+		mexas::endx ( instr, pp, trace_info );
 	    }
 	    }
 	}

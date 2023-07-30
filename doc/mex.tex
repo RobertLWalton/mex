@@ -239,7 +239,7 @@
 
 \author{Robert L. Walton}
 
-\date{July 29, 2023}
+\date{July 30, 2023}
  
 \maketitle
 
@@ -1723,18 +1723,19 @@ of the form:
 
 \TT{JMP\ldots} instructions are forward-referencing: their
 {\em jmp-targets} are defined by \TT{LABEL} declaratios that
-occur in source code after the \TT{JMP\ldots} instruction.
+occur in source code \underline{after} the \TT{JMP\ldots} instruction.
 To manage \TT{JMP\ldots} instructions and their targets,
 the assembler maintains a list of \skey{pending jumps}:
 that is, jumps whose {\em jmp-target} has not yet been
 declared.  When a \TT{LABEL} declaration is processed,
 the pending jump list is searched for matching jumps,
-and those that are found are processed and removed from
-the list.  Processing involves calculating the distance
+and those that are found are resolved and removed from
+the list.  Resolving involves calculating the distance
 between the jump and its target, and the number of
-process stack elements the jump should pop and push.
+process stack elements the jump should pop.  Jump instructions
+are allowed to pop stack elements, but cannot push them.
 
-To do this, an element of the pending jump list contains:
+To allow this, an element of the pending jump list contains:
 \begin{enumerate}
 \item The location of the jump instruction so it can be updated
 when its target is found.
@@ -1743,14 +1744,15 @@ when its target is found.
 \item The maximum depth $D$ allowed for the target.
 \item The length $S$ of the variable stack when the jump instruction
       was encountered.
-\item The minimum $M$ of all the variable stack lengths that have
-      occured since the jump instruction was encountered.
+\item The minimum $M$ of $S$ and all the variable stack lengths that have
+      occured after \TT{END} or \TT{ENDL} instructions encountered
+      since the jump instruction was encountered.
       $M\le S$.
 \end{enumerate}
 
 A \TT{JMP\ldots} instruction for which a legal target exists
-is called \key{satisfied}.  Other \TT{JMP\ldots} instructions
-are \key{unsatisfied} and are in error.
+is called \key{resolvable}.  Other \TT{JMP\ldots} instructions
+are \key{unresolvable} and are in error.
 
 The following instructions/declarations act on the pending jump list:
 
@@ -1774,16 +1776,23 @@ decrease their $M$ to $s$.
 \begin{indpar}
 Search the pending jump list for matching elements with $L$ equal
 to the current lexical level and $D$ not less than the current
-depth, satisfy these, and remove them from
+depth, resolve these, and remove them from
 the pending jmp list.
 \end{indpar}
 
 \ttkey{ENDF}
 \begin{indpar}
 Search the pending jump list for elements with $L$ equal to the
-lexical level of the \TT{ENDF} and remove them as being unsatisfied,
+lexical level of the \TT{ENDF} and remove them as being unresolvabl,
 and therefore in error.
 \end{indpar}
+
+{\bf Stack Jump Rule}: When a jump list element is resolved, its $M$
+must equal the length of the stack when the resolving \TT{LABEL}
+is resolved.
+
+In other words, the code jumped over by a \TT{JMP\ldots} must
+have the same stack length at its beginning and at its end.
 
 
 \subsection{MEXAS Instructions}
@@ -1912,8 +1921,7 @@ this instruction adds an element to the pending jump
 list (see \itemref{JMP-TARGETS}).
 
 The statement following a \TT{JMP} must
-be a \TT{LABEL} declaration, a \TT{BEG\ldots} instruction,
-or an \TT{END\ldots} instruction.
+be a \TT{LABEL} declaration or an \TT{END\ldots} instruction.
 \end{indpar}
 
 \ttkey{JMP\ldots} {\em jmp-target}

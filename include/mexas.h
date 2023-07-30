@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Jul 30 04:43:18 EDT 2023
+// Date:	Sun Jul 30 16:42:15 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -86,6 +86,10 @@ extern min::uns32 warning_count;
 
 extern min::locatable_gen star;
     // new_str_gen ( "*" );
+extern min::locatable_gen single_quote;
+    // new_str_gen ( "'" );
+extern min::locatable_gen double_quote;
+    // new_str_gen ( "\"" );
 
 extern min::locatable_gen op_code_table;
     // For op_code OP < ::NUMBER_OF_OP_CODES:
@@ -398,6 +402,30 @@ inline min::gen get_num ( min::uns32 & i )
 	return statement[i++];
     else
 	return min::NONE();
+}
+
+// If statement[i] exists and is a quote, return a
+// label containing the statement lexemes after the
+// quote, and set i = statement->length.  Otherwise
+// return min::MISSING().
+//
+inline min::gen get_trace_info ( min::uns32 & i )
+{
+    if ( i < mexas::statement->length
+         &&
+	 ( statement[i] == mexas::single_quote
+	   ||
+	   statement[i] == mexas::double_quote ) )
+    {
+        min::uns32 len = statement->length - i - 1;
+	min::gen labbuf[len];
+	for ( min::uns32 j = 0; j < len; ++ j )
+	    labbuf[j] = statement[i+1+j];
+	i = statement->length;
+	return new_lab_gen ( labbuf, len );
+    }
+    else
+	return min::MISSING();
 }
 
 extern min::uns8 compile_trace_flags;
