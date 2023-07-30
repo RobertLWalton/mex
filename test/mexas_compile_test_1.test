@@ -4,7 +4,7 @@ Compile module and dump instructions
 //
 // File:        mexas_compile_test_1.in
 // Author:      Bob Walton (walton@acm.org)
-// Date:        Sat Jul 29 17:27:40 EDT 2023
+// Date:        Sun Jul 30 04:21:18 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -27,22 +27,60 @@ ERROR: in line ##: portion of stack in the current block is too little
        to pop required arguments; instruction ignored:
 ADD
 PUSH Z W
-    [3]PUSHS 1 0 0 [$ MISSING $]; [< W Z >]
+    [3]PUSHS 0 0 0 [$ MISSING $]; [< W Z >]
 SUB
     [4]SUB 0 0 0 [$ MISSING $]; *
     STACK: *
 POP
     [5]POPS 0 0 0 [$ MISSING $]; [< * * >]
     STACK:
-// JMP TEST
+// JMP TEST 1
+// Z = MIN ( X, Y )
 //
-PUSHI 2 X
-    [6]PUSHI 0 0 0 2; X
-JMP BY-Y
-    [7]JMP 0 0 0 [$ MISSING $]; BY-Y
-PUSHI 4 Y
-    [8]PUSHI 0 0 0 4; Y
-JMP BY-Y
-    [7]JMP 0 1 2 [$ MISSING $]; BY-Y
+PUSHI 5 X
+    [6]PUSHI 0 0 0 5; X
+PUSHI 23 Y
+    [7]PUSHI 0 0 0 23; Y
+PUSHI NaN Z
+    [8]PUSHI 0 0 0 nan; Z
+    STACK: Z Y X
+PUSH X
+    [9]PUSHS 2 0 0 [$ MISSING $]; [< X X >]
+PUSH Y
+    [10]PUSHS 2 0 0 [$ MISSING $]; [< Y Y >]
+    STACK: Y X Z Y X
+JMPLT ITS-X
+    [11]JMPLT 0 0 0 [$ MISSING $]; ITS-X
+PUSH Y
+    [12]PUSHS 1 0 0 [$ MISSING $]; [< Y Y >]
+POP Z
+    [13]POPS 1 0 0 [$ MISSING $]; [< Z Y >]
+JMP DONE
+    [14]JMP 0 0 0 [$ MISSING $]; DONE
+JMPLT ITS-X
+    [11]JMPLT 0 0 4 [$ MISSING $]; ITS-X
+PUSH X
+    [15]PUSHS 2 0 0 [$ MISSING $]; [< X X >]
+POP Z
+    [16]POPS 1 0 0 [$ MISSING $]; [< Z X >]
+JMP DONE
+    [14]JMP 0 0 3 [$ MISSING $]; DONE
+    STACK: Z Y X
+POP
+    [17]POPS 0 0 0 [$ MISSING $]; [< * Z >]
     STACK: Y X
+PUSH X Z
+    [18]PUSHS 1 0 0 [$ MISSING $]; [< Z X >]
+PUSH X
+    [19]PUSHS 2 0 0 [$ MISSING $]; [< X X >]
+PUSH Y
+    [20]PUSHS 2 0 0 [$ MISSING $]; [< Y Y >]
+JMPLT ITS-X
+    [21]JMPLT 0 0 0 [$ MISSING $]; ITS-X
+POP
+    [22]POPS 0 0 0 [$ MISSING $]; [< * Z >]
+PUSH Y Z
+    [23]PUSHS 0 0 0 [$ MISSING $]; [< Z Y >]
+JMPLT ITS-X
+    [21]JMPLT 0 0 3 [$ MISSING $]; ITS-X
 Compile returned true

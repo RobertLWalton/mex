@@ -239,7 +239,7 @@
 
 \author{Robert L. Walton}
 
-\date{July 27, 2023}
+\date{July 29, 2023}
  
 \maketitle
 
@@ -925,7 +925,7 @@ are explained in Tracing and Exceptions, \itemref{TRACING-AND-EXCEPTIONS}.
 \\\hline
 \TT{ATAN2}/\TT{ATAN2R}
     & Pop 2 values, then push the arc-tangent of the \\
-    & first/second popped divided by the second/first popped.
+    & second/first popped divided by the first/second popped.
 \\\hline
 \TT{POWI}
     & Replace the top value by the top value to the \TT{immedA} power.
@@ -978,12 +978,12 @@ are explained in Tracing and Exceptions, \itemref{TRACING-AND-EXCEPTIONS}.
     & continue as per the \TT{JMP} instruction.  Otherwise do nothing.
 \\\hline
 \TT{JMPLT/JMPLEQ}
-    & Ditto, but \TT{JMP} if the first popped is \\
-    & less-than/less-than-or-equal-to the second popped.
+    & Ditto, but \TT{JMP} if the second popped is \\
+    & less-than/less-than-or-equal-to the first popped.
 \\\hline
 \TT{JMPGT/JMPGEQ}
-    & Ditto, but \TT{JMP} if the first popped is \\
-    & greater-than/greater-than-or-equal-to the second popped.
+    & Ditto, but \TT{JMP} if the second popped is \\
+    & greater-than/greater-than-or-equal-to the first popped.
 \\\hline
 \TT{BEG}/\TT{NOP}/\TT{END}
     & Subtract \TT{immedA} to \TT{sp} (popping the stack \TT{immedA} times). \\

@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat Jul 29 16:49:14 EDT 2023
+// Date:	Sat Jul 29 21:48:52 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1080,7 +1080,7 @@ mex::module mexas::compile
 		    if ( k == L )
 		    {
 			instr.op_code = mex::PUSHS;
-			instr.immedA = SP - j;
+			instr.immedA = SP - j - 1;
 		    }
 		    else if ( j >= mexas::fp[k] )
 		    {
@@ -1256,7 +1256,7 @@ mex::module mexas::compile
 				  " ignored" );
 			continue;
 		    }
-		    instr.immedA = SP - j;
+		    instr.immedA = SP - j - 1;
 		}
 		else
 		    instr.immedA = 0;
