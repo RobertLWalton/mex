@@ -4,7 +4,7 @@ Compile module and dump instructions
 //
 // File:        mexas_compile_test_1.in
 // Author:      Bob Walton (walton@acm.org)
-// Date:        Sun Jul 30 04:21:18 EDT 2023
+// Date:        Sun Jul 30 06:12:54 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -97,4 +97,64 @@ PUSH Y Z
 LABEL ITS-X
 JMPLT ITS-X
     [21]JMPLT 0 0 3 [$ MISSING $]; ITS-X
+POP
+    [24]POPS 0 0 0 [$ MISSING $]; [< * Z >]
+// JMP TEST 3
+// Z = MIN ( X, Y )
+// Z pushed into stack by code jumped over
+//
+STACK
+    STACK: Y X
+PUSH X
+    [25]PUSHS 1 0 0 [$ MISSING $]; [< X X >]
+PUSH Y
+    [26]PUSHS 1 0 0 [$ MISSING $]; [< Y Y >]
+JMPLT ITS-X
+    [27]JMPLT 0 0 0 [$ MISSING $]; ITS-X
+PUSH Y Z
+    [28]PUSHS 0 0 0 [$ MISSING $]; [< Z Y >]
+JMP DONE
+    [29]JMP 0 0 0 [$ MISSING $]; DONE
+LABEL ITS-X
+ERROR: in line ##: code jumped over pushes values into the stack; JMP
+       unresolved:
+JMPLT ITS-X
+PUSH X Z
+    [30]PUSHS 2 0 0 [$ MISSING $]; [< Z X >]
+LABEL DONE
+ERROR: in line ##: code jumped over pushes values into the stack; JMP
+       unresolved:
+JMP DONE
+STACK
+    STACK: Z Z Y X
+POP
+    [31]POPS 0 0 0 [$ MISSING $]; [< * Z >]
+POP
+    [32]POPS 0 0 0 [$ MISSING $]; [< * Z >]
+// JMP TEST 4
+// Z = MIN ( X, Y )
+// Z popped from stack by code jumped over
+//
+STACK
+    STACK: Y X
+PUSH X
+    [33]PUSHS 1 0 0 [$ MISSING $]; [< X X >]
+PUSH Y
+    [34]PUSHS 1 0 0 [$ MISSING $]; [< Y Y >]
+PUSH Y Z
+    [35]PUSHS 0 0 0 [$ MISSING $]; [< Z Y >]
+PUSH X Z
+    [36]PUSHS 2 0 0 [$ MISSING $]; [< Z X >]
+JMPLT ITS-X
+    [37]JMPLT 0 0 0 [$ MISSING $]; ITS-X
+POP
+    [38]POPS 0 0 0 [$ MISSING $]; [< * Y >]
+LABEL ITS-X
+ERROR: in line ##: code jumped over pops values from the stack; JMP
+       unresolved:
+JMPLT ITS-X
+STACK
+    STACK: X Y X
+POP
+    [39]POPS 0 0 0 [$ MISSING $]; [< * X >]
 Compile returned true

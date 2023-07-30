@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Jul 30 04:54:41 EDT 2023
+// Date:	Sun Jul 30 06:16:35 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -440,26 +440,37 @@ unsigned mexas::jump_list_resolve
 	{
 	    min::uns32 depth_diff =
 	        next->depth - mexas::depth[L];
+	    min::phrase_position pp =
+		m->position[next->jmp_location];
 	    if ( depth_diff > mex::TRACE_DEPTH )
-	    {
-		min::phrase_position pp =
-		    m->position[next->jmp_location];
 		mexas::compile_error
 		    ( pp, "jump exits too many"
 		          " blocks" );
+	    if ( SP > next->stack_minimum )
+		mexas::compile_error
+		    ( pp, "code jumped over pushes"
+		          " values into the stack;"
+			  " JMP unresolved" );
+	    else if ( SP < next->stack_minimum )
+		mexas::compile_error
+		    ( pp, "code jumped over pops"
+		          " values from the stack;"
+			  " JMP unresolved" );
+	    else
+	    {
+		min::ptr<mex::instr> instr =
+		    m + next->jmp_location;
+		instr->immedA = next->stack_length
+			      - next->stack_minimum;
+		instr->immedC = m->length
+			      - next->jmp_location;
+		instr->trace_flags &=
+		    ~ mex::TRACE_DEPTH;
+		instr->trace_flags |= depth_diff;
+
+		mexas::trace_instr
+		    ( next->jmp_location );
 	    }
-
-	    min::ptr<mex::instr> instr =
-		m + next->jmp_location;
-	    instr->immedA = next->stack_length
-	                  - next->stack_minimum;
-	    instr->immedB = SP - next->stack_minimum;
-	    instr->immedC = m->length
-	                  - next->jmp_location;
-	    instr->trace_flags &= ~ mex::TRACE_DEPTH;
-	    instr->trace_flags |= depth_diff;
-
-	    mexas::trace_instr ( next->jmp_location );
 
 	    previous->next = next->next;
 	    next->next = free->next;
@@ -1328,7 +1339,7 @@ mex::module mexas::compile
 		    }
 		    -- i;
 		    min::gen name = (variables+i)->name;
-		    printer << min::pgen ( name );
+		    printer << name;
 		    if ( i > 0 ) printer << " ";
 		}
 		printer << min::eom;
