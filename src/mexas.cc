@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Jul 30 16:41:42 EDT 2023
+// Date:	Mon Jul 31 16:37:41 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -692,6 +692,69 @@ void mexas::trace_instr ( min::uns32 location )
 	    << min::eom;
 }
 
+void mexas::push_push_instr
+        ( min::gen new_name, min::gen name,
+	  const min::phrase_position & pp )
+{
+    mex::instr instr =
+	{ 0, 0, 0, 0, 0, 0, 0, min::MISSING() };
+    min::gen labbuf[3] = { name };
+    min::locatable_gen trace_info;
+
+    min::uns32 i = search ( name, SP );
+    if ( i != mexas::NOT_FOUND )
+    {
+	min::uns32 k = L;
+	while ( i < mexas::lp[k] ) -- k;
+	if ( k == L )
+	{
+	    instr.op_code = mex::PUSHS;
+	    instr.immedA = SP - i - 1;
+	}
+	else if ( i >= mexas::fp[k] )
+	{
+	    instr.op_code = mex::PUSHL;
+	    instr.immedA = i - mexas::fp[k];
+	    instr.immedB = k;
+	}
+	else
+	{
+	    instr.op_code = mex::PUSHA;
+	    instr.immedA = mexas::fp[k] - i;
+	    instr.immedB = k;
+	}
+	labbuf[1] = new_name;
+	trace_info = new_lab_gen ( labbuf, 2 );
+    }
+    else
+    {
+	mex::module gm;
+	i = mexas::global_search
+	    ( gm, mexas::star, mexas::V, name );
+	if ( i != mexas::NOT_FOUND )
+	{
+	    instr.immedA = i;
+	    instr.immedD = min::new_stub_gen ( gm );
+
+	    labbuf[1] = gm->name;
+	    labbuf[2] = new_name;
+	    trace_info = new_lab_gen ( labbuf, 3 );
+	}
+	else
+	{
+	    mexas::compile_error
+		( pp, "variable named ",
+		      min::pgen ( name ),
+		      " not defined; instruction"
+		      " changed to PUSHI missing"
+		      " value" );
+	    instr.op_code = mex::PUSHI;
+	    trace_info = min::MISSING();
+	}
+    }
+    mexas::push_instr ( instr, pp, trace_info );
+}
+
 
 // Scanner Function
 // ------- --------
@@ -1066,6 +1129,23 @@ mex::module mexas::compile
 	    case ::PUSHM:
 	    case mex::PUSHG:
 	    {
+	        min::gen mod_name;
+		if ( op_code == mex::PUSHG )
+		{
+		    min::gen mod_name =
+			mexas::get_name ( index );
+		    if ( mod_name == min::NONE() )
+		        mod_name = mexas::get_star
+			    ( index );
+		    if ( mod_name == min::NONE() )
+		    {
+			mexas::compile_error
+			    ( pp, "no module name:"
+				  " instruction"
+				  " ignored" );
+			continue;
+		    }
+		}
 		min::gen name =
 		    mexas::get_name ( index );
 		if ( name == min::NONE() )
@@ -1075,40 +1155,22 @@ mex::module mexas::compile
 			      " instruction ignored" );
 		    continue;
 		}
+		min::gen new_name =
+		    mexas::get_name ( index );
+		if ( new_name != min::NONE() )
+		    check_new_name ( new_name, pp );
+		else
+		    new_name =
+		        mexas::get_star ( index );
+		if ( new_name == min::NONE() )
+		    new_name = name;
+
 		switch ( op_code )
 		{
 		case ::PUSH:
 		{
-		    min::uns32 j = search ( name, SP );
-		    if ( j == mexas::NOT_FOUND )
-		    {
-			mexas::compile_error
-			    ( pp, "variable named ",
-				  min::pgen ( name ),
-				  " not defined within"
-				  " module; instruction"
-				  " ignored" );
-			continue;
-		    }
-		    min::uns32 k = L;
-		    while ( j < mexas::lp[k] ) -- k;
-		    if ( k == L )
-		    {
-			instr.op_code = mex::PUSHS;
-			instr.immedA = SP - j - 1;
-		    }
-		    else if ( j >= mexas::fp[k] )
-		    {
-			instr.op_code = mex::PUSHL;
-			instr.immedA = j - mexas::fp[k];
-			instr.immedB = k;
-		    }
-		    else
-		    {
-			instr.op_code = mex::PUSHA;
-			instr.immedA = mexas::fp[k] - j;
-			instr.immedB = k;
-		    }
+		    mexas::push_push_instr
+		        ( new_name, name, pp );
 		    break;
 		}
 		case ::PUSHM:
@@ -1132,33 +1194,18 @@ mex::module mexas::compile
 		    instr.op_code = mex::PUSHL;
 		    instr.immedA = j;
 		    instr.immedB = 0;
+
+		    min::gen labbuf[2] =
+		        { new_name, name };
+		    min::locatable_gen trace_info
+			( min::new_lab_gen
+			      ( labbuf, 2 ) );
+		    mexas::push_instr
+			( instr, pp, trace_info );
 		    break;
 		}
 		case mex::PUSHG:
 		{
-		    min::gen mod_name =
-			mexas::get_name ( index );
-		    if ( mod_name == min::NONE() )
-		        mod_name = mexas::get_star
-			    ( index );
-		    if ( mod_name == min::NONE() )
-		    {
-			mexas::compile_error
-			    ( pp, "no module name:"
-				  " instruction"
-				  " ignored" );
-			continue;
-		    }
-		    min::gen name =
-			mexas::get_name ( index );
-		    if ( name == min::NONE() )
-		    {
-			mexas::compile_error
-			    ( pp, "no variable name:"
-				  " instruction"
-				  " ignored" );
-			continue;
-		    }
 		    mex::module gm;
 		    min::uns32 index =
 		        mexas::global_search
@@ -1182,24 +1229,18 @@ mex::module mexas::compile
 		    instr.immedD =
 		        min::new_stub_gen ( gm );
 
+		    min::gen labbuf[3] =
+		        { new_name, gm->name, name };
+		    min::locatable_gen trace_info
+			( min::new_lab_gen
+			      ( labbuf, 3 ) );
+		    mexas::push_instr
+			( instr, pp, trace_info );
+
 		    break;
 		}
 		}
-		min::gen new_name =
-		    mexas::get_name ( index );
-		if ( new_name != min::NONE() )
-		    check_new_name ( new_name, pp );
-		else
-		    new_name =
-		        mexas::get_star ( index );
-		if ( new_name == min::NONE() )
-		    new_name = name;
 
-		min::gen labbuf[2] = { new_name, name };
-		min::locatable_gen trace_info
-		    ( min::new_lab_gen ( labbuf, 2 ) );
-		mexas::push_instr
-		    ( instr, pp, trace_info );
 		mexas::push_variable
 		    ( mexas::variables, new_name,
 		      L, mexas::depth[L] );

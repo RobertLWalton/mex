@@ -2,7 +2,7 @@
 #
 # File:		Makefile
 # Author:	Bob Walton (walton@acm.org)
-# Date:		Fri Jul 28 15:36:08 EDT 2023
+# Date:		Mon Jul 31 16:32:33 EDT 2023
 #
 # The authors have placed this program in the public
 # domain; they make no warranty and accept no liability
@@ -56,55 +56,17 @@ test:		${TESTS:=.test}
 %.test:	%.out Makefile
 	rm -f $*.test
 	sed \
-	    -e '/\.cc:[0-9]* assert/s//.cc:XXXX assert/' \
-	    -e '/\.h:[0-9]* assert/s//.h:XXXX assert/' \
-	    -e '/\.cc:[0-9]* desire/s//.cc:XXXX desire/' \
-	    -e '/\.L/s/\(\.L[A-Z][A-Z]*\)[0-9][0-9]*/\1XXX/g' \
-	    -e '/line [0-9]/s//line #/g' \
-	    -e '/\(lines [0-9][0-9]*-\)[0-9]/s//\1#/g' \
-	    -e '/lines [0-9]\([0-9]*-#\)/s//lines #\1/g' \
-	    -e '/#[0-9]/s//##/g' \
-	    -e '/#[0-9]/s//##/g' \
-	    -e '/#[0-9]/s//##/g' \
-	    -e '/#[0-9]/s//##/g' \
-	    -e '/#[0-9]/s//##/g' \
-	    -e '/[0-9]#/s//##/g' \
-	    -e '/[0-9]#/s//##/g' \
-	    -e '/[0-9]#/s//##/g' \
-	    -e '/[0-9]#/s//##/g' \
-	    -e '/[0-9]#/s//##/g' \
-	    -e '/@[0-9]/s//@@/g' \
-	    -e '/@[0-9]/s//@@/g' \
-	    -e '/@[0-9]/s//@@/g' \
-	    -e '/@[0-9]/s//@@/g' \
-	    -e '/@[0-9]/s//@@/g' \
+	    -e '/line [0-9][0-9]*:/s//line ####:/g' \
+	    -e '/lines [0-9][0-9]*-[0-9][0-9]*:/s//lines ####-####/g' \
+	    -e '/\[[0-9][0-9]*\]/s//\[####\]/g' \
             < $*.out > $*.test
 
 %.diff:	%.out
 	@echo DIFFING $*.test $*.out
 	-@sed \
-	    -e '/\.cc:[0-9]* assert/s//.cc:XXXX assert/' \
-	    -e '/\.h:[0-9]* assert/s//.h:XXXX assert/' \
-	    -e '/\.cc:[0-9]* desire/s//.cc:XXXX desire/' \
-	    -e '/\.L/s/\(\.L[A-Z][A-Z]*\)[0-9][0-9]*/\1XXX/g' \
-	    -e '/line [0-9]/s//line #/g' \
-	    -e '/\(lines [0-9][0-9]*-\)[0-9]/s//\1#/g' \
-	    -e '/lines [0-9]\([0-9]*-#\)/s//lines #\1/g' \
-	    -e '/#[0-9]/s//##/g' \
-	    -e '/#[0-9]/s//##/g' \
-	    -e '/#[0-9]/s//##/g' \
-	    -e '/#[0-9]/s//##/g' \
-	    -e '/#[0-9]/s//##/g' \
-	    -e '/[0-9]#/s//##/g' \
-	    -e '/[0-9]#/s//##/g' \
-	    -e '/[0-9]#/s//##/g' \
-	    -e '/[0-9]#/s//##/g' \
-	    -e '/[0-9]#/s//##/g' \
-	    -e '/@[0-9]/s//@@/g' \
-	    -e '/@[0-9]/s//@@/g' \
-	    -e '/@[0-9]/s//@@/g' \
-	    -e '/@[0-9]/s//@@/g' \
-	    -e '/@[0-9]/s//@@/g' \
+	    -e '/line [0-9][0-9]*:/s//line ####:/g' \
+	    -e '/lines [0-9][0-9]*-[0-9][0-9]*:/s//lines ####-####/g' \
+	    -e '/\[[0-9][0-9]*\]/s//\[####\]/g' \
             < $*.out | diff ${DIFFOPT} $*.test -
 
 %.out:	%
