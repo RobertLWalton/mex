@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat Jul 29 04:44:32 EDT 2023
+// Date:	Mon Jul 31 03:39:23 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -477,9 +477,7 @@ static bool optimized_run_process ( mex::process p )
 	case mex::JMPGEQ:
 	{
 	    min::uns32 immedA = pc->immedA;
-	    min::uns32 immedB = pc->immedB;
 	    min::uns32 immedC = pc->immedC;
-	    min::gen immedD = pc->immedD;
 	    min::gen * new_sp = sp;
 	    bool execute_jmp = true;
 	    if ( op_code != mex::JMP )
@@ -522,8 +520,6 @@ static bool optimized_run_process ( mex::process p )
 		}
 	    }
 	    if ( immedA > new_sp - spbegin
-	         ||
-		 immedB - immedA > spend - new_sp
 		 ||
 		 immedC > pcend - pc
 		 ||
@@ -536,10 +532,7 @@ static bool optimized_run_process ( mex::process p )
 		break;
 	    }
 
-	    new_sp -= immedA;
-	    sp = new_sp + immedB;
-	    while ( new_sp < sp ) * new_sp ++ = immedD;
-
+	    sp = new_sp - immedA;
 	    pc += immedC;
 	    -- pc;
 	    break;
@@ -1256,18 +1249,11 @@ bool mex::run_process ( mex::process p )
 	    // Process JMP.
 
 	    min::uns32 immedA = pc->immedA;
-	    min::uns32 immedB = pc->immedB;
 	    min::uns32 immedC = pc->immedC;
-	    min::gen immedD = pc->immedD;
 
 	    if ( immedA > new_sp - spbegin )
 	    {
 	        message = "immedA too large";
-	        goto INNER_FATAL;
-	    }
-	    if ( immedB - immedA > spend - new_sp )
-	    {
-	        message = "immedB too large";
 	        goto INNER_FATAL;
 	    }
 	    if ( pc + immedC > pcend )
@@ -1300,6 +1286,18 @@ bool mex::run_process ( mex::process p )
 		    break;
 		case mex::JMPNE:
 		    execute_jmp = ( arg1 != arg2 );
+		    break;
+		case mex::JMPLT:
+		    execute_jmp = ( arg1 < arg2 );
+		    break;
+		case mex::JMPLEQ:
+		    execute_jmp = ( arg1 <= arg2 );
+		    break;
+		case mex::JMPGT:
+		    execute_jmp = ( arg1 > arg2 );
+		    break;
+		case mex::JMPGEQ:
+		    execute_jmp = ( arg1 >= arg2 );
 		    break;
 		}
 	    }
@@ -1393,10 +1391,7 @@ bool mex::run_process ( mex::process p )
 		sp = new_sp;
 	    else
 	    {
-		new_sp -= immedA;
-		sp = new_sp + immedB;
-		while ( new_sp < sp )
-		    * new_sp ++ = immedD;
+		sp = new_sp - immedA;
 		pc += immedC;
 		-- pc;
 		p->trace_depth -=

@@ -239,7 +239,7 @@
 
 \author{Robert L. Walton}
 
-\date{July 30, 2023}
+\date{July 31, 2023}
  
 \maketitle
 
@@ -969,9 +969,9 @@ are explained in Tracing and Exceptions, \itemref{TRACING-AND-EXCEPTIONS}.
 \TT{JMP}
     & Subtract \TT{immedA} to \TT{sp} (popping the stack \TT{immedA} times),
       then \\
-    & push \TT{immedD} into the stack \TT{immedB} times, then add
-      \TT{immedC} \\
-    & (which must \TT{!= 0}) to the \TT{pc} (skipping \TT{immedC} instructions).
+    & add \TT{immedC} to the \TT{pc} (skipping \TT{immedC} instructions).
+      It is \\
+    & illegal for \TT{immedC} = 0 (\TT{JMP} would jump to itself).
 \\\hline
 \TT{JMPEQ/JMPNE}
     & Pop 2 values and compare them.  If they are equal/not-equal \\
@@ -1817,10 +1817,10 @@ the bottommost, and accept the first element found with the desired name.
 the module, with the suffix \TT{.mex} deleted.  Such a name is
 a \emkey{module-name}.
 \item When a {\em variable-name} is assigned to a new variable stack
-element, `\TT{*}' can be used as the {\em variable-name} to indicate
+element, `\TT{*}' is used as the {\em variable-name} to indicate
 that the element should have no name.
 \item The operands that take integer values must have values in the
-range $[0,2^{16})$ (so they will fit into \TT{immed\ldots} instruction
+range $[0,2^{32})$ (so they will fit into \TT{immed\ldots} instruction
 members.
 \end{enumerate}
 
@@ -1931,7 +1931,9 @@ Here \ldots~denotes one of \TT{EQ}, \TT{NE}, etc.
 At run-time these instruction's actions are as described in
 Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}.  At assembly-time,
 these instructions pop two elements from the variable stack
-and then add an element to the pending jump list.  Note that
+and then add an element to the pending jump list.
+
+Note that
 the pending jump list element
 $S$ value is the length of the variable stack \underline{after}
 the two elements were popped.

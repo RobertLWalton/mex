@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Jul 30 16:42:15 EDT 2023
+// Date:	Sun Jul 30 22:30:54 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -42,7 +42,7 @@ extern min::uns8 next_trace_flags;
     // flags.
 
 // The following pushes an instruction into the module
-// after first setting its trace flags.
+// code vector after first setting its trace flags.
 //
 inline void push_instr
         ( mex::instr & instr,
@@ -68,6 +68,26 @@ inline void push_instr
 	m->trace_info;
     min::push(trace_info_ins) = trace_info;
 }
+void push_push_instr
+        ( min::gen name,
+	  const min::phrase_position & pp =
+	      min::MISSING_PHRASE_POSITION,
+	  min::gen trace_info = min::MISSING() );
+    // Just like mexas:push_inst, but constructs the
+    // instruction to be pushed to the code vector
+    // using a PUSH... op code and using the `name'
+    // to specify the stack or module global location
+    // to be pushed.
+    //
+    // First the variables stack is search for the name,
+    // from top to bottom.  If not found, the module
+    // globals are searched, most recent module first,
+    // using the interface of each module, and stopping
+    // at the first location found.
+    //
+    // If `name' is not found, a compile_error message
+    // is generated and the instruction generated is a
+    // PUSHI of min::MISSING().
 
 extern min::uns8 lexical_level;
     // Current lexical_level.
