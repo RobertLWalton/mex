@@ -987,11 +987,11 @@ are explained in Tracing and Exceptions, \itemref{TRACING-AND-EXCEPTIONS}.
 \\\hline
 \TT{BEG}/\TT{NOP}/\TT{END}
     & Subtract \TT{immedA} to \TT{sp} (popping the stack \TT{immedA} times). \\
-    & For \TT{BEG}/\TT{END} the values popped are always trace values.
+    & The values popped are always trace values.
 \\\hline
 \TT{BEGL}
-    & Subtract \TT{immedA} to \TT{sp} (popping the stack \TT{immedA} times).
-      Then \\
+    & Subtract \TT{immedA} to \TT{sp} (popping the stack \TT{immedA} times). \\
+    & The values popped are always trace values.  Then \\
     & take the top \TT{immedB} values in the stack and push a copy of \\
     & them all into the stack, preserving stack ordering.
 \\\hline

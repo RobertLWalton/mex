@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Aug  1 05:38:17 EDT 2023
+// Date:	Tue Aug  1 17:31:47 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -466,22 +466,32 @@ min::uns32 get_trace_info
 	  min::uns32 & i,
 	  const min::phrase_position & pp =
 	      min::MISSING_PHRASE_POSITION );
-    // Ditto but also push into the code vector the
-    // value of each variable named in the trace_info.
+    // Ditto but also call push_push_instr (star,n,pp)
+    // for each each variable named n in the trace_info.
     // The variable names are after the initial quoted
     // lexeme, and the value of the first variable named
     // is pushed first into the stack.  If a lexeme that
     // should be a variable name is not, a compile_error
-    // message is output, min::MISSING() is pushed into
-    // the stack at run-time, and the bad name is still
+    // message is output, PUSHI min::MISSING() is pushed
+    // into the code vector, and the bad name is still
     // included in the trace_info MIN label.
+    //
+    // mexas::trace_instr is called for each PUSH...
+    // instruction output.
+    //
+    // The variables stack is not changed.  The first
+    // thing the possibly traced instruction should do
+    // at run-time, after optionally being traced, is
+    // pop the values pushed by the PUSH... instructions
+    // output by this function.
     //
     // The number of variables (the number of PUSH...
     // instructions ouput) is returned by this function.
     // The trace_info MIN label is returned in the
     // trace_info argument if there is a quoted lexeme
     // at the initial i position; otherwise trace_info
-    // is set to min::MISSING().
+    // is set to min::MISSING(), no PUSH... instructions
+    // are output, and 0 is returned.
 
 extern min::uns8 compile_trace_flags;
     // mex::TRACE and mex::TRACE_LINES to print
@@ -554,14 +564,23 @@ void begx ( mex::instr & instr,
     // Push a block stack entry for BEG, BEGL, or BEGF
     // respectively, according to instr.op_code,
     // and execute mexas::push_instr on the arguments.
+    // Unless noted otherwise, this function sets all
+    // the necessary instr members except op_code.
+    //
+    // This function gets the number of trace variables
+    // in the run-time stack from the length of
+    // trace_info.  Trace variables should NOT be
+    // recorded in the assembler's variables stack.
     //
     // BEGF increments mexas::lexical level to be L,
     // sets depth[L] to 0, sets lp[L] = variables->
     // length and fp[L] = lp[L] + instr.immedC.
     //
-    // *** Immediately AFTER a call to this function,
-    // BEGF must push instr.immedC variables stack
-    // elements.
+    // **** In addition to the BEGF op_code, the initial
+    // instr value must specify the nargs parameter in
+    // instr.immedA.  Immediately AFTER a call to this
+    // function, BEGF must push instr.immedA variables
+    // stack elements.
     //
     // BEG and BEGL increment depth[L] for the current
     // lexical level L.

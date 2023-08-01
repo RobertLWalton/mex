@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Aug  1 06:51:28 EDT 2023
+// Date:	Tue Aug  1 17:31:02 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -487,6 +487,11 @@ void mexas::begx ( mex::instr & instr,
                    const min::phrase_position & pp,
 	           min::gen trace_info )
 {
+    min::uns32 tvars = 0;
+    min::lab_ptr lp = trace_info;
+    if ( lp != min::NULL_STUB ) tvars =
+        min::lablen ( lp ) - 1;
+
     mexas::block_element e =
         { instr.op_code, 0,
 	  mexas::variables->length, 0,
@@ -546,6 +551,7 @@ void mexas::begx ( mex::instr & instr,
     }
     else if ( instr.op_code == mex::BEG )
     {
+	instr.immedA = tvars;
 	e.end_op_code = mex::END;
         ++ mexas::depth[L];
     }
@@ -563,6 +569,11 @@ unsigned mexas::endx ( mex::instr & instr,
                        const min::phrase_position & pp,
 	               min::gen trace_info )
 {
+    min::uns32 tvars = 0;
+    min::lab_ptr lp = trace_info;
+    if ( lp != min::NULL_STUB ) tvars =
+        min::lablen ( lp ) - 1;
+
     if ( mexas::blocks->length == 0 )
     {
 	mexas::compile_error
@@ -644,7 +655,7 @@ unsigned mexas::endx ( mex::instr & instr,
     else // if mex::END
     {
 	instr.immedA = mexas::variables->length
-	             - e.stack_limit;
+	             - e.stack_limit + tvars;
 	-- mexas::depth[L];
     }
 
@@ -774,11 +785,6 @@ min::uns32 mexas::get_trace_info
 	{
 	    mexas::push_push_instr
 	        ( mexas::star, n, pp );
-	    mexas::push_variable
-		( mexas::variables, mexas::star,
-		  L, mexas::depth[L] );
-	    mexas::trace_instr
-	        ( mexas::output_module->length - 1 );
 	}
 	else
 	{
@@ -791,6 +797,8 @@ min::uns32 mexas::get_trace_info
 		              min::MISSING() };
 	    mexas::push_instr ( instr, pp );
 	}
+	mexas::trace_instr
+	    ( mexas::output_module->length - 1 );
     }
     return len - 1;
 }
@@ -1431,14 +1439,12 @@ mex::module mexas::compile
 	    {
 	        min::locatable_gen trace_info
 		    ( mexas::get_trace_info ( index ) );
-		// TBD trace variables
 		mexas::begx ( instr, pp, trace_info );
 	    }
 	    case mex::END:
 	    {
 	        min::locatable_gen trace_info
 		    ( mexas::get_trace_info ( index ) );
-		// TBD trace variables
 		mexas::endx ( instr, pp, trace_info );
 	    }
 	    }
