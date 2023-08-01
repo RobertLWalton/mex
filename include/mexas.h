@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Jul 31 07:12:10 EDT 2023
+// Date:	Tue Aug  1 05:38:17 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -380,6 +380,16 @@ extern min::uns32 first_line_number,
 bool next_statement ( void );
     // Get the next statement and return true.  Or
     // return false if end of file.
+ 
+// Return true if the lexeme is a name (MIN string with
+// initial letter), and false otherwise.
+//
+inline bool is_name ( min::gen lexeme )
+{
+    min::str_ptr sp ( lexeme );
+    return ( sp && strlen ( sp ) >= 1
+	        && isalpha ( sp[0] ) );
+}
 
 // If statement[i] exists and is a name, return the name
 // and increment i.  Otherwise return min::NONE().
@@ -389,9 +399,7 @@ inline min::gen get_name ( min::uns32 & i )
     if ( i < mexas::statement->length )
     {
 	min::gen n = mexas::statement[i];
-        min::str_ptr sp ( n );
-        if ( sp && strlen ( sp ) >= 1
-                && isalpha ( sp[0] ) )
+	if ( mexas::is_name ( n ) )
 	{
 	    ++ i;
 	    return n;
@@ -429,7 +437,7 @@ inline min::gen get_num ( min::uns32 & i )
 	return min::NONE();
 }
 
-// If statement[i] exists and is a quote, return a
+// If statement[i] exists and is a quote, return a MIN
 // label containing the statement lexemes after the
 // quote, and set i = statement->length.  Otherwise
 // return min::MISSING().
@@ -452,6 +460,28 @@ inline min::gen get_trace_info ( min::uns32 & i )
     else
 	return min::MISSING();
 }
+
+min::uns32 get_trace_info
+	( min::ref<min::gen> trace_info,
+	  min::uns32 & i,
+	  const min::phrase_position & pp =
+	      min::MISSING_PHRASE_POSITION );
+    // Ditto but also push into the code vector the
+    // value of each variable named in the trace_info.
+    // The variable names are after the initial quoted
+    // lexeme, and the value of the first variable named
+    // is pushed first into the stack.  If a lexeme that
+    // should be a variable name is not, a compile_error
+    // message is output, min::MISSING() is pushed into
+    // the stack at run-time, and the bad name is still
+    // included in the trace_info MIN label.
+    //
+    // The number of variables (the number of PUSH...
+    // instructions ouput) is returned by this function.
+    // The trace_info MIN label is returned in the
+    // trace_info argument if there is a quoted lexeme
+    // at the initial i position; otherwise trace_info
+    // is set to min::MISSING().
 
 extern min::uns8 compile_trace_flags;
     // mex::TRACE and mex::TRACE_LINES to print
