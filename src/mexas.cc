@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Jul 31 16:37:41 EDT 2023
+// Date:	Tue Aug  1 06:51:28 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -753,6 +753,46 @@ void mexas::push_push_instr
 	}
     }
     mexas::push_instr ( instr, pp, trace_info );
+}
+
+min::uns32 mexas::get_trace_info
+    ( min::ref<min::gen> trace_info,
+      min::uns32 & i,
+      const min::phrase_position & pp )
+{
+    trace_info = mexas::get_trace_info ( i );
+    if ( trace_info == min::MISSING() )
+        return 0;
+    min::lab_ptr lp ( trace_info );
+    MIN_ASSERT ( lp != min::NULL_STUB,
+                 "bad trace_info" );
+    min::uns32 len = min::lablen ( lp );
+    for ( min::uns32 j = 1; j < len; ++ j )
+    {
+        min::gen n = lp[j];
+	if ( mexas::is_name ( n ) )
+	{
+	    mexas::push_push_instr
+	        ( mexas::star, n, pp );
+	    mexas::push_variable
+		( mexas::variables, mexas::star,
+		  L, mexas::depth[L] );
+	    mexas::trace_instr
+	        ( mexas::output_module->length - 1 );
+	}
+	else
+	{
+	    mexas::compile_error
+		( pp, "not a name: ",
+		      min::pgen ( n ),
+		      "; PUSHI missing value output" );
+	    mex::instr instr =
+		{ mex::PUSHI, 0, 0, 0, 0, 0, 0,
+		              min::MISSING() };
+	    mexas::push_instr ( instr, pp );
+	}
+    }
+    return len - 1;
 }
 
 
