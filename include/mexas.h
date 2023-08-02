@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Aug  1 17:31:47 EDT 2023
+// Date:	Wed Aug  2 03:54:13 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -196,7 +196,7 @@ struct block_element
     min::uns8 begin_op_code;
     min::uns8 end_op_code;
     min::uns32 stack_limit;
-    min::uns32 nargs;
+    min::uns32 nvars;
     min::uns32 begin_location;
 };
 typedef min::packed_vec_insptr<mexas::block_element>
@@ -212,17 +212,17 @@ extern min::locatable_var<mexas::block_stack>
     // error messages.
     //
     // Stack_limit is the stack bounary below which
-    //   (1) elements cannot be popped by instructions
-    //       that do not decrease depth or lexical
-    //       level
-    //   (2) elements cannot be hidden by elements above
-    //       the limit
+    //   (1) variable elements cannot be popped by
+    //       instructions that do not decrease depth or
+    //       lexical level
+    //   (2) variable elements cannot be hidden by
+    //       elements above the limit
     //
-    // Nargs is the number of stack elements holding
+    // Nvars is the number of stack elements holding
     // arguments to a function (BEGF) or next-variables
-    // for a loop (BEGL).  Nargs is 0 for BEG.  Upon
+    // for a loop (BEGL).  Nvars is 0 for BEG.  Upon
     // encountering the BEG...  the stack pointer is at
-    // stack_limit - nargs.
+    // stack_limit - nvars.
 
 extern min::uns32 stack_limit;
     // This is a cache of the stack_limit of the top
@@ -558,19 +558,33 @@ unsigned jump_list_resolve
     // of resolved elements is returned.
 
 void begx ( mex::instr & instr,
+	    min::uns32 nvars, min::uns32 tvars,
+	    min::gen trace_info = min::MISSING(),
             const min::phrase_position & pp =
-	       min::MISSING_PHRASE_POSITION,
-	   min::gen trace_info = min::MISSING() );
+	       min::MISSING_PHRASE_POSITION );
     // Push a block stack entry for BEG, BEGL, or BEGF
     // respectively, according to instr.op_code,
     // and execute mexas::push_instr on the arguments.
-    // Unless noted otherwise, this function sets all
-    // the necessary instr members except op_code.
+    // This function sets all the necessary instr
+    // members except op_code and trace_flags.  These
+    // other members must be initialized to 0 or
+    // min::MISSING().
     //
-    // This function gets the number of trace variables
-    // in the run-time stack from the length of
-    // trace_info.  Trace variables should NOT be
+    // Nvars equals nnext for BEGL, the number of
+    // variables listed as arguments for BEGF, and must
+    // be 0 for BEG.
+    //
+    // Tvars is the number of trace variables in the
+    // run-time stack.  Trace variables should NOT be
     // recorded in the assembler's variables stack.
+    //
+    // BEG and BEGL increment depth[L] for the current
+    // lexical level L.  BEGF increments L.
+    //
+    // BEGL takes the top nvars elements of the
+    // variables stack and pushes them in order into the
+    // variables stack giving the copy of any variable
+    // with name N (not equal *) the name `next-N'.
     //
     // BEGF increments mexas::lexical level to be L,
     // sets depth[L] to 0, sets lp[L] = variables->
@@ -581,27 +595,30 @@ void begx ( mex::instr & instr,
     // instr.immedA.  Immediately AFTER a call to this
     // function, BEGF must push instr.immedA variables
     // stack elements.
-    //
-    // BEG and BEGL increment depth[L] for the current
-    // lexical level L.
-    //
-    // BEGL takes the top instr.immedB elements of the
-    // variables stack and pushes them in order into the
-    // variables stack giving the copy of any variable
-    // with name N (not equal *) the name `next-N'.
 
 unsigned endx ( mex::instr & instr,
+	        min::uns32 tvars,
+	        min::gen trace_info = min::MISSING(),
                 const min::phrase_position & pp =
-	            min::MISSING_PHRASE_POSITION,
-	        min::gen trace_info = min::MISSING() );
+	            min::MISSING_PHRASE_POSITION );
     // If instr.op_code matches the op_code of the top
     // block stack entry (e.g., ENDL matches BEGL), pop
     // the top block stack entry, adjusting the BEG...
     // instruction associated with that entry and the
     // END... instr argument, and execute mexas::push_
-    // instr on the arguments.  Only instr.op_code and
-    // instr.trace_flags are used: all other instr
-    // fields are set by this function.
+    // instr on the arguments.
+    //
+    // This function sets all the necessary instr
+    // members except op_code and trace_flags.  These
+    // other members must be initialized to 0 or
+    // min::MISSING().
+    //
+    // Tvars is the number of trace variables in the
+    // run-time stack.  Trace variables should NOT be
+    // recorded in the assembler's variables stack.
+    //
+    // END and ENDL decrement depth[L] for the current
+    // lexical level L.  ENDF decrements L.
     //
     // If instr.op_code does not match the top of the
     // stack, and if it does match a block stack entry,
@@ -620,6 +637,16 @@ unsigned endx ( mex::instr & instr,
     // If instr.op_code does not match ANY block stack
     // entries, just issue an error message and return
     // 0.  No instructions are pushed.
+
+void cont ( mex::instr & instr,
+	    min::uns32 tvars,
+	    min::gen trace_info = min::MISSING(),
+            const min::phrase_position & pp =
+	        min::MISSING_PHRASE_POSITION );
+    // Similar to endx but only handles the CONT
+    // instruction.  Does NOT pop the block stack or
+    // decrease depth.  Does require the top of the
+    // block stack to be a BEGL entry.
 
 const min::uns32 NOT_FOUND = 0xFFFFFFFF;
     // Returned by search functions when not found.

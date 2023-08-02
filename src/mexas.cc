@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Aug  1 17:31:02 EDT 2023
+// Date:	Wed Aug  2 03:54:02 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -484,17 +484,13 @@ unsigned mexas::jump_list_resolve
 }
 
 void mexas::begx ( mex::instr & instr,
-                   const min::phrase_position & pp,
-	           min::gen trace_info )
+		   min::uns32 nvars, min::uns32 tvars,
+	           min::gen trace_info,
+                   const min::phrase_position & pp )
 {
-    min::uns32 tvars = 0;
-    min::lab_ptr lp = trace_info;
-    if ( lp != min::NULL_STUB ) tvars =
-        min::lablen ( lp ) - 1;
-
     mexas::block_element e =
         { instr.op_code, 0,
-	  mexas::variables->length, 0,
+	  mexas::variables->length + nvars, nvars,
 	  mexas::output_module->length };
 
     if ( instr.op_code == mex::BEGF )
@@ -504,35 +500,43 @@ void mexas::begx ( mex::instr & instr,
 		     mex::max_lexical_level,
 		     "mex::max_lexical_level"
 		     " exceeded" );
+	MIN_ASSERT ( tvars == 0,
+	             "BEGF has trace variables" );
 	e.end_op_code = mex::ENDF;
+
 	++ L;
-	instr.immedB = L;
-	e.nargs = instr.immedA;
 	mexas::depth[L] = 0;
 	mexas::lp[L] = mexas::variables->length;
-	mexas::fp[L] = mexas::lp[L] + e.nargs;
+	mexas::fp[L] = mexas::lp[L] + nvars;
+
+	instr.immedA = nvars;
+	instr.immedB = L;
     }
     else if ( instr.op_code == mex::BEGL )
     {
 	e.end_op_code = mex::ENDL;
-	min::uns32 nargs = instr.immedB;
-	if ( nargs > SP - mexas::stack_limit )
+	if ( nvars > SP - mexas::stack_limit )
+	{
 	    mexas::compile_error
 	        ( pp, "portion of stack in the"
 		      " containing block is smaller"
 		      " than the number of"
 		      " next-variables" );
-	e.nargs = nargs;
+	    nvars = SP - mexas::stack_limit;
+	        // To protect against excessively
+		// large nvars values.
+	}
         ++ mexas::depth[L];
-	for ( min::uns32 i = 0; i < nargs; ++ i )
+
+	for ( min::uns32 i = 0; i < nvars; ++ i )
 	{
 	    min::locatable_gen name;
-	    if ( nargs > SP - mexas::stack_limit )
+	    if ( nvars > SP - mexas::stack_limit )
 	        name = mexas::star;
             else
 	    {
 	        name = (   mexas::variables
-		         + ( SP - nargs ) )->name;
+		         + ( SP - nvars ) )->name;
 		if ( name != mexas::star )
 		{
 		    min::str_ptr sp ( name );
@@ -551,6 +555,8 @@ void mexas::begx ( mex::instr & instr,
     }
     else if ( instr.op_code == mex::BEG )
     {
+	MIN_ASSERT ( nvars == 0,
+	             "BEG has non-zero nvars" );
 	instr.immedA = tvars;
 	e.end_op_code = mex::END;
         ++ mexas::depth[L];
@@ -559,21 +565,16 @@ void mexas::begx ( mex::instr & instr,
         MIN_ABORT
 	    ( "bad instr.op_code to mexas::begx" );
 
-    e.stack_limit += e.nargs;
     min::push ( mexas::blocks ) = e;
     mexas::stack_limit = e.stack_limit;
     mexas::push_instr ( instr, pp, trace_info );
 }
 
 unsigned mexas::endx ( mex::instr & instr,
-                       const min::phrase_position & pp,
-	               min::gen trace_info )
+		       min::uns32 tvars,
+	               min::gen trace_info,
+                       const min::phrase_position & pp )
 {
-    min::uns32 tvars = 0;
-    min::lab_ptr lp = trace_info;
-    if ( lp != min::NULL_STUB ) tvars =
-        min::lablen ( lp ) - 1;
-
     if ( mexas::blocks->length == 0 )
     {
 	mexas::compile_error
@@ -631,23 +632,23 @@ unsigned mexas::endx ( mex::instr & instr,
     }
 
     mexas::block_element e = min::pop ( mexas::blocks );
-    min::ptr<mex::instr> ip =
-        mexas::output_module + e.begin_location;
  
     if ( instr.op_code == mex::ENDF )
     {
+	min::ptr<mex::instr> ip =
+	    mexas::output_module + e.begin_location;
         ip->immedC = mexas::output_module->length + 1
 	           - e.begin_location;
 	instr.immedA = mexas::variables->length
-	             - e.stack_limit - e.nargs;
+	             - e.stack_limit - e.nvars + tvars;
 	mexas::jump_list_delete ( mexas::jumps );
 	-- L;
     }
     else if ( instr.op_code == mex::ENDL )
     {
 	instr.immedA = mexas::variables->length
-	             - e.stack_limit;
-	instr.immedB = e.nargs;
+	             - e.stack_limit + tvars;
+	instr.immedB = e.nvars;
         instr.immedC = mexas::output_module->length
 	             - e.begin_location - 1;
 	-- mexas::depth[L];
@@ -666,6 +667,37 @@ unsigned mexas::endx ( mex::instr & instr,
     mexas::push_instr ( instr, pp, trace_info );
 
     return 0;
+}
+
+void mexas::cont ( mex::instr & instr,
+		   min::uns32 tvars,
+	           min::gen trace_info,
+                   const min::phrase_position & pp )
+{
+    if ( mexas::blocks->length == 0 )
+    {
+	mexas::compile_error
+	    ( pp, "not in a BEGL ... ENDL block;"
+	          " instruction ignored" );
+	return;
+    }
+    min::ptr<mexas::block_element> bp =
+        mexas::blocks + ( mexas::blocks->length - 1 );
+    if ( bp->begin_op_code != mex::BEGL )
+    {
+	mexas::compile_error
+	    ( pp, "not in a BEGL ... ENDL block;"
+	          " instruction ignored" );
+	return;
+    }
+
+    instr.immedA = mexas::variables->length
+		 - bp->stack_limit + tvars;
+    instr.immedB = bp->nvars;
+    instr.immedC = mexas::output_module->length
+		 - bp->begin_location - 1;
+
+    mexas::push_instr ( instr, pp, trace_info );
 }
 
 min::uns8 mexas::compile_trace_flags;
@@ -1437,15 +1469,70 @@ mex::module mexas::compile
 	    }
 	    case mex::BEG:
 	    {
-	        min::locatable_gen trace_info
-		    ( mexas::get_trace_info ( index ) );
-		mexas::begx ( instr, pp, trace_info );
+		min::locatable_gen trace_info;
+	        min::uns32 tvars =
+		    mexas::get_trace_info
+			( trace_info, index, pp );
+		mexas::begx
+		    ( instr, 0, tvars, trace_info, pp );
 	    }
 	    case mex::END:
 	    {
-	        min::locatable_gen trace_info
-		    ( mexas::get_trace_info ( index ) );
-		mexas::endx ( instr, pp, trace_info );
+		min::locatable_gen trace_info;
+	        min::uns32 tvars =
+		    mexas::get_trace_info
+			( trace_info, index, pp );
+		mexas::endx
+		    ( instr, tvars, trace_info, pp );
+	    }
+	    case mex::BEGL:
+	    {
+	        min::gen nn = mexas::get_num ( index );
+		if ( nn == min::NONE() )
+		{
+		    mexas::compile_error
+			( pp, "no nnext parameter;"
+			      " instruction ignored" );
+		    continue;
+		}
+		min::float64 nf =
+		    min::direct_float_of ( nn );
+		if ( nf < 0
+		     ||
+		     nf != (min::uns32) nf )
+		{
+		    mexas::compile_error
+			( pp, "bad nnext parameter;"
+			      " instruction ignored" );
+		    continue;
+		}
+		min::uns32 nnext = (min::uns32) nf;
+
+		min::locatable_gen trace_info;
+	        min::uns32 tvars =
+		    mexas::get_trace_info
+			( trace_info, index, pp );
+		mexas::begx
+		    ( instr, nnext, tvars, trace_info,
+		             pp );
+	    }
+	    case mex::ENDL:
+	    {
+		min::locatable_gen trace_info;
+	        min::uns32 tvars =
+		    mexas::get_trace_info
+			( trace_info, index, pp );
+		mexas::endx
+		    ( instr, tvars, trace_info, pp );
+	    }
+	    case mex::CONT:
+	    {
+		min::locatable_gen trace_info;
+	        min::uns32 tvars =
+		    mexas::get_trace_info
+			( trace_info, index, pp );
+		mexas::cont
+		    ( instr, tvars, trace_info, pp );
 	    }
 	    }
 	}
