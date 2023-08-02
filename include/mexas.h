@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Aug  2 03:54:13 EDT 2023
+// Date:	Wed Aug  2 17:34:55 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -35,14 +35,8 @@ extern min::locatable_var<min::file> input_file;
 extern min::locatable_var<mex::module_ins>
     output_module;
 
-extern min::uns8 default_trace_flags;
-extern min::uns8 next_trace_flags;
-    // An instruction is given next_trace_flags which
-    // is then immediately reset to default_trace_
-    // flags.
-
 // The following pushes an instruction into the module
-// code vector after first setting its trace flags.
+// code vector.
 //
 inline void push_instr
         ( mex::instr & instr,
@@ -50,10 +44,6 @@ inline void push_instr
 	      min::MISSING_PHRASE_POSITION,
 	  min::gen trace_info = min::MISSING() )
 {
-    instr.trace_flags = mexas::next_trace_flags;
-    mexas::next_trace_flags =
-        mexas::default_trace_flags;
-
     mex::module_ins m = mexas::output_module;
     min::push(m) = instr;
     min::unprotected::acc_write_update
@@ -315,8 +305,7 @@ inline void push_jump
 // ---- ---------
 
 mex::module compile
-    ( min::file file, min::uns8 default_flags = 0,
-                      min::uns8 compile_flags = 0 );
+    ( min::file file, min::uns8 compile_flags = 0 );
     // Compile file and return module.  Also push
     // module into module stack.  If there is a compile
     // error, to not produce a new module and return
@@ -493,8 +482,13 @@ min::uns32 get_trace_info
     // is set to min::MISSING(), no PUSH... instructions
     // are output, and 0 is returned.
 
+enum compile_trace_flags
+{
+    TRACE       = 1 << 0,
+    TRACE_LINES = 1 << 1
+};
 extern min::uns8 compile_trace_flags;
-    // mex::TRACE and mex::TRACE_LINES to print
+    // mexas::TRACE and mexas::TRACE_LINES to print
     // compiled instructions as they are assembled.
 void trace_instr ( min::uns32 location );
     // Print trace of instruction at mexas::ouput_
@@ -566,7 +560,7 @@ void begx ( mex::instr & instr,
     // respectively, according to instr.op_code,
     // and execute mexas::push_instr on the arguments.
     // This function sets all the necessary instr
-    // members except op_code and trace_flags.  These
+    // members except op_code and trace_class.  These
     // other members must be initialized to 0 or
     // min::MISSING().
     //
@@ -609,7 +603,7 @@ unsigned endx ( mex::instr & instr,
     // instr on the arguments.
     //
     // This function sets all the necessary instr
-    // members except op_code and trace_flags.  These
+    // members except op_code and trace_class.  These
     // other members must be initialized to 0 or
     // min::MISSING().
     //
@@ -628,8 +622,8 @@ unsigned endx ( mex::instr & instr,
     // original instr.op_code is popped.  Note that END
     // and ENDL can only match block stack entries with
     // the current lexical level.  Issue an error
-    // message in this case.  The trace_flags of all
-    // instructions pushed will be those of instr.
+    // message in this case.  The trace_class of all
+    // instructions pushed will be those of T_PUSH.
     //
     // Return the number of block stack entries popped.
     // Normally this will be 1.

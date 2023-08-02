@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Jul 31 03:39:23 EDT 2023
+// Date:	Wed Aug  2 17:33:16 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -102,9 +102,11 @@ static min::packed_vec<mex::ret>
 	   ::return_stack_element_stub_disp );
 
 static void check_op_infos ( void );
+static void check_trace_class_infos ( void );
 static void initialize ( void )
 {
     check_op_infos();
+    check_trace_class_infos();
 }
 static min::initializer initializer ( ::initialize );
 
@@ -721,70 +723,98 @@ RET_EXIT:
 // Operation Information Table.
 //
 mex::op_info mex::op_infos [ mex::NUMBER_OF_OP_CODES ] =
-{   { 0, 0, "", "" },
-    { mex::ADD, A2, "ADD", "+" },
-    { mex::ADDI, A2I, "ADDI", "+" },
-    { mex::MUL, A2, "MUL", "*" },
-    { mex::MULI, A2I, "MULI", "*" },
-    { mex::SUB, A2, "SUB", "-" },
-    { mex::SUBR, A2R, "SUBR", "-" },
-    { mex::SUBI, A2I, "SUBI", "-" },
-    { mex::SUBRI, A2RI, "SUBRI", "-" },
-    { mex::DIV, A2, "DIV", "/" },
-    { mex::DIVR, A2R, "DIVR", "/" },
-    { mex::DIVI, A2I, "DIVI", "/" },
-    { mex::DIVRI, A2RI, "DIVRI", "/" },
-    { mex::MOD, A2, "MOD", "fmod" },
-    { mex::MODR, A2R, "MODR", "fmod" },
-    { mex::MODI, A2I, "MODI", "fmod" },
-    { mex::MODRI, A2RI, "MODRI", "fmod" },
-    { mex::FLOOR, A1, "FLOOR", "floor" },
-    { mex::CEIL, A1, "CEIL", "ceil" },
-    { mex::TRUNC, A1, "TRUNC", "trunc" },
-    { mex::ROUND, A1, "ROUND", "round" },
-    { mex::NEG, A1, "NEG", "-" },
-    { mex::ABS, A1, "ABS", "abs" },
-    { mex::LOG, A1, "LOG", "log" },
-    { mex::LOG10, A1, "LOG10", "log10" },
-    { mex::EXP, A1, "EXP", "exp" },
-    { mex::EXP10, A1, "EXP10", "exp10" },
-    { mex::SIN, A1, "SIN", "sin" },
-    { mex::ASIN, A1, "ASIN", "asin" },
-    { mex::COS, A1, "COS", "cos" },
-    { mex::ACOS, A1, "ACOS", "acos" },
-    { mex::TAN, A1, "TAN", "tan" },
-    { mex::ATAN, A1, "ATAN", "atan" },
-    { mex::ATAN2, A2, "ATAN2", "atan2" },
-    { mex::ATAN2R, A2R, "ATAN2R", "atan2" },
-    { mex::POWI, A1, "POWI", "pow" },
-    { mex::PUSHS, NONA, "PUSHS", NULL },
-    { mex::PUSHL, NONA, "PUSHL", NULL },
-    { mex::PUSHI, NONA, "PUSHI", NULL },
-    { mex::PUSHG, NONA, "PUSHG", NULL },
-    { mex::POPS, NONA, "POPS", NULL },
-    { mex::JMP, J, "JMP", NULL },
-    { mex::JMPEQ, J2, "JMPEQ", "==" },
-    { mex::JMPNE, J2, "JMPNE", "!=" },
-    { mex::JMPLT, J2, "JMPLT", "<" },
-    { mex::JMPLEQ, J2, "JMPLEQ", "<=" },
-    { mex::JMPGT, J2, "JMPGT", ">" },
-    { mex::JMPGEQ, J2, "JMPGEQ", ">=" },
-    { mex::BEG, NONA, "BEG", NULL },
-    { mex::NOP, NONA, "NOP", NULL },
-    { mex::END, NONA, "END", NULL },
-    { mex::BEGL, NONA, "BEGL", NULL },
-    { mex::ENDL, NONA, "ENDL", NULL },
-    { mex::CONT, NONA, "CONT", NULL },
-    { mex::SET_TRACE, NONA, "SET_TRACE", NULL },
-    { mex::ERROR, NONA, "ERROR", NULL },
-    { mex::BEGF, NONA, "BEGF", NULL },
-    { mex::ENDF, NONA, "ENDF", NULL },
-    { mex::CALLM, NONA, "CALLM", NULL },
-    { mex::CALLG, NONA, "CALLG", NULL },
-    { mex::RET, NONA, "RET", NULL },
-    { mex::PUSHA, NONA, "PUSHA", NULL },
-    { mex::PUSHNARGS, NONA, "PUSHNARGS", NULL },
-    { mex::PUSHV, A1, "PUSHV", "pushv" },
+{   { 0, 0, T_NONE, "NONE", "" },
+    { mex::ADD, A2, T_AOP, "ADD", "+" },
+    { mex::ADDI, A2I, T_AOP, "ADDI", "+" },
+    { mex::MUL, A2, T_AOP, "MUL", "*" },
+    { mex::MULI, A2I, T_AOP, "MULI", "*" },
+    { mex::SUB, A2, T_AOP, "SUB", "-" },
+    { mex::SUBR, A2R, T_AOP, "SUBR", "-" },
+    { mex::SUBI, A2I, T_AOP, "SUBI", "-" },
+    { mex::SUBRI, A2RI, T_AOP, "SUBRI", "-" },
+    { mex::DIV, A2, T_AOP, "DIV", "/" },
+    { mex::DIVR, A2R, T_AOP, "DIVR", "/" },
+    { mex::DIVI, A2I, T_AOP, "DIVI", "/" },
+    { mex::DIVRI, A2RI, T_AOP, "DIVRI", "/" },
+    { mex::MOD, A2, T_AOP, "MOD", "fmod" },
+    { mex::MODR, A2R, T_AOP, "MODR", "fmod" },
+    { mex::MODI, A2I, T_AOP, "MODI", "fmod" },
+    { mex::MODRI, A2RI, T_AOP, "MODRI", "fmod" },
+    { mex::FLOOR, A1, T_AOP, "FLOOR", "floor" },
+    { mex::CEIL, A1, T_AOP, "CEIL", "ceil" },
+    { mex::TRUNC, A1, T_AOP, "TRUNC", "trunc" },
+    { mex::ROUND, A1, T_AOP, "ROUND", "round" },
+    { mex::NEG, A1, T_AOP, "NEG", "-" },
+    { mex::ABS, A1, T_AOP, "ABS", "abs" },
+    { mex::LOG, A1, T_AOP, "LOG", "log" },
+    { mex::LOG10, A1, T_AOP, "LOG10", "log10" },
+    { mex::EXP, A1, T_AOP, "EXP", "exp" },
+    { mex::EXP10, A1, T_AOP, "EXP10", "exp10" },
+    { mex::SIN, A1, T_AOP, "SIN", "sin" },
+    { mex::ASIN, A1, T_AOP, "ASIN", "asin" },
+    { mex::COS, A1, T_AOP, "COS", "cos" },
+    { mex::ACOS, A1, T_AOP, "ACOS", "acos" },
+    { mex::TAN, A1, T_AOP, "TAN", "tan" },
+    { mex::ATAN, A1, T_AOP, "ATAN", "atan" },
+    { mex::ATAN2, A2, T_AOP, "ATAN2", "atan2" },
+    { mex::ATAN2R, A2R, T_AOP, "ATAN2R", "atan2" },
+    { mex::POWI, A1, T_AOP, "POWI", "pow" },
+    { mex::PUSHS, NONA, T_PUSH, "PUSHS", NULL },
+    { mex::PUSHL, NONA, T_PUSH, "PUSHL", NULL },
+    { mex::PUSHI, NONA, T_PUSH, "PUSHI", NULL },
+    { mex::PUSHG, NONA, T_PUSH, "PUSHG", NULL },
+    { mex::POPS, NONA, T_POP, "POPS", NULL },
+    { mex::JMP, J, T_JMP, "JMP", NULL },
+    { mex::JMPEQ, J2, T_JMPS, "JMPEQ", "==" },
+    { mex::JMPNE, J2, T_JMPS, "JMPNE", "!=" },
+    { mex::JMPLT, J2, T_JMPS, "JMPLT", "<" },
+    { mex::JMPLEQ, J2, T_JMPS, "JMPLEQ", "<=" },
+    { mex::JMPGT, J2, T_JMPS, "JMPGT", ">" },
+    { mex::JMPGEQ, J2, T_JMPS, "JMPGEQ", ">=" },
+    { mex::BEG, NONA, T_BEG, "BEG", NULL },
+    { mex::NOP, NONA, T_NOP, "NOP", NULL },
+    { mex::END, NONA, T_END, "END", NULL },
+    { mex::BEGL, NONA, T_BEGL, "BEGL", NULL },
+    { mex::ENDL, NONA, T_ENDL, "ENDL", NULL },
+    { mex::CONT, NONA, T_CONT, "CONT", NULL },
+    { mex::SET_TRACE, NONA, T_SET_TRACE, "SET_TRACE",
+                      NULL },
+    { mex::ERROR, NONA, T_ERROR, "ERROR", NULL },
+    { mex::BEGF, NONA, T_BEGF, "BEGF", NULL },
+    { mex::ENDF, NONA, T_ENDF, "ENDF", NULL },
+    { mex::CALLM, NONA, T_CALLM, "CALLM", NULL },
+    { mex::CALLG, NONA, T_CALLG, "CALLG", NULL },
+    { mex::RET, NONA, T_RET, "RET", NULL },
+    { mex::PUSHA, NONA, T_PUSH, "PUSHA", NULL },
+    { mex::PUSHNARGS, NONA, T_PUSH, "PUSHNARGS", NULL },
+    { mex::PUSHV, A1, T_PUSH, "PUSHV", "pushv" },
+};
+
+// Operation Information Table.
+//
+mex::trace_class_info mex::trace_class_infos
+	[ mex::NUMBER_OF_TRACE_CLASSES ] =
+{
+    { T_NONE, "T_NONE" },
+    { T_AOP, "T_AOP" },
+    { T_PUSH, "T_PUSH" },
+    { T_POP, "T_POP" },
+    { T_JMP, "T_JMP" },
+    { T_JMPS, "T_JMPS" },
+    { T_JMPF, "T_JMPF" },
+    { T_NOP, "T_NOP" },
+    { T_SET_TRACE, "T_SET_TRACE" },
+    { T_ERROR, "T_ERROR" },
+    { T_BEG, "T_BEG" },
+    { T_END, "T_END" },
+    { T_BEGL, "T_BEGL" },
+    { T_ENDL, "T_ENDL" },
+    { T_CONT, "T_CONT" },
+    { T_BEGF, "T_BEGF" },
+    { T_ENDF, "T_ENDF" },
+    { T_CALLM, "T_CALLM" },
+    { T_CALLG, "T_CALLG" },
+    { T_RET, "T_RET" },
 };
 
 
@@ -799,6 +829,27 @@ static void check_op_infos ( void )
 	    std::cerr << "BAD OP_INFOS["
 	              << p - mex::op_infos
 	              << "] != " << p->op_code
+		      << std::endl;
+	    std::exit ( 1 );
+	}
+	++ p;
+    }
+}
+
+static void check_trace_class_infos ( void )
+{
+    mex::trace_class_info * p =
+        mex::trace_class_infos;
+    mex::trace_class_info * endp =
+        p + mex::NUMBER_OF_TRACE_CLASSES;
+    while  ( p < endp )
+    {
+        if (    p - mex::trace_class_infos
+	     != p->trace_class )
+	{
+	    std::cerr << "BAD TRACE_CLASS_INFOS["
+	              << p - mex::trace_class_infos
+	              << "] != " << p->trace_class
 		      << std::endl;
 	    std::exit ( 1 );
 	}
@@ -941,10 +992,11 @@ bool mex::run_process ( mex::process p )
 	}
 
         min::uns8 op_code = pc->op_code;
+	min::uns8 trace_class = pc->trace_class;
 	op_info * op_info;
 	min::float64 arg1, arg2;
 	min::gen * new_sp = sp;
-	min::uns8 trace_flags = pc->trace_flags; 
+	min::uns32 trace_flags = p->trace_flags; 
 
 	if ( op_code >= mex::NUMBER_OF_OP_CODES )
 	{
@@ -1159,10 +1211,8 @@ bool mex::run_process ( mex::process p )
 	    p->excepts_accumulator |= excepts;
 	    excepts &= p->excepts;
 
-	    trace_flags &= p->trace_flags;
-
 	    if (    excepts != 0
-	         || trace_flags & mex::TRACE )
+	         || trace_flags & (1 << trace_class) )
 	    {
 	        SAVE;
 
@@ -1302,21 +1352,15 @@ bool mex::run_process ( mex::process p )
 		}
 	    }
 
-	    if ( bad_jmp )
-	        trace_flags |= mex::TRACE
-		             + mex::TRACE_LINES;
-	    else
-	    {
-	        trace_flags &= pc->trace_flags;
-		if ( ! execute_jmp
-		     &&
-		        (   trace_flags
-		          & mex::TRACE_NOJUMP )
-		     == 0 )
-		    trace_flags &= ~ mex::TRACE;
-	    }
+	    min::uns8 jmp_trace_class = trace_class;
+	    if ( ! execute_jmp
+	         &&
+		 trace_class == mex::T_JMPS )
+	        ++ jmp_trace_class;
 
-	    if ( trace_flags & mex::TRACE )
+	    if ( bad_jmp
+	         ||
+		 trace_flags & (1 << jmp_trace_class ) )
 	    {
 		SAVE;
 
@@ -1394,9 +1438,7 @@ bool mex::run_process ( mex::process p )
 		sp = new_sp - immedA;
 		pc += immedC;
 		-- pc;
-		p->trace_depth -=
-		    (   pc->trace_flags
-		      & mex::TRACE_DEPTH );
+		p->trace_depth -= pc->trace_depth;
 	    }
 
 	    goto LOOP;
@@ -1729,13 +1771,9 @@ bool mex::run_process ( mex::process p )
 
 	    } // end switch ( op_code )
 
-	    if ( fatal_error )
-	        trace_flags |= mex::TRACE
-		             + mex::TRACE_LINES;
-	    else
-	        trace_flags &= pc->trace_flags;
-
-	    if ( trace_flags & mex::TRACE )
+	    if ( fatal_error
+	         ||
+		 ( trace_flags & (1 << trace_class ) ) )
 	    {
 		SAVE;
 
@@ -1806,20 +1844,21 @@ bool mex::run_process ( mex::process p )
 		case mex::SET_TRACE:
 		{
 		    const char * prefix = ": ";
-		    if ( immedA & mex::TRACE )
+		    for ( unsigned i = 0;
+		          i < mex::
+			    NUMBER_OF_TRACE_CLASSES;
+			  ++ i )
 		    {
-		        p->printer << prefix << "TRACE";
-			prefix = ", ";
+		        if ( immedA & (1 << i) )
+			{
+			    p->printer
+			        << prefix 
+				<< mex::
+				     trace_class_infos
+				         [i].name;
+			    prefix = ", ";
+			}
 		    }
-		    if ( immedA & mex::TRACE_LINES )
-		    {
-		        p->printer << prefix
-			           << "TRACE_LINES";
-			prefix = ", ";
-		    }
-		    if ( immedA & mex::TRACE_NOJUMP )
-		        p->printer << prefix
-			           << "TRACE_NOJUMP";
 		}
 
 		default:
@@ -2151,7 +2190,6 @@ mex::process mex::create_process
     mex::pc pc = { min::NULL_STUB, 0 };
     mex::set_pc ( p, pc );
     p->optimize = false;
-    p->trace_function = mex::default_trace_function;
     for ( unsigned i = 0;
           i <= mex::max_lexical_level; ++ i )
         p->fp[i] = 0;
@@ -2240,13 +2278,4 @@ ERROR_EXIT:
 	set_pc ( p, pc );
 	return min::NULL_STUB;
     }
-}
-
-
-// Default Trace Function
-//
-void mex::default_trace_function
-	( mex::process p, min::gen info )
-{
-    // TBD
 }

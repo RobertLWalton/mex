@@ -13,96 +13,96 @@ Compile module and dump instructions
 // PUSH, POP, ARITHMETIC OP TEST
 //
 PUSHI 2 X
-    [####]PUSHI 0 0 0 2; X
+    [####]PUSHI T_PUSH 0 0 0 2; X
 PUSHI 2 Y
-    [####]PUSHI 0 0 0 2; Y
+    [####]PUSHI T_PUSH 0 0 0 2; Y
 STACK
     STACK: Y X
 ADD Z
-    [####]ADD 0 0 0 [$ MISSING $]; Z
+    [####]ADD T_AOP 0 0 0 [$ MISSING $]; Z
 STACK
     STACK: Z
 ERROR: in line ####: variable named X not defined; instruction changed to
        PUSHI missing value:
 PUSH X
 PUSH X
-    [####]PUSHI 0 0 0 [$ MISSING $]; [$ MISSING $]
+    [####]PUSHI T_PUSH 0 0 0 [$ MISSING $]; [$ MISSING $]
 POP
-    [####]POPS 0 0 0 [$ MISSING $]; [< * X >]
+    [####]POPS T_POP 0 0 0 [$ MISSING $]; [< * X >]
 ERROR: in line ####: portion of stack in the current block is too little
        to pop required arguments; instruction ignored:
 ADD
 PUSH Z W
-    [####]PUSHS 0 0 0 [$ MISSING $]; [< Z W >]
+    [####]PUSHS T_PUSH 0 0 0 [$ MISSING $]; [< Z W >]
 SUB
-    [####]SUB 0 0 0 [$ MISSING $]; *
+    [####]SUB T_AOP 0 0 0 [$ MISSING $]; *
 STACK
     STACK: *
 POP
-    [####]POPS 0 0 0 [$ MISSING $]; [< * * >]
+    [####]POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
 STACK
     STACK:
 // JMP TEST 1
 // Z = MIN ( X, Y )
 //
 PUSHI 5 X
-    [####]PUSHI 0 0 0 5; X
+    [####]PUSHI T_PUSH 0 0 0 5; X
 PUSHI 23 Y
-    [####]PUSHI 0 0 0 23; Y
+    [####]PUSHI T_PUSH 0 0 0 23; Y
 PUSHI NaN Z
-    [####]PUSHI 0 0 0 nan; Z
+    [####]PUSHI T_PUSH 0 0 0 nan; Z
 STACK
     STACK: Z Y X
 PUSH X
-    [####]PUSHS 2 0 0 [$ MISSING $]; [< X X >]
+    [####]PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< X X >]
 PUSH Y
-    [####]PUSHS 2 0 0 [$ MISSING $]; [< Y Y >]
+    [####]PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< Y Y >]
 STACK
     STACK: Y X Z Y X
 JMPLT ITS-X
-    [####]JMPLT 0 0 0 [$ MISSING $]; ITS-X
+    [####]JMPLT T_JMPS 0 0 0 [$ MISSING $]; ITS-X
 PUSH Y
-    [####]PUSHS 1 0 0 [$ MISSING $]; [< Y Y >]
+    [####]PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< Y Y >]
 POP Z
-    [####]POPS 1 0 0 [$ MISSING $]; [< Z Y >]
+    [####]POPS T_POP 1 0 0 [$ MISSING $]; [< Z Y >]
 JMP DONE
-    [####]JMP 0 0 0 [$ MISSING $]; DONE
+    [####]JMP T_JMP 0 0 0 [$ MISSING $]; DONE
 LABEL ITS-X
 JMPLT ITS-X
-    [####]JMPLT 0 0 4 [$ MISSING $]; ITS-X
+    [####]JMPLT T_JMPS 0 0 4 [$ MISSING $]; ITS-X
 PUSH X
-    [####]PUSHS 2 0 0 [$ MISSING $]; [< X X >]
+    [####]PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< X X >]
 POP Z
-    [####]POPS 1 0 0 [$ MISSING $]; [< Z X >]
+    [####]POPS T_POP 1 0 0 [$ MISSING $]; [< Z X >]
 LABEL DONE
 JMP DONE
-    [####]JMP 0 0 3 [$ MISSING $]; DONE
+    [####]JMP T_JMP 0 0 3 [$ MISSING $]; DONE
 STACK
     STACK: Z Y X
 POP
-    [####]POPS 0 0 0 [$ MISSING $]; [< * Z >]
+    [####]POPS T_POP 0 0 0 [$ MISSING $]; [< * Z >]
 // JMP TEST 2
 // Z = MIN ( X, Y )
 //
 STACK
     STACK: Y X
 PUSH X Z
-    [####]PUSHS 1 0 0 [$ MISSING $]; [< X Z >]
+    [####]PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< X Z >]
 PUSH X
-    [####]PUSHS 2 0 0 [$ MISSING $]; [< X X >]
+    [####]PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< X X >]
 PUSH Y
-    [####]PUSHS 2 0 0 [$ MISSING $]; [< Y Y >]
+    [####]PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< Y Y >]
 JMPLT ITS-X
-    [####]JMPLT 0 0 0 [$ MISSING $]; ITS-X
+    [####]JMPLT T_JMPS 0 0 0 [$ MISSING $]; ITS-X
 POP
-    [####]POPS 0 0 0 [$ MISSING $]; [< * Z >]
+    [####]POPS T_POP 0 0 0 [$ MISSING $]; [< * Z >]
 PUSH Y Z
-    [####]PUSHS 0 0 0 [$ MISSING $]; [< Y Z >]
+    [####]PUSHS T_PUSH 0 0 0 [$ MISSING $]; [< Y Z >]
 LABEL ITS-X
 JMPLT ITS-X
-    [####]JMPLT 0 0 3 [$ MISSING $]; ITS-X
+    [####]JMPLT T_JMPS 0 0 3 [$ MISSING $]; ITS-X
 POP
-    [####]POPS 0 0 0 [$ MISSING $]; [< * Z >]
+    [####]POPS T_POP 0 0 0 [$ MISSING $]; [< * Z >]
 // JMP TEST 3
 // Z = MIN ( X, Y )
 // Z pushed into stack by code jumped over
@@ -110,21 +110,21 @@ POP
 STACK
     STACK: Y X
 PUSH X
-    [####]PUSHS 1 0 0 [$ MISSING $]; [< X X >]
+    [####]PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< X X >]
 PUSH Y
-    [####]PUSHS 1 0 0 [$ MISSING $]; [< Y Y >]
+    [####]PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< Y Y >]
 JMPLT ITS-X
-    [####]JMPLT 0 0 0 [$ MISSING $]; ITS-X
+    [####]JMPLT T_JMPS 0 0 0 [$ MISSING $]; ITS-X
 PUSH Y Z
-    [####]PUSHS 0 0 0 [$ MISSING $]; [< Y Z >]
+    [####]PUSHS T_PUSH 0 0 0 [$ MISSING $]; [< Y Z >]
 JMP DONE
-    [####]JMP 0 0 0 [$ MISSING $]; DONE
+    [####]JMP T_JMP 0 0 0 [$ MISSING $]; DONE
 LABEL ITS-X
 ERROR: in line ####: code jumped over pushes values into the stack; JMP
        unresolved:
 JMPLT ITS-X
 PUSH X Z
-    [####]PUSHS 2 0 0 [$ MISSING $]; [< X Z >]
+    [####]PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< X Z >]
 LABEL DONE
 ERROR: in line ####: code jumped over pushes values into the stack; JMP
        unresolved:
@@ -132,9 +132,9 @@ JMP DONE
 STACK
     STACK: Z Z Y X
 POP
-    [####]POPS 0 0 0 [$ MISSING $]; [< * Z >]
+    [####]POPS T_POP 0 0 0 [$ MISSING $]; [< * Z >]
 POP
-    [####]POPS 0 0 0 [$ MISSING $]; [< * Z >]
+    [####]POPS T_POP 0 0 0 [$ MISSING $]; [< * Z >]
 // JMP TEST 4
 // Z = MIN ( X, Y )
 // Z popped from stack by code jumped over
@@ -142,17 +142,17 @@ POP
 STACK
     STACK: Y X
 PUSH X
-    [####]PUSHS 1 0 0 [$ MISSING $]; [< X X >]
+    [####]PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< X X >]
 PUSH Y
-    [####]PUSHS 1 0 0 [$ MISSING $]; [< Y Y >]
+    [####]PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< Y Y >]
 PUSH Y Z
-    [####]PUSHS 0 0 0 [$ MISSING $]; [< Y Z >]
+    [####]PUSHS T_PUSH 0 0 0 [$ MISSING $]; [< Y Z >]
 PUSH X Z
-    [####]PUSHS 2 0 0 [$ MISSING $]; [< X Z >]
+    [####]PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< X Z >]
 JMPLT ITS-X
-    [####]JMPLT 0 0 0 [$ MISSING $]; ITS-X
+    [####]JMPLT T_JMPS 0 0 0 [$ MISSING $]; ITS-X
 POP
-    [####]POPS 0 0 0 [$ MISSING $]; [< * Y >]
+    [####]POPS T_POP 0 0 0 [$ MISSING $]; [< * Y >]
 LABEL ITS-X
 ERROR: in line ####: code jumped over pops values from the stack; JMP
        unresolved:
@@ -160,5 +160,5 @@ JMPLT ITS-X
 STACK
     STACK: X Y X
 POP
-    [####]POPS 0 0 0 [$ MISSING $]; [< * X >]
+    [####]POPS T_POP 0 0 0 [$ MISSING $]; [< * X >]
 Compile returned true

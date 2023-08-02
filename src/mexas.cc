@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Aug  2 03:54:02 EDT 2023
+// Date:	Wed Aug  2 18:01:49 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -24,8 +24,6 @@
 # define L mexas::lexical_level
 # define SP mexas::variables->length
 
-min::uns8 mexas::default_trace_flags = 0;
-min::uns8 mexas::next_trace_flags = 0;
 min::uns32 mexas::error_count;
 min::uns32 mexas::warning_count;
 
@@ -61,16 +59,16 @@ enum op_code
 
 static mex::op_info op_infos[] =
 {
-    { ::PUSHM, mex::NONA, "PUSHM" },
-    { ::PUSH, mex::NONA, "PUSH" },
-    { ::POP, mex::NONA, "POP" },
-    { ::CALL, mex::NONA, "CALL" },
-    { ::LABEL, mex::NONA, "LABEL" },
+    { ::PUSHM, mex::NONA, 0, "PUSHM" },
+    { ::PUSH, mex::NONA, 0, "PUSH" },
+    { ::POP, mex::NONA, 0, "POP" },
+    { ::CALL, mex::NONA, 0, "CALL" },
+    { ::LABEL, mex::NONA, 0, "LABEL" },
     { ::INSTRUCTION_TRACE, mex::NONA,
-                           "INSTRUCTION_TRACE" },
+                           0, "INSTRUCTION_TRACE" },
     { ::DEFAULT_TRACE, mex::NONA,
-                            "DEFAULT_TRACE" },
-    { ::STACK, mex::NONA, "STACK" }
+                            0, "DEFAULT_TRACE" },
+    { ::STACK, mex::NONA, 0, "STACK" }
 };
 
 static void init_op_code_table ( void )
@@ -442,10 +440,6 @@ unsigned mexas::jump_list_resolve
 	        next->depth - mexas::depth[L];
 	    min::phrase_position pp =
 		m->position[next->jmp_location];
-	    if ( depth_diff > mex::TRACE_DEPTH )
-		mexas::compile_error
-		    ( pp, "jump exits too many"
-		          " blocks" );
 	    if ( SP > next->stack_minimum )
 		mexas::compile_error
 		    ( pp, "code jumped over pushes"
@@ -464,9 +458,7 @@ unsigned mexas::jump_list_resolve
 			      - next->stack_minimum;
 		instr->immedC = m->length
 			      - next->jmp_location;
-		instr->trace_flags &=
-		    ~ mex::TRACE_DEPTH;
-		instr->trace_flags |= depth_diff;
+		instr->trace_depth = depth_diff;
 
 		mexas::trace_instr
 		    ( next->jmp_location );
@@ -708,10 +700,10 @@ void mexas::trace_instr ( min::uns32 location )
 	mexas::input_file->printer;
     mex::module m = mexas::output_module;
 
-    if ( ( trace_flags & mex::TRACE ) == 0 )
+    if ( ( trace_flags & mexas::TRACE ) == 0 )
 	return;
 
-    if ( trace_flags & mex::TRACE_LINES )
+    if ( trace_flags & mexas::TRACE_LINES )
 	min::print_phrase_lines
 	    ( printer, mexas::input_file,
 	      m->position[location] );
@@ -719,20 +711,17 @@ void mexas::trace_instr ( min::uns32 location )
     mex::instr instr = m[location];
     printer
 	<< "[" << location << "]"
-	<< mex::op_infos[instr.op_code].name;
-    if ( instr.trace_flags & mex::TRACE )
-	printer << " TRACE";
-    if ( instr.trace_flags & mex::TRACE_LINES )
-	printer << " TRACE_LINES";
-    if ( instr.trace_flags & mex::TRACE_NOJUMP )
-	printer << " TRACE_NOJUMP";
-    printer << " " << instr.immedA
-	    << " " << instr.immedB
-	    << " " << instr.immedC
-	    << " " << instr.immedD
-	    << "; "
-	    << m->trace_info[location]
-	    << min::eom;
+	<< mex::op_infos[instr.op_code].name
+        << " "
+        << mex::trace_class_infos
+	       [instr.trace_class].name
+        << " " << instr.immedA
+	<< " " << instr.immedB
+	<< " " << instr.immedC
+	<< " " << instr.immedD
+	<< "; "
+	<< m->trace_info[location]
+	<< min::eom;
 }
 
 void mexas::push_push_instr
@@ -752,17 +741,20 @@ void mexas::push_push_instr
 	if ( k == L )
 	{
 	    instr.op_code = mex::PUSHS;
+	    instr.trace_class = mex::T_PUSH;
 	    instr.immedA = SP - i - 1;
 	}
 	else if ( i >= mexas::fp[k] )
 	{
 	    instr.op_code = mex::PUSHL;
+	    instr.trace_class = mex::T_PUSH;
 	    instr.immedA = i - mexas::fp[k];
 	    instr.immedB = k;
 	}
 	else
 	{
 	    instr.op_code = mex::PUSHA;
+	    instr.trace_class = mex::T_PUSH;
 	    instr.immedA = mexas::fp[k] - i;
 	    instr.immedB = k;
 	}
@@ -792,6 +784,7 @@ void mexas::push_push_instr
 		      " changed to PUSHI missing"
 		      " value" );
 	    instr.op_code = mex::PUSHI;
+	    instr.trace_class = mex::T_PUSH;
 	    trace_info = min::MISSING();
 	}
     }
@@ -1054,14 +1047,11 @@ bool mexas::next_statement ( void )
 // ------- --------
 
 mex::module mexas::compile
-	( min::file file, min::uns8 default_flags,
-	                  min::uns8 compile_flags )
+	( min::file file, min::uns8 compile_flags )
 {
     mexas::error_count = 0;
     mexas::warning_count = 0;
 
-    mexas::default_trace_flags = default_flags;
-    mexas::next_trace_flags = default_flags;
     mexas::compile_trace_flags = compile_flags;
 
     min::pop ( mexas::variables,
@@ -1118,6 +1108,8 @@ mex::module mexas::compile
 	{
 	    op_type = mex::op_infos[op_code].op_type;
 	    instr.op_code = op_code;
+	    instr.trace_class =
+	        mex::op_infos[op_code].trace_class;
 	}
 
 	switch ( op_type )
@@ -1272,6 +1264,7 @@ mex::module mexas::compile
 			continue;
 		    }
 		    instr.op_code = mex::PUSHL;
+		    instr.trace_class = mex::T_PUSH;
 		    instr.immedA = j;
 		    instr.immedB = 0;
 
@@ -1397,6 +1390,7 @@ mex::module mexas::compile
 		else
 		    instr.immedA = 0;
 		instr.op_code = mex::POPS;
+		instr.trace_class = mex::T_POP;
 
 		min::gen old_name =
 		    ( mexas::variables
@@ -1416,7 +1410,7 @@ mex::module mexas::compile
 	    {
 		if ( mexas::compile_trace_flags
 		     &
-		     mex::TRACE_LINES )
+		     mexas::TRACE_LINES )
 		    min::print_phrase_lines
 			( mexas::input_file->printer,
 			  mexas::input_file, pp );
@@ -1442,7 +1436,7 @@ mex::module mexas::compile
 		    mexas::input_file->printer;
 		if ( mexas::compile_trace_flags
 		     &
-		     mex::TRACE_LINES )
+		     mexas::TRACE_LINES )
 		    min::print_phrase_lines
 			( printer,
 			  mexas::input_file, pp );

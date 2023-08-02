@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Jul 26 02:28:52 EDT 2023
+// Date:	Wed Aug  2 17:33:27 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -45,7 +45,8 @@ extern min::uns32 return_stack_limit;
 namespace mex {
 
 struct instr {
-    min::uns8 op_code, trace_flags, unused1, unused2;
+    min::uns8 op_code, trace_class, trace_depth,
+              unused2;
     min::uns32 immedA, immedB, immedC;
     min::gen immedD;
 };
@@ -89,7 +90,41 @@ enum op_code {
     NUMBER_OF_OP_CODES
 };
 
-enum
+enum trace_class
+{
+    T_NONE,
+    T_AOP,
+    T_PUSH,
+    T_POP,
+    T_JMP,
+    T_JMPS,
+    T_JMPF,
+	// T_JMPS for successful JMPs, T_JMPF for failed
+	// JMPs.  Trace class of conditional jumps,
+	// JMP..., is T_JMPS.  +1 is added at run-time
+	// if the jump fails.
+    T_NOP,
+    T_SET_TRACE,
+    T_ERROR,
+    T_BEG,
+    T_END,
+    T_BEGL,
+    T_ENDL,
+    T_CONT,
+    T_BEGF,
+    T_ENDF,
+    T_CALLM,
+    T_CALLG,
+    T_RET,
+    NUMBER_OF_TRACE_CLASSES
+};
+
+enum trace_flags
+{
+    TRACE_LINES = 1 << NUMBER_OF_TRACE_CLASSES
+};
+
+enum op_type
 {
     NONA = 1,	// No arithmetic operands, not a JMP.
     A2 =   2,	// sp[0] and sp[-1] are the arithmetic
@@ -115,21 +150,26 @@ struct op_info
 	//     op_infos[mex::POP].op_code = mex::POP
     min::uns8 op_type;
         // See above.
+    min::uns8 trace_class;
+        // Trace class of op_code.
     const char * name;
         // Name of op_code: e.g, "POP".
     const char * oper;
         // Name of op_code operator: e.g, "+" or "<=".
 };
-
 extern op_info op_infos[];
 
-enum trace_flag
+struct trace_class_info
 {
-    TRACE_DEPTH  = 7 << 0,
-    TRACE_LINES  = 1 << 3,
-    TRACE_NOJUMP = 1 << 4,
-    TRACE        = 1 << 7
+    min::uns8 trace_class;
+        // Trace class as a check: e.g., mex::T_POP.
+	// It should be true that:
+	//     trace_class_infos[mex::POP].trace_class
+	//         = mex::T_POP
+    const char * name;
+        // Name of trace_class: e.g, "T_POP".
 };
+extern trace_class_info trace_class_infos[];
 
 
 // Modules
@@ -226,11 +266,6 @@ struct ret
 
 typedef min::packed_vec_insptr<mex::ret> return_stack;
 
-typedef void (* trace_function )
-    ( mex::process p, min::gen info );
-void default_trace_function
-    ( mex::process p, min::gen info );
-
 struct process_header
 {
     const min::uns32 control;
@@ -240,9 +275,8 @@ struct process_header
     const mex::pc pc;
     mex::return_stack return_stack;
     min::uns32 fp[mex::max_lexical_level + 1];
-    mex::trace_function trace_function;
     min::uns32 trace_depth;
-    min::uns8 trace_flags;
+    min::uns32 trace_flags;
     int excepts;
     int excepts_accumulator;
     bool optimize;
