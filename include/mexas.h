@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Aug  2 17:34:55 EDT 2023
+// Date:	Thu Aug  3 02:48:19 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -527,9 +527,8 @@ unsigned jump_list_update
     //               variables->length );
     //
     // This function should be called just AFTER 
-    // mexas::depth[L] has been decremented and the
-    // stack lengt, variables->length, has been
-    // reduced.
+    // mexas::depth[L] has been decremented and
+    // variables->length has been reduced.
     //
     // Assumes that the elements of jlist are sorted by
     // lexical level, highest first, and L is equal to

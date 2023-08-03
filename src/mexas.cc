@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Aug  2 22:57:41 EDT 2023
+// Date:	Thu Aug  3 02:42:52 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -406,7 +406,7 @@ unsigned mexas::jump_list_update
     while ( min::uns32 n = previous->next )
     {
         min::ptr<mexas::jump_element> next = jlist + n;
-	if ( next->lexical_level <= L )
+	if ( next->lexical_level < L )
 	    break;
 	if ( next->maximum_depth > depth[L] )
 	    next->maximum_depth = depth[L];
@@ -634,6 +634,9 @@ unsigned mexas::endx ( mex::instr & instr,
 	instr.immedA = mexas::variables->length
 	             - e.stack_limit - e.nvars + tvars;
 	mexas::jump_list_delete ( mexas::jumps );
+	min::pop ( mexas::variables,
+	           variables->length - e.stack_limit
+		                     + e.nvars );
 	-- L;
     }
     else if ( instr.op_code == mex::ENDL )
@@ -644,12 +647,19 @@ unsigned mexas::endx ( mex::instr & instr,
         instr.immedC = mexas::output_module->length
 	             - e.begin_location - 1;
 	-- mexas::depth[L];
+	min::pop ( mexas::variables,
+	           variables->length - e.stack_limit
+		                     + e.nvars );
+	mexas::jump_list_update ( mexas::jumps );
     }
     else // if mex::END
     {
 	instr.immedA = mexas::variables->length
 	             - e.stack_limit + tvars;
 	-- mexas::depth[L];
+	min::pop ( mexas::variables,
+	           variables->length - e.stack_limit );
+	mexas::jump_list_update ( mexas::jumps );
     }
 
     min::uns32 len = mexas::blocks->length;

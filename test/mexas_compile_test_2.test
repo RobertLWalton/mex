@@ -4,13 +4,14 @@ Compile module and dump instructions
 //
 // File:        mexas_compile_test_2.in
 // Author:      Bob Walton (walton@acm.org)
-// Date:        Wed Aug  2 22:42:44 EDT 2023
+// Date:        Thu Aug  3 02:29:11 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
 // for this program.
 
 // BEG ... END Test
+// Z = MIN ( X, Y )
 //
 PUSHI 152 X
     [####]PUSHI T_PUSH 0 0 0 152; X
@@ -46,4 +47,54 @@ BEG
     [####]PUSHI T_PUSH 0 0 0 2000; UNUSED
 END
     [####]END T_END 1 0 0 [$ MISSING $]; [$ MISSING $]
+STACK
+    STACK: Z Y X
+POP
+    [####]POPS T_POP 0 0 0 [$ MISSING $]; [< * Z >]
+POP
+    [####]POPS T_POP 0 0 0 [$ MISSING $]; [< * Y >]
+POP
+    [####]POPS T_POP 0 0 0 [$ MISSING $]; [< * X >]
+// BEGL ... ENDL Test
+// Z = SUM { I: I = 4 TO I = 6 }
+//
+PUSHI 6 LIMIT
+    [####]PUSHI T_PUSH 0 0 0 6; LIMIT
+PUSHI 0 SUM
+    [####]PUSHI T_PUSH 0 0 0 0; SUM
+PUSHI 4 I
+    [####]PUSHI T_PUSH 0 0 0 4; I
+BEGL 2
+    [####]BEGL T_BEGL 0 0 0 [$ MISSING $]; [$ MISSING $]
+    STACK
+    STACK: next-I next-SUM I SUM LIMIT
+    PUSH I
+    [####]PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< I I >]
+    PUSH LIMIT
+    [####]PUSHS T_PUSH 5 0 0 [$ MISSING $]; [< LIMIT LIMIT >]
+    JMPGT DONE
+    [####]JMPGT T_JMPS 0 0 0 [$ MISSING $]; DONE
+    PUSH SUM
+    [####]PUSHS T_PUSH 3 0 0 [$ MISSING $]; [< SUM SUM >]
+    PUSH I
+    [####]PUSHS T_PUSH 3 0 0 [$ MISSING $]; [< I I >]
+    ADD
+    [####]ADD T_AOP 0 0 0 [$ MISSING $]; *
+    POP next-SUM
+    [####]POPS T_POP 2 0 0 [$ MISSING $]; [< next-SUM * >]
+    PUSH I
+    [####]PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< I I >]
+    PUSHI 1
+    [####]PUSHI T_PUSH 0 0 0 1; *
+    ADD
+    [####]ADD T_AOP 0 0 0 [$ MISSING $]; *
+    POP next-I
+    [####]POPS T_POP 1 0 0 [$ MISSING $]; [< next-I * >]
+ENDL
+    [####]ENDL T_ENDL 0 2 11 [$ MISSING $]; [$ MISSING $]
+STACK
+    STACK: I SUM LIMIT
+LABEL DONE
+    JMPGT DONE
+    [####]JMPGT T_JMPS 2 0 10 [$ MISSING $]; DONE
 Compile returned true
