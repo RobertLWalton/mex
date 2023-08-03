@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Aug  3 02:42:52 EDT 2023
+// Date:	Thu Aug  3 04:18:50 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1541,6 +1541,39 @@ mex::module mexas::compile
 			( trace_info, index, pp );
 		mexas::cont
 		    ( instr, tvars, trace_info, pp );
+		goto TRACE;
+	    }
+	    case mex::BEGF:
+	    {
+		min::gen function_name =
+		    mexas::get_name ( index );
+		if ( function_name == min::NONE() )
+		{
+		    mexas::compile_error
+			( pp, "BEGF has no function"
+			      " name; instruction"
+			      " ignored" );
+		    continue;
+		}
+		min::uns32 first = index;
+		while ( mexas::get_name ( index )
+		        !=
+			min::NONE() );
+		min::uns32 nargs = index - first;
+		mexas::push_function
+		    ( mexas::functions,
+		      function_name,
+		      L, mexas::depth[L],
+		      m->length );
+		mexas::begx
+		    ( instr, nargs, 0,
+		      function_name, pp );
+		for ( min::uns32 i = 0; i < nargs;
+		                        ++ i )
+		    mexas::push_variable
+			( mexas::variables,
+			  statement[first+i],
+			  L, mexas::depth[L] );
 		goto TRACE;
 	    }
 	    }
