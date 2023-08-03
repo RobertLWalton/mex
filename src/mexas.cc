@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Aug  2 18:01:49 EDT 2023
+// Date:	Wed Aug  2 22:57:41 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1469,6 +1469,7 @@ mex::module mexas::compile
 			( trace_info, index, pp );
 		mexas::begx
 		    ( instr, 0, tvars, trace_info, pp );
+		goto TRACE;
 	    }
 	    case mex::END:
 	    {
@@ -1478,6 +1479,7 @@ mex::module mexas::compile
 			( trace_info, index, pp );
 		mexas::endx
 		    ( instr, tvars, trace_info, pp );
+		goto TRACE;
 	    }
 	    case mex::BEGL:
 	    {
@@ -1509,6 +1511,7 @@ mex::module mexas::compile
 		mexas::begx
 		    ( instr, nnext, tvars, trace_info,
 		             pp );
+		goto TRACE;
 	    }
 	    case mex::ENDL:
 	    {
@@ -1518,6 +1521,7 @@ mex::module mexas::compile
 			( trace_info, index, pp );
 		mexas::endx
 		    ( instr, tvars, trace_info, pp );
+		goto TRACE;
 	    }
 	    case mex::CONT:
 	    {
@@ -1527,6 +1531,7 @@ mex::module mexas::compile
 			( trace_info, index, pp );
 		mexas::cont
 		    ( instr, tvars, trace_info, pp );
+		goto TRACE;
 	    }
 	    }
 	}

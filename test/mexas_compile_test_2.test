@@ -1,0 +1,49 @@
+Compile module and dump instructions
+
+// MEXAS Compile Test 2 Input
+//
+// File:        mexas_compile_test_2.in
+// Author:      Bob Walton (walton@acm.org)
+// Date:        Wed Aug  2 22:42:44 EDT 2023
+//
+// The authors have placed this program in the public
+// domain; they make no warranty and accept no liability
+// for this program.
+
+// BEG ... END Test
+//
+PUSHI 152 X
+    [####]PUSHI T_PUSH 0 0 0 152; X
+PUSHI 196 Y
+    [####]PUSHI T_PUSH 0 0 0 196; Y
+PUSHI 0 Z
+    [####]PUSHI T_PUSH 0 0 0 0; Z
+BEG
+    [####]BEG T_BEG 0 0 0 [$ MISSING $]; [$ MISSING $]
+    PUSH X
+    [####]PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< X X >]
+    PUSH Y
+    [####]PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< Y Y >]
+    JMPLT ITS-X
+    [####]JMPLT T_JMPS 0 0 0 [$ MISSING $]; ITS-X
+    PUSH Y
+    [####]PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< Y Y >]
+    POP Z
+    [####]POPS T_POP 1 0 0 [$ MISSING $]; [< Z Y >]
+    JMP DONE
+    [####]JMP T_JMP 0 0 0 [$ MISSING $]; DONE
+    LABEL ITS-X
+    JMPLT ITS-X
+    [####]JMPLT T_JMPS 0 0 4 [$ MISSING $]; ITS-X
+    PUSH X
+    [####]PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< X X >]
+    POP Z
+    [####]POPS T_POP 1 0 0 [$ MISSING $]; [< Z X >]
+    LABEL DONE
+    JMP DONE
+    [####]JMP T_JMP 0 0 3 [$ MISSING $]; DONE
+    PUSHI 2000 UNUSED
+    [####]PUSHI T_PUSH 0 0 0 2000; UNUSED
+END
+    [####]END T_END 1 0 0 [$ MISSING $]; [$ MISSING $]
+Compile returned true

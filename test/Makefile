@@ -2,7 +2,7 @@
 #
 # File:		Makefile
 # Author:	Bob Walton (walton@acm.org)
-# Date:		Mon Jul 31 16:32:33 EDT 2023
+# Date:		Wed Aug  2 22:57:08 EDT 2023
 #
 # The authors have placed this program in the public
 # domain; they make no warranty and accept no liability
@@ -27,7 +27,8 @@ OPTIMIZE = -O3
 DIFFOPT ?= -u
 
 TESTS = mexas_scanner_test_1 \
-        mexas_compile_test_1
+        mexas_compile_test_1 \
+        mexas_compile_test_2
 
 MIN_H =	${MIN}/include/min.h
 
