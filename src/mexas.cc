@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Aug  3 04:18:50 EDT 2023
+// Date:	Thu Aug  3 08:02:21 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -632,7 +632,7 @@ unsigned mexas::endx ( mex::instr & instr,
         ip->immedC = mexas::output_module->length + 1
 	           - e.begin_location;
 	instr.immedA = mexas::variables->length
-	             - e.stack_limit - e.nvars + tvars;
+	             - e.stack_limit + e.nvars + tvars;
 	mexas::jump_list_delete ( mexas::jumps );
 	min::pop ( mexas::variables,
 	           variables->length - e.stack_limit
