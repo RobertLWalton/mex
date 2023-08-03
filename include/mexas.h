@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Aug  3 02:48:19 EDT 2023
+// Date:	Thu Aug  3 16:31:57 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -422,6 +422,28 @@ inline min::gen get_num ( min::uns32 & i )
          &&
 	 min::is_num ( statement[i] ) )
 	return statement[i++];
+    else
+	return min::NONE();
+}
+
+// If statement[i] exists and is a quote, and
+// statement[i+1] exists and is a MIN string,
+// return statement[i+1] and increment i twice.
+// Otherwise return min::NONE().
+//
+inline min::gen get_str ( min::uns32 & i )
+{
+    if ( i + 1 < mexas::statement->length
+         &&
+	 ( statement[i] == mexas::single_quote
+	   ||
+	   statement[i] == mexas::double_quote )
+	 &&
+	 min::is_str ( statement[i+1] ) )
+    {
+        ++ i;
+	return statement[i++];
+    }
     else
 	return min::NONE();
 }

@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Aug  3 08:02:21 EDT 2023
+// Date:	Thu Aug  3 16:27:45 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1560,20 +1560,44 @@ mex::module mexas::compile
 		        !=
 			min::NONE() );
 		min::uns32 nargs = index - first;
-		mexas::push_function
-		    ( mexas::functions,
-		      function_name,
-		      L, mexas::depth[L],
-		      m->length );
+		min::gen message =
+		    mexas::get_str ( index );
+		if ( message == min::NONE() )
+		    message = function_name;
+
+		min::gen labbuf[nargs + 1];
+		labbuf[0] = message;
+		for ( min::uns32 i = 0; i < nargs;
+		                        ++ i )
+		    labbuf[i+1] = statement[first+i];
+		min::locatable_gen trace_info
+		    ( min::new_lab_gen
+		          ( labbuf, nargs+1 ) );
+
 		mexas::begx
 		    ( instr, nargs, 0,
-		      function_name, pp );
+		      trace_info, pp );
 		for ( min::uns32 i = 0; i < nargs;
 		                        ++ i )
 		    mexas::push_variable
 			( mexas::variables,
 			  statement[first+i],
 			  L, mexas::depth[L] );
+		mexas::push_function
+		    ( mexas::functions,
+		      function_name,
+		      L, mexas::depth[L],
+		      m->length );
+		goto TRACE;
+	    }
+	    case mex::ENDF:
+	    {
+		min::locatable_gen trace_info;
+	        min::uns32 tvars =
+		    mexas::get_trace_info
+			( trace_info, index, pp );
+		mexas::endx
+		    ( instr, tvars, trace_info, pp );
 		goto TRACE;
 	    }
 	    }
