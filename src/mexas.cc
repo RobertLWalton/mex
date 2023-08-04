@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Aug  3 16:27:45 EDT 2023
+// Date:	Fri Aug  4 09:00:22 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -631,8 +631,7 @@ unsigned mexas::endx ( mex::instr & instr,
 	    mexas::output_module + e.begin_location;
         ip->immedC = mexas::output_module->length + 1
 	           - e.begin_location;
-	instr.immedA = mexas::variables->length
-	             - e.stack_limit + e.nvars + tvars;
+	instr.immedB = L;
 	mexas::jump_list_delete ( mexas::jumps );
 	min::pop ( mexas::variables,
 	           variables->length - e.stack_limit
@@ -1505,6 +1504,8 @@ mex::module mexas::compile
 		    min::direct_float_of ( nn );
 		if ( nf < 0
 		     ||
+		     nf >= (1ul << 32 )
+		     ||
 		     nf != (min::uns32) nf )
 		{
 		    mexas::compile_error
@@ -1599,6 +1600,48 @@ mex::module mexas::compile
 		mexas::endx
 		    ( instr, tvars, trace_info, pp );
 		goto TRACE;
+	    }
+	    case mex::RET:
+	    {
+	        if ( L == 0 )
+		{
+		    mexas::compile_error
+			( pp, "RET not in a function;"
+			      " instruction ignored" );
+		    continue;
+		}
+		min::gen nn = mexas::get_num ( index );
+		if ( nn == min::NONE() )
+		{
+		    mexas::compile_error
+			( pp, "no nresults parameter;"
+			      " instruction ignored" );
+		    continue;
+		}
+		min::float64 nf =
+		    min::direct_float_of ( nn );
+		if ( nf < 0
+		     ||
+		     nf >= (1ul << 32 )
+		     ||
+		     nf != (min::uns32) nf )
+		{
+		    mexas::compile_error
+			( pp, "bad nresults parameter;"
+			      " instruction ignored" );
+		    continue;
+		}
+		min::uns32 nresults = (min::uns32) nf;
+		min::locatable_gen trace_info;
+	        min::uns32 tvars =
+		    mexas::get_trace_info
+			( trace_info, index, pp );
+		instr.immedA = tvars;
+		instr.immedB = L;
+		instr.immedC = nresults;
+		mexas::push_instr
+		    ( instr, pp, trace_info );
+		min::pop ( mexas::variables, nresults );
 	    }
 	    }
 	}

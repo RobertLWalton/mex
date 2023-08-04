@@ -2058,7 +2058,8 @@ assembles to \TT{CALLM} or \TT{CALLG}.
 \begin{indpar}
 At run-time this instruction's actions are as described in
 Figure~\itemref{FUNCTION-INSTRUCTIONS}.  At assembly-time,
-this instruction does nothing.
+this instruction pops {\em nresults} elements from the
+variables stack.
 \end{indpar}
 
 \ttkey{PUSHNARGS} {\em variable-name}
