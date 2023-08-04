@@ -4,7 +4,7 @@ Compile module and dump instructions
 //
 // File:        mexas_compile_test_2.in
 // Author:      Bob Walton (walton@acm.org)
-// Date:        Thu Aug  3 02:29:11 EDT 2023
+// Date:        Fri Aug  4 17:22:29 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -47,8 +47,7 @@ BEG
     [####]PUSHI T_PUSH 0 0 0 2000; UNUSED
 END
     [####]END T_END 1 0 0 [$ MISSING $]; [$ MISSING $]
-STACK
-    STACK: Z Y X
+    STACKS: VARIABLES: Z Y X
 POP
     [####]POPS T_POP 0 0 0 [$ MISSING $]; [< * Z >]
 POP
@@ -66,8 +65,7 @@ PUSHI 4 I
     [####]PUSHI T_PUSH 0 0 0 4; I
 BEGL 2
     [####]BEGL T_BEGL 0 0 0 [$ MISSING $]; [$ MISSING $]
-    STACK
-    STACK: next-I next-SUM I SUM LIMIT
+    STACKS: VARIABLES: next-I next-SUM ; I SUM LIMIT
     PUSH I
     [####]PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< I I >]
     PUSH LIMIT
@@ -92,8 +90,7 @@ BEGL 2
     [####]POPS T_POP 1 0 0 [$ MISSING $]; [< next-I * >]
 ENDL
     [####]ENDL T_ENDL 0 2 11 [$ MISSING $]; [$ MISSING $]
-STACK
-    STACK: I SUM LIMIT
+    STACKS: VARIABLES: I SUM LIMIT
 LABEL DONE
     JMPGT DONE
     [####]JMPGT T_JMPS 2 0 10 [$ MISSING $]; DONE

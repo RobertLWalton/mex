@@ -4,7 +4,7 @@ Compile module and dump instructions
 //
 // File:        mexas_compile_test_1.in
 // Author:      Bob Walton (walton@acm.org)
-// Date:        Sun Jul 30 06:12:54 EDT 2023
+// Date:        Fri Aug  4 17:21:54 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -16,12 +16,10 @@ PUSHI 2 X
     [####]PUSHI T_PUSH 0 0 0 2; X
 PUSHI 2 Y
     [####]PUSHI T_PUSH 0 0 0 2; Y
-STACK
-    STACK: Y X
+    STACKS: VARIABLES: Y X
 ADD Z
     [####]ADD T_AOP 0 0 0 [$ MISSING $]; Z
-STACK
-    STACK: Z
+    STACKS: VARIABLES: Z
 ERROR: in line ####: variable named X not defined; instruction changed to
        PUSHI missing value:
 PUSH X
@@ -36,12 +34,10 @@ PUSH Z W
     [####]PUSHS T_PUSH 0 0 0 [$ MISSING $]; [< Z W >]
 SUB
     [####]SUB T_AOP 0 0 0 [$ MISSING $]; *
-STACK
-    STACK: *
+    STACKS: VARIABLES: *
 POP
     [####]POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
-STACK
-    STACK:
+    STACKS: VARIABLES:
 // JMP TEST 1
 // Z = MIN ( X, Y )
 //
@@ -51,14 +47,12 @@ PUSHI 23 Y
     [####]PUSHI T_PUSH 0 0 0 23; Y
 PUSHI NaN Z
     [####]PUSHI T_PUSH 0 0 0 nan; Z
-STACK
-    STACK: Z Y X
+    STACKS: VARIABLES: Z Y X
 PUSH X
     [####]PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< X X >]
 PUSH Y
     [####]PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< Y Y >]
-STACK
-    STACK: Y X Z Y X
+    STACKS: VARIABLES: Y X Z Y X
 JMPLT ITS-X
     [####]JMPLT T_JMPS 0 0 0 [$ MISSING $]; ITS-X
 PUSH Y
@@ -77,15 +71,13 @@ POP Z
 LABEL DONE
 JMP DONE
     [####]JMP T_JMP 0 0 3 [$ MISSING $]; DONE
-STACK
-    STACK: Z Y X
+    STACKS: VARIABLES: Z Y X
 POP
     [####]POPS T_POP 0 0 0 [$ MISSING $]; [< * Z >]
 // JMP TEST 2
 // Z = MIN ( X, Y )
 //
-STACK
-    STACK: Y X
+    STACKS: VARIABLES: Y X
 PUSH X Z
     [####]PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< X Z >]
 PUSH X
@@ -107,8 +99,7 @@ POP
 // Z = MIN ( X, Y )
 // Z pushed into stack by code jumped over
 //
-STACK
-    STACK: Y X
+    STACKS: VARIABLES: Y X
 PUSH X
     [####]PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< X X >]
 PUSH Y
@@ -129,8 +120,7 @@ LABEL DONE
 ERROR: in line ####: code jumped over pushes values into the stack; JMP
        unresolved:
 JMP DONE
-STACK
-    STACK: Z Z Y X
+    STACKS: VARIABLES: Z Z Y X
 POP
     [####]POPS T_POP 0 0 0 [$ MISSING $]; [< * Z >]
 POP
@@ -139,8 +129,7 @@ POP
 // Z = MIN ( X, Y )
 // Z popped from stack by code jumped over
 //
-STACK
-    STACK: Y X
+    STACKS: VARIABLES: Y X
 PUSH X
     [####]PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< X X >]
 PUSH Y
@@ -157,8 +146,7 @@ LABEL ITS-X
 ERROR: in line ####: code jumped over pops values from the stack; JMP
        unresolved:
 JMPLT ITS-X
-STACK
-    STACK: X Y X
+    STACKS: VARIABLES: X Y X
 POP
     [####]POPS T_POP 0 0 0 [$ MISSING $]; [< * X >]
 Compile returned true

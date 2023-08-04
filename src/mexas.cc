@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Aug  4 13:49:36 EDT 2023
+// Date:	Fri Aug  4 17:21:22 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -53,7 +53,7 @@ enum op_code
     LABEL,
     INSTRUCTION_TRACE,
     DEFAULT_TRACE,
-    STACK,
+    STACKS,
     NUMBER_OF_OP_CODES
 };
 
@@ -68,7 +68,7 @@ static mex::op_info op_infos[] =
                            0, "INSTRUCTION_TRACE" },
     { ::DEFAULT_TRACE, mex::NONA,
                             0, "DEFAULT_TRACE" },
-    { ::STACK, mex::NONA, 0, "STACK" }
+    { ::STACKS, mex::NONA, 0, "STACKS" }
 };
 
 static void init_op_code_table ( void )
@@ -1444,34 +1444,83 @@ mex::module mexas::compile
 		    ( mexas::jumps, target );
 		continue;
 	    }
-	    case ::STACK:
+	    case ::STACKS:
 	    {
 		min::printer printer =
 		    mexas::input_file->printer;
-		if ( mexas::compile_trace_flags
-		     &
-		     mexas::TRACE_LINES )
-		    min::print_phrase_lines
-			( printer,
-			  mexas::input_file, pp );
-		printer << min::bol << "    STACK: "
+		if (   compile_trace_flags
+		     & mexas::TRACE_LINES )
+		{
+		    min::phrase_position spp = pp;
+		    -- spp.end.line;
+		    if (   spp.end.line
+		         > spp.begin.line )
+			min::print_phrase_lines
+			    ( printer,
+			      mexas::input_file,
+			      spp );
+		}
+
+		printer << min::bol << "    STACKS: "
 		        << min::bom;
-		min::uns32 ell = L;
+
+		printer << "VARIABLES: " << min::bom;
+		min::uns32 level = L;
+		min::uns32 depth = mexas::depth[L];
 		for ( min::uns32 i = variables->length;
 		      0 < i; )
 		{
-		    if ( i == mexas::fp[ell] )
-		        printer << "; ";
-		    if ( i == mexas::lp[ell] )
+		    -- i;
+		    mexas::variable_element v =
+		        variables[i];
+		    while ( v.level < level )
 		    {
 		        printer << "| ";
-			-- ell;
+			-- level;
+			depth = mexas::depth[level];
 		    }
-		    -- i;
-		    min::gen name = (variables+i)->name;
-		    printer << name;
+		    while ( v.depth < depth )
+		    {
+		        printer << "; ";
+			-- depth;
+		    }
+		    printer << v.name;
 		    if ( i > 0 ) printer << " ";
 		}
+		printer << min::eom;
+
+		if ( functions->length == 0 )
+		{
+		    printer << min::eom;
+		    continue;
+		}
+
+		printer << min::indent << "FUNCTIONS: "
+		        << min::bom;
+		level = L;
+		depth = mexas::depth[L];
+		for ( min::uns32 i = functions->length;
+		      0 < i; )
+		{
+		    -- i;
+		    mexas::function_element f =
+		        functions[i];
+		    while ( f.level < level )
+		    {
+		        printer << "| ";
+			-- level;
+			depth = mexas::depth[level];
+		    }
+		    while ( f.depth < depth )
+		    {
+		        printer << "; ";
+			-- depth;
+		    }
+		    printer << f.name;
+		    if ( i > 0 ) printer << " ";
+		}
+		printer << min::eom;
+
 		printer << min::eom;
 		continue;
 	    }
