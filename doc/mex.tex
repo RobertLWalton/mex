@@ -239,7 +239,7 @@
 
 \author{Robert L. Walton}
 
-\date{July 31, 2023}
+\date{August 4, 2023}
  
 \maketitle
 
@@ -1035,11 +1035,13 @@ are explained in Tracing and Exceptions, \itemref{TRACING-AND-EXCEPTIONS}.
     & minimum number of arguments expected.
 \\\hline
 \TT{ENDF}
-    & Subtract \TT{immedA} to \TT{sp} (popping the stack \TT{immedA} times),
-    					then pop \\
-    & the return stack, set the process \TT{fp[immedB]} member to the \\
-    & \TT{saved\_fp} member of the value popped, and set the process \TT{pc} \\
-    & member to the \TT{saved\_pc} member of the value popped.
+    & Pop element $e$ from the return stack and check that \TT{$e$.level}
+      equals \\
+    & \TT{immedB} and \TT{$e$.nresults} equals zero.  Set the process's
+       \TT{sp} member \\
+    & to \TT{fp[immedB] - $e$.nargs}.  Then set the process's \TT{fp[immedB]} \\
+    & and \TT{pc} members to \TT{$e$.saved\_fp} and \TT{$e$.saved\_pc}
+      respectively.
 \\\hline
 \TT{CALLM}
     & Push a \TT{mex::ret} value into the return stack, setting its
@@ -1069,12 +1071,17 @@ are explained in Tracing and Exceptions, \itemref{TRACING-AND-EXCEPTIONS}.
     & member from \TT{immedD} (which must convert to a \TT{mex::module}).
 \\\hline
 \TT{RET}
-    & Pop \TT{immedC} values from the stack and save them.  Then subtract \\
-    & \TT{immedA} to \TT{sp} (popping the stack \TT{immedA} times), then push \\
-    & the saved values into the stack.  Then pop the return stack \\
-    & and set the the process's \TT{pc} and \TT{fp[immedB]} members from the \\
-    & \TT{saved\_pc} and \TT{saved\_fp} members of the value popped, \\
-    & and check that the \TT{nresults} member equals \TT{immedC}.
+    & Subtract \TT{immedA} to \TT{sp} (popping the stack \TT{immedA} times).
+      The \\
+    & values popped are always trace values.  Pop element $e$ from the \\
+    & return stack and check that \TT{immedB} and \TT{immedC} equal
+      \TT{$e$.level} \\
+    & and \TT{$e$.nresults}, respectively.  Pop \TT{immedC} values from
+      the stack \\
+    & and save them.  Set \TT{sp} to \TT{fp[immedB] - $e$.nargs} and then push \\
+    & the saved values into the stack.  Set the process's \TT{fp[immedB]} and \\
+    & \TT{pc} members to \TT{$e$.saved\_fp} and \TT{$e$.saved\_pc}
+      respectively.
 \\\hline
 \TT{PUSHA}
     & Push the stack vector value with index \TT{fp[immedB] - immedA}.

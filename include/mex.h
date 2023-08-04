@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Aug  2 17:33:27 EDT 2023
+// Date:	Fri Aug  4 05:17:23 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -260,6 +260,7 @@ struct ret
 {
     const mex::pc saved_pc;
     min::uns32 saved_fp;
+    min::uns32 level;
     min::uns32 nargs;
     min::uns32 nresults;
 };
