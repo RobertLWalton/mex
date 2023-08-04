@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Aug  3 16:31:57 EDT 2023
+// Date:	Fri Aug  4 13:49:15 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -186,6 +186,7 @@ struct block_element
     min::uns8 begin_op_code;
     min::uns8 end_op_code;
     min::uns32 stack_limit;
+    min::uns32 function_stack;
     min::uns32 nvars;
     min::uns32 begin_location;
 };

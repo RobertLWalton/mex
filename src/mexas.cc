@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Aug  4 09:00:22 EDT 2023
+// Date:	Fri Aug  4 13:49:36 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -482,7 +482,9 @@ void mexas::begx ( mex::instr & instr,
 {
     mexas::block_element e =
         { instr.op_code, 0,
-	  mexas::variables->length + nvars, nvars,
+	  mexas::variables->length + nvars,
+	  mexas::functions->length,
+	  nvars,
 	  mexas::output_module->length };
 
     if ( instr.op_code == mex::BEGF )
@@ -624,6 +626,9 @@ unsigned mexas::endx ( mex::instr & instr,
     }
 
     mexas::block_element e = min::pop ( mexas::blocks );
+    min::pop ( mexas::functions,
+                 mexas::functions->length
+	       - e.function_stack );
  
     if ( instr.op_code == mex::ENDF )
     {
