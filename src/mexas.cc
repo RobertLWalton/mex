@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat Aug  5 06:20:43 EDT 2023
+// Date:	Sat Aug  5 06:35:14 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1660,12 +1660,8 @@ mex::module mexas::compile
 		    min::print_phrase_lines
 			( mexas::input_file->printer,
 			  mexas::input_file, pp );
-		min::locatable_gen trace_info;
-	        min::uns32 tvars =
-		    mexas::get_trace_info
-			( trace_info, index, pp );
 		mexas::endx
-		    ( instr, tvars, trace_info, pp );
+		    ( instr, 0, min::MISSING(), pp );
 		trace_instr ( m->length - 1, true );
 		continue;
 	    }
@@ -1700,15 +1696,9 @@ mex::module mexas::compile
 		    continue;
 		}
 		min::uns32 nresults = (min::uns32) nf;
-		min::locatable_gen trace_info;
-	        min::uns32 tvars =
-		    mexas::get_trace_info
-			( trace_info, index, pp );
-		instr.immedA = tvars;
 		instr.immedB = L;
 		instr.immedC = nresults;
-		mexas::push_instr
-		    ( instr, pp, trace_info );
+		mexas::push_instr ( instr, pp );
 		min::pop ( mexas::variables, nresults );
 	    }
 	    }

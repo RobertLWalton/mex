@@ -1,0 +1,26 @@
+// MEXAS Compile Test 3 Input
+//
+// File:	mexas_compile_test_3.in
+// Author:	Bob Walton (walton@acm.org)
+// Date:	Sat Aug  5 06:32:14 EDT 2023
+//
+// The authors have placed this program in the public
+// domain; they make no warranty and accept no liability
+// for this program.
+
+// BEGF ... ENDF Test
+// RESULT = MIN ( ARG1, ARG2 )
+//
+BEGF MIN ARG1 ARG2
+    STACKS
+    PUSH ARG1
+    PUSH ARG2
+    JMPLT ITS-ARG1
+    PUSH ARG2
+    RET 1
+    LABEL ITS-ARG1
+    PUSH ARG1
+    RET 1
+    STACKS
+ENDF
+STACKS
