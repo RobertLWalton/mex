@@ -239,7 +239,7 @@
 
 \author{Robert L. Walton}
 
-\date{August 4, 2023}
+\date{August 5, 2023}
  
 \maketitle
 
@@ -1694,7 +1694,7 @@ pops arguments from the variable stack and pushes returned values.
 jumps \TT{JMP\ldots} just pops two elements.
 
 In order to locate arguments in the variable stack, the assembler variable
-\TT{FP[$L$]} is maintained when a \TT{BEGF} is assembled as the
+\TT{fp[$L$]} is maintained when a \TT{BEGF} is assembled as the
 variable stack size after argument elements are pushed into the
 variable stack by \TT{BEGF}: see \TT{BEGF}, \pagref{BEGF}.
 
@@ -2002,12 +2002,12 @@ this instruction pushes an element with the {\em function-name}
 into the function stack and pushes one element with each
 of the {\em variable-names} into the variable stack (they
 represent the arguments to the function).
-It is \underline{not} necessary that the number of
-{\em variable-names} exactly equals the number of actual
+The number of {\em variable-names} can be less than,
+but may \underline{not} be greater than, the number of actual
 arguments.
 
 Lastly the instruction saves the current variable stack size
-in the assembly-time variable FP[$L$],
+in the assembly-time variable fp[$L$],
 where $L$ is the lexical level of the \TT{BEGF}
 instruction.  This is used to implement \TT{PUSHA}.
 \end{indpar}
@@ -2017,7 +2017,7 @@ instruction.  This is used to implement \TT{PUSHA}.
 At run-time this instruction's actions are as described in
 Figure~\itemref{FUNCTION-INSTRUCTIONS}.  At assembly-time,
 it pops from the variable and function stacks all elements with the
-same lexical level \TT{ENDF} instruction.
+same lexical level as the \TT{ENDF} instruction.
 \end{indpar}
 
 \ttkey{CALLM} {\em function-name} {\em nargs} {\em variable-name}\STAR{}
@@ -2029,7 +2029,6 @@ and pushes into the stack one element for each {\em variable-name}
 (representing the results of the function execution).
 The number of {\em variable-names} \underline{must} equal
 the number of actual results.
-same lexical level \TT{ENDF} instruction.
 
 The {\em function-name} is searched for in the function stack.
 \end{indpar}

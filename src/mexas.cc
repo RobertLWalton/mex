@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat Aug  5 06:35:14 EDT 2023
+// Date:	Sat Aug  5 17:37:15 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1700,6 +1700,217 @@ mex::module mexas::compile
 		instr.immedC = nresults;
 		mexas::push_instr ( instr, pp );
 		min::pop ( mexas::variables, nresults );
+		break;
+	    }
+	    case ::CALL:
+	    case mex::CALLM:
+	    case mex::CALLG:
+	    {
+		mex::module cm = m;
+		min::uns32 begf_location =
+		    mexas::NOT_FOUND;
+		min::gen function_name;
+
+		if ( op_code == mex::CALLG )
+		{
+		    min::gen mod_name =
+		        mexas::get_name ( index );
+		    if ( mod_name == min::NONE() )
+		        mod_name =
+			    mexas::get_star ( index );
+		    if ( mod_name == min::NONE() )
+		    {
+			mexas::compile_error
+			    ( pp, "no module name for"
+			          " CALLG;"
+				  " instruction ignored" );
+			continue;
+		    }
+		    function_name =
+		        mexas::get_name ( index );
+		    if ( function_name == min::NONE() )
+		    {
+			mexas::compile_error
+			    ( pp, "no function name for"
+			          " CALLG;"
+				  " instruction ignored" );
+			continue;
+		    }
+		    begf_location = mexas::global_search
+		        ( cm, mod_name, mexas::F,
+			      function_name );
+		    if (    begf_location
+		         == mexas::NOT_FOUND )
+		    {
+			mexas::compile_error
+			    ( pp, "function ",
+			          min::pgen
+				      ( function_name ),
+				  " in module ",
+			          min::pgen
+				      ( mod_name ),
+			          " not found;"
+				  " instruction ignored" );
+			continue;
+		    }
+		    instr.immedD =
+		        min::new_stub_gen ( cm );
+		}
+		else
+		{
+		    function_name =
+		        mexas::get_name ( index );
+		    if ( function_name == min::NONE() )
+		    {
+			mexas::compile_error
+			    ( pp, "no function name for"
+			          " CALL/CALLM;"
+				  " instruction ignored" );
+			continue;
+		    }
+		    min::uns32 i =
+		        mexas::functions->length;
+		    while ( 0 < i )
+		    {
+		        -- i;
+			min::ptr
+			    <mexas::function_element>
+			    fptr =
+			    (mexas::functions + i );
+			if (    fptr->name
+			     == function_name )
+			{
+			    begf_location =
+			        fptr->index;
+			    break;
+			}
+		    }
+		    if (    begf_location
+			 != mexas::NOT_FOUND )
+		    {
+		        instr.op_code = mex::CALLM;
+			instr.trace_class =
+			    mex::T_CALLM;
+		    }
+		    else if ( op_code == ::CALL )
+		    {
+		        instr.op_code = mex::CALLG;
+			instr.trace_class =
+			    mex::T_CALLG;
+			begf_location =
+			    mexas::global_search
+				( cm, mexas::star,
+				      mexas::F,
+				      function_name );
+			instr.immedD =
+			    min::new_stub_gen ( cm );
+		    }
+		    if (    begf_location
+		         == mexas::NOT_FOUND )
+		    {
+			mexas::compile_error
+			    ( pp, "function ",
+			          min::pgen
+				      ( function_name ),
+			          " not found;"
+				  " instruction ignored" );
+			continue;
+		    }
+		}
+
+		if ( begf_location >= cm->length )
+		{
+		    mexas::compile_error
+			( pp, "bad function_element;"
+			      " begf_location >="
+			      " cm->length;"
+			      " instruction ignored" );
+		    continue;
+		}
+		min::ptr<mex::instr> ip =
+		    cm + begf_location;
+		if ( ip->op_code != mex::BEGF )
+		{
+		    mexas::compile_error
+			( pp, "bad function_element;"
+			      " does not point at"
+			      " BEGF;"
+			      " instruction ignored" );
+		    continue;
+		}
+
+	        min::gen na = mexas::get_num ( index );
+		if ( na == min::NONE() )
+		{
+		    mexas::compile_error
+			( pp, "no nargs parameter;"
+			      " instruction ignored" );
+		    continue;
+		}
+		min::float64 nf =
+		    min::direct_float_of ( na );
+		if ( nf < 0
+		     ||
+		     nf >= (1ul << 32 )
+		     ||
+		     nf != (min::uns32) nf )
+		{
+		    mexas::compile_error
+			( pp, "bad nargs parameter;"
+			      " instruction ignored" );
+		    continue;
+		}
+		min::uns32 nargs = (min::uns32) nf;
+
+		if ( ip->immedA > nargs )
+		{
+		    mexas::compile_error
+			( pp, "BEGF expects ",
+			      min::puns
+			         ( ip->immedA,
+				   "%u" ),
+			      " arguments but CALL..."
+			      " provides only ",
+			      min::puns
+			         ( nargs, "%u" ),
+			      ";"
+			      " instruction ignored" );
+		    continue;
+		}
+
+		min::uns32 first = index;
+		while ( mexas::get_name ( index )
+		        !=
+			min::NONE() );
+		min::uns32 nresults = index - first;
+		min::gen message =
+		    mexas::get_str ( index );
+		if ( message == min::NONE() )
+		    message = function_name;
+
+		min::gen labbuf[nresults + 1];
+		labbuf[0] = message;
+		for ( min::uns32 i = 0; i < nresults;
+		                        ++ i )
+		    labbuf[i+1] = statement[first+i];
+		min::locatable_gen trace_info
+		    ( min::new_lab_gen
+		          ( labbuf, nresults+1 ) );
+		
+		instr.immedA = nargs;
+		instr.immedB = nresults;
+		instr.immedC = begf_location;
+		mexas::push_instr
+		    ( instr, pp, trace_info );
+
+		min::pop ( mexas::variables, nargs );
+		for ( min::uns32 i = 0; i < nresults;
+		                        ++ i )
+		    mexas::push_variable
+			( mexas::variables,
+			  statement[first+i],
+			  L, mexas::depth[L] );
+		break;
 	    }
 	    }
 	}
