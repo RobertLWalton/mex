@@ -62,14 +62,12 @@ POP Z
 JMP DONE
     [####]JMP T_JMP 0 0 0 [$ MISSING $]; DONE
 LABEL ITS-X
-JMPLT ITS-X
     [####]JMPLT T_JMPS 0 0 4 [$ MISSING $]; ITS-X
 PUSH X
     [####]PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< X X >]
 POP Z
     [####]POPS T_POP 1 0 0 [$ MISSING $]; [< Z X >]
 LABEL DONE
-JMP DONE
     [####]JMP T_JMP 0 0 3 [$ MISSING $]; DONE
     STACKS: VARIABLES: Z Y X
 POP
@@ -91,7 +89,6 @@ POP
 PUSH Y Z
     [####]PUSHS T_PUSH 0 0 0 [$ MISSING $]; [< Y Z >]
 LABEL ITS-X
-JMPLT ITS-X
     [####]JMPLT T_JMPS 0 0 3 [$ MISSING $]; ITS-X
 POP
     [####]POPS T_POP 0 0 0 [$ MISSING $]; [< * Z >]

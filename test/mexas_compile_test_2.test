@@ -34,14 +34,12 @@ BEG
     JMP DONE
     [####]JMP T_JMP 0 0 0 [$ MISSING $]; DONE
     LABEL ITS-X
-    JMPLT ITS-X
     [####]JMPLT T_JMPS 0 0 4 [$ MISSING $]; ITS-X
     PUSH X
     [####]PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< X X >]
     POP Z
     [####]POPS T_POP 1 0 0 [$ MISSING $]; [< Z X >]
     LABEL DONE
-    JMP DONE
     [####]JMP T_JMP 0 0 3 [$ MISSING $]; DONE
     PUSHI 2000 UNUSED
     [####]PUSHI T_PUSH 0 0 0 2000; UNUSED
@@ -92,7 +90,6 @@ ENDL
     [####]ENDL T_ENDL 0 2 11 [$ MISSING $]; [$ MISSING $]
     STACKS: VARIABLES: I SUM LIMIT
 LABEL DONE
-    JMPGT DONE
     [####]JMPGT T_JMPS 2 0 10 [$ MISSING $]; DONE
 POP
     [####]POPS T_POP 0 0 0 [$ MISSING $]; [< * I >]

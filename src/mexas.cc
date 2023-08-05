@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Aug  4 17:21:22 EDT 2023
+// Date:	Sat Aug  5 06:20:43 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -461,7 +461,7 @@ unsigned mexas::jump_list_resolve
 		instr->trace_depth = depth_diff;
 
 		mexas::trace_instr
-		    ( next->jmp_location );
+		    ( next->jmp_location, true );
 	    }
 
 	    previous->next = next->next;
@@ -636,6 +636,7 @@ unsigned mexas::endx ( mex::instr & instr,
 	    mexas::output_module + e.begin_location;
         ip->immedC = mexas::output_module->length + 1
 	           - e.begin_location;
+	trace_instr ( e.begin_location, true );
 	instr.immedB = L;
 	mexas::jump_list_delete ( mexas::jumps );
 	min::pop ( mexas::variables,
@@ -707,7 +708,8 @@ void mexas::cont ( mex::instr & instr,
 }
 
 min::uns8 mexas::compile_trace_flags;
-void mexas::trace_instr ( min::uns32 location )
+void mexas::trace_instr
+	( min::uns32 location, bool no_lines )
 {
     min::uns8 trace_flags = mexas::compile_trace_flags;
     min::printer printer =
@@ -717,10 +719,13 @@ void mexas::trace_instr ( min::uns32 location )
     if ( ( trace_flags & mexas::TRACE ) == 0 )
 	return;
 
-    if ( trace_flags & mexas::TRACE_LINES )
+    if ( ( trace_flags & mexas::TRACE_LINES )
+         &&
+	 ! no_lines )
 	min::print_phrase_lines
 	    ( printer, mexas::input_file,
 	      m->position[location] );
+
     printer << min::bol << "    " << min::bom;
     mex::instr instr = m[location];
     printer
@@ -837,7 +842,8 @@ min::uns32 mexas::get_trace_info
 	    mexas::push_instr ( instr, pp );
 	}
 	mexas::trace_instr
-	    ( mexas::output_module->length - 1 );
+	    ( mexas::output_module->length - 1,
+	      true );
     }
     return len - 1;
 }
@@ -1629,6 +1635,12 @@ mex::module mexas::compile
 		    ( min::new_lab_gen
 		          ( labbuf, nargs+1 ) );
 
+		mexas::push_function
+		    ( mexas::functions,
+		      function_name,
+		      L, mexas::depth[L],
+		      m->length );
+
 		mexas::begx
 		    ( instr, nargs, 0,
 		      trace_info, pp );
@@ -1638,22 +1650,24 @@ mex::module mexas::compile
 			( mexas::variables,
 			  statement[first+i],
 			  L, mexas::depth[L] );
-		mexas::push_function
-		    ( mexas::functions,
-		      function_name,
-		      L, mexas::depth[L],
-		      m->length );
 		goto TRACE;
 	    }
 	    case mex::ENDF:
 	    {
+		if ( mexas::compile_trace_flags
+		     &
+		     mexas::TRACE_LINES )
+		    min::print_phrase_lines
+			( mexas::input_file->printer,
+			  mexas::input_file, pp );
 		min::locatable_gen trace_info;
 	        min::uns32 tvars =
 		    mexas::get_trace_info
 			( trace_info, index, pp );
 		mexas::endx
 		    ( instr, tvars, trace_info, pp );
-		goto TRACE;
+		trace_instr ( m->length - 1, true );
+		continue;
 	    }
 	    case mex::RET:
 	    {

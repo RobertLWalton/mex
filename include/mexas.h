@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Aug  4 13:49:15 EDT 2023
+// Date:	Sat Aug  5 06:09:33 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -513,9 +513,11 @@ enum compile_trace_flags
 extern min::uns8 compile_trace_flags;
     // mexas::TRACE and mexas::TRACE_LINES to print
     // compiled instructions as they are assembled.
-void trace_instr ( min::uns32 location );
+void trace_instr ( min::uns32 location,
+                   bool no_lines = false );
     // Print trace of instruction at mexas::ouput_
-    // _module[location], as per compile_trace_flags.
+    // _module[location], as per compile_trace_flags,
+    // except ignore TRACE_LINES if no_lines is true.
 
 unsigned jump_list_delete
 	( mexas::jump_list jlist );
