@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Aug  4 04:52:55 EDT 2023
+// Date:	Sat Aug  5 05:56:45 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1764,7 +1764,6 @@ bool mex::run_process ( mex::process p )
 		        "immedA + immedC is too large";
 		    goto INNER_FATAL;
 		}
-
 		mex::module em = ret->saved_pc.module;
 		min::uns32 new_pc = ret->saved_pc.index;
 		if ( em == min::NULL_STUB )
@@ -1792,6 +1791,36 @@ bool mex::run_process ( mex::process p )
 		    message = "bad saved_fp value";
 		    goto INNER_FATAL;
 		}
+
+
+		// RET/ENDF is executed before tracing,
+		// so what is traced is the CALL
+		// instruction, but with op_code ==
+		// RET/ENDF.
+		//
+		mex::set_pc ( p, ret->saved_pc );
+		p->fp[immedB] = new_fp;
+		RW_UNS32 p->return_stack->length = rp;
+
+		min::gen * qend = sp - immedA;
+		min::gen * q = qend - immedC;
+		while ( q < qend )
+		    * ++ new_sp = * ++ q;
+		sp = new_sp;
+		-- p->trace_depth;
+
+		m = em;
+		if ( m == min::NULL_STUB )
+		{
+		    RET_SAVE;
+		    p->state = mex::CALL_END;
+		    return true;
+		}
+
+		pcbegin = ~ ( m + 0 );
+		pc = pcbegin + new_pc;
+		pcend = pcbegin + m->length;
+		break;
 	    }
 	    case mex::CALLM:
 	    case mex::CALLG:
@@ -1837,6 +1866,33 @@ bool mex::run_process ( mex::process p )
 		    message = "return stack is full";
 		    goto INNER_FATAL;
 		}
+
+		// CALL... is executed before tracing,
+		// so what is traced is the BEGF
+		// instruction, but with op_code ==
+		// CALL....
+		//
+		mex::ret * ret =
+		    ~ ( p->return_stack + rp );
+		mex::pc new_pc =
+		    { m, (min::uns32)
+			 ( pc - pcbegin ) };
+		mex::set_saved_pc ( p, ret, new_pc );
+		ret->saved_fp = p->fp[level];
+		ret->level = level;
+		ret->nargs = immedA;
+		ret->nresults = immedB;
+		RW_UNS32 p->return_stack->length =
+		    rp + 1;
+
+		new_pc = { cm, immedC };
+		mex::set_pc ( p, new_pc );
+
+		m = cm;
+		pcbegin = ~ ( m + 0 );
+		pc = pcbegin + immedC;
+		pcend = pcbegin + m->length;
+		break;
 	    }
 
 	    } // end switch ( op_code )
@@ -2054,74 +2110,21 @@ bool mex::run_process ( mex::process p )
 		break;
 	    }
 	    case mex::ENDF:
-		-- p->trace_depth;
-		immedA = immedC = 0;
-		// Fall through.
 	    case mex::RET:
 	    {
-		min::uns32 rp = p->return_stack->length;
-		-- rp;
-		const mex::ret * ret =
-		    ~ ( p->return_stack + rp );
-		mex::module em = ret->saved_pc.module;
-		min::uns32 new_pc = ret->saved_pc.index;
-		min::uns32 new_fp = ret->saved_fp;
-	        min::gen * new_sp =
-		    spbegin + p->fp[immedB]
-		            - ret->nargs;
-
-		mex::set_pc ( p, ret->saved_pc );
-		p->fp[immedB] = new_fp;
-		RW_UNS32 p->return_stack->length = rp;
-
-		min::gen * qend = sp - immedA;
-		min::gen * q = qend - immedC;
-		while ( q < qend )
-		    * ++ new_sp = * ++ q;
-		sp = new_sp;
-
-		if ( em == min::NULL_STUB )
-		{
-		    RET_SAVE;
-		    p->state = mex::CALL_END;
-		    return true;
-		}
-
-		m = em;
-		pcbegin = ~ ( m + 0 );
-		pc = pcbegin + new_pc;
-		pcend = pcbegin + m->length;
-		-- pc;
+		// RET/ENDF was executed before tracing
+		// so the CALL instruction would be
+		// traced.
+		//
 		break;
 	    }
 	    case mex::CALLM:
 	    case mex::CALLG:
 	    {
-		mex::module cm =
-		    ( op_code == mex::CALLG ?
-		      immedD :
-		      m );
-		const mex::instr * target =
-		    ~ ( cm + immedC );
-		int level = target->immedB;
-		min::uns32 rp = p->return_stack->length;
-
-		mex::ret * ret =
-		    ~ ( p->return_stack + rp );
-		mex::pc new_pc =
-		    { m, (min::uns32)
-			 ( pc - pcbegin + 1 ) };
-		mex::set_saved_pc ( p, ret, new_pc );
-		ret->saved_fp = p->fp[level];
-		ret->level = level;
-		ret->nargs = immedA;
-		ret->nresults = immedB;
-		RW_UNS32 p->return_stack->length =
-		    rp + 1;
-
-		new_pc = { cm, immedC + 1 };
-		mex::set_pc ( p, new_pc );
-		m = cm;
+		// CALL.. was executed before tracing
+		// to the BEGF instruction would be
+		// traced.
+		//
 		break;
 	    }
 
