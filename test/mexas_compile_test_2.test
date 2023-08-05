@@ -4,7 +4,7 @@ Compile module and dump instructions
 //
 // File:        mexas_compile_test_2.in
 // Author:      Bob Walton (walton@acm.org)
-// Date:        Fri Aug  4 17:22:29 EDT 2023
+// Date:        Fri Aug  4 21:47:34 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -94,4 +94,29 @@ ENDL
 LABEL DONE
     JMPGT DONE
     [####]JMPGT T_JMPS 2 0 10 [$ MISSING $]; DONE
+POP
+    [####]POPS T_POP 0 0 0 [$ MISSING $]; [< * I >]
+POP
+    [####]POPS T_POP 0 0 0 [$ MISSING $]; [< * SUM >]
+POP
+    [####]POPS T_POP 0 0 0 [$ MISSING $]; [< * LIMIT >]
+// DEPTH TEST
+//
+PUSHI 1 X
+    [####]PUSHI T_PUSH 0 0 0 1; X
+BEG
+    [####]BEG T_BEG 0 0 0 [$ MISSING $]; [$ MISSING $]
+PUSHI 2 Y
+    [####]PUSHI T_PUSH 0 0 0 2; Y
+BEG
+    [####]BEG T_BEG 0 0 0 [$ MISSING $]; [$ MISSING $]
+PUSHI 3 Z
+    [####]PUSHI T_PUSH 0 0 0 3; Z
+    STACKS: VARIABLES: Z ; Y ; X
+END
+    [####]END T_END 1 0 0 [$ MISSING $]; [$ MISSING $]
+    STACKS: VARIABLES: Y ; X
+END
+    [####]END T_END 1 0 0 [$ MISSING $]; [$ MISSING $]
+    STACKS: VARIABLES: X
 Compile returned true

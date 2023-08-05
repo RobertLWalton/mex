@@ -2,7 +2,7 @@
 //
 // File:	mexas_compile_test_2.in
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Aug  4 17:22:29 EDT 2023
+// Date:	Fri Aug  4 21:47:34 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -54,3 +54,19 @@ BEGL 2
 ENDL
 STACKS
 LABEL DONE
+POP
+POP
+POP
+
+// DEPTH TEST
+//
+PUSHI 1 X
+BEG
+PUSHI 2 Y
+BEG
+PUSHI 3 Z
+STACKS
+END
+STACKS
+END
+STACKS
