@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat Aug  5 05:56:45 EDT 2023
+// Date:	Sun Aug  6 17:23:22 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -777,7 +777,7 @@ RET_EXIT:
 // Operation Information Table.
 //
 mex::op_info mex::op_infos [ mex::NUMBER_OF_OP_CODES ] =
-{   { 0, 0, T_NONE, "NONE", "" },
+{   { 0, 0, T_ALWAYS, "NONE", "" },
     { mex::ADD, A2, T_AOP, "ADD", "+" },
     { mex::ADDI, A2I, T_AOP, "ADDI", "+" },
     { mex::MUL, A2, T_AOP, "MUL", "*" },
@@ -849,26 +849,27 @@ mex::op_info mex::op_infos [ mex::NUMBER_OF_OP_CODES ] =
 mex::trace_class_info mex::trace_class_infos
 	[ mex::NUMBER_OF_TRACE_CLASSES ] =
 {
-    { T_NONE, "T_NONE" },
-    { T_AOP, "T_AOP" },
-    { T_PUSH, "T_PUSH" },
-    { T_POP, "T_POP" },
-    { T_JMP, "T_JMP" },
-    { T_JMPS, "T_JMPS" },
-    { T_JMPF, "T_JMPF" },
-    { T_NOP, "T_NOP" },
-    { T_SET_TRACE, "T_SET_TRACE" },
-    { T_ERROR, "T_ERROR" },
-    { T_BEG, "T_BEG" },
-    { T_END, "T_END" },
-    { T_BEGL, "T_BEGL" },
-    { T_ENDL, "T_ENDL" },
-    { T_CONT, "T_CONT" },
-    { T_BEGF, "T_BEGF" },
-    { T_ENDF, "T_ENDF" },
-    { T_CALLM, "T_CALLM" },
-    { T_CALLG, "T_CALLG" },
-    { T_RET, "T_RET" },
+    { T_NEVER, "NEVER" },
+    { T_ALWAYS, "ALWAYS" },
+    { T_AOP, "AOP" },
+    { T_PUSH, "PUSH" },
+    { T_POP, "POP" },
+    { T_JMP, "JMP" },
+    { T_JMPS, "JMPS" },
+    { T_JMPF, "JMPF" },
+    { T_NOP, "NOP" },
+    { T_SET_TRACE, "SET_TRACE" },
+    { T_ERROR, "ERROR" },
+    { T_BEG, "BEG" },
+    { T_END, "END" },
+    { T_BEGL, "BEGL" },
+    { T_ENDL, "ENDL" },
+    { T_CONT, "CONT" },
+    { T_BEGF, "BEGF" },
+    { T_ENDF, "ENDF" },
+    { T_CALLM, "CALLM" },
+    { T_CALLG, "CALLG" },
+    { T_RET, "RET" },
 };
 
 
@@ -1969,7 +1970,7 @@ bool mex::run_process ( mex::process p )
 		}
 		case mex::SET_TRACE:
 		{
-		    const char * prefix = ": ";
+		    const char * prefix = ": T_";
 		    for ( unsigned i = 0;
 		          i < mex::
 			    NUMBER_OF_TRACE_CLASSES;
@@ -1982,7 +1983,7 @@ bool mex::run_process ( mex::process p )
 				<< mex::
 				     trace_class_infos
 				         [i].name;
-			    prefix = ", ";
+			    prefix = ", T_";
 			}
 		    }
 		}

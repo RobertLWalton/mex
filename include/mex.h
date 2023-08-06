@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Aug  4 05:17:23 EDT 2023
+// Date:	Sun Aug  6 17:19:49 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -92,7 +92,8 @@ enum op_code {
 
 enum trace_class
 {
-    T_NONE,
+    T_NEVER,
+    T_ALWAYS,
     T_AOP,
     T_PUSH,
     T_POP,
