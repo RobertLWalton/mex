@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat Aug  5 06:09:33 EDT 2023
+// Date:	Sun Aug  6 06:20:17 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -304,6 +304,8 @@ inline void push_jump
 
 // Main Functions
 // ---- ---------
+
+int main ( int argc, char * argv[] );
 
 mex::module compile
     ( min::file file, min::uns8 compile_flags = 0 );

@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat Aug  5 17:37:15 EDT 2023
+// Date:	Sun Aug  6 05:51:08 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -14,6 +14,7 @@
 //	Support Functions
 //	Scanner Function
 //	Compile Function
+//	Main Function
 
 
 // Setup and Data
@@ -1924,9 +1925,40 @@ mex::module mexas::compile
 
     mexas::jump_list_delete ( mexas::jumps );
 
+    if ( mexas::error_count > 0 )
+        return min::NULL_STUB;
+
+    if (    mexas::input_file->file_name
+         == min::MISSING() )
+        mex::name_ref(m) = min::MISSING();
+    else
+    {
+        min::str_ptr sp
+	    ( mexas::input_file->file_name );
+	const char * p =
+	    min::unprotected::str_of ( sp );
+	min::uns32 len = std::strlen ( p );
+	if ( len > 4
+	     &&
+	     std::strcmp ( ".mex", p + len - 4 ) == 0 )
+	    mex::name_ref(m) =
+	        min::new_str_gen ( p, len - 1 );
+	else
+	    mex::name_ref(m) =
+	        mexas::input_file->file_name;
+    }
+
     mexas::make_module_interface();
 
     min::push ( mexas::modules ) = m;
 
     return m;
+}
+
+// Main Function
+// ---- --------
+
+int mexas::main ( int argc, char * argv[] )
+{
+    return 0;
 }

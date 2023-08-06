@@ -146,4 +146,4 @@ JMPLT ITS-X
     STACKS: VARIABLES: X Y X
 POP
     [####]POPS T_POP 0 0 0 [$ MISSING $]; [< * X >]
-Compile returned true
+Compile returned false
