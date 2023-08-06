@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Aug  6 17:25:19 EDT 2023
+// Date:	Sun Aug  6 17:38:11 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -42,6 +42,7 @@ min::locatable_gen mexas::V;
 min::locatable_gen mexas::F;
 
 min::locatable_gen mexas::op_code_table;
+min::locatable_gen mexas::trace_class_table;
 
 enum op_code
     // Extends mex::op_code to include pseudo-ops and
@@ -104,6 +105,34 @@ static void init_op_code_table ( void )
 	min::locate ( ap, tmp );
 	tmp = min::new_num_gen ( p->op_code );
 	min::set ( ap, tmp );
+	++ p;
+    }
+}
+
+static void init_trace_class_table ( void )
+{
+    mexas::trace_class_table = min::new_obj_gen
+        ( 10 * mex::NUMBER_OF_TRACE_CLASSES,
+	   4 * mex::NUMBER_OF_TRACE_CLASSES,
+	   1 * mex::NUMBER_OF_TRACE_CLASSES );
+
+    min::obj_vec_insptr vp ( mexas::trace_class_table );
+    min::attr_insptr ap ( vp );
+
+    min::locatable_gen tmp;
+    mex::trace_class_info * p = mex::trace_class_infos;
+    mex::trace_class_info * endp =
+        p + mex::NUMBER_OF_TRACE_CLASSES;
+    while  ( p < endp )
+    {
+        tmp = min::new_str_gen ( p->name );
+        min::attr_push(vp) = tmp;
+	if ( p->trace_class != mex::T_NEVER )
+	{
+	    min::locate ( ap, tmp );
+	    tmp = min::new_num_gen ( p->trace_class );
+	    min::set ( ap, tmp );
+	}
 	++ p;
     }
 }
@@ -192,6 +221,7 @@ static void initialize ( void )
     ::backslash = min::new_str_gen ( "\\" );
 
     ::init_op_code_table();
+    ::init_trace_class_table();
 
     mexas::variables =
 	::variable_stack_vec_type.new_stub ( 1000 );
@@ -1724,7 +1754,8 @@ mex::module mexas::compile
 			mexas::compile_error
 			    ( pp, "no module name for"
 			          " CALLG;"
-				  " instruction ignored" );
+				  " instruction"
+				  " ignored" );
 			continue;
 		    }
 		    function_name =
@@ -1734,7 +1765,8 @@ mex::module mexas::compile
 			mexas::compile_error
 			    ( pp, "no function name for"
 			          " CALLG;"
-				  " instruction ignored" );
+				  " instruction"
+				  " ignored" );
 			continue;
 		    }
 		    begf_location = mexas::global_search
@@ -1751,7 +1783,8 @@ mex::module mexas::compile
 			          min::pgen
 				      ( mod_name ),
 			          " not found;"
-				  " instruction ignored" );
+				  " instruction"
+				  " ignored" );
 			continue;
 		    }
 		    instr.immedD =
@@ -1766,7 +1799,8 @@ mex::module mexas::compile
 			mexas::compile_error
 			    ( pp, "no function name for"
 			          " CALL/CALLM;"
-				  " instruction ignored" );
+				  " instruction"
+				  " ignored" );
 			continue;
 		    }
 		    min::uns32 i =
@@ -1814,7 +1848,8 @@ mex::module mexas::compile
 			          min::pgen
 				      ( function_name ),
 			          " not found;"
-				  " instruction ignored" );
+				  " instruction"
+				  " ignored" );
 			continue;
 		    }
 		}

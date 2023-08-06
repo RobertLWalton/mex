@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Aug  6 06:20:17 EDT 2023
+// Date:	Sun Aug  6 17:31:29 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -112,6 +112,13 @@ extern min::locatable_gen op_code_table;
     // and
     //   get ( op_code_table, new_str_gen ( "OP" ) )
     //          == new_num_gen ( OP )
+
+extern min::locatable_gen trace_class_table;
+    // For trace_class T_XX < ::NUMBER_OF_TRACE_CLASSES:
+    //   trace_class_table[T_XX] == new_str_gen ( "XX" )
+    // and
+    //   get ( trace_class_table, new_str_gen ( "XX" ) )
+    //          == new_num_gen ( T_XX )
 
 // Variable Stack
 //
