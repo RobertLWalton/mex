@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Aug  6 22:46:18 EDT 2023
+// Date:	Sun Aug  6 23:09:40 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -24,6 +24,9 @@
 
 # define L mexas::lexical_level
 # define SP mexas::variables->length
+
+min::uns8 mexas::compile_trace_flags = 0;
+bool mexas::compile_trace_never = false;
 
 min::uns32 mexas::error_count;
 min::uns32 mexas::warning_count;
@@ -740,7 +743,6 @@ void mexas::cont ( mex::instr & instr,
     mexas::push_instr ( instr, pp, trace_info );
 }
 
-min::uns8 mexas::compile_trace_flags;
 void mexas::trace_instr
 	( min::uns32 location, bool no_lines )
 {
@@ -822,6 +824,8 @@ void mexas::push_push_instr
 	{
 	    instr.immedA = i;
 	    instr.immedD = min::new_stub_gen ( gm );
+	    instr.op_code = mex::PUSHG;
+	    instr.trace_class = mex::T_PUSH;
 
 	    labbuf[1] = gm->name;
 	    labbuf[2] = new_name;
@@ -1099,13 +1103,10 @@ bool mexas::next_statement ( void )
 // Compile Function
 // ------- --------
 
-mex::module mexas::compile
-	( min::file file, min::uns8 compile_flags )
+mex::module mexas::compile ( min::file file )
 {
     mexas::error_count = 0;
     mexas::warning_count = 0;
-
-    mexas::compile_trace_flags = compile_flags;
 
     min::pop ( mexas::variables,
                mexas::variables->length );

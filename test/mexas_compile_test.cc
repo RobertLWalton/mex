@@ -2,7 +2,7 @@
 //
 // File:	mexas_compile_test.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Aug  2 17:45:01 EDT 2023
+// Date:	Sun Aug  6 23:14:45 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -25,9 +25,9 @@ int main ( int argc, char * argv[] )
     mex::default_printer
         << "Compile module and dump instructions"
 	<< min::eol << min::eol;
-    bool result = mexas::compile
-        ( mexas::input_file,
-	  mexas::TRACE + mexas::TRACE_LINES );
+    mexas::compile_trace_flags =
+	mexas::TRACE + mexas::TRACE_LINES;
+    bool result = mexas::compile ( mexas::input_file );
     mex::default_printer
         << "Compile returned "
 	<< ( result ? "true" : "false" )

@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Aug  6 17:31:29 EDT 2023
+// Date:	Sun Aug  6 23:10:05 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -38,12 +38,20 @@ extern min::locatable_var<mex::module_ins>
 // The following pushes an instruction into the module
 // code vector.
 //
+extern bool compile_trace_never;
+    // Forces the trace_class of the instruction to be
+    // T_NEVER unless that trace_class is T_ALWAYS.
 inline void push_instr
         ( mex::instr & instr,
 	  const min::phrase_position & pp =
 	      min::MISSING_PHRASE_POSITION,
 	  min::gen trace_info = min::MISSING() )
 {
+    if ( mexas::compile_trace_never
+         &&
+	 instr.trace_class != mex::T_ALWAYS )
+        instr.trace_class = mex::T_NEVER;
+
     mex::module_ins m = mexas::output_module;
     min::push(m) = instr;
     min::unprotected::acc_write_update
@@ -314,17 +322,11 @@ inline void push_jump
 
 int main ( int argc, char * argv[] );
 
-mex::module compile
-    ( min::file file, min::uns8 compile_flags = 0 );
+mex::module compile ( min::file file );
     // Compile file and return module.  Also push
     // module into module stack.  If there is a compile
     // error, to not produce a new module and return
     // NULL_STUB.
-    //
-    // Default_flags become the initial default trace
-    // flags, as per the DEFAULT_TRACE instruction.
-    // Compile_flags trace the compilation: not the
-    // execution (TRACE_NOJMP has no effect).
 
 
 // Support Functions
