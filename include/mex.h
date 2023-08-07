@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Aug  6 17:19:49 EDT 2023
+// Date:	Sun Aug  6 22:47:38 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -106,7 +106,6 @@ enum trace_class
 	// if the jump fails.
     T_NOP,
     T_SET_TRACE,
-    T_ERROR,
     T_BEG,
     T_END,
     T_BEGL,

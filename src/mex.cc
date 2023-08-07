@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Aug  6 17:23:22 EDT 2023
+// Date:	Sun Aug  6 22:47:51 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -833,7 +833,7 @@ mex::op_info mex::op_infos [ mex::NUMBER_OF_OP_CODES ] =
     { mex::CONT, NONA, T_CONT, "CONT", NULL },
     { mex::SET_TRACE, NONA, T_SET_TRACE, "SET_TRACE",
                       NULL },
-    { mex::ERROR, NONA, T_ERROR, "ERROR", NULL },
+    { mex::ERROR, NONA, T_ALWAYS, "ERROR", NULL },
     { mex::BEGF, NONA, T_BEGF, "BEGF", NULL },
     { mex::ENDF, NONA, T_ENDF, "ENDF", NULL },
     { mex::CALLM, NONA, T_CALLM, "CALLM", NULL },
@@ -859,7 +859,6 @@ mex::trace_class_info mex::trace_class_infos
     { T_JMPF, "JMPF" },
     { T_NOP, "NOP" },
     { T_SET_TRACE, "SET_TRACE" },
-    { T_ERROR, "ERROR" },
     { T_BEG, "BEG" },
     { T_END, "END" },
     { T_BEGL, "BEGL" },

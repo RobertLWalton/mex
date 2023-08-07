@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Aug  6 17:38:11 EDT 2023
+// Date:	Sun Aug  6 22:46:18 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -127,7 +127,9 @@ static void init_trace_class_table ( void )
     {
         tmp = min::new_str_gen ( p->name );
         min::attr_push(vp) = tmp;
-	if ( p->trace_class != mex::T_NEVER )
+	if ( p->trace_class != mex::T_NEVER
+	     &&
+	     p->trace_class != mex::T_ALWAYS )
 	{
 	    min::locate ( ap, tmp );
 	    tmp = min::new_num_gen ( p->trace_class );
