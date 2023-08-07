@@ -1826,13 +1826,31 @@ a \emkey{module-name}.
 \item When a {\em variable-name} is assigned to a new variable stack
 element, `\TT{*}' is used as the {\em variable-name} to indicate
 that the element should have no name.
+\item When an instruction assigns a {\em new-variable-name}
+to a newly created variable stack element, the {\em new-variable-name}
+must \underline{not} be the same as the name of any variable of
+less lexical level or depth than the instruction, or the same name
+as that of an argument of a function (see \TT{BEGF}), or the same name as a
+\TT{next-} variable of a loop (see \TT{BEGL}).
+
+TBD\\
+This does not apply when a copy of a variable is pushed to the stack
+while giving the copy the same name as the variable.
 \item The operands that take integer values must have values in the
 range $[0,2^{32})$ (so they will fit into \TT{immedA}, \TT{immedB},
 or \TT{immedC} instruction
 members).
+\item Some instructions have a {\em trace-message} argument
+and some have {\em trace-info} arguments, where:
+\begin{indpar}
+\emkey{trace-message} ::= {\em string}
+\\[0.5ex]
+\emkey{trace-info} ::= {\em trace-message} {\em variable}\STAR{}
+\end{indpar}
+See Instruction Tracing\pagnote{INSTRUCTION-TRACING} for details.
 \end{enumerate}
 
-{\em aop} {\em variable-name}\QMARK{}
+{\em aop} {\em new-variable-name}\QMARK{}
 \begin{indpar}
 Here {\em aop} is any arithmetic operation code from
 Figure~\itemref{ARITHMETIC-INSTRUCTIONS}, and the run-time
@@ -1887,12 +1905,12 @@ to the runtime instruction \TT{PUSHS}, \TT{PUSHL}, \TT{PUSHG},
 or \TT{PUSHA}, depending on the location of the variable.
 \end{indpar}
 
-\ttkey{PUSHI} {\em number} {\em variable-name}\QMARK{}
+\ttkey{PUSHI} {\em number} {\em new-variable-name}\QMARK{}
 \begin{indpar}
 At run-time, pushes into the process stack a copy of
 the {\em number}\pagnote{NUMBER}.
 At assembly time, pushes into the variable stack an element
-with the given {\em variable-name}, if provided.
+with the given {\em new-variable-name}, if provided.
 \end{indpar}
 
 \ttkey{POP} {\em variable-name}
@@ -1912,13 +1930,6 @@ Note that \TT{POPL}, \TT{POPG}, and \TT{POPA} do
 \underline{not} exist as you cannot write
 variables that are arguments, or at a different lexical level,
 or in a different module.
-\end{indpar}
-
-\ttkey{BEG}/\ttkey{NOP}/\ttkey{CONT}
-\begin{indpar}
-At run-time these instruction's actions are as described in
-Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}.  At assembly-time,
-these instructions do nothing.
 \end{indpar}
 
 \ttkey{JMP} {\em jmp-target}
@@ -1947,7 +1958,24 @@ $S$ value is the length of the variable stack \underline{after}
 the two elements were popped.
 \end{indpar}
 
-\ttkey{BEGL} {\em nnext}
+\ttkey{BEG} {\em trace-info}\QMARK{}
+\begin{indpar}
+At run-time this instruction's actions are as described in
+Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}.  At assembly-time,
+\TT{BEG} just increments the depth.
+\end{indpar}
+
+\ttkey{END} {\em trace-info}\QMARK{}
+\begin{indpar}
+At run-time this instruction's actions are as described in
+Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}.  At assembly-time,
+it pops from the variable and function stacks all elements with the
+same lexical level and depth as the \TT{END} instruction, then
+decrements the depth, then updates the jump list (see
+JMP Targets\pagnote{JMP-TARGETS}).
+\end{indpar}
+
+\ttkey{BEGL} {\em nnext} {\em trace-info}\QMARK{}
 \begin{indpar}
 Here {\em nnext} is the number of next variables
 (see Next Variables and Loops, \itemref{NEXT-VARIABLES-AND-LOOPS}).
@@ -1955,7 +1983,8 @@ At run-time this instruction's action is as described in
 Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS} with \TT{immedB} equal
 to {\em nnext}.
 
-At assembly-time, this instruction pushes {\em nnext} variable
+At assembly-time, this instruction first increments the depth,
+and then pushes {\em nnext} variable
 stack elements.  For each of these, its name is derived from
 the name of the {\em nnext}'th predecessor in the variable
 stack by adding the prefix `\TT{next-}.'
@@ -1965,21 +1994,35 @@ Thus for example, if the top two stack elements have names
 pushed would have names \TT{next-X} and \TT{next-Y}.
 \end{indpar}
 
-\ttkey{END}/\ttkey{ENDL}
+\ttkey{ENDL} {\em trace-info}\QMARK{}
 \begin{indpar}
-At run-time these instruction's actions are as described in
+At run-time this instruction's actions are as described in
 Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}.  At assembly-time,
-they pop from the variable and function stacks all elements with the
-same lexical level and depth as the \TT{END}/\TT{ENDL}
-instruction.
+\TT{ENDL} does the same thing as \TT{END}.
 \end{indpar}
 
-\ttkey{PROCESS\_TRACE} {\em trace-option}\STAR{}
+\ttkey{CONT} {\em trace-info}\QMARK{}
 \begin{indpar}
-At run-time set the process \TT{trace\_flags} parameter to the
-flags given by the options (i.e., \TT{TRACE},
-\ttkey{TRACE\_LINES}, \TT{TRACE\_NOJMP}).  This is implemented
-by the run-time instruction \TT{SET\_TRACE}. At assembly-time,
+At run-time this instruction's actions are as described in
+Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}.  At assembly-time,
+this instruction does nothing.
+\end{indpar}
+
+\ttkey{NOP} {\em trace-info}\QMARK{}
+\begin{indpar}
+At run-time this instruction does nothing
+(see Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}).  At assembly-time,
+this instruction does nothing.  This instruction is usually
+used for tracing.
+\end{indpar}
+
+\ttkey{SET\_TRACE} {\em trace-class}\STAR{}
+\begin{indpar}
+At run-time set the process \TT{trace\_flags} parameter so as
+to have a flag for each {\em trace-class} given.
+See Instruction Tracing\pagnote{INSTRUCTION-TRACING} for details.
+
+At assembly-time,
 this instruction does nothing.
 \end{indpar}
 
@@ -2110,6 +2153,9 @@ In the absence of an immediately preceding \TT{INSTRUCTION\_TRACE}
 declaration, an instruction's \TT{trace\_flags} are set to the
 default trace flags.
 \end{indpar}
+
+\subsection{Instruction Tracing}
+\label{INSTRUCTION-TRACING}
 
 
 \clearpage
