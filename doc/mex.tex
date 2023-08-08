@@ -239,7 +239,7 @@
 
 \author{Robert L. Walton}
 
-\date{August 7, 2023}
+\date{August 8, 2023}
  
 \maketitle
 
@@ -1825,17 +1825,15 @@ the module, with the suffix \TT{.mex} deleted.  Such a name is
 a \emkey{module-name}.
 \item When a {\em variable-name} is assigned to a new variable stack
 element, `\TT{*}' is used as the {\em variable-name} to indicate
-that the element should have no name.
+that the element has no name.
 \item When an instruction assigns a {\em new-variable-name}
 to a newly created variable stack element, the {\em new-variable-name}
 must \underline{not} be the same as the name of any variable of
 less lexical level or depth than the instruction, or the same name
 as that of an argument of a function (see \TT{BEGF}), or the same name as a
 \TT{next-} variable of a loop (see \TT{BEGL}).
-
-TBD\\
-This does not apply when a copy of a variable is pushed to the stack
-while giving the copy the same name as the variable.
+\item A variable cannot be written if it has a lexical level less than
+that of the writting instruction, or is a function argument variable.
 \item The operands that take integer values must have values in the
 range $[0,2^{32})$ (so they will fit into \TT{immedA}, \TT{immedB},
 or \TT{immedC} instruction
@@ -1870,7 +1868,7 @@ At run-time, pushes into the process stack a copy of the named
 lexical level 0 variable.
 At assembly time, pushes into the variable stack an
 element with the {\em new-variable-name} if given, or 
-the {\em variable-name} otherwise.
+with no name otherwise.
 
 The variable stack search for {\em variable-name} is restricted to
 elements with the lexical level \TT{0}.
@@ -1883,7 +1881,7 @@ At run-time, pushes into the process stack a copy of the named
 global variable in the named module.
 At assembly time, pushes into the variable stack an
 element with the {\em new-variable-name} if given, or 
-the {\em variable-name} otherwise.
+with no name otherwise.
 
 The variable stack searched for {\em variable-name} is the variable
 stack of the previously assembled module named.
@@ -1895,8 +1893,8 @@ stack of the previously assembled module named.
 At run-time, pushes into the process stack a copy of the variable
 named in the variable stack or global variable vector.
 At assembly time, pushes into the variable stack an
-element whose name is the {\em new-variable-name} if that is
-given, or {\em variable-name} otherwise.
+element with the {\em new-variable-name} if given, or
+with no name otherwise.
 
 The search for {\em variable-name} begins with the entire variable
 stack and proceeds through the variable stacks of previously assembled modules
@@ -1910,14 +1908,15 @@ or \TT{PUSHA}, depending on the location of the variable.
 At run-time, pushes into the process stack a copy of
 the {\em number}\pagnote{NUMBER}.
 At assembly time, pushes into the variable stack an element
-with the given {\em new-variable-name}, if provided.
+with the given {\em new-variable-name}, if given, or
+with no name otherwise.
 \end{indpar}
 
-\ttkey{POP} {\em variable-name}
+\ttkey{POP} {\em variable-name}\QMARK{}
 \begin{indpar}
 At run-time, pops the process stack and stores the value popped
 into the variable named in the variable stack.  Or if the
-variable name is `\TT{*}', discards the value popped.
+variable name is not given or is `\TT{*}', discards the value popped.
 
 At assembly time, pops the variable stack.
 
@@ -2026,19 +2025,19 @@ At assembly-time,
 this instruction does nothing.
 \end{indpar}
 
-\ttkey{ERROR} {\em error-code} {\em nargs}\QMARK{}
+\ttkey{ERROR} {\em error-code} {\em trace-info}\QMARK{}
 \begin{indpar}
 If {\em error-code} is non-zero, this instruction terminates
-the process at run-time, {\em nargs} must \underline{not}
-be given, and this instruction does nothing at assembly-time.
+the process at run-time.
+This instruction is \underline{always} traced, regardless
+of the setting of compile options and the process
+\TT{trace\_flags}.
 
-If {\em error-code} is \TT{0}, {\em nargs} must be given
-and this instruction pops {\em nargs} elements from the
-process stack at run-time and from the variable stack
-at assembly-time.
+At assembly time this instruction does nothing.
 \end{indpar}
 
 \ttkey{BEGF}\label{BEGF} {\em function-name} {\em variable-name}\STAR{}
+	{\em trace-message}\QMARK{}
 \begin{indpar}
 At run-time this instruction's actions are as described in
 Figure~\itemref{FUNCTION-INSTRUCTIONS}.  At assembly-time,
@@ -2056,7 +2055,7 @@ where $L$ is the lexical level of the \TT{BEGF}
 instruction.  This is used to implement \TT{PUSHA}.
 \end{indpar}
 
-\ttkey{ENDF}
+\ttkey{ENDF} {\em trace-message}\QMARK{}
 \begin{indpar}
 At run-time this instruction's actions are as described in
 Figure~\itemref{FUNCTION-INSTRUCTIONS}.  At assembly-time,
@@ -2065,6 +2064,7 @@ same lexical level as the \TT{ENDF} instruction.
 \end{indpar}
 
 \ttkey{CALLM} {\em function-name} {\em nargs} {\em variable-name}\STAR{}
+	{\em trace-message}\QMARK{}
 \begin{indpar}
 At run-time this instruction's actions are as described in
 Figure~\itemref{FUNCTION-INSTRUCTIONS}.  At assembly-time,
@@ -2079,6 +2079,7 @@ The {\em function-name} is searched for in the function stack.
 
 \ttkey{CALLG} {\em module-name} {\em function-name}
               {\em nargs} {\em variable-name}\STAR{}
+	      {\em trace-message}\QMARK{}
 \begin{indpar}
 At run-time this instruction's actions are as described in
 Figure~\itemref{FUNCTION-INSTRUCTIONS}.  At assembly-time,
@@ -2090,6 +2091,7 @@ the previously assembled module named.
 
 \ttkey{CALL} {\em function-name}
              {\em nargs} {\em variable-name}\STAR{}
+	      {\em trace-message}\QMARK{}
 \begin{indpar}
 This instruction searches for the {\em function-name} first in the function
 stack and then in the function stacks of the previously assembled
@@ -2097,7 +2099,7 @@ modules in the order in which they were assembled.  It then
 assembles to \TT{CALLM} or \TT{CALLG}.
 \end{indpar}
 
-\ttkey{RET} {\em nresults}
+\ttkey{RET} {\em nresults} {\em trace-message}\QMARK{}
 \begin{indpar}
 At run-time this instruction's actions are as described in
 Figure~\itemref{FUNCTION-INSTRUCTIONS}.  At assembly-time,
@@ -2105,7 +2107,7 @@ this instruction pops {\em nresults} elements from the
 variables stack.
 \end{indpar}
 
-\ttkey{PUSHNARGS} {\em variable-name}
+\ttkey{PUSHNARGS} {\em new-variable-name}\QMARK{}
 \begin{indpar}
 At run-time this instruction's actions are as described in
 Figure~\itemref{FUNCTION-INSTRUCTIONS}.  At assembly-time,
@@ -2113,7 +2115,7 @@ this instruction pushes into the variable stack an element
 with the given {\em variable-name}.
 \end{indpar}
 
-\ttkey{PUSHV} {\em level}\QMARK{} {\em variable-name}\QMARK{}
+\ttkey{PUSHV} {\em level}\QMARK{} {\em new-variable-name}\QMARK{}
 \begin{indpar}
 Here {\em level} is an integer specifing the lexical level
 $L$ used as the \TT{immedB} parameter of the run-time

@@ -18,19 +18,19 @@ BEGF MIN ARG1 ARG2
     STACKS: VARIABLES: ARG2 ARG1
             FUNCTIONS: | MIN
     PUSH ARG1
-    [####]PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< ARG1 ARG1 >]
+    [####]PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< ARG1 * >]
     PUSH ARG2
-    [####]PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< ARG2 ARG2 >]
+    [####]PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< ARG2 * >]
     JMPLT ITS-ARG1
     [####]JMPLT T_JMPS 0 0 0 [$ MISSING $]; ITS-ARG1
     PUSH ARG2
-    [####]PUSHS T_PUSH 0 0 0 [$ MISSING $]; [< ARG2 ARG2 >]
+    [####]PUSHS T_PUSH 0 0 0 [$ MISSING $]; [< ARG2 * >]
     RET 1
     [####]RET T_RET 0 1 1 [$ MISSING $]; [$ MISSING $]
     LABEL ITS-ARG1
     [####]JMPLT T_JMPS 0 0 3 [$ MISSING $]; ITS-ARG1
     PUSH ARG1
-    [####]PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< ARG1 ARG1 >]
+    [####]PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< ARG1 * >]
     RET 1
     [####]RET T_RET 0 1 1 [$ MISSING $]; [$ MISSING $]
     STACKS: VARIABLES: ARG2 ARG1

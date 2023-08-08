@@ -22,23 +22,23 @@ PUSHI 0 Z
 BEG
     [####]BEG T_BEG 0 0 0 [$ MISSING $]; [$ MISSING $]
     PUSH X
-    [####]PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< X X >]
+    [####]PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< X * >]
     PUSH Y
-    [####]PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< Y Y >]
+    [####]PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< Y * >]
     JMPLT ITS-X
     [####]JMPLT T_JMPS 0 0 0 [$ MISSING $]; ITS-X
     PUSH Y
-    [####]PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< Y Y >]
+    [####]PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< Y * >]
     POP Z
-    [####]POPS T_POP 1 0 0 [$ MISSING $]; [< Z Y >]
+    [####]POPS T_POP 1 0 0 [$ MISSING $]; [< Z * >]
     JMP DONE
     [####]JMP T_JMP 0 0 0 [$ MISSING $]; DONE
     LABEL ITS-X
     [####]JMPLT T_JMPS 0 0 4 [$ MISSING $]; ITS-X
     PUSH X
-    [####]PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< X X >]
+    [####]PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< X * >]
     POP Z
-    [####]POPS T_POP 1 0 0 [$ MISSING $]; [< Z X >]
+    [####]POPS T_POP 1 0 0 [$ MISSING $]; [< Z * >]
     LABEL DONE
     [####]JMP T_JMP 0 0 3 [$ MISSING $]; DONE
     PUSHI 2000 UNUSED
@@ -65,21 +65,21 @@ BEGL 2
     [####]BEGL T_BEGL 0 0 0 [$ MISSING $]; [$ MISSING $]
     STACKS: VARIABLES: next-I next-SUM ; I SUM LIMIT
     PUSH I
-    [####]PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< I I >]
+    [####]PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< I * >]
     PUSH LIMIT
-    [####]PUSHS T_PUSH 5 0 0 [$ MISSING $]; [< LIMIT LIMIT >]
+    [####]PUSHS T_PUSH 5 0 0 [$ MISSING $]; [< LIMIT * >]
     JMPGT DONE
     [####]JMPGT T_JMPS 0 0 0 [$ MISSING $]; DONE
     PUSH SUM
-    [####]PUSHS T_PUSH 3 0 0 [$ MISSING $]; [< SUM SUM >]
+    [####]PUSHS T_PUSH 3 0 0 [$ MISSING $]; [< SUM * >]
     PUSH I
-    [####]PUSHS T_PUSH 3 0 0 [$ MISSING $]; [< I I >]
+    [####]PUSHS T_PUSH 3 0 0 [$ MISSING $]; [< I * >]
     ADD
     [####]ADD T_AOP 0 0 0 [$ MISSING $]; *
     POP next-SUM
     [####]POPS T_POP 2 0 0 [$ MISSING $]; [< next-SUM * >]
     PUSH I
-    [####]PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< I I >]
+    [####]PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< I * >]
     PUSHI 1
     [####]PUSHI T_PUSH 0 0 0 1; *
     ADD

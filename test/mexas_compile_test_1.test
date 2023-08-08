@@ -26,7 +26,7 @@ PUSH X
 PUSH X
     [####]PUSHI T_PUSH 0 0 0 [$ MISSING $]; [$ MISSING $]
 POP
-    [####]POPS T_POP 0 0 0 [$ MISSING $]; [< * X >]
+    [####]POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
 ERROR: in line ####: portion of stack in the current block is too little
        to pop required arguments; instruction ignored:
 ADD
@@ -49,24 +49,24 @@ PUSHI NaN Z
     [####]PUSHI T_PUSH 0 0 0 nan; Z
     STACKS: VARIABLES: Z Y X
 PUSH X
-    [####]PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< X X >]
+    [####]PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< X * >]
 PUSH Y
-    [####]PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< Y Y >]
-    STACKS: VARIABLES: Y X Z Y X
+    [####]PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< Y * >]
+    STACKS: VARIABLES: * * Z Y X
 JMPLT ITS-X
     [####]JMPLT T_JMPS 0 0 0 [$ MISSING $]; ITS-X
 PUSH Y
-    [####]PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< Y Y >]
+    [####]PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< Y * >]
 POP Z
-    [####]POPS T_POP 1 0 0 [$ MISSING $]; [< Z Y >]
+    [####]POPS T_POP 1 0 0 [$ MISSING $]; [< Z * >]
 JMP DONE
     [####]JMP T_JMP 0 0 0 [$ MISSING $]; DONE
 LABEL ITS-X
     [####]JMPLT T_JMPS 0 0 4 [$ MISSING $]; ITS-X
 PUSH X
-    [####]PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< X X >]
+    [####]PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< X * >]
 POP Z
-    [####]POPS T_POP 1 0 0 [$ MISSING $]; [< Z X >]
+    [####]POPS T_POP 1 0 0 [$ MISSING $]; [< Z * >]
 LABEL DONE
     [####]JMP T_JMP 0 0 3 [$ MISSING $]; DONE
     STACKS: VARIABLES: Z Y X
@@ -79,9 +79,9 @@ POP
 PUSH X Z
     [####]PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< X Z >]
 PUSH X
-    [####]PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< X X >]
+    [####]PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< X * >]
 PUSH Y
-    [####]PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< Y Y >]
+    [####]PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< Y * >]
 JMPLT ITS-X
     [####]JMPLT T_JMPS 0 0 0 [$ MISSING $]; ITS-X
 POP
@@ -98,9 +98,9 @@ POP
 //
     STACKS: VARIABLES: Y X
 PUSH X
-    [####]PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< X X >]
+    [####]PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< X * >]
 PUSH Y
-    [####]PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< Y Y >]
+    [####]PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< Y * >]
 JMPLT ITS-X
     [####]JMPLT T_JMPS 0 0 0 [$ MISSING $]; ITS-X
 PUSH Y Z
@@ -128,22 +128,22 @@ POP
 //
     STACKS: VARIABLES: Y X
 PUSH X
-    [####]PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< X X >]
+    [####]PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< X * >]
 PUSH Y
-    [####]PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< Y Y >]
+    [####]PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< Y * >]
 PUSH Y Z
-    [####]PUSHS T_PUSH 0 0 0 [$ MISSING $]; [< Y Z >]
+    [####]PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< Y Z >]
 PUSH X Z
-    [####]PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< X Z >]
+    [####]PUSHS T_PUSH 4 0 0 [$ MISSING $]; [< X Z >]
 JMPLT ITS-X
     [####]JMPLT T_JMPS 0 0 0 [$ MISSING $]; ITS-X
 POP
-    [####]POPS T_POP 0 0 0 [$ MISSING $]; [< * Y >]
+    [####]POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
 LABEL ITS-X
 ERROR: in line ####: code jumped over pops values from the stack; JMP
        unresolved:
 JMPLT ITS-X
-    STACKS: VARIABLES: X Y X
+    STACKS: VARIABLES: * Y X
 POP
-    [####]POPS T_POP 0 0 0 [$ MISSING $]; [< * X >]
+    [####]POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
 Compile returned false
