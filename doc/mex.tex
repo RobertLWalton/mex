@@ -2159,6 +2159,145 @@ default trace flags.
 \subsection{Instruction Tracing}
 \label{INSTRUCTION-TRACING}
 
+Instruction tracing is controlled by \skey{trace class}{es}
+which are part of each instruction and \skey{trace flag}s which
+are part of each process.  For example, all \TT{PUSH\ldots}
+instructions have the \TT{PUSH} trace class, and a process
+has a \TT{PUSH} trace flag which if on causes all instructions
+with the \TT{PUSH} trace class to be traced.
+
+The trace classes are given in Figure \ref{TRACE-CLASSES-AND-GROUPS}.
+
+\begin{boxedfigure}[t]
+
+\begin{center}
+
+\bigskip
+
+{\Large \bf Trace Classes}
+\\[2ex]
+\begin{tabular}{|l|p{5in}|}
+\hline
+\ttikey{NEVER}{trace class} & Instruction is never traced.
+\\\hline
+\ttikey{ALWAYS}{trace class} & Instruction is always traced.
+    Only the \TT{ERROR} instruction has this class.
+\\\hline
+\ttikey{AOP}{trace class} & Arithmetic instructions in Figure
+    \ref{ARITHMETIC-INSTRUCTIONS}.
+\\\hline
+\ttikey{PUSH}{trace class} & All \TT{PUSH\ldots} instructions in Figures
+    \ref{HOUSEKEEPING-INSTRUCTIONS} and
+    \ref{FUNCTION-INSTRUCTIONS}.
+\\\hline
+\ttikey{POP}{trace class} & The \TT{POP} instruction in Figure
+    \ref{HOUSEKEEPING-INSTRUCTIONS}.
+\\\hline
+\ttikey{JMP}{trace class} & The \TT{JMP} instruction.
+\\\hline
+\begin{tabular}[t]{@{}l@{}}
+\ttikey{JMPS}{trace class} \\
+\ttikey{JMPF}{trace class}
+\end{tabular} & \TT{JMP\ldots} instructions in
+	        Figure \ref{HOUSEKEEPING-INSTRUCTIONS}.
+		When compiled the instruction is given the \TT{JMPS}
+		class.  When executed, if the jump test succeeds
+		(jump is taken),
+		the instruction trace class is left unchanged, but if
+		the jump test fails (there is no actual jump),
+		the trace class is changed
+		to \TT{JMPF}.
+\\\hline
+\ttikey{XXX}{trace class} & Instruction with operation code \TT{XXX},
+                            for instructions not mentioned above
+			    (e.g., for \TT{NOP}, \TT{BEG}, etc.,
+			    but \underline{not} for \TT{ADD},
+			    \TT{PUSH}, \TT{JMPEQ}, \TT{ERROR}, etc.).
+\\\hline
+\end{tabular}
+\end{center}
+
+\bigskip
+
+\begin{center}
+{\Large \bf Trace Class Groups}
+\\[2ex]
+\begin{tabular}{|l|l|}
+\hline
+\ttmkey{ALL}{trace class group} &  All trace classes.
+\\\hline
+\ttmkey{NONE}{trace class group} &  No trace classes.
+\\\hline
+\ttmkey{FUNC}{trace class group} &  \TT{CALL} \TT{BEGF}
+\\\hline
+\ttmkey{LOOP}{trace class group} &  \TT{BEGL} \TT{CONT} \TT{ENDL}
+\\\hline
+\end{tabular}
+\end{center}
+\caption{Trace Classes and Groups}
+\label{TRACE-CLASSES-AND-GROUPS}
+\end{boxedfigure}
+
+If a module is compiled with the \TT{-tcn} (trace class never)
+flag (see The MEXAS Program, \itemref{THE-MEXAS-PROGRAM}),
+all instructions that do not normally have the \TT{ALWAYS}
+class are given the \TT{NEVER} class instead of their normal
+class, thus providing that they will never be traced.  Note
+that the \TT{ERROR} instruction is not affected by this flag.
+
+Whether or not an instruction is actually traced depends on
+the instruction's trace class and on the setting of the
+process's \TT{trace\_flags}.  A trace class \TT{XX} has a
+numeric code \TT{mex::T\_XX} and a trace flag
+\TT{1<<mex::T\_XX}.  An instruction is traced if and only
+if the flag of its trace class is set in the process's
+\TT{trace\_flags}.
+
+Note that the trace flag for \TT{ALWAYS} is always set
+and the trace flag for \TT{NEVER} is always clear.
+
+The MEXAS program \TT{-t:\ldots} flag sets trace flags
+which then become the initial trace flags of any process.
+The \TT{SET\_TRACE} instruction sets the process trace
+flags.  Both take a list of trace class names, as in
+\begin{center}
+\tt SET\_TRACE POP CALL BEGF
+\end{center}
+and also the trace class group names in
+Figure \ref{TRACE-CLASSES-AND-GROUPS}.
+
+Note that when a function is called, it is the \TT{BEGF}
+instruction that is traced, and the \TT{CALL} instruction
+is not traced.  Similarly when the function returns,
+it is the \TT{CALL} instruction that is traced, and the
+\TT{ENDF} or \TT{RET} instruction is not traced.  Also,
+jumping out of blocks prevents the block ending instruction
+from being traced.
+
+Tracing an instruction with a {\em trace-message} causes
+the {\em trace-message} to be printed.
+
+Tracing an instruction with a {\em trace-info} in addition causes
+the names and values of the {\em variable}s named in the
+{\em trace-info} to be printed.  In the cases of instructions
+like \TT{BEGF} and \TT{CALL} that have a list of {\em variable}s
+as part of the instruction proper, and not as part of a
+{\em trace-info}, the list of variables in the instruction proper
+is used as the {\em trace-info} variables list.
+
+When an instruction has a {\em trace-info}, \TT{PUSH\ldots}
+instructions are generated just before the instruction to
+push the variable values onto the stack.  The values are then
+printed from the stack if the instruction is traced.  Then
+when the instruction executes, it begins by popping these
+variable values from the stack.  This is why instructions
+like \TT{BEG} can pop the stack; it is only because the
+instruction may have to pop trace variable values.
+
+
+\subsection{The MEXAS Program}
+\label{THE-MEXAS-PROGRAM}
+
 
 \clearpage
 
