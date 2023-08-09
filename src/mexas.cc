@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Aug  8 02:58:29 EDT 2023
+// Date:	Wed Aug  9 00:45:40 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -45,7 +45,7 @@ min::locatable_gen mexas::V;
 min::locatable_gen mexas::F;
 
 min::locatable_gen mexas::op_code_table;
-min::locatable_gen mexas::trace_class_table;
+min::locatable_gen mexas::trace_flag_table;
 
 enum op_code
     // Extends mex::op_code to include pseudo-ops and
@@ -112,14 +112,26 @@ static void init_op_code_table ( void )
     }
 }
 
-static void init_trace_class_table ( void )
-{
-    mexas::trace_class_table = min::new_obj_gen
-        ( 10 * mex::NUMBER_OF_TRACE_CLASSES,
-	   4 * mex::NUMBER_OF_TRACE_CLASSES,
-	   1 * mex::NUMBER_OF_TRACE_CLASSES );
+const unsigned NUMBER_OF_TRACE_GROUPS = 4;
+static struct trace_group
+  { const char * name; min::uns32 flags; }
+    trace_groups[NUMBER_OF_TRACE_GROUPS] = {
+    { "ALL", (min::uns32) -1 },
+    { "NONE", 0 },
+    { "FUNC", (1<<mex::T_CALLM) | (1<<mex::T_CALLG) |
+              (1<<mex::T_BEGF) },
+    { "LOOP", (1<<mex::T_BEGL) | (1<<mex::T_CONT) |
+              (1<<mex::T_ENDL) }
+    };
 
-    min::obj_vec_insptr vp ( mexas::trace_class_table );
+static void init_trace_flag_table ( void )
+{
+    min::uns32 n = mex::NUMBER_OF_TRACE_CLASSES
+                 + 20;
+    mexas::trace_flag_table = min::new_obj_gen
+        ( 10 * n, 4 * n, 1 * n );
+
+    min::obj_vec_insptr vp ( mexas::trace_flag_table );
     min::attr_insptr ap ( vp );
 
     min::locatable_gen tmp;
@@ -129,16 +141,27 @@ static void init_trace_class_table ( void )
     while  ( p < endp )
     {
         tmp = min::new_str_gen ( p->name );
-        min::attr_push(vp) = tmp;
 	if ( p->trace_class != mex::T_NEVER
 	     &&
 	     p->trace_class != mex::T_ALWAYS )
 	{
 	    min::locate ( ap, tmp );
-	    tmp = min::new_num_gen ( p->trace_class );
+	    tmp = min::new_num_gen
+	        ( 1 << p->trace_class );
 	    min::set ( ap, tmp );
 	}
 	++ p;
+    }
+
+    trace_group * q = trace_groups;
+    trace_group * endq = q + NUMBER_OF_TRACE_GROUPS;
+    while ( q < endq )
+    {
+        tmp = min::new_str_gen ( q->name );
+	min::locate ( ap, tmp );
+	tmp = min::new_num_gen ( q->flags );
+	min::set ( ap, tmp );
+        ++ q;
     }
 }
 
@@ -226,7 +249,7 @@ static void initialize ( void )
     ::backslash = min::new_str_gen ( "\\" );
 
     ::init_op_code_table();
-    ::init_trace_class_table();
+    ::init_trace_flag_table();
 
     mexas::variables =
 	::variable_stack_vec_type.new_stub ( 1000 );
@@ -1998,5 +2021,15 @@ mex::module mexas::compile ( min::file file )
 
 int mexas::main ( int argc, char * argv[] )
 {
+    int i = 1;
+    while ( i < argc )
+    {
+        const char * arg = argv[i++];
+	if ( strcmp ( "-tc", arg ) == 0 )
+	    mexas::compile_trace_never = false;
+	else if ( strcmp ( "-tcn", arg ) == 0 )
+	    mexas::compile_trace_never = true;
+
+    }
     return 0;
 }
