@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Aug  9 00:45:40 EDT 2023
+// Date:	Wed Aug  9 01:26:50 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -26,6 +26,7 @@
 # define SP mexas::variables->length
 
 min::uns8 mexas::compile_trace_flags = 0;
+min::uns32 mexas::run_trace_flags = mex::T_ALWAYS;
 bool mexas::compile_trace_never = false;
 
 min::uns32 mexas::error_count;
@@ -2021,6 +2022,16 @@ mex::module mexas::compile ( min::file file )
 
 int mexas::main ( int argc, char * argv[] )
 {
+    min::initialize();
+
+    min::init_ostream
+        ( mex::default_printer, std::cout );
+    mex::default_printer << min::ascii;
+
+    min::printer printer = mex::default_printer;
+
+    min::locatable_gen tmp1, tmp2;
+
     int i = 1;
     while ( i < argc )
     {
@@ -2029,6 +2040,42 @@ int mexas::main ( int argc, char * argv[] )
 	    mexas::compile_trace_never = false;
 	else if ( strcmp ( "-tcn", arg ) == 0 )
 	    mexas::compile_trace_never = true;
+	else if ( strncmp ( "-t:", arg, 3 ) == 0 )
+	{
+	    min::uns32 flags = mex::T_ALWAYS;
+	    const char * p = arg + 3;
+	    while ( * p )
+	    {
+	        const char * q = p;
+		while ( * q && * q != ',' ) ++ q;
+		if ( q > p )
+		{
+		    tmp1 = min::new_str_gen
+		        ( p, q - p );
+		    tmp2 = min::get
+		        ( mexas::trace_flag_table,
+			  tmp1 );
+		    if ( tmp2 != min::NONE() )
+		    {
+		        min::float64 f =
+			    min::direct_float_of
+			        ( tmp2 );
+			flags |= (min::uns32) f;
+		    }
+		    else
+		        printer
+			    << min::bol
+			    << "trace class/group "
+			    << min::pgen ( tmp1 )
+			    << " unrecognized;"
+			       " ignored"
+			    << min::eol;
+		}
+		if ( * q ) ++ q;
+		p = q;
+	    }
+	    mexas::run_trace_flags = flags;
+	}
 
     }
     return 0;

@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Aug  9 00:45:52 EDT 2023
+// Date:	Wed Aug  9 01:26:36 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -518,6 +518,8 @@ min::uns32 get_trace_info
     // is set to min::MISSING(), no PUSH... instructions
     // are output, and 0 is returned.
 
+extern min::uns32 run_trace_flags;
+    // Initial trace_flags value for processes.
 enum compile_trace_flags
 {
     TRACE       = 1 << 0,
