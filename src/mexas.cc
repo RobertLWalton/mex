@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Aug  9 01:26:50 EDT 2023
+// Date:	Thu Aug 10 05:23:21 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -2037,9 +2037,18 @@ int mexas::main ( int argc, char * argv[] )
     {
         const char * arg = argv[i++];
 	if ( strcmp ( "-tc", arg ) == 0 )
+	    mexas::compile_trace_flags = mexas::TRACE;
+	else if ( strcmp ( "-tcl", arg ) == 0 )
+	    mexas::compile_trace_flags =
+	        mexas::TRACE + mexas::TRACE_LINES;
+	else if ( strcmp ( "-tco", arg ) == 0 )
+	    mexas::compile_trace_flags = 0;
+
+	else if ( strcmp ( "-ta", arg ) == 0 )
 	    mexas::compile_trace_never = false;
-	else if ( strcmp ( "-tcn", arg ) == 0 )
+	else if ( strcmp ( "-tn", arg ) == 0 )
 	    mexas::compile_trace_never = true;
+
 	else if ( strncmp ( "-t:", arg, 3 ) == 0 )
 	{
 	    min::uns32 flags = mex::T_ALWAYS;
@@ -2076,7 +2085,58 @@ int mexas::main ( int argc, char * argv[] )
 	    }
 	    mexas::run_trace_flags = flags;
 	}
-
+	else if ( strcmp ( "-", arg ) == 0 )
+	{
+	    min::locatable_var<min::file> file;
+	    min::init_printer
+	        ( file, mex::default_printer );
+	    min::init_input_stream ( file, std::cin );
+	    bool result = mexas::compile ( file );
+	    if ( ! result )
+	    {
+	        printer << min::bol
+		        << "exiting due to compile"
+		           " errors"
+			<< min::eol;
+		exit ( 1 );
+	    }
+	    else
+	        printer << min::bol
+		        << "standard input successfully"
+		           " compiled"
+			<< min::eol;
+	}
+	else if ( arg[0] == '-' )
+	{
+	    printer << min::bol
+	            << "unrecognized option: " << arg
+		    << min::eol;
+	    exit ( 1 );
+	}
+	else
+	{
+	    min::locatable_gen file_name
+	        ( min::new_str_gen ( arg ) );
+	    min::locatable_var<min::file> file;
+	    min::init_printer
+	        ( file, mex::default_printer );
+	    min::init_input_named_file
+	        ( file, file_name );
+	    bool result = mexas::compile ( file );
+	    if ( ! result )
+	    {
+	        printer << min::bol
+		        << "exiting due to compile"
+		           " errors"
+			<< min::eol;
+		exit ( 1 );
+	    }
+	    else
+	        printer << min::bol
+			<< arg
+		        << " successfully compiled"
+			<< min::eol;
+	}
     }
     return 0;
 }
