@@ -239,7 +239,7 @@
 
 \author{Robert L. Walton}
 
-\date{August 9, 2023}
+\date{August 11, 2023}
  
 \maketitle
 
@@ -741,9 +741,6 @@ a return stack, and other parameters.  Specifically:
 \verb|}                   | \\
 \end{tabular}
 \\[1ex]
-\verb|typedef (* mex::|\MEXKEY{trace\_function}\verb|) ( mex::process p )|%
-\LABEL{MEX::TRACE_FUNCTION}
-\\[1ex]
 \verb|const unsigned mex::|\MEXKEY{max\_lexical\_level}\verb| = 16|%
 \LABEL{MEX::MAX_LEXICAL_DEPTH}
 \\[1ex]
@@ -760,8 +757,6 @@ a return stack, and other parameters.  Specifically:
 \verb|min::uns32 | & \TTMKEY{rp}{in {\tt mex::process\_header}} \\
 \verb|min::uns32 | & \TTMKEY{fp}{in {\tt mex::process\_header}}%
                      \TT{[mex::max\_lexical\_level+1]} \\
-\verb|mex::trace_function | & \TTMKEY{trace\_function}%
-                                     {in {\tt mex::process\_header}} \\
 \verb|min::uns32 | & \TTMKEY{trace\_depth}{in {\tt mex::process\_header}} \\
 \verb|min::uns8 | & \TTMKEY{trace\_flags}{in {\tt mex::process\_header}} \\
 \verb|int | & \TTMKEY{excepts}{in {\tt mex::process\_header}} \\
@@ -846,7 +841,7 @@ finishes execution.  The process stops when \TT{counter >= limit}.
 When the process terminates, \TT{state} is set.  For details
 see \TT{mex::run\_process}, \pagref{MEX::RUN_PROCESS},
 
-The \TT{trace\_function}, \TT{trace\_depth}, \TT{trace\_flags}, \TT{excepts},
+The \TT{trace\_depth}, \TT{trace\_flags}, \TT{excepts},
 \TT{excepts\_accumuator}, and \TT{optimize}
 members of a process
 are explained in Tracing and Exceptions, \itemref{TRACING-AND-EXCEPTIONS}.
@@ -1154,15 +1149,21 @@ The default setting of the \TT{optimize} member of a process
 is \TT{false}.
 
 In normal mode, tracing of an instruction
-is controlled by the \key{effective trace flags},
-which are the logical AND of the instruction's \TT{trace\_flags}
-member and the process's \TT{TRACE\_flags} member.
-An instruction is traced if its \TT{TRACE} flag is on
-in its effective trace flags.
+is controlled by the \key{trace class} $C$ of the instruction
+and the \key{trace flags} $F$ of the process.  If
+\TT{$F$ \& ( 1 <{}< $C$ ) != 0} the instruction is traced.
 
 In optimized mode, instructions are \underline{not} traced.
 
 As an exception, \TT{ERROR} instructions are traced in all cases.
+
+When an instruction is traced and the process
+trace flag's \TT{TRACE\_LINES} flag is on,
+the instruction source lines are output
+using \TT{min::\EOL print\_\EOL phrase\_\EOL lines} and the
+instruction's \TT{min::\EOL phrase\_\EOL position} value from its module's
+\TT{min::phrase\_\EOL position\_\EOL vec}.  This is then followed by
+the instruction specific trace message.
 
 Arithmetic instructions that have errors raise exception flags.
 In normal mode, an error message is also produced.  In both
@@ -1172,21 +1173,15 @@ when the process terminates if any exception flags have been raised.
 \subsection{Arithmetic Tracing}
 \label{ARITHMETIC-TRACING}
 
-When an arithmetic instruction is traced and the effective
-trace flag's \TT{TRACE\_LINES} flag is on,
-the instruction source lines are output
-using \TT{min::\EOL print\_\EOL phrase\_\EOL lines} and the
-instruction's \TT{min::\EOL phrase\_\EOL position} value from its module's
-\TT{min::phrase\_\EOL position\_\EOL vec}, followed by
-a message such as:
+The trace message of an arithmetic instruction has the form:
 \begin{center}
-\tt 1 + 2 ===> 3
+{\em new-variable-name} \TT{=} {\em value} \TT{<=} {\em value}\QMARK{}
+             {\em operator} {\em value}
 \end{center}
-If the \TT{TRACE\_LINES} flag is off, a message such as:
-\begin{center}
-\tt Line 53: 1 + 2 ===> 3
-\end{center}
-is output instead.
+If {\em new-variable-name} is not given in the instruction,
+\TT{*} is used instead.
+If the \TT{TRACE\_LINES} flag is off, the message is preceeded by
+`\TT{Line} {\em line-number}\TT{:}'.
 Note that arithmetic instructions are usually not traced.
 
 \subsection{Arithmetic Exceptions}
@@ -1224,10 +1219,8 @@ associated with a flag bit defined in \TT{fenv.h}
 In normal mode, an instruction that raises an exception prints
 an error message if the instruction raises any exception whose bit
 is on in the process's \TT{excepts} member.
-The error message ends with source lines printed
-using \TT{min::\EOL print\_\EOL phrase\_\EOL lines} and the
-instruction's \TT{min::phrase\_\EOL position} value from its module's
-\TT{min::phrase\_\EOL position\_\EOL vec}.
+This error message is always followed by a trace of the instruction
+(regardless of the process trace flag settings).
 
 In optimized mode, instructions do not print error messages
 involving exceptions.
@@ -1250,30 +1243,18 @@ When the process is not running, it is stored in the latter.  When
 a process is optimized and is running and has not been interrupted,
 it is store in the hardware register.
 
+\subsection{Jump Tracing}
+\label{JUMP-TRACING}
+
+TBD
+
 \subsection{Non-Arithmetic Tracing}
 \label{NON-ARITHMETIC-TRACING}
 
-Tracing non-arithmetic functions calls the process's
-\TT{trace\_function} member if that is not \TT{NULL},
-or the \TT{mex::\EOL default\_\EOL trace\_\EOL function}
-otherwise.  This is called before the instruction is
-executed.  For conditional \TT{JMP\ldots} instructions,
-the call is suppressed if the condition is false (so there
-will be no jump) and the instruction's \TT{TRACE\_NOJMP}
-flag is off.  For \TT{CALL} instructions, there are two
-calls to \TT{trace\_function}, one before the \TT{CALL}
-executes, and one with the program counter pointing
-to the \TT{BEGF} instruction, just before the program
-counter is incremented at the end of \TT{CALL} execution.
+TBD
 
-The remainder of this section describes the behavior of
-the \TT{mex::\EOL default\_\EOL trace\_\EOL function}.
-
-Default tracing uses the \TT{TRACE\_LINES} flag in the
-same manner as Arithmetic Tracing, \itemref{ARITHMETIC-TRACING}.
-
-To produce the companion message,
-default tracing of the instruction \TT{module[i]} uses
+The trace message of the non-arithmetic instruction
+\TT{module[i]} uses
 $I$ = \TT{module->trace\_info[i]}.  If this is missing
 or equals \TT{min::MISSING()}, a minimal message
 is produced, such as:

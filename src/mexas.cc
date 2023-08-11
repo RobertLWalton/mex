@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Aug 10 21:41:46 EDT 2023
+// Date:	Fri Aug 11 05:24:57 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -159,6 +159,8 @@ static void init_trace_flag_table ( void )
     {
         tmp = min::new_str_gen ( q->name );
 	min::locate ( ap, tmp );
+	min::uns32 flags = q->flags;
+	flags &= ~ (1<<mex::T_NEVER);
 	tmp = min::new_num_gen ( q->flags );
 	min::set ( ap, tmp );
         ++ q;
@@ -2010,6 +2012,10 @@ mex::module mexas::compile ( min::file file )
     }
 
     mexas::make_module_interface();
+
+    min::locatable_var<mex::process> process
+        ( mex::init_process ( m ) );
+    mex::run_process ( process );
 
     min::push ( mexas::modules ) = m;
 

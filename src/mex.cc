@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Aug  6 22:47:51 EDT 2023
+// Date:	Fri Aug 11 05:52:46 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -166,13 +166,14 @@ static bool optimized_run_process ( mex::process p )
     min::uns32 i = p->pc.index;
     if ( m == min::NULL_STUB ) return i == 0;
     if ( i >= m->length ) return i == m->length;
-    const mex::instr * pcbegin = ~ ( m + 0 );
+    const mex::instr * pcbegin =
+        ~ min::begin_ptr_of ( m );
     const mex::instr * pc = pcbegin + i;
     const mex::instr * pcend = pcbegin + m->length;
 
     i = p->length;
     if ( i > p->max_length ) return false;
-    min::gen * spbegin = ~ ( p + 0 );
+    min::gen * spbegin = ~ min::begin_ptr_of ( p );
     min::gen * sp = spbegin + i;
     min::gen * spend = spbegin + p->max_length;
 
@@ -639,7 +640,7 @@ static bool optimized_run_process ( mex::process p )
 	        goto RET_EXIT;
 
             m = em;
-	    pcbegin = ~ ( m + 0 );
+	    pcbegin = ~ min::begin_ptr_of ( m );
 	    pc = pcbegin + new_pc;
 	    pcend = pcbegin + m->length;
 	    -- pc;
@@ -699,7 +700,7 @@ static bool optimized_run_process ( mex::process p )
 	        goto RET_EXIT;
 
             m = em;
-	    pcbegin = ~ ( m + 0 );
+	    pcbegin = ~ min::begin_ptr_of ( m );
 	    pc = pcbegin + new_pc;
 	    pcend = pcbegin + m->length;
 	    -- pc;
@@ -936,7 +937,7 @@ bool mex::run_process ( mex::process p )
 	message = "Illegal PC: index too large";
 	goto FATAL;
     }
-    pcbegin = ~ ( m + 0 );
+    pcbegin = ~ min::begin_ptr_of ( m );
     pc = pcbegin + i;
     pcend = pcbegin + m->length;
 
@@ -946,7 +947,7 @@ bool mex::run_process ( mex::process p )
 	message = "Illegal SP: too large";
 	goto FATAL;
     }
-    spbegin = ~ ( p + 0 );
+    spbegin = ~ min::begin_ptr_of ( p );
     sp = spbegin + i;
     spend = spbegin + p->max_length;
 
@@ -976,10 +977,10 @@ bool mex::run_process ( mex::process p )
 	p->counter = p->limit - limit;
 
 #   define RESTORE \
-	pcbegin = ~ ( m + 0 ); \
+	pcbegin = ~ min::begin_ptr_of ( m ); \
 	pc = pcbegin + p->pc.index; \
 	pcend = pcbegin + m->length; \
-	spbegin = ~ ( p + 0 ); \
+	spbegin = ~ min::begin_ptr_of ( p ); \
 	sp = spbegin + p->length; \
 	spend = spbegin + p->max_length; \
         limit = p->limit - p->counter;
@@ -1817,7 +1818,7 @@ bool mex::run_process ( mex::process p )
 		    return true;
 		}
 
-		pcbegin = ~ ( m + 0 );
+		pcbegin = ~ min::begin_ptr_of ( m );
 		pc = pcbegin + new_pc;
 		pcend = pcbegin + m->length;
 		break;
@@ -1889,7 +1890,7 @@ bool mex::run_process ( mex::process p )
 		mex::set_pc ( p, new_pc );
 
 		m = cm;
-		pcbegin = ~ ( m + 0 );
+		pcbegin = ~ min::begin_ptr_of ( m );
 		pc = pcbegin + immedC;
 		pcend = pcbegin + m->length;
 		break;
@@ -2334,8 +2335,8 @@ mex::process mex::init_process
 
     {   // Execute CALLG.
 
-	mex::ret * ret = (mex::ret *)
-	    ~ ( p->return_stack + 0 );
+	mex::ret * ret =
+	    ~ min::begin_ptr_of ( p->return_stack );
 	mex::pc saved_pc = { min::NULL_STUB, 0 };
 	mex::set_saved_pc ( p, ret, saved_pc );
 	ret->saved_fp = 0;
