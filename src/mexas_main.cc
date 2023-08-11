@@ -2,7 +2,7 @@
 //
 // File:	mexas_main.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Aug 10 21:42:53 EDT 2023
+// Date:	Thu Aug 10 22:06:14 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -88,7 +88,7 @@ int main ( int argc, char * argv[] )
 		        << "exiting due to compile"
 		           " errors"
 			<< min::eol;
-		exit ( 1 );
+		return 1;
 	    }
 	    else
 	        printer << min::bol
@@ -101,7 +101,7 @@ int main ( int argc, char * argv[] )
 	    printer << min::bol
 	            << "unrecognized option: " << arg
 		    << min::eol;
-	    exit ( 1 );
+	    return 1;
 	}
 	else
 	{
@@ -119,7 +119,7 @@ int main ( int argc, char * argv[] )
 		        << "exiting due to compile"
 		           " errors"
 			<< min::eol;
-		exit ( 1 );
+		return 1;
 	    }
 	    else
 	        printer << min::bol

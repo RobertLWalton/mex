@@ -2,3 +2,4 @@
 *.out
 mex_test_math_signals
 mexas_*_test
+mexas

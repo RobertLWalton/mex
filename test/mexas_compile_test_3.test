@@ -1,5 +1,3 @@
-Compile module and dump instructions
-
 // MEXAS Compile Test 3 Input
 //
 // File:        mexas_compile_test_3.in
@@ -46,4 +44,4 @@ CALL MIN 2 Z
     [####]CALLM T_CALLM 2 1 0 [$ MISSING $]; [< MIN Z >]
     STACKS: VARIABLES: Z
             FUNCTIONS: MIN
-Compile returned true
+mexas_compile_test_3.in successfully compiled
