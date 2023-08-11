@@ -2,7 +2,7 @@
 #
 # File:		Makefile
 # Author:	Bob Walton (walton@acm.org)
-# Date:		Fri Aug 11 05:02:56 EDT 2023
+# Date:		Fri Aug 11 05:10:33 EDT 2023
 #
 # The authors have placed this program in the public
 # domain; they make no warranty and accept no liability
@@ -123,11 +123,11 @@ mexas_scanner_test_%.out:	\
 
 mexas_compile_test_%.out:	\
 		mexas \
-		mexas_compile_test_%.in \
+		mexas_compile_test_%.mex \
 		Makefile
 	rm -f mexas_compile_test_$*.out
 	-${RUNENV} mexas -tcl \
-	    mexas_compile_test_$*.in \
+	    mexas_compile_test_$*.mex \
 	    > mexas_compile_test_$*.out
 
 

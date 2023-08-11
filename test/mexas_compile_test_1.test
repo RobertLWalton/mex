@@ -18,14 +18,14 @@ PUSHI 2 Y
 ADD Z
     [####]ADD T_AOP 0 0 0 [$ MISSING $]; Z
     STACKS: VARIABLES: Z
-ERROR: in mexas_compile_test_1.in: line ####: variable named X not
+ERROR: in mexas_compile_test_1.mex: line ####: variable named X not
        defined; instruction changed to PUSHI missing value:
 PUSH X
 PUSH X
     [####]PUSHI T_PUSH 0 0 0 [$ MISSING $]; [$ MISSING $]
 POP
     [####]POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
-ERROR: in mexas_compile_test_1.in: line ####: portion of stack in the
+ERROR: in mexas_compile_test_1.mex: line ####: portion of stack in the
        current block is too little to pop required arguments;
        instruction ignored:
 ADD
@@ -107,13 +107,13 @@ PUSH Y Z
 JMP DONE
     [####]JMP T_JMP 0 0 0 [$ MISSING $]; DONE
 LABEL ITS-X
-ERROR: in mexas_compile_test_1.in: line ####: code jumped over pushes
+ERROR: in mexas_compile_test_1.mex: line ####: code jumped over pushes
        values into the stack; JMP unresolved:
 JMPLT ITS-X
 PUSH X Z
     [####]PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< X Z >]
 LABEL DONE
-ERROR: in mexas_compile_test_1.in: line ####: code jumped over pushes
+ERROR: in mexas_compile_test_1.mex: line ####: code jumped over pushes
        values into the stack; JMP unresolved:
 JMP DONE
     STACKS: VARIABLES: Z Z Y X
@@ -139,8 +139,8 @@ JMPLT ITS-X
 POP
     [####]POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
 LABEL ITS-X
-ERROR: in mexas_compile_test_1.in: line ####: code jumped over pops values
-       from the stack; JMP unresolved:
+ERROR: in mexas_compile_test_1.mex: line ####: code jumped over pops
+       values from the stack; JMP unresolved:
 JMPLT ITS-X
     STACKS: VARIABLES: * Y X
 POP

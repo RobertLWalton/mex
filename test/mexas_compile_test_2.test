@@ -114,4 +114,4 @@ END
 END
     [####]END T_END 1 0 0 [$ MISSING $]; [$ MISSING $]
     STACKS: VARIABLES: X
-mexas_compile_test_2.in successfully compiled
+mexas_compile_test_2.mex successfully compiled

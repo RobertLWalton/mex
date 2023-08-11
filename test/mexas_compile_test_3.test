@@ -44,4 +44,4 @@ CALL MIN 2 Z
     [####]CALLM T_CALLM 2 1 0 [$ MISSING $]; [< MIN Z >]
     STACKS: VARIABLES: Z
             FUNCTIONS: MIN
-mexas_compile_test_3.in successfully compiled
+mexas_compile_test_3.mex successfully compiled
