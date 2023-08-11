@@ -2,7 +2,7 @@
 #
 # File:		Makefile
 # Author:	Bob Walton (walton@acm.org)
-# Date:		Fri Aug  4 21:55:15 EDT 2023
+# Date:		Thu Aug 10 21:43:40 EDT 2023
 #
 # The authors have placed this program in the public
 # domain; they make no warranty and accept no liability
@@ -93,6 +93,15 @@ mexas.o:	\
 	g++ -g ${GFLAGS} ${WFLAGS} \
 	    -I ../include -I ${MIN}/include \
 	    -c ../src/mexas.cc
+
+mexas:	\
+	${MEXAS_H} \
+	${MEXAS_O} \
+	../src/mexas_main.cc \
+	Makefile
+	g++ -o mexas -g ${GFLAGS} ${WFLAGS} \
+	    -I ../include -I ${MIN}/include \
+	    ../src/mexas_main.cc ${MEXAS_O}
 
 mexas_%_test:	\
 	${MEXAS_H} \
