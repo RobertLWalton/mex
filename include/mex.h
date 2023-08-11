@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Aug  6 22:47:38 EDT 2023
+// Date:	Fri Aug 11 17:45:36 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -35,6 +35,7 @@ extern min::locatable_var<min::printer> default_printer;
 extern min::uns32 module_length;
 extern min::uns32 stack_limit;
 extern min::uns32 return_stack_limit;
+extern min::uns32 run_counter_limit;
 
 }
 

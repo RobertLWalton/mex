@@ -41,7 +41,7 @@ int main ( int argc, char * argv[] )
 
 	else if ( strncmp ( "-t:", arg, 3 ) == 0 )
 	{
-	    min::uns32 flags = mex::T_ALWAYS;
+	    min::uns32 flags = (1 << mex::T_ALWAYS );
 	    const char * p = arg + 3;
 	    while ( * p )
 	    {

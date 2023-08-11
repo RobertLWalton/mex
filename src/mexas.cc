@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Aug 11 05:24:57 EDT 2023
+// Date:	Fri Aug 11 17:45:55 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -161,7 +161,7 @@ static void init_trace_flag_table ( void )
 	min::locate ( ap, tmp );
 	min::uns32 flags = q->flags;
 	flags &= ~ (1<<mex::T_NEVER);
-	tmp = min::new_num_gen ( q->flags );
+	tmp = min::new_num_gen ( flags );
 	min::set ( ap, tmp );
         ++ q;
     }
@@ -607,6 +607,8 @@ void mexas::begx ( mex::instr & instr,
 	        ( mexas::variables, name,
 		  L, mexas::depth[L] );
 	}
+	instr.immedA = tvars;
+	instr.immedB = nvars;
     }
     else if ( instr.op_code == mex::BEG )
     {
@@ -1476,7 +1478,7 @@ mex::module mexas::compile ( min::file file )
 		      +
 		      ( mexas::variables->length - 1 ) )
 		    ->name;
-		min::gen labbuf[2] = { name, old_name };
+		min::gen labbuf[2] = { old_name, name };
 		min::locatable_gen trace_info
 		    ( min::new_lab_gen ( labbuf, 2 ) );
 
@@ -2015,6 +2017,8 @@ mex::module mexas::compile ( min::file file )
 
     min::locatable_var<mex::process> process
         ( mex::init_process ( m ) );
+    process->trace_flags = mexas::run_trace_flags;
+    process->limit = mex::run_counter_limit;
     mex::run_process ( process );
 
     min::push ( mexas::modules ) = m;

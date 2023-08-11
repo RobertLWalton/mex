@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Aug 11 05:52:46 EDT 2023
+// Date:	Fri Aug 11 17:46:05 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -36,6 +36,7 @@ min::locatable_var<min::printer> mex::default_printer;
 min::uns32 mex::module_length = 1 << 12;
 min::uns32 mex::stack_limit = 1 << 14;
 min::uns32 mex::return_stack_limit = 1 << 12;
+min::uns32 mex::run_counter_limit = 1 << 20;
 min::uns32 mex::trace_indent = 2;
 char mex::trace_mark = '*';
 
@@ -535,7 +536,7 @@ static bool optimized_run_process ( mex::process p )
 		break;
 	    }
 
-	    sp = new_sp - immedA;
+	    sp = new_sp - (int) immedA;
 	    pc += immedC;
 	    -- pc;
 	    break;
@@ -581,7 +582,7 @@ static bool optimized_run_process ( mex::process p )
 	        goto ERROR_EXIT;
 	    sp -= immedA;
 	    for ( min::uns32 i = immedB; 0 < i; -- i )
-	        sp[-immedB-i] = sp[-i];
+	        sp[-(int)immedB-i] = sp[-i];
 	    pc -= immedC;
 	    -- pc;
 	    break;
@@ -690,8 +691,8 @@ static bool optimized_run_process ( mex::process p )
 	    p->fp[immedB] = new_fp;
 	    RW_UNS32 p->return_stack->length = rp;
 
-	    min::gen * qend = sp - immedA;
-	    min::gen * q = qend - immedC;
+	    min::gen * qend = sp - (int) immedA;
+	    min::gen * q = qend - (int) immedC;
 	    while ( q < qend )
 	        * ++ new_sp = * ++ q;
 	    sp = new_sp;
@@ -1003,6 +1004,7 @@ bool mex::run_process ( mex::process p )
 
 	if ( p->optimize )
 	{
+p->printer << "OPTIMIZED" << min::eol;
 	    SAVE;
 	    if ( optimized_run_process ( p ) )
 	    {
@@ -1046,6 +1048,7 @@ bool mex::run_process ( mex::process p )
 	    RESTORE;
 	}
 
+p->printer << "SP = SPBEGIN + " << (int) (sp - spbegin) << min::eol;
         min::uns8 op_code = pc->op_code;
 	min::uns8 trace_class = pc->trace_class;
 	op_info * op_info;
@@ -1490,7 +1493,7 @@ bool mex::run_process ( mex::process p )
 		sp = new_sp;
 	    else
 	    {
-		sp = new_sp - immedA;
+		sp = new_sp - (int) immedA;
 		pc += immedC;
 		-- pc;
 		p->trace_depth -= pc->trace_depth;
@@ -1534,7 +1537,7 @@ bool mex::run_process ( mex::process p )
 		        "stack too large for push";
 		    goto INNER_FATAL;
 		}
-		value = sp[-immedA-1];
+		value = sp[-(int)immedA-1];
 		break;
 	    case mex::PUSHI:
 		if ( sp >= spend )
@@ -1619,7 +1622,8 @@ bool mex::run_process ( mex::process p )
 		    message = "immedA too large";
 		    goto INNER_FATAL;
 		}
-		value = spbegin[p->fp[immedB] - immedA];
+		value = spbegin
+		    [p->fp[immedB] - (int) immedA];
 		break;
 	    case mex::PUSHNARGS:
 		if ( p->return_stack->length == 0 )
@@ -1803,8 +1807,8 @@ bool mex::run_process ( mex::process p )
 		p->fp[immedB] = new_fp;
 		RW_UNS32 p->return_stack->length = rp;
 
-		min::gen * qend = sp - immedA;
-		min::gen * q = qend - immedC;
+		min::gen * qend = sp - (int) immedA;
+		min::gen * q = qend - (int) immedC;
 		while ( q < qend )
 		    * ++ new_sp = * ++ q;
 		sp = new_sp;
@@ -1930,9 +1934,9 @@ bool mex::run_process ( mex::process p )
 
 		if ( pp )
 		    p->printer
-		        << min::pline_numbers
-			    ( m->position->file, pp )
-			<< ": "
+		        << "{"
+			<< pp.end.line - 1
+			<< "} "
 		        << mex::op_infos[op_code].name;
 
 		min::gen tinfo  = min::MISSING();
@@ -1946,6 +1950,7 @@ bool mex::run_process ( mex::process p )
 		case mex::PUSHL:
 		case mex::PUSHG:
 		case mex::PUSHA:
+		case mex::POPS:
 		{
 		    min::lab_ptr lp ( tinfo );
 		    if ( lp != min::NULL_STUB
@@ -1953,11 +1958,13 @@ bool mex::run_process ( mex::process p )
 			 min::lablen ( lp ) == 2 )
 		    {
 		        p->printer << " "
-			           << lp[0]
+			           << lp[1]
 				   << " <=== "
-				   << lp[1];
+				   << lp[0]
+				   << " =";
 		    }
 		    p->printer << " " << value;
+		    break;
 		}
 		case mex::PUSHI:
 		case mex::PUSHNARGS:
@@ -1967,6 +1974,7 @@ bool mex::run_process ( mex::process p )
 			           << tinfo
 				   << " <===";
 		    p->printer << " " << value;
+		    break;
 		}
 		case mex::SET_TRACE:
 		{
@@ -1986,6 +1994,7 @@ bool mex::run_process ( mex::process p )
 			    prefix = ", T_";
 			}
 		    }
+		    break;
 		}
 
 		default:
@@ -2018,6 +2027,7 @@ bool mex::run_process ( mex::process p )
 		        p->printer << " " << immedB;
 			break;
 		    }
+		    break;
 		}
 
 		}
@@ -2055,7 +2065,7 @@ bool mex::run_process ( mex::process p )
 	    case mex::POPS:
 	    {
 		-- sp;
-		sp[-immedA] = value;
+		sp[-(int)immedA] = value;
 		break;
 	    }
 	    case mex::BEG:
@@ -2071,7 +2081,7 @@ bool mex::run_process ( mex::process p )
 	    }
 	    case mex::BEGL:
 	    {
-		min::gen * q1 = sp - immedB;
+		min::gen * q1 = sp - (int) immedB;
 		min::gen * q2 = sp;
 		while ( q1 < q2 )
 		    * sp ++ = * q1 ++;
@@ -2089,7 +2099,7 @@ bool mex::run_process ( mex::process p )
 		}
 		sp -= immedA;
 		for ( int i = immedB; 0 < i; -- i )
-		    sp[-immedB-i] = sp[-i];
+		    sp[-(int)immedB-i] = sp[-i];
 		pc -= immedC;
 		-- pc;
 		-- p->trace_depth;
