@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Aug 11 17:45:55 EDT 2023
+// Date:	Fri Aug 11 22:58:45 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -795,7 +795,11 @@ void mexas::trace_instr
 	<< mex::op_infos[instr.op_code].name
         << " T_"
         << mex::trace_class_infos
-	       [instr.trace_class].name
+	       [instr.trace_class].name;
+    if ( instr.trace_depth != 0 )
+        printer
+	    << '[' << instr.trace_depth << ']';
+    printer
         << " " << instr.immedA
 	<< " " << instr.immedB
 	<< " " << instr.immedC

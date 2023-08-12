@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Aug 11 20:54:31 EDT 2023
+// Date:	Fri Aug 11 22:58:28 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -732,7 +732,9 @@ static bool optimized_run_process ( mex::process p )
 	    if ( rp >= p->return_stack->max_length )
 	        goto ERROR_EXIT;
 
-	    mex::ret * ret = ~ ( p->return_stack + rp );
+	    mex::ret * ret =
+	        ~ min::begin_ptr_of ( p->return_stack )
+		+ rp;
 	    mex::pc new_pc =
 	        { m, (min::uns32)
 		     ( pc - pcbegin + 1 ) };
@@ -1481,9 +1483,9 @@ bool mex::run_process ( mex::process p )
 	    else
 	    {
 		sp = new_sp - (int) immedA;
+		p->trace_depth -= pc->trace_depth;
 		pc += immedC;
 		-- pc;
-		p->trace_depth -= pc->trace_depth;
 	    }
 
 	    goto LOOP;
@@ -1712,6 +1714,7 @@ bool mex::run_process ( mex::process p )
 		    message = "immedB too large";
 		    goto INNER_FATAL;
 		}
+		break;
 	    case mex::ENDF:
 		immedA = immedC = 0;
 		// Fall through
@@ -1761,7 +1764,6 @@ bool mex::run_process ( mex::process p )
 		if ( em == min::NULL_STUB )
 		{
 		    if ( new_pc != 0 )
-			goto INNER_FATAL;
 		    {
 			message = "bad saved_pc value";
 			goto INNER_FATAL;
@@ -1770,7 +1772,6 @@ bool mex::run_process ( mex::process p )
 		else
 		{
 		    if ( new_pc > em->length )
-			goto INNER_FATAL;
 		    {
 			message = "bad saved_pc value";
 			goto INNER_FATAL;
@@ -1865,7 +1866,9 @@ bool mex::run_process ( mex::process p )
 		// CALL....
 		//
 		mex::ret * ret =
-		    ~ ( p->return_stack + rp );
+		    ~ min::begin_ptr_of
+		          ( p->return_stack )
+		    + rp;
 		mex::pc new_pc =
 		    { m, (min::uns32)
 			 ( pc - pcbegin ) };
