@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Aug 11 17:46:05 EDT 2023
+// Date:	Fri Aug 11 20:54:31 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1004,7 +1004,6 @@ bool mex::run_process ( mex::process p )
 
 	if ( p->optimize )
 	{
-p->printer << "OPTIMIZED" << min::eol;
 	    SAVE;
 	    if ( optimized_run_process ( p ) )
 	    {
@@ -1048,7 +1047,6 @@ p->printer << "OPTIMIZED" << min::eol;
 	    RESTORE;
 	}
 
-p->printer << "SP = SPBEGIN + " << (int) (sp - spbegin) << min::eol;
         min::uns8 op_code = pc->op_code;
 	min::uns8 trace_class = pc->trace_class;
 	op_info * op_info;
@@ -1304,25 +1302,19 @@ p->printer << "SP = SPBEGIN + " << (int) (sp - spbegin) << min::eol;
 		    m->position[p->pc.index] :
 		    min::MISSING_PHRASE_POSITION;
 
-		if ( pp
-		     &&
-		     (   trace_flags
-		       & mex::TRACE_LINES ) )
-		    min::print_phrase_lines
-		        ( p->printer,
-			  m->position->file,
-			  pp );
-
 		print_indent ( p );
-		p->printer << min::bom;
+		p->printer << min::bom << "{";
 
 		if ( pp )
 		    p->printer
-		        << min::pline_numbers
-			    ( m->position->file, pp )
-			<< ": ";
+		        << pp.end.line - 1
+			<< ":";
+		p->printer << (int) ( pc - pcbegin )
+		           << ";"
+			   << (int) ( sp - spbegin )
+			   << "} "
+		           << op_info->name << ": ";
 
-		p->printer << op_info->name << ": ";
 		if ( m->trace_info != min::NULL_STUB  )
 		{
 		    min::gen trace_info =
@@ -1436,24 +1428,19 @@ p->printer << "SP = SPBEGIN + " << (int) (sp - spbegin) << min::eol;
 		    m->position[p->pc.index] :
 		    min::MISSING_PHRASE_POSITION;
 
-		if ( pp
-		     &&
-		     (   trace_flags
-		       & mex::TRACE_LINES ) )
-		    min::print_phrase_lines
-		        ( p->printer,
-			  m->position->file,
-			  pp );
 		print_indent ( p );
-		p->printer << min::bom;
 
+		p->printer << min::bom << "{";
 		if ( pp )
 		    p->printer
-		        << min::pline_numbers
-			    ( m->position->file, pp )
-			<< ": ";
+		        << pp.end.line - 1
+			<< ":";
+		p->printer << (int) ( pc - pcbegin )
+		           << ";"
+			   << (int) ( sp - spbegin )
+			   << "} "
+		           << op_info->name << ": ";
 
-		p->printer << op_info->name;
 		if ( m->trace_info != min::NULL_STUB
 		     &&
 		       p->pc.index
@@ -1921,23 +1908,19 @@ p->printer << "SP = SPBEGIN + " << (int) (sp - spbegin) << min::eol;
 		    m->position[p->pc.index] :
 		    min::MISSING_PHRASE_POSITION;
 
-		if ( pp
-		     &&
-		     (   trace_flags
-		       & mex::TRACE_LINES ) )
-		    min::print_phrase_lines
-		        ( p->printer,
-			  m->position->file,
-			  pp );
 		print_indent ( p );
-		p->printer << min::bom;
+		p->printer << min::bom << "{";
 
 		if ( pp )
 		    p->printer
-		        << "{"
-			<< pp.end.line - 1
-			<< "} "
-		        << mex::op_infos[op_code].name;
+		        << pp.end.line - 1
+			<< ":";
+		p->printer << (int) ( pc - pcbegin )
+		           << ";"
+			   << (int) ( sp - spbegin )
+			   << "} "
+		           << op_infos[op_code].name
+			   << ": ";
 
 		min::gen tinfo  = min::MISSING();
 		if (   p->pc.index
@@ -2102,7 +2085,6 @@ p->printer << "SP = SPBEGIN + " << (int) (sp - spbegin) << min::eol;
 		    sp[-(int)immedB-i] = sp[-i];
 		pc -= immedC;
 		-- pc;
-		-- p->trace_depth;
 		break;
 	    }
 	    case mex::SET_TRACE:
