@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Aug 11 22:58:28 EDT 2023
+// Date:	Sat Aug 12 06:06:21 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -740,6 +740,7 @@ static bool optimized_run_process ( mex::process p )
 		     ( pc - pcbegin + 1 ) };
 	    mex::set_saved_pc ( p, ret, new_pc );
 	    ret->saved_fp = p->fp[level];
+	    p->fp[level] = ( sp - spbegin );
 	    ret->level = level;
 	    ret->nargs = pc->immedA;
 	    ret->nresults = pc->immedB;
@@ -1874,6 +1875,7 @@ bool mex::run_process ( mex::process p )
 			 ( pc - pcbegin ) };
 		mex::set_saved_pc ( p, ret, new_pc );
 		ret->saved_fp = p->fp[level];
+		p->fp[level] = ( sp - spbegin );
 		ret->level = level;
 		ret->nargs = immedA;
 		ret->nresults = immedB;
@@ -1887,6 +1889,7 @@ bool mex::run_process ( mex::process p )
 		pcbegin = ~ min::begin_ptr_of ( m );
 		pc = pcbegin + immedC;
 		pcend = pcbegin + m->length;
+		++ p->trace_depth;
 		break;
 	    }
 
@@ -2102,7 +2105,6 @@ bool mex::run_process ( mex::process p )
 	    {
 		pc += immedC;
 		-- pc;
-		++ p->trace_depth;
 		break;
 	    }
 	    case mex::ENDF:
