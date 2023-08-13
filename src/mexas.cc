@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Aug 11 22:58:45 EDT 2023
+// Date:	Sat Aug 12 22:24:31 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -155,13 +155,14 @@ static void init_trace_flag_table ( void )
 
     trace_group * q = trace_groups;
     trace_group * endq = q + NUMBER_OF_TRACE_GROUPS;
+    min::uns32 mask =
+        (1<<mex::NUMBER_OF_TRACE_CLASSES) - 1;
+    mask &= ~ (1<<mex::T_NEVER);
     while ( q < endq )
     {
         tmp = min::new_str_gen ( q->name );
 	min::locate ( ap, tmp );
-	min::uns32 flags = q->flags;
-	flags &= ~ (1<<mex::T_NEVER);
-	tmp = min::new_num_gen ( flags );
+	tmp = min::new_num_gen ( q->flags & mask );
 	min::set ( ap, tmp );
         ++ q;
     }
@@ -781,17 +782,20 @@ void mexas::trace_instr
     if ( ( trace_flags & mexas::TRACE ) == 0 )
 	return;
 
+    min::phrase_position pp = m->position[location];
     if ( ( trace_flags & mexas::TRACE_LINES )
          &&
 	 ! no_lines )
 	min::print_phrase_lines
-	    ( printer, mexas::input_file,
-	      m->position[location] );
+	    ( printer, mexas::input_file, pp );
 
     printer << min::bol << "    " << min::bom;
     mex::instr instr = m[location];
     printer
-	<< "[" << location << "]"
+	<< "[" << pp.end.line
+	<< ":" << location
+	<< ";" << variables->length
+	<< "] "
 	<< mex::op_infos[instr.op_code].name
         << " T_"
         << mex::trace_class_infos

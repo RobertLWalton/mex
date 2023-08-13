@@ -2,7 +2,7 @@
 //
 // File:	mexas_compile_test_2.in
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Aug  4 21:47:34 EDT 2023
+// Date:	Sun Aug 13 01:06:13 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -70,3 +70,4 @@ END
 STACKS
 END
 STACKS
+POP

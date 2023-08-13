@@ -2,7 +2,7 @@
 #
 # File:		Makefile
 # Author:	Bob Walton (walton@acm.org)
-# Date:		Fri Aug 11 05:58:40 EDT 2023
+# Date:		Sun Aug 13 00:51:52 EDT 2023
 #
 # The authors have placed this program in the public
 # domain; they make no warranty and accept no liability
@@ -60,7 +60,6 @@ test:		${TESTS:=.test}
 	sed \
 	    -e '/line [0-9][0-9]*:/s//line ####:/g' \
 	    -e '/lines [0-9][0-9]*-[0-9][0-9]*:/s//lines ####-####/g' \
-	    -e '/\[[0-9][0-9]*\]/s//\[####\]/g' \
             < $*.out > $*.test
 
 %.diff:	%.out
@@ -68,7 +67,6 @@ test:		${TESTS:=.test}
 	-@sed \
 	    -e '/line [0-9][0-9]*:/s//line ####:/g' \
 	    -e '/lines [0-9][0-9]*-[0-9][0-9]*:/s//lines ####-####/g' \
-	    -e '/\[[0-9][0-9]*\]/s//\[####\]/g' \
             < $*.out | diff ${DIFFOPT} $*.test -
 
 %.out:	%

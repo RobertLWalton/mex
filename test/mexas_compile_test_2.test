@@ -2,7 +2,7 @@
 //
 // File:        mexas_compile_test_2.in
 // Author:      Bob Walton (walton@acm.org)
-// Date:        Fri Aug  4 21:47:34 EDT 2023
+// Date:        Sun Aug 13 01:06:13 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -12,106 +12,176 @@
 // Z = MIN ( X, Y )
 //
 PUSHI 152 X
-    [####]PUSHI T_PUSH 0 0 0 152; X
+    [14:0;1] PUSHI T_PUSH 0 0 0 152; X
 PUSHI 196 Y
-    [####]PUSHI T_PUSH 0 0 0 196; Y
+    [15:1;2] PUSHI T_PUSH 0 0 0 196; Y
 PUSHI 0 Z
-    [####]PUSHI T_PUSH 0 0 0 0; Z
+    [16:2;3] PUSHI T_PUSH 0 0 0 0; Z
 BEG
-    [####]BEG T_BEG 0 0 0 [$ MISSING $]; [$ MISSING $]
+    [17:3;3] BEG T_BEG 0 0 0 [$ MISSING $]; [$ MISSING $]
     PUSH X
-    [####]PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< X * >]
+    [18:4;4] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< X * >]
     PUSH Y
-    [####]PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< Y * >]
+    [19:5;5] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< Y * >]
     JMPLT ITS-X
-    [####]JMPLT T_JMPS 0 0 0 [$ MISSING $]; ITS-X
+    [20:6;3] JMPLT T_JMPS 0 0 0 [$ MISSING $]; ITS-X
     PUSH Y
-    [####]PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< Y * >]
+    [21:7;4] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< Y * >]
     POP Z
-    [####]POPS T_POP 1 0 0 [$ MISSING $]; [< Z * >]
+    [22:8;3] POPS T_POP 1 0 0 [$ MISSING $]; [< * Z >]
     JMP DONE
-    [####]JMP T_JMP 0 0 0 [$ MISSING $]; DONE
+    [23:9;3] JMP T_JMP 0 0 0 [$ MISSING $]; DONE
     LABEL ITS-X
-    [####]JMPLT T_JMPS 0 0 4 [$ MISSING $]; ITS-X
+    [20:6;3] JMPLT T_JMPS 0 0 4 [$ MISSING $]; ITS-X
     PUSH X
-    [####]PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< X * >]
+    [25:10;4] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< X * >]
     POP Z
-    [####]POPS T_POP 1 0 0 [$ MISSING $]; [< Z * >]
+    [26:11;3] POPS T_POP 1 0 0 [$ MISSING $]; [< * Z >]
     LABEL DONE
-    [####]JMP T_JMP 0 0 3 [$ MISSING $]; DONE
+    [23:9;3] JMP T_JMP 0 0 3 [$ MISSING $]; DONE
     PUSHI 2000 UNUSED
-    [####]PUSHI T_PUSH 0 0 0 2000; UNUSED
+    [28:12;4] PUSHI T_PUSH 0 0 0 2000; UNUSED
 END
-    [####]END T_END 1 0 0 [$ MISSING $]; [$ MISSING $]
+    [29:13;3] END T_END 1 0 0 [$ MISSING $]; [$ MISSING $]
     STACKS: VARIABLES: Z Y X
 POP
-    [####]POPS T_POP 0 0 0 [$ MISSING $]; [< * Z >]
+    [31:14;2] POPS T_POP 0 0 0 [$ MISSING $]; [< Z * >]
 POP
-    [####]POPS T_POP 0 0 0 [$ MISSING $]; [< * Y >]
+    [32:15;1] POPS T_POP 0 0 0 [$ MISSING $]; [< Y * >]
 POP
-    [####]POPS T_POP 0 0 0 [$ MISSING $]; [< * X >]
+    [33:16;0] POPS T_POP 0 0 0 [$ MISSING $]; [< X * >]
 // BEGL ... ENDL Test
 // Z = SUM { I: I = 4 TO I = 6 }
 //
 PUSHI 6 LIMIT
-    [####]PUSHI T_PUSH 0 0 0 6; LIMIT
+    [38:17;1] PUSHI T_PUSH 0 0 0 6; LIMIT
 PUSHI 0 SUM
-    [####]PUSHI T_PUSH 0 0 0 0; SUM
+    [39:18;2] PUSHI T_PUSH 0 0 0 0; SUM
 PUSHI 4 I
-    [####]PUSHI T_PUSH 0 0 0 4; I
+    [40:19;3] PUSHI T_PUSH 0 0 0 4; I
 BEGL 2
-    [####]BEGL T_BEGL 0 0 0 [$ MISSING $]; [$ MISSING $]
+    [41:20;5] BEGL T_BEGL 0 2 0 [$ MISSING $]; [$ MISSING $]
     STACKS: VARIABLES: next-I next-SUM ; I SUM LIMIT
     PUSH I
-    [####]PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< I * >]
+    [43:21;6] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< I * >]
     PUSH LIMIT
-    [####]PUSHS T_PUSH 5 0 0 [$ MISSING $]; [< LIMIT * >]
+    [44:22;7] PUSHS T_PUSH 5 0 0 [$ MISSING $]; [< LIMIT * >]
     JMPGT DONE
-    [####]JMPGT T_JMPS 0 0 0 [$ MISSING $]; DONE
+    [45:23;5] JMPGT T_JMPS 0 0 0 [$ MISSING $]; DONE
     PUSH SUM
-    [####]PUSHS T_PUSH 3 0 0 [$ MISSING $]; [< SUM * >]
+    [46:24;6] PUSHS T_PUSH 3 0 0 [$ MISSING $]; [< SUM * >]
     PUSH I
-    [####]PUSHS T_PUSH 3 0 0 [$ MISSING $]; [< I * >]
+    [47:25;7] PUSHS T_PUSH 3 0 0 [$ MISSING $]; [< I * >]
     ADD
-    [####]ADD T_AOP 0 0 0 [$ MISSING $]; *
+    [48:26;6] ADD T_AOP 0 0 0 [$ MISSING $]; *
     POP next-SUM
-    [####]POPS T_POP 2 0 0 [$ MISSING $]; [< next-SUM * >]
+    [49:27;5] POPS T_POP 2 0 0 [$ MISSING $]; [< * next-SUM >]
     PUSH I
-    [####]PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< I * >]
+    [50:28;6] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< I * >]
     PUSHI 1
-    [####]PUSHI T_PUSH 0 0 0 1; *
+    [51:29;7] PUSHI T_PUSH 0 0 0 1; *
     ADD
-    [####]ADD T_AOP 0 0 0 [$ MISSING $]; *
+    [52:30;6] ADD T_AOP 0 0 0 [$ MISSING $]; *
     POP next-I
-    [####]POPS T_POP 1 0 0 [$ MISSING $]; [< next-I * >]
+    [53:31;5] POPS T_POP 1 0 0 [$ MISSING $]; [< * next-I >]
 ENDL
-    [####]ENDL T_ENDL 0 2 11 [$ MISSING $]; [$ MISSING $]
+    [54:32;3] ENDL T_ENDL 0 2 11 [$ MISSING $]; [$ MISSING $]
     STACKS: VARIABLES: I SUM LIMIT
 LABEL DONE
-    [####]JMPGT T_JMPS 2 0 10 [$ MISSING $]; DONE
+    [45:23;3] JMPGT T_JMPS[1] 2 0 10 [$ MISSING $]; DONE
 POP
-    [####]POPS T_POP 0 0 0 [$ MISSING $]; [< * I >]
+    [57:33;2] POPS T_POP 0 0 0 [$ MISSING $]; [< I * >]
 POP
-    [####]POPS T_POP 0 0 0 [$ MISSING $]; [< * SUM >]
+    [58:34;1] POPS T_POP 0 0 0 [$ MISSING $]; [< SUM * >]
 POP
-    [####]POPS T_POP 0 0 0 [$ MISSING $]; [< * LIMIT >]
+    [59:35;0] POPS T_POP 0 0 0 [$ MISSING $]; [< LIMIT * >]
 // DEPTH TEST
 //
 PUSHI 1 X
-    [####]PUSHI T_PUSH 0 0 0 1; X
+    [63:36;1] PUSHI T_PUSH 0 0 0 1; X
 BEG
-    [####]BEG T_BEG 0 0 0 [$ MISSING $]; [$ MISSING $]
+    [64:37;1] BEG T_BEG 0 0 0 [$ MISSING $]; [$ MISSING $]
 PUSHI 2 Y
-    [####]PUSHI T_PUSH 0 0 0 2; Y
+    [65:38;2] PUSHI T_PUSH 0 0 0 2; Y
 BEG
-    [####]BEG T_BEG 0 0 0 [$ MISSING $]; [$ MISSING $]
+    [66:39;2] BEG T_BEG 0 0 0 [$ MISSING $]; [$ MISSING $]
 PUSHI 3 Z
-    [####]PUSHI T_PUSH 0 0 0 3; Z
+    [67:40;3] PUSHI T_PUSH 0 0 0 3; Z
     STACKS: VARIABLES: Z ; Y ; X
 END
-    [####]END T_END 1 0 0 [$ MISSING $]; [$ MISSING $]
+    [69:41;2] END T_END 1 0 0 [$ MISSING $]; [$ MISSING $]
     STACKS: VARIABLES: Y ; X
 END
-    [####]END T_END 1 0 0 [$ MISSING $]; [$ MISSING $]
+    [71:42;1] END T_END 1 0 0 [$ MISSING $]; [$ MISSING $]
     STACKS: VARIABLES: X
+POP
+    [73:43;0] POPS T_POP 0 0 0 [$ MISSING $]; [< X * >]
+* {13:0;0} PUSHI:  X <=== 152
+* {14:1;1} PUSHI:  Y <=== 196
+* {15:2;2} PUSHI:  Z <=== 0
+* {16:3;3} BEG:
+*** {17:4;3} PUSHS:  * <=== X = 152
+*** {18:5;4} PUSHS:  * <=== Y = 196
+*** {19:6;5} JMPLT:  ITS-X is successful: true <= 152 < 196
+*** {24:10;3} PUSHS:  * <=== X = 152
+*** {25:11;4} POPS:  Z <=== * = 152
+*** {27:12;3} PUSHI:  UNUSED <=== 2000
+*** {28:13;4} END:
+* {30:14;3} POPS:  * <=== Z = 152
+* {31:15;2} POPS:  * <=== Y = 196
+* {32:16;1} POPS:  * <=== X = 152
+* {37:17;0} PUSHI:  LIMIT <=== 6
+* {38:18;1} PUSHI:  SUM <=== 0
+* {39:19;2} PUSHI:  I <=== 4
+* {40:20;3} BEGL:
+*** {42:21;5} PUSHS:  * <=== I = 4
+*** {43:22;6} PUSHS:  * <=== LIMIT = 6
+*** {44:23;7} JMPGT:  DONE is UNsuccessful: false <= 4 > 6
+*** {45:24;5} PUSHS:  * <=== SUM = 0
+*** {46:25;6} PUSHS:  * <=== I = 4
+*** {47:26;7} ADD: * = 4 <= 0 + 4
+*** {48:27;6} POPS:  next-SUM <=== * = 4
+*** {49:28;5} PUSHS:  * <=== I = 4
+*** {50:29;6} PUSHI:  * <=== 1
+*** {51:30;7} ADD: * = 5 <= 4 + 1
+*** {52:31;6} POPS:  next-I <=== * = 5
+*** {53:32;5} ENDL:
+*** {42:21;5} PUSHS:  * <=== I = 5
+*** {43:22;6} PUSHS:  * <=== LIMIT = 6
+*** {44:23;7} JMPGT:  DONE is UNsuccessful: false <= 5 > 6
+*** {45:24;5} PUSHS:  * <=== SUM = 4
+*** {46:25;6} PUSHS:  * <=== I = 5
+*** {47:26;7} ADD: * = 9 <= 4 + 5
+*** {48:27;6} POPS:  next-SUM <=== * = 9
+*** {49:28;5} PUSHS:  * <=== I = 5
+*** {50:29;6} PUSHI:  * <=== 1
+*** {51:30;7} ADD: * = 6 <= 5 + 1
+*** {52:31;6} POPS:  next-I <=== * = 6
+*** {53:32;5} ENDL:
+*** {42:21;5} PUSHS:  * <=== I = 6
+*** {43:22;6} PUSHS:  * <=== LIMIT = 6
+*** {44:23;7} JMPGT:  DONE is UNsuccessful: false <= 6 > 6
+*** {45:24;5} PUSHS:  * <=== SUM = 9
+*** {46:25;6} PUSHS:  * <=== I = 6
+*** {47:26;7} ADD: * = 15 <= 9 + 6
+*** {48:27;6} POPS:  next-SUM <=== * = 15
+*** {49:28;5} PUSHS:  * <=== I = 6
+*** {50:29;6} PUSHI:  * <=== 1
+*** {51:30;7} ADD: * = 7 <= 6 + 1
+*** {52:31;6} POPS:  next-I <=== * = 7
+*** {53:32;5} ENDL:
+*** {42:21;5} PUSHS:  * <=== I = 7
+*** {43:22;6} PUSHS:  * <=== LIMIT = 6
+*** {44:23;7} JMPGT:  DONE is successful: true <= 7 > 6
+* {56:33;3} POPS:  * <=== I = 7
+* {57:34;2} POPS:  * <=== SUM = 15
+* {58:35;1} POPS:  * <=== LIMIT = 6
+* {62:36;0} PUSHI:  X <=== 1
+* {63:37;1} BEG:
+*** {64:38;1} PUSHI:  Y <=== 2
+*** {65:39;2} BEG:
+***** {66:40;2} PUSHI:  Z <=== 3
+***** {68:41;3} END:
+*** {70:42;2} END:
+* {72:43;1} POPS:  * <=== X = 1
 mexas_compile_test_2.mex successfully compiled

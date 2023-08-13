@@ -11,138 +11,138 @@
 // PUSH, POP, ARITHMETIC OP TEST
 //
 PUSHI 2 X
-    [####]PUSHI T_PUSH 0 0 0 2; X
+    [13:0;1] PUSHI T_PUSH 0 0 0 2; X
 PUSHI 2 Y
-    [####]PUSHI T_PUSH 0 0 0 2; Y
+    [14:1;2] PUSHI T_PUSH 0 0 0 2; Y
     STACKS: VARIABLES: Y X
 ADD Z
-    [####]ADD T_AOP 0 0 0 [$ MISSING $]; Z
+    [16:2;1] ADD T_AOP 0 0 0 [$ MISSING $]; Z
     STACKS: VARIABLES: Z
 ERROR: in mexas_compile_test_1.mex: line ####: variable named X not
        defined; instruction changed to PUSHI missing value:
 PUSH X
 PUSH X
-    [####]PUSHI T_PUSH 0 0 0 [$ MISSING $]; [$ MISSING $]
+    [18:3;2] PUSHI T_PUSH 0 0 0 [$ MISSING $]; [$ MISSING $]
 POP
-    [####]POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
+    [19:4;1] POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
 ERROR: in mexas_compile_test_1.mex: line ####: portion of stack in the
        current block is too little to pop required arguments;
        instruction ignored:
 ADD
 PUSH Z W
-    [####]PUSHS T_PUSH 0 0 0 [$ MISSING $]; [< Z W >]
+    [21:5;2] PUSHS T_PUSH 0 0 0 [$ MISSING $]; [< Z W >]
 SUB
-    [####]SUB T_AOP 0 0 0 [$ MISSING $]; *
+    [22:6;1] SUB T_AOP 0 0 0 [$ MISSING $]; *
     STACKS: VARIABLES: *
 POP
-    [####]POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
+    [24:7;0] POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
     STACKS: VARIABLES:
 // JMP TEST 1
 // Z = MIN ( X, Y )
 //
 PUSHI 5 X
-    [####]PUSHI T_PUSH 0 0 0 5; X
+    [30:8;1] PUSHI T_PUSH 0 0 0 5; X
 PUSHI 23 Y
-    [####]PUSHI T_PUSH 0 0 0 23; Y
+    [31:9;2] PUSHI T_PUSH 0 0 0 23; Y
 PUSHI NaN Z
-    [####]PUSHI T_PUSH 0 0 0 nan; Z
+    [32:10;3] PUSHI T_PUSH 0 0 0 nan; Z
     STACKS: VARIABLES: Z Y X
 PUSH X
-    [####]PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< X * >]
+    [34:11;4] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< X * >]
 PUSH Y
-    [####]PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< Y * >]
+    [35:12;5] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< Y * >]
     STACKS: VARIABLES: * * Z Y X
 JMPLT ITS-X
-    [####]JMPLT T_JMPS 0 0 0 [$ MISSING $]; ITS-X
+    [37:13;3] JMPLT T_JMPS 0 0 0 [$ MISSING $]; ITS-X
 PUSH Y
-    [####]PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< Y * >]
+    [38:14;4] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< Y * >]
 POP Z
-    [####]POPS T_POP 1 0 0 [$ MISSING $]; [< Z * >]
+    [39:15;3] POPS T_POP 1 0 0 [$ MISSING $]; [< * Z >]
 JMP DONE
-    [####]JMP T_JMP 0 0 0 [$ MISSING $]; DONE
+    [40:16;3] JMP T_JMP 0 0 0 [$ MISSING $]; DONE
 LABEL ITS-X
-    [####]JMPLT T_JMPS 0 0 4 [$ MISSING $]; ITS-X
+    [37:13;3] JMPLT T_JMPS 0 0 4 [$ MISSING $]; ITS-X
 PUSH X
-    [####]PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< X * >]
+    [42:17;4] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< X * >]
 POP Z
-    [####]POPS T_POP 1 0 0 [$ MISSING $]; [< Z * >]
+    [43:18;3] POPS T_POP 1 0 0 [$ MISSING $]; [< * Z >]
 LABEL DONE
-    [####]JMP T_JMP 0 0 3 [$ MISSING $]; DONE
+    [40:16;3] JMP T_JMP 0 0 3 [$ MISSING $]; DONE
     STACKS: VARIABLES: Z Y X
 POP
-    [####]POPS T_POP 0 0 0 [$ MISSING $]; [< * Z >]
+    [46:19;2] POPS T_POP 0 0 0 [$ MISSING $]; [< Z * >]
 // JMP TEST 2
 // Z = MIN ( X, Y )
 //
     STACKS: VARIABLES: Y X
 PUSH X Z
-    [####]PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< X Z >]
+    [52:20;3] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< X Z >]
 PUSH X
-    [####]PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< X * >]
+    [53:21;4] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< X * >]
 PUSH Y
-    [####]PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< Y * >]
+    [54:22;5] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< Y * >]
 JMPLT ITS-X
-    [####]JMPLT T_JMPS 0 0 0 [$ MISSING $]; ITS-X
+    [55:23;3] JMPLT T_JMPS 0 0 0 [$ MISSING $]; ITS-X
 POP
-    [####]POPS T_POP 0 0 0 [$ MISSING $]; [< * Z >]
+    [56:24;2] POPS T_POP 0 0 0 [$ MISSING $]; [< Z * >]
 PUSH Y Z
-    [####]PUSHS T_PUSH 0 0 0 [$ MISSING $]; [< Y Z >]
+    [57:25;3] PUSHS T_PUSH 0 0 0 [$ MISSING $]; [< Y Z >]
 LABEL ITS-X
-    [####]JMPLT T_JMPS 0 0 3 [$ MISSING $]; ITS-X
+    [55:23;3] JMPLT T_JMPS 0 0 3 [$ MISSING $]; ITS-X
 POP
-    [####]POPS T_POP 0 0 0 [$ MISSING $]; [< * Z >]
+    [59:26;2] POPS T_POP 0 0 0 [$ MISSING $]; [< Z * >]
 // JMP TEST 3
 // Z = MIN ( X, Y )
 // Z pushed into stack by code jumped over
 //
     STACKS: VARIABLES: Y X
 PUSH X
-    [####]PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< X * >]
+    [66:27;3] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< X * >]
 PUSH Y
-    [####]PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< Y * >]
+    [67:28;4] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< Y * >]
 JMPLT ITS-X
-    [####]JMPLT T_JMPS 0 0 0 [$ MISSING $]; ITS-X
+    [68:29;2] JMPLT T_JMPS 0 0 0 [$ MISSING $]; ITS-X
 PUSH Y Z
-    [####]PUSHS T_PUSH 0 0 0 [$ MISSING $]; [< Y Z >]
+    [69:30;3] PUSHS T_PUSH 0 0 0 [$ MISSING $]; [< Y Z >]
 JMP DONE
-    [####]JMP T_JMP 0 0 0 [$ MISSING $]; DONE
+    [70:31;3] JMP T_JMP 0 0 0 [$ MISSING $]; DONE
 LABEL ITS-X
 ERROR: in mexas_compile_test_1.mex: line ####: code jumped over pushes
        values into the stack; JMP unresolved:
 JMPLT ITS-X
 PUSH X Z
-    [####]PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< X Z >]
+    [72:32;4] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< X Z >]
 LABEL DONE
 ERROR: in mexas_compile_test_1.mex: line ####: code jumped over pushes
        values into the stack; JMP unresolved:
 JMP DONE
     STACKS: VARIABLES: Z Z Y X
 POP
-    [####]POPS T_POP 0 0 0 [$ MISSING $]; [< * Z >]
+    [75:33;3] POPS T_POP 0 0 0 [$ MISSING $]; [< Z * >]
 POP
-    [####]POPS T_POP 0 0 0 [$ MISSING $]; [< * Z >]
+    [76:34;2] POPS T_POP 0 0 0 [$ MISSING $]; [< Z * >]
 // JMP TEST 4
 // Z = MIN ( X, Y )
 // Z popped from stack by code jumped over
 //
     STACKS: VARIABLES: Y X
 PUSH X
-    [####]PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< X * >]
+    [83:35;3] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< X * >]
 PUSH Y
-    [####]PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< Y * >]
+    [84:36;4] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< Y * >]
 PUSH Y Z
-    [####]PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< Y Z >]
+    [85:37;5] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< Y Z >]
 PUSH X Z
-    [####]PUSHS T_PUSH 4 0 0 [$ MISSING $]; [< X Z >]
+    [86:38;6] PUSHS T_PUSH 4 0 0 [$ MISSING $]; [< X Z >]
 JMPLT ITS-X
-    [####]JMPLT T_JMPS 0 0 0 [$ MISSING $]; ITS-X
+    [87:39;4] JMPLT T_JMPS 0 0 0 [$ MISSING $]; ITS-X
 POP
-    [####]POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
+    [88:40;3] POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
 LABEL ITS-X
 ERROR: in mexas_compile_test_1.mex: line ####: code jumped over pops
        values from the stack; JMP unresolved:
 JMPLT ITS-X
     STACKS: VARIABLES: * Y X
 POP
-    [####]POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
+    [91:41;2] POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
 exiting due to compile errors
