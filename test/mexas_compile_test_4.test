@@ -2,7 +2,7 @@
 //
 // File:        mexas_compile_test_4.in
 // Author:      Bob Walton (walton@acm.org)
-// Date:        Sun Aug 13 06:05:19 EDT 2023
+// Date:        Sun Aug 13 12:25:49 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -100,6 +100,148 @@ DIVRI 615
     [61:43;1] DIVRI T_AOP 0 0 0 615; *
 POP
     [62:44;0] POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
+PUSHI 4.567
+    [64:45;1] PUSHI T_PUSH 0 0 0 4.567; *
+PUSHI 1
+    [65:46;2] PUSHI T_PUSH 0 0 0 1; *
+MOD
+    [66:47;1] MOD T_AOP 0 0 0 [$ MISSING $]; *
+MULI 1000
+    [67:48;1] MULI T_AOP 0 0 0 1000; *
+ADDI 4000
+    [68:49;1] ADDI T_AOP 0 0 0 4000; *
+MODI 1000
+    [69:50;1] MODI T_AOP 0 0 0 1000; *
+POP
+    [70:51;0] POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
+PUSHI 1
+    [71:52;1] PUSHI T_PUSH 0 0 0 1; *
+MODRI 4.567
+    [72:53;1] MODRI T_AOP 0 0 0 4.567; *
+POP
+    [73:54;0] POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
+PUSHI 1000
+    [74:55;1] PUSHI T_PUSH 0 0 0 1000; *
+PUSHI 4567
+    [75:56;2] PUSHI T_PUSH 0 0 0 4567; *
+MODR
+    [76:57;1] MODR T_AOP 0 0 0 [$ MISSING $]; *
+POP
+    [77:58;0] POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
+PUSHI 1.5
+    [79:59;1] PUSHI T_PUSH 0 0 0 1.5; *
+FLOOR
+    [80:60;1] FLOOR T_AOP 0 0 0 [$ MISSING $]; *
+CEIL
+    [81:61;1] CEIL T_AOP 0 0 0 [$ MISSING $]; *
+ADDI 0.1
+    [82:62;1] ADDI T_AOP 0 0 0 0.1; *
+CEIL
+    [83:63;1] CEIL T_AOP 0 0 0 [$ MISSING $]; *
+FLOOR
+    [84:64;1] FLOOR T_AOP 0 0 0 [$ MISSING $]; *
+POP
+    [85:65;0] POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
+PUSHI 1.5
+    [87:66;1] PUSHI T_PUSH 0 0 0 1.5; *
+TRUNC
+    [88:67;1] TRUNC T_AOP 0 0 0 [$ MISSING $]; *
+ROUND
+    [89:68;1] ROUND T_AOP 0 0 0 [$ MISSING $]; *
+PUSHI 2.5
+    [90:69;2] PUSHI T_PUSH 0 0 0 2.5; *
+TRUNC
+    [91:70;2] TRUNC T_AOP 0 0 0 [$ MISSING $]; *
+ROUND
+    [92:71;2] ROUND T_AOP 0 0 0 [$ MISSING $]; *
+PUSHI -1.5
+    [93:72;3] PUSHI T_PUSH 0 0 0 -1.5; *
+TRUNC
+    [94:73;3] TRUNC T_AOP 0 0 0 [$ MISSING $]; *
+ROUND
+    [95:74;3] ROUND T_AOP 0 0 0 [$ MISSING $]; *
+PUSHI -2.5
+    [96:75;4] PUSHI T_PUSH 0 0 0 -2.5; *
+TRUNC
+    [97:76;4] TRUNC T_AOP 0 0 0 [$ MISSING $]; *
+ROUND
+    [98:77;4] ROUND T_AOP 0 0 0 [$ MISSING $]; *
+POP
+    [99:78;3] POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
+PUSHI 1.5
+    [101:79;4] PUSHI T_PUSH 0 0 0 1.5; *
+ROUND
+    [102:80;4] ROUND T_AOP 0 0 0 [$ MISSING $]; *
+TRUNC
+    [103:81;4] TRUNC T_AOP 0 0 0 [$ MISSING $]; *
+PUSHI 2.5
+    [104:82;5] PUSHI T_PUSH 0 0 0 2.5; *
+ROUND
+    [105:83;5] ROUND T_AOP 0 0 0 [$ MISSING $]; *
+TRUNC
+    [106:84;5] TRUNC T_AOP 0 0 0 [$ MISSING $]; *
+PUSHI -1.5
+    [107:85;6] PUSHI T_PUSH 0 0 0 -1.5; *
+ROUND
+    [108:86;6] ROUND T_AOP 0 0 0 [$ MISSING $]; *
+TRUNC
+    [109:87;6] TRUNC T_AOP 0 0 0 [$ MISSING $]; *
+PUSHI -2.5
+    [110:88;7] PUSHI T_PUSH 0 0 0 -2.5; *
+ROUND
+    [111:89;7] ROUND T_AOP 0 0 0 [$ MISSING $]; *
+TRUNC
+    [112:90;7] TRUNC T_AOP 0 0 0 [$ MISSING $]; *
+POP
+    [113:91;6] POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
+PUSHI 1234
+    [115:92;7] PUSHI T_PUSH 0 0 0 1234; *
+LOG
+    [116:93;7] LOG T_AOP 0 0 0 [$ MISSING $]; *
+EXP
+    [117:94;7] EXP T_AOP 0 0 0 [$ MISSING $]; *
+LOG10
+    [118:95;7] LOG10 T_AOP 0 0 0 [$ MISSING $]; *
+EXP10
+    [119:96;7] EXP10 T_AOP 0 0 0 [$ MISSING $]; *
+POP
+    [120:97;6] POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
+PUSHI 1
+    [122:98;7] PUSHI T_PUSH 0 0 0 1; *
+ASIN DEG90
+    [123:99;7] ASIN T_AOP 0 0 0 [$ MISSING $]; DEG90
+PUSH DEG90
+    [124:100;8] PUSHS T_PUSH 0 0 0 [$ MISSING $]; [< DEG90 * >]
+SIN
+    [125:101;8] SIN T_AOP 0 0 0 [$ MISSING $]; *
+PUSH DEG90
+    [126:102;9] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< DEG90 * >]
+COS
+    [127:103;9] COS T_AOP 0 0 0 [$ MISSING $]; *
+PUSH DEG90
+    [128:104;10] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< DEG90 * >]
+TAN
+    [129:105;10] TAN T_AOP 0 0 0 [$ MISSING $]; *
+POP
+    [130:106;9] POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
+PUSHI 1
+    [132:107;10] PUSHI T_PUSH 0 0 0 1; *
+ATAN DEG45
+    [133:108;10] ATAN T_AOP 0 0 0 [$ MISSING $]; DEG45
+PUSH DEG45
+    [134:109;11] PUSHS T_PUSH 0 0 0 [$ MISSING $]; [< DEG45 * >]
+SIN
+    [135:110;11] SIN T_AOP 0 0 0 [$ MISSING $]; *
+PUSH DEG45
+    [136:111;12] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< DEG45 * >]
+COS
+    [137:112;12] COS T_AOP 0 0 0 [$ MISSING $]; *
+PUSH DEG45
+    [138:113;13] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< DEG45 * >]
+TAN
+    [139:114;13] TAN T_AOP 0 0 0 [$ MISSING $]; *
+POP
+    [140:115;12] POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
 * {12:0;0} PUSHI:  * <=== 101
 * {13:1;1} NEG: * = -101 <= - 101
 * {14:2;1} ABS: * = 101 <= abs -101
@@ -145,4 +287,75 @@ POP
 * {59:42;0} PUSHI:  * <=== 5
 * {60:43;1} DIVRI: * = 123 <= 615 / 5
 * {61:44;1} POPS:  * <=== * = 123
+* {63:45;0} PUSHI:  * <=== 4.567
+* {64:46;1} PUSHI:  * <=== 1
+* {65:47;2} MOD: * = 0.567 <= 4.567 fmod 1
+* {66:48;1} MULI: * = 567 <= 0.567 * 1000
+* {67:49;1} ADDI: * = 4567 <= 567 + 4000
+* {68:50;1} MODI: * = 567 <= 4567 fmod 1000
+* {69:51;1} POPS:  * <=== * = 567
+* {70:52;0} PUSHI:  * <=== 1
+* {71:53;1} MODRI: * = 0.567 <= 4.567 fmod 1
+* {72:54;1} POPS:  * <=== * = 0.567
+* {73:55;0} PUSHI:  * <=== 1000
+* {74:56;1} PUSHI:  * <=== 4567
+* {75:57;2} MODR: * = 567 <= 4567 fmod 1000
+* {76:58;1} POPS:  * <=== * = 567
+* {78:59;0} PUSHI:  * <=== 1.5
+* {79:60;1} FLOOR: * = 1 <= floor 1.5
+* {80:61;1} CEIL: * = 1 <= ceil 1
+* {81:62;1} ADDI: * = 1.1 <= 1 + 0.1
+* {82:63;1} CEIL: * = 2 <= ceil 1.1
+* {83:64;1} FLOOR: * = 2 <= floor 2
+* {84:65;1} POPS:  * <=== * = 2
+* {86:66;0} PUSHI:  * <=== 1.5
+* {87:67;1} TRUNC: * = 1 <= trunc 1.5
+* {88:68;1} ROUND: * = 1 <= round 1
+* {89:69;1} PUSHI:  * <=== 2.5
+* {90:70;2} TRUNC: * = 2 <= trunc 2.5
+* {91:71;2} ROUND: * = 2 <= round 2
+* {92:72;2} PUSHI:  * <=== -1.5
+* {93:73;3} TRUNC: * = -1 <= trunc -1.5
+* {94:74;3} ROUND: * = -1 <= round -1
+* {95:75;3} PUSHI:  * <=== -2.5
+* {96:76;4} TRUNC: * = -2 <= trunc -2.5
+* {97:77;4} ROUND: * = -2 <= round -2
+* {98:78;4} POPS:  * <=== * = -2
+* {100:79;3} PUSHI:  * <=== 1.5
+* {101:80;4} ROUND: * = 2 <= round 1.5
+* {102:81;4} TRUNC: * = 2 <= trunc 2
+* {103:82;4} PUSHI:  * <=== 2.5
+* {104:83;5} ROUND: * = 2 <= round 2.5
+* {105:84;5} TRUNC: * = 2 <= trunc 2
+* {106:85;5} PUSHI:  * <=== -1.5
+* {107:86;6} ROUND: * = -2 <= round -1.5
+* {108:87;6} TRUNC: * = -2 <= trunc -2
+* {109:88;6} PUSHI:  * <=== -2.5
+* {110:89;7} ROUND: * = -2 <= round -2.5
+* {111:90;7} TRUNC: * = -2 <= trunc -2
+* {112:91;7} POPS:  * <=== * = -2
+* {114:92;6} PUSHI:  * <=== 1234
+* {115:93;7} LOG: * = 7.11801620446533 <= log 1234
+* {116:94;7} EXP: * = 1234 <= exp 7.11801620446533
+* {117:95;7} LOG10: * = 3.09131515969722 <= log10 1234
+* {118:96;7} EXP10: * = 1234 <= exp10 3.09131515969722
+* {119:97;7} POPS:  * <=== * = 1234
+* {121:98;6} PUSHI:  * <=== 1
+* {122:99;7} ASIN: DEG90 = 1.5707963267949 <= asin 1
+* {123:100;7} PUSHS:  * <=== DEG90 = 1.5707963267949
+* {124:101;8} SIN: * = 1 <= sin 1.5707963267949
+* {125:102;8} PUSHS:  * <=== DEG90 = 1.5707963267949
+* {126:103;9} COS: * = 6.12323399573677e-17 <= cos 1.5707963267949
+* {127:104;9} PUSHS:  * <=== DEG90 = 1.5707963267949
+* {128:105;10} TAN: * = 1.63312393531954e+16 <= tan 1.5707963267949
+* {129:106;10} POPS:  * <=== * = 1.63312393531954e+16
+* {131:107;9} PUSHI:  * <=== 1
+* {132:108;10} ATAN: DEG45 = 0.785398163397448 <= atan 1
+* {133:109;10} PUSHS:  * <=== DEG45 = 0.785398163397448
+* {134:110;11} SIN: * = 0.707106781186547 <= sin 0.785398163397448
+* {135:111;11} PUSHS:  * <=== DEG45 = 0.785398163397448
+* {136:112;12} COS: * = 0.707106781186548 <= cos 0.785398163397448
+* {137:113;12} PUSHS:  * <=== DEG45 = 0.785398163397448
+* {138:114;13} TAN: * = 1 <= tan 0.785398163397448
+* {139:115;13} POPS:  * <=== * = 1
 mexas_compile_test_4.mex successfully compiled
