@@ -2,7 +2,7 @@
 //
 // File:        mexas_compile_test_4.in
 // Author:      Bob Walton (walton@acm.org)
-// Date:        Sun Aug 13 12:25:49 EDT 2023
+// Date:        Sun Aug 13 17:31:55 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -242,6 +242,66 @@ TAN
     [139:114;13] TAN T_AOP 0 0 0 [$ MISSING $]; *
 POP
     [140:115;12] POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
+PUSHI 1
+    [142:116;13] PUSHI T_PUSH 0 0 0 1; *
+ACOS DEG0
+    [143:117;13] ACOS T_AOP 0 0 0 [$ MISSING $]; DEG0
+PUSH DEG0
+    [144:118;14] PUSHS T_PUSH 0 0 0 [$ MISSING $]; [< DEG0 * >]
+SIN
+    [145:119;14] SIN T_AOP 0 0 0 [$ MISSING $]; *
+PUSH DEG0
+    [146:120;15] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< DEG0 * >]
+COS
+    [147:121;15] COS T_AOP 0 0 0 [$ MISSING $]; *
+PUSH DEG0
+    [148:122;16] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< DEG0 * >]
+TAN
+    [149:123;16] TAN T_AOP 0 0 0 [$ MISSING $]; *
+POP
+    [150:124;15] POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
+PUSHI 1
+    [152:125;16] PUSHI T_PUSH 0 0 0 1; *
+PUSHI 1
+    [153:126;17] PUSHI T_PUSH 0 0 0 1; *
+ATAN2
+    [154:127;16] ATAN2 T_AOP 0 0 0 [$ MISSING $]; *
+POP
+    [155:128;15] POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
+PUSHI 10
+    [156:129;16] PUSHI T_PUSH 0 0 0 10; *
+PUSHI -10
+    [157:130;17] PUSHI T_PUSH 0 0 0 -10; *
+ATAN2
+    [158:131;16] ATAN2 T_AOP 0 0 0 [$ MISSING $]; *
+POP
+    [159:132;15] POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
+PUSHI -10
+    [160:133;16] PUSHI T_PUSH 0 0 0 -10; *
+PUSHI 10
+    [161:134;17] PUSHI T_PUSH 0 0 0 10; *
+ATAN2R
+    [162:135;16] ATAN2R T_AOP 0 0 0 [$ MISSING $]; *
+POP
+    [163:136;15] POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
+PUSHI 2
+    [165:137;16] PUSHI T_PUSH 0 0 0 2; *
+POWI 10
+    [166:138;16] POWI T_AOP 10 0 0 [$ MISSING $]; *
+POP
+    [167:139;15] POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
+PUSHI 0
+    [168:140;16] PUSHI T_PUSH 0 0 0 0; *
+POWI 10
+    [169:141;16] POWI T_AOP 10 0 0 [$ MISSING $]; *
+POP
+    [170:142;15] POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
+PUSHI 0
+    [171:143;16] PUSHI T_PUSH 0 0 0 0; *
+POWI 0
+    [172:144;16] POWI T_AOP 0 0 0 [$ MISSING $]; *
+POP
+    [173:145;15] POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
 * {12:0;0} PUSHI:  * <=== 101
 * {13:1;1} NEG: * = -101 <= - 101
 * {14:2;1} ABS: * = 101 <= abs -101
@@ -358,4 +418,34 @@ POP
 * {137:113;12} PUSHS:  * <=== DEG45 = 0.785398163397448
 * {138:114;13} TAN: * = 1 <= tan 0.785398163397448
 * {139:115;13} POPS:  * <=== * = 1
+* {141:116;12} PUSHI:  * <=== 1
+* {142:117;13} ACOS: DEG0 = 0 <= acos 1
+* {143:118;13} PUSHS:  * <=== DEG0 = 0
+* {144:119;14} SIN: * = 0 <= sin 0
+* {145:120;14} PUSHS:  * <=== DEG0 = 0
+* {146:121;15} COS: * = 1 <= cos 0
+* {147:122;15} PUSHS:  * <=== DEG0 = 0
+* {148:123;16} TAN: * = 0 <= tan 0
+* {149:124;16} POPS:  * <=== * = 0
+* {151:125;15} PUSHI:  * <=== 1
+* {152:126;16} PUSHI:  * <=== 1
+* {153:127;17} ATAN2: * = 0.785398163397448 <= 1 atan2 1
+* {154:128;16} POPS:  * <=== * = 0.785398163397448
+* {155:129;15} PUSHI:  * <=== 10
+* {156:130;16} PUSHI:  * <=== -10
+* {157:131;17} ATAN2: * = 2.35619449019234 <= 10 atan2 -10
+* {158:132;16} POPS:  * <=== * = 2.35619449019234
+* {159:133;15} PUSHI:  * <=== -10
+* {160:134;16} PUSHI:  * <=== 10
+* {161:135;17} ATAN2R: * = 2.35619449019234 <= 10 atan2 -10
+* {162:136;16} POPS:  * <=== * = 2.35619449019234
+* {164:137;15} PUSHI:  * <=== 2
+* {165:138;16} POWI: * = 1024 <= pow 2 10
+* {166:139;16} POPS:  * <=== * = 1024
+* {167:140;15} PUSHI:  * <=== 0
+* {168:141;16} POWI: * = 0 <= pow 0 10
+* {169:142;16} POPS:  * <=== * = 0
+* {170:143;15} PUSHI:  * <=== 0
+* {171:144;16} POWI: * = 1 <= pow 0 0
+* {172:145;16} POPS:  * <=== * = 1
 mexas_compile_test_4.mex successfully compiled

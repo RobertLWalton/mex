@@ -919,8 +919,9 @@ are explained in Tracing and Exceptions, \itemref{TRACING-AND-EXCEPTIONS}.
     & Replace the top value by its arc- sin/cos/tan.
 \\\hline
 \TT{ATAN2}/\TT{ATAN2R}
-    & Pop 2 values, then push the arc-tangent of the \\
-    & second/first popped divided by the first/second popped.
+    & Pop 2 values, then push the arc-tangent of the first/second \\
+    & popped (x value) divided by the second/first popped \\
+    & (y value).
 \\\hline
 \TT{POWI}
     & Replace the top value by the top value to the \TT{immedA} power.
@@ -1248,6 +1249,11 @@ it is store in the hardware register.
 
 TBD
 
+\subsection{Push/Pop Tracing}
+\label{PUSH/POP-TRACING}
+
+TBD
+
 \subsection{Non-Arithmetic Tracing}
 \label{NON-ARITHMETIC-TRACING}
 
@@ -1255,7 +1261,7 @@ TBD
 
 The trace message of the non-arithmetic instruction
 \TT{module[i]} uses
-$I$ = \TT{module->trace\_info[i]}.  If this is missing
+$I$ = \TT{module->\EOL trace\_\EOL info[i]}.  If this is missing
 or equals \TT{min::MISSING()}, a minimal message
 is produced, such as:
 \begin{center}

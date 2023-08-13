@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Aug 13 07:18:48 EDT 2023
+// Date:	Sun Aug 13 17:26:01 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1228,6 +1228,31 @@ mex::module mexas::compile ( min::file file )
 	case mex::A1:
 	    if ( SP < mexas::stack_limit + 1 )
 	        goto STACK_TOO_SHORT;
+	    if ( op_code == mex::POWI )
+	    {
+	        min::gen en = mexas::get_num ( index );
+		if ( en == min::NONE() )
+		{
+		    mexas::compile_error
+			( pp, "no exponent parameter;"
+			      " instruction ignored" );
+		    continue;
+		}
+		min::float64 ef =
+		    min::direct_float_of ( en );
+		if ( ef < 0
+		     ||
+		     ef >= (1ul << 32 )
+		     ||
+		     ef != (min::uns32) ef )
+		{
+		    mexas::compile_error
+			( pp, "bad exponent parameter;"
+			      " instruction ignored" );
+		    continue;
+		}
+		instr.immedA = (min::uns32) ef;
+	    }
 	    min::pop ( variables );
 	    goto ARITHMETIC;
 

@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Aug 13 06:09:35 EDT 2023
+// Date:	Sun Aug 13 17:32:49 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1332,7 +1332,14 @@ bool mex::run_process ( mex::process p )
 		    p->printer << "*";
 
 		char buffer[200];
-		if ( op_info->op_type == mex::A1 )
+		if ( op_code == mex::POWI )
+		    sprintf
+			( buffer,
+			  " = %.15g <= %s %.15g %u",
+			  result,
+			  op_info->oper, arg1,
+			  pc->immedA );
+		else if ( op_info->op_type == mex::A1 )
 		    sprintf
 			( buffer,
 			  " = %.15g <= %s %.15g",
