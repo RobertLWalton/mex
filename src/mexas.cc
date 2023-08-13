@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat Aug 12 22:24:31 EDT 2023
+// Date:	Sun Aug 13 07:18:48 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1214,6 +1214,17 @@ mex::module mexas::compile ( min::file file )
 
 	case mex::A2I:
 	case mex::A2RI:
+	{
+	    instr.immedD = mexas::get_num ( index );
+	    if ( instr.immedD == min::NONE() )
+	    {
+		mexas::compile_error
+		    ( pp, "no immediate value given;"
+		          " zero assumed" );
+		instr.immedD == min::new_num_gen ( 0 );
+	    }
+	    // Fall through
+	}
 	case mex::A1:
 	    if ( SP < mexas::stack_limit + 1 )
 	        goto STACK_TOO_SHORT;

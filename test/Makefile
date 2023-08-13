@@ -2,7 +2,7 @@
 #
 # File:		Makefile
 # Author:	Bob Walton (walton@acm.org)
-# Date:		Sun Aug 13 00:51:52 EDT 2023
+# Date:		Sun Aug 13 06:06:59 EDT 2023
 #
 # The authors have placed this program in the public
 # domain; they make no warranty and accept no liability
@@ -29,7 +29,8 @@ DIFFOPT ?= -u
 TESTS = mexas_scanner_test_1 \
         mexas_compile_test_1 \
         mexas_compile_test_2 \
-        mexas_compile_test_3
+        mexas_compile_test_3 \
+        mexas_compile_test_4
 
 MIN_H =	${MIN}/include/min.h
 

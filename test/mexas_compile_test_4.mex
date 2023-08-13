@@ -1,0 +1,64 @@
+// MEXAS Compile Test 4 Input
+//
+// File:	mexas_compile_test_4.in
+// Author:	Bob Walton (walton@acm.org)
+// Date:	Sun Aug 13 06:05:19 EDT 2023
+//
+// The authors have placed this program in the public
+// domain; they make no warranty and accept no liability
+// for this program.
+
+// TEST ALL THE ARITHMETIC INSTRUCIONS
+//
+PUSHI 101
+NEG
+ABS
+POP
+
+PUSHI 100
+PUSHI 10
+ADD
+PUSHI 10
+SUB
+POP
+
+PUSHI 100
+ADDI 10
+SUBI 10
+POP
+
+PUSHI 10
+PUSHI 110
+SUBR
+POP
+PUSHI 10
+SUBRI 110
+POP
+
+PUSHI 123
+PUSHI 5
+MUL
+PUSHI 5
+DIV
+MULI 5
+DIVI 5
+MULI 5
+SUBI 1
+DIVI 5
+POP
+
+PUSHI 5
+PUSHI 5
+PUSHI 123
+MUL
+DIVR
+POP
+PUSHI 5
+PUSHI 615
+DIVR
+POP
+PUSHI 5
+DIVRI 615
+POP
+
+

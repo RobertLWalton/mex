@@ -1,0 +1,148 @@
+// MEXAS Compile Test 4 Input
+//
+// File:        mexas_compile_test_4.in
+// Author:      Bob Walton (walton@acm.org)
+// Date:        Sun Aug 13 06:05:19 EDT 2023
+//
+// The authors have placed this program in the public
+// domain; they make no warranty and accept no liability
+// for this program.
+
+// TEST ALL THE ARITHMETIC INSTRUCIONS
+//
+PUSHI 101
+    [13:0;1] PUSHI T_PUSH 0 0 0 101; *
+NEG
+    [14:1;1] NEG T_AOP 0 0 0 [$ MISSING $]; *
+ABS
+    [15:2;1] ABS T_AOP 0 0 0 [$ MISSING $]; *
+POP
+    [16:3;0] POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
+PUSHI 100
+    [18:4;1] PUSHI T_PUSH 0 0 0 100; *
+PUSHI 10
+    [19:5;2] PUSHI T_PUSH 0 0 0 10; *
+ADD
+    [20:6;1] ADD T_AOP 0 0 0 [$ MISSING $]; *
+PUSHI 10
+    [21:7;2] PUSHI T_PUSH 0 0 0 10; *
+SUB
+    [22:8;1] SUB T_AOP 0 0 0 [$ MISSING $]; *
+POP
+    [23:9;0] POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
+PUSHI 100
+    [25:10;1] PUSHI T_PUSH 0 0 0 100; *
+ADDI 10
+    [26:11;1] ADDI T_AOP 0 0 0 10; *
+SUBI 10
+    [27:12;1] SUBI T_AOP 0 0 0 10; *
+POP
+    [28:13;0] POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
+PUSHI 10
+    [30:14;1] PUSHI T_PUSH 0 0 0 10; *
+PUSHI 110
+    [31:15;2] PUSHI T_PUSH 0 0 0 110; *
+SUBR
+    [32:16;1] SUBR T_AOP 0 0 0 [$ MISSING $]; *
+POP
+    [33:17;0] POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
+PUSHI 10
+    [34:18;1] PUSHI T_PUSH 0 0 0 10; *
+SUBRI 110
+    [35:19;1] SUBRI T_AOP 0 0 0 110; *
+POP
+    [36:20;0] POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
+PUSHI 123
+    [38:21;1] PUSHI T_PUSH 0 0 0 123; *
+PUSHI 5
+    [39:22;2] PUSHI T_PUSH 0 0 0 5; *
+MUL
+    [40:23;1] MUL T_AOP 0 0 0 [$ MISSING $]; *
+PUSHI 5
+    [41:24;2] PUSHI T_PUSH 0 0 0 5; *
+DIV
+    [42:25;1] DIV T_AOP 0 0 0 [$ MISSING $]; *
+MULI 5
+    [43:26;1] MULI T_AOP 0 0 0 5; *
+DIVI 5
+    [44:27;1] DIVI T_AOP 0 0 0 5; *
+MULI 5
+    [45:28;1] MULI T_AOP 0 0 0 5; *
+SUBI 1
+    [46:29;1] SUBI T_AOP 0 0 0 1; *
+DIVI 5
+    [47:30;1] DIVI T_AOP 0 0 0 5; *
+POP
+    [48:31;0] POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
+PUSHI 5
+    [50:32;1] PUSHI T_PUSH 0 0 0 5; *
+PUSHI 5
+    [51:33;2] PUSHI T_PUSH 0 0 0 5; *
+PUSHI 123
+    [52:34;3] PUSHI T_PUSH 0 0 0 123; *
+MUL
+    [53:35;2] MUL T_AOP 0 0 0 [$ MISSING $]; *
+DIVR
+    [54:36;1] DIVR T_AOP 0 0 0 [$ MISSING $]; *
+POP
+    [55:37;0] POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
+PUSHI 5
+    [56:38;1] PUSHI T_PUSH 0 0 0 5; *
+PUSHI 615
+    [57:39;2] PUSHI T_PUSH 0 0 0 615; *
+DIVR
+    [58:40;1] DIVR T_AOP 0 0 0 [$ MISSING $]; *
+POP
+    [59:41;0] POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
+PUSHI 5
+    [60:42;1] PUSHI T_PUSH 0 0 0 5; *
+DIVRI 615
+    [61:43;1] DIVRI T_AOP 0 0 0 615; *
+POP
+    [62:44;0] POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
+* {12:0;0} PUSHI:  * <=== 101
+* {13:1;1} NEG: * = -101 <= - 101
+* {14:2;1} ABS: * = 101 <= abs -101
+* {15:3;1} POPS:  * <=== * = 101
+* {17:4;0} PUSHI:  * <=== 100
+* {18:5;1} PUSHI:  * <=== 10
+* {19:6;2} ADD: * = 110 <= 100 + 10
+* {20:7;1} PUSHI:  * <=== 10
+* {21:8;2} SUB: * = 100 <= 110 - 10
+* {22:9;1} POPS:  * <=== * = 100
+* {24:10;0} PUSHI:  * <=== 100
+* {25:11;1} ADDI: * = 110 <= 100 + 10
+* {26:12;1} SUBI: * = 100 <= 110 - 10
+* {27:13;1} POPS:  * <=== * = 100
+* {29:14;0} PUSHI:  * <=== 10
+* {30:15;1} PUSHI:  * <=== 110
+* {31:16;2} SUBR: * = 100 <= 110 - 10
+* {32:17;1} POPS:  * <=== * = 100
+* {33:18;0} PUSHI:  * <=== 10
+* {34:19;1} SUBRI: * = 100 <= 110 - 10
+* {35:20;1} POPS:  * <=== * = 100
+* {37:21;0} PUSHI:  * <=== 123
+* {38:22;1} PUSHI:  * <=== 5
+* {39:23;2} MUL: * = 615 <= 123 * 5
+* {40:24;1} PUSHI:  * <=== 5
+* {41:25;2} DIV: * = 123 <= 615 / 5
+* {42:26;1} MULI: * = 615 <= 123 * 5
+* {43:27;1} DIVI: * = 123 <= 615 / 5
+* {44:28;1} MULI: * = 615 <= 123 * 5
+* {45:29;1} SUBI: * = 614 <= 615 - 1
+* {46:30;1} DIVI: * = 122.8 <= 614 / 5
+* {47:31;1} POPS:  * <=== * = 122.8
+* {49:32;0} PUSHI:  * <=== 5
+* {50:33;1} PUSHI:  * <=== 5
+* {51:34;2} PUSHI:  * <=== 123
+* {52:35;3} MUL: * = 615 <= 5 * 123
+* {53:36;2} DIVR: * = 123 <= 615 / 5
+* {54:37;1} POPS:  * <=== * = 123
+* {55:38;0} PUSHI:  * <=== 5
+* {56:39;1} PUSHI:  * <=== 615
+* {57:40;2} DIVR: * = 123 <= 615 / 5
+* {58:41;1} POPS:  * <=== * = 123
+* {59:42;0} PUSHI:  * <=== 5
+* {60:43;1} DIVRI: * = 123 <= 615 / 5
+* {61:44;1} POPS:  * <=== * = 123
+mexas_compile_test_4.mex successfully compiled
