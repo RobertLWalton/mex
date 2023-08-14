@@ -2,7 +2,7 @@
 //
 // File:        mexas_compile_test_2.in
 // Author:      Bob Walton (walton@acm.org)
-// Date:        Sun Aug 13 01:06:13 EDT 2023
+// Date:        Mon Aug 14 06:48:51 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -11,8 +11,8 @@
 // BEG ... END Test
 // Z = MIN ( X, Y )
 //
-PUSHI 152 X
-    [14:0;1] PUSHI T_PUSH 0 0 0 152; X
+PUSHI 295 X
+    [14:0;1] PUSHI T_PUSH 0 0 0 295; X
 PUSHI 196 Y
     [15:1;2] PUSHI T_PUSH 0 0 0 196; Y
 PUSHI 0 Z
@@ -116,20 +116,21 @@ END
     STACKS: VARIABLES: X
 POP
     [73:43;0] POPS T_POP 0 0 0 [$ MISSING $]; [< X * >]
-* {13:0;0} PUSHI:  X <=== 152
+* {13:0;0} PUSHI:  X <=== 295
 * {14:1;1} PUSHI:  Y <=== 196
 * {15:2;2} PUSHI:  Z <=== 0
 * {16:3;3} BEG:
-*** {17:4;3} PUSHS:  * <=== X = 152
+*** {17:4;3} PUSHS:  * <=== X = 295
 *** {18:5;4} PUSHS:  * <=== Y = 196
-*** {19:6;5} JMPLT:  ITS-X is successful: true <= 152 < 196
-*** {24:10;3} PUSHS:  * <=== X = 152
-*** {25:11;4} POPS:  Z <=== * = 152
+*** {19:6;5} JMPLT:  ITS-X is UNsuccessful: false <= 295 < 196
+*** {20:7;3} PUSHS:  * <=== Y = 196
+*** {21:8;4} POPS:  Z <=== * = 196
+*** {22:9;3} JMP:  DONE
 *** {27:12;3} PUSHI:  UNUSED <=== 2000
 *** {28:13;4} END:
-* {30:14;3} POPS:  * <=== Z = 152
+* {30:14;3} POPS:  * <=== Z = 196
 * {31:15;2} POPS:  * <=== Y = 196
-* {32:16;1} POPS:  * <=== X = 152
+* {32:16;1} POPS:  * <=== X = 295
 * {37:17;0} PUSHI:  LIMIT <=== 6
 * {38:18;1} PUSHI:  SUM <=== 0
 * {39:19;2} PUSHI:  I <=== 4

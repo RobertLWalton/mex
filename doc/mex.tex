@@ -239,7 +239,7 @@
 
 \author{Robert L. Walton}
 
-\date{August 13, 2023}
+\date{August 14, 2023}
  
 \maketitle
 
@@ -1176,8 +1176,9 @@ when the process terminates if any exception flags have been raised.
 
 The trace message of an arithmetic instruction has the form:
 \begin{center}
-{\em new-variable-name} \TT{=} {\em value} \TT{<=} {\em value}\QMARK{}
-             {\em operator} {\em value}
+{\em op-code}\TT{:} {\em new-variable-name} \TT{=} {\em value}
+                    \TT{<=} {\em value}\QMARK{}
+                    {\em operator} {\em value}
 \end{center}
 If {\em new-variable-name} is not given in the instruction,
 \TT{*} is used instead.
@@ -1247,7 +1248,22 @@ it is store in the hardware register.
 \subsection{Jump Tracing}
 \label{JUMP-TRACING}
 
-TBD
+\TT{JMP\ldots} instruction trace messages have the form:
+
+\begin{center}
+{\em op-code}\TT{:} {\em jmp-target} {\tt is successful:~true}
+                    \TT{<=} {\em value} {\em operator} {\em value}
+\end{center}
+or
+\begin{center}
+{\em op-code}\TT{:} {\em jmp-target} {\tt is UNsuccessful:~false}
+                    \TT{<=} {\em value} {\em operator} {\em value}
+\end{center}
+
+or for a plain unconditional \TT{JMP} instruction, just:
+\begin{center}
+\TT{JMP:} {\em jmp-target}
+\end{center}
 
 \subsection{Push/Pop Tracing}
 \label{PUSH/POP-TRACING}

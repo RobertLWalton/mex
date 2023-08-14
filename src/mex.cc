@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Aug 13 17:32:49 EDT 2023
+// Date:	Mon Aug 14 06:58:26 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1479,17 +1479,24 @@ bool mex::run_process ( mex::process p )
 		    return false;
 		}
 
-		if ( execute_jmp )
-		    p->printer
-		        << " is successful: true";
-		else if ( ! bad_jmp )
-		    p->printer
-		        << " is UNsuccessful: false";
+		if ( op_code != mex::JMP )
+		{
+		    if ( execute_jmp )
+			p->printer
+			    << " is successful: true";
+		    else if ( ! bad_jmp )
+			p->printer
+			    << " is UNsuccessful:"
+			       " false";
 
-		char buffer[200];
-	        sprintf ( buffer, " <= %.15g %s %.15g",
+		    char buffer[200];
+		    sprintf
+		        ( buffer, " <= %.15g %s %.15g",
 			  arg1, op_info->oper, arg2 );
-		p->printer << buffer << min::eom;
+		    p->printer << buffer;
+		}
+
+		p->printer << min::eom;
 
 		RESTORE;
 	    }
