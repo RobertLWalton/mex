@@ -1279,7 +1279,22 @@ or for a plain unconditional \TT{JMP} instruction, just:
 \subsection{Push/Pop Tracing}
 \label{PUSH/POP-TRACING}
 
-TBD
+\TT{PUSH\ldots} instructions and the \TT{POP} instruction are in essence
+value copy instructions and their trace messages
+have the form:
+
+\begin{center}
+{\em op-code}\TT{:} {\em to-variable}
+                    \TT{<=} {\em from-variable} \TT{=} {\em value}
+\end{center}
+
+For \TT{PUSH\ldots} the {\em to-variable} is the {\em new-variable}
+and the {\em from-variable} is the instruction {\tt variable}.
+For \TT{POP} the {\em to-variable} is the instruction {\em variable}
+and the {\em from-variable} is the name of the top of the stack.
+
+As always in tracing, `\TT{*}' is used for a missing variable name.
+
 
 \subsection{Non-Arithmetic Tracing}
 \label{NON-ARITHMETIC-TRACING}
