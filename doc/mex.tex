@@ -1166,6 +1166,14 @@ instruction's \TT{min::\EOL phrase\_\EOL position} value from its module's
 \TT{min::phrase\_\EOL position\_\EOL vec}.  This is then followed by
 the instruction specific trace message.
 
+Each instruction trace message begins with:
+\begin{center}
+\TT{\{}{\em line-number}\TT{:}{\em code-vector-location}%
+                        \TT{;}{\em stack-length}\TT{\}}
+\end{center}
+The {\em stack-length} is the number of values in the stack
+just before the instruction executes.
+
 Arithmetic instructions that have errors raise exception flags.
 In normal mode, an error message is also produced.  In both
 normal and optimized modes, an error message is produced
@@ -1180,10 +1188,13 @@ The trace message of an arithmetic instruction has the form:
                     \TT{<=} {\em value}\QMARK{}
                     {\em operator} {\em value}
 \end{center}
+except for the \TT{POWI} instruction whose trace message has the form:
+\begin{center}
+\TT{POWI:} {\em new-variable-name} \TT{=} {\em value}
+                    \TT{<=} \TT{pow} {\em exponent} {\em value}
+\end{center}
 If {\em new-variable-name} is not given in the instruction,
 \TT{*} is used instead.
-If the \TT{TRACE\_LINES} flag is off, the message is preceeded by
-`\TT{Line} {\em line-number}\TT{:}'.
 Note that arithmetic instructions are usually not traced.
 
 \subsection{Arithmetic Exceptions}
@@ -1860,7 +1871,21 @@ action of the instruction is specified in that figure.
 At assembly-time the same number of elements are popped from the variable stack
 as are popped from the process stack during run-time.
 Then one element is pushed to the variable stack.
-If {\em variable-name} is given, it becomes
+If {\em new-variable-name} is given, it becomes
+the name of the pushed element; otherwise the element has no name.
+\end{indpar}
+
+\ttkey{POWI} {\em exponent}
+              {\em new-variable-name}\QMARK{}
+\begin{indpar}
+At run time, performs as indicated in
+Figure~\itemref{ARITHMETIC-INSTRUCTIONS}.
+Here {\em exponent} is stored in the instruction's \TT{immedA}
+member and must be an integer in the range $[0,2^{32})$.
+
+At assembly-time pops one element from the variable stack
+Then one element is pushed to the variable stack.
+If {\em new-variable-name} is given, it becomes
 the name of the pushed element; otherwise the element has no name.
 \end{indpar}
 
