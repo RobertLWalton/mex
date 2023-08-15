@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Aug 14 06:58:26 EDT 2023
+// Date:	Mon Aug 14 23:20:11 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -426,14 +426,12 @@ static bool optimized_run_process ( mex::process p )
 	}
 	case mex::PUSHNARGS:
 	{
-	    min::uns32 rp = p->return_stack->length;
-	    if ( rp == 0 )
+	    min::uns32 immedB = pc->immedB;
+	    if ( immedB > mex::max_lexical_level )
 	        goto ERROR_EXIT;
 	    if ( sp >= spend )
 	        goto ERROR_EXIT;
-	    -- rp;
-	    mex::ret * ret = ~ ( p->return_stack + rp );
-	    * sp ++ = GF ( ret->nargs );
+	    * sp ++ = GF ( p->nargs[immedB] );
 	    break;
 	}
 	case mex::PUSHV:
@@ -450,7 +448,7 @@ static bool optimized_run_process ( mex::process p )
 	         ||
 	         f != ff
 		 ||
-	         ff <= 0 || ff > k - p->fp[j-1] )
+	         ff < 1 || ff > p->nargs[j] )
 	    {
 	        sp[-1] = GF ( NAN );
 		feraiseexcept ( FE_INVALID );
@@ -615,7 +613,8 @@ static bool optimized_run_process ( mex::process p )
 	        goto ERROR_EXIT;
 
 	    min::gen * new_sp =
-	        spbegin + p->fp[immedB] - ret->nargs;
+	        spbegin + p->fp[immedB]
+		        - p->nargs[immedB];
 	    min::uns32 new_fp = ret->saved_fp;
 	    if ( new_fp > new_sp - spbegin )
 		goto ERROR_EXIT;
@@ -635,6 +634,7 @@ static bool optimized_run_process ( mex::process p )
 
 	    mex::set_pc ( p, ret->saved_pc );
 	    p->fp[immedB] = new_fp;
+	    p->nargs[immedB] = ret->saved_nargs;
 	    RW_UNS32 p->return_stack->length = rp;
 
 	    if ( em == min::NULL_STUB )
@@ -664,7 +664,8 @@ static bool optimized_run_process ( mex::process p )
 	        goto ERROR_EXIT;
 
 	    min::gen * new_sp =
-	        spbegin + p->fp[immedB] - ret->nargs;
+	        spbegin + p->fp[immedB]
+		        - p->nargs[immedB];
 	    min::uns32 new_fp = ret->saved_fp;
 	    if ( new_fp > new_sp - spbegin )
 		goto ERROR_EXIT;
@@ -689,6 +690,7 @@ static bool optimized_run_process ( mex::process p )
 
 	    mex::set_pc ( p, ret->saved_pc );
 	    p->fp[immedB] = new_fp;
+	    p->nargs[immedB] = ret->saved_nargs;
 	    RW_UNS32 p->return_stack->length = rp;
 
 	    min::gen * qend = sp - (int) immedA;
@@ -740,9 +742,10 @@ static bool optimized_run_process ( mex::process p )
 		     ( pc - pcbegin + 1 ) };
 	    mex::set_saved_pc ( p, ret, new_pc );
 	    ret->saved_fp = p->fp[level];
+	    ret->saved_nargs = p->nargs[level];
 	    p->fp[level] = ( sp - spbegin );
+	    p->nargs[level] = pc->immedA;
 	    ret->level = level;
-	    ret->nargs = pc->immedA;
 	    ret->nresults = pc->immedB;
 	    RW_UNS32 p->return_stack->length = rp + 1;
 
@@ -1250,7 +1253,7 @@ bool mex::run_process ( mex::process p )
 		     ||
 		     arg1 != ff
 		     ||
-		     ff <= 0 || ff > k - p->fp[j-1] )
+		     ff < 1 || ff > p->nargs[j] )
 		{
 		    result = NAN;
 		    feraiseexcept ( FE_INVALID );
@@ -1638,6 +1641,11 @@ bool mex::run_process ( mex::process p )
 		    [p->fp[immedB] - (int) immedA];
 		break;
 	    case mex::PUSHNARGS:
+		if ( immedB > mex::max_lexical_level )
+		{
+		    message = "immedB too large";
+		    goto INNER_FATAL;
+		}
 		if ( p->return_stack->length == 0 )
 		{
 		    message = "return stack empty";
@@ -1649,14 +1657,8 @@ bool mex::run_process ( mex::process p )
 		        "stack too large for push";
 		    goto INNER_FATAL;
 		}
-		{
-		    int rp = p->return_stack->length;
-		    -- rp;
-		    mex::ret * ret =
-			~ ( p->return_stack + rp );
-		    value = min::new_direct_float_gen
-				   ( ret->nargs );
-		}
+		value = min::new_num_gen
+		    ( p->nargs[immedB] );
 		break;
 	    case mex::POPS:
 		if ( sp <= spbegin )
@@ -1771,7 +1773,7 @@ bool mex::run_process ( mex::process p )
 
 	        min::gen * new_sp =
 		    spbegin + p->fp[immedB]
-		            - ret->nargs;
+		            - p->nargs[immedB];
 
 		if ( immedA + immedC < immedA
 		     ||
@@ -1816,6 +1818,7 @@ bool mex::run_process ( mex::process p )
 		//
 		mex::set_pc ( p, ret->saved_pc );
 		p->fp[immedB] = new_fp;
+		p->nargs[immedB] = ret->saved_nargs;
 		RW_UNS32 p->return_stack->length = rp;
 
 		min::gen * qend = sp - (int) immedA;
@@ -1897,9 +1900,10 @@ bool mex::run_process ( mex::process p )
 			 ( pc - pcbegin ) };
 		mex::set_saved_pc ( p, ret, new_pc );
 		ret->saved_fp = p->fp[level];
+		ret->saved_nargs = p->nargs[level];
 		p->fp[level] = ( sp - spbegin );
+		p->nargs[level] = immedA;
 		ret->level = level;
-		ret->nargs = immedA;
 		ret->nresults = immedB;
 		RW_UNS32 p->return_stack->length =
 		    rp + 1;
@@ -2359,7 +2363,8 @@ mex::process mex::init_process
 	mex::pc saved_pc = { min::NULL_STUB, 0 };
 	mex::set_saved_pc ( p, ret, saved_pc );
 	ret->saved_fp = 0;
-	ret->level = ret->nargs = ret->nresults = 0;
+	ret->saved_nargs = 0;
+	ret->level = ret->nresults = 0;
 	RW_UNS32 p->return_stack->length = 1;
 
 	RW_UNS32 pc.index = pc.index + 1;
