@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Aug 14 23:20:11 EDT 2023
+// Date:	Tue Aug 15 03:25:30 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -609,7 +609,7 @@ static bool optimized_run_process ( mex::process p )
 	    -- rp;
 	    const mex::ret * ret =
 	       ~ ( p->return_stack + rp );
-	    if ( immedB != ret->level )
+	    if ( immedB != p->level )
 	        goto ERROR_EXIT;
 
 	    min::gen * new_sp =
@@ -633,6 +633,7 @@ static bool optimized_run_process ( mex::process p )
 	    }
 
 	    mex::set_pc ( p, ret->saved_pc );
+	    p->level = ret->saved_level;
 	    p->fp[immedB] = new_fp;
 	    p->nargs[immedB] = ret->saved_nargs;
 	    RW_UNS32 p->return_stack->length = rp;
@@ -658,7 +659,7 @@ static bool optimized_run_process ( mex::process p )
 	    -- rp;
 	    const mex::ret * ret =
 	       ~ ( p->return_stack + rp );
-	    if ( immedB != ret->level )
+	    if ( immedB != p->level )
 	        goto ERROR_EXIT;
 	    if ( immedC != ret->nresults )
 	        goto ERROR_EXIT;
@@ -689,6 +690,7 @@ static bool optimized_run_process ( mex::process p )
 	    }
 
 	    mex::set_pc ( p, ret->saved_pc );
+	    p->level = ret->saved_level;
 	    p->fp[immedB] = new_fp;
 	    p->nargs[immedB] = ret->saved_nargs;
 	    RW_UNS32 p->return_stack->length = rp;
@@ -741,11 +743,12 @@ static bool optimized_run_process ( mex::process p )
 	        { m, (min::uns32)
 		     ( pc - pcbegin + 1 ) };
 	    mex::set_saved_pc ( p, ret, new_pc );
+	    ret->saved_level = p->level;
 	    ret->saved_fp = p->fp[level];
 	    ret->saved_nargs = p->nargs[level];
+	    p->level = level;
 	    p->fp[level] = ( sp - spbegin );
 	    p->nargs[level] = pc->immedA;
-	    ret->level = level;
 	    ret->nresults = pc->immedB;
 	    RW_UNS32 p->return_stack->length = rp + 1;
 
@@ -1754,10 +1757,10 @@ bool mex::run_process ( mex::process p )
 		-- rp;
 		const mex::ret * ret =
 		   ~ ( p->return_stack + rp );
-		if ( immedB != ret->level )
+		if ( immedB != p->level )
 		{
-		    message = "immedB != return stack"
-		              " level";
+		    message = "immedB != current"
+		              " lexical level";
 		    goto INNER_FATAL;
 		}
 		if ( immedC != ret->nresults )
@@ -1899,11 +1902,12 @@ bool mex::run_process ( mex::process p )
 		    { m, (min::uns32)
 			 ( pc - pcbegin ) };
 		mex::set_saved_pc ( p, ret, new_pc );
+		ret->saved_level = p->level;
 		ret->saved_fp = p->fp[level];
 		ret->saved_nargs = p->nargs[level];
+		p->level = level;
 		p->fp[level] = ( sp - spbegin );
 		p->nargs[level] = immedA;
-		ret->level = level;
 		ret->nresults = immedB;
 		RW_UNS32 p->return_stack->length =
 		    rp + 1;
@@ -2291,9 +2295,10 @@ mex::process mex::create_process
     mex::pc pc = { min::NULL_STUB, 0 };
     mex::set_pc ( p, pc );
     p->optimize = false;
+    p->level = 0;
     for ( unsigned i = 0;
           i <= mex::max_lexical_level; ++ i )
-        p->fp[i] = 0;
+        p->fp[i] = p->nargs[i] = 0;
     p->trace_depth = 0;
     p->trace_flags = 0;
     p->excepts = 0;
@@ -2317,9 +2322,10 @@ mex::process mex::init_process
     RW_UNS32 p->return_stack->length = 0;
     mex::pc pc = { m, 0 };
     mex::set_pc ( p, pc );
+    p->level = 0;
     for ( unsigned i = 0;
           i <= mex::max_lexical_level; ++ i )
-        p->fp[i] = 0;
+        p->fp[i] = p->nargs[i] = 0;
     p->trace_depth = 0;
     p->excepts_accumulator = 0;
     p->state = mex::NEVER_STARTED;
@@ -2336,9 +2342,10 @@ mex::process mex::init_process
         p = mex::create_process();
     RW_UNS32 p->length = 0;
     RW_UNS32 p->return_stack->length = 0;
+    p->level = 0;
     for ( unsigned i = 0;
           i <= mex::max_lexical_level; ++ i )
-        p->fp[i] = 0;
+        p->fp[i] = p->nargs[i] = 0;
     p->trace_depth = 0;
     p->excepts_accumulator = 0;
     p->state = mex::NEVER_STARTED;
@@ -2362,9 +2369,10 @@ mex::process mex::init_process
 	    ~ min::begin_ptr_of ( p->return_stack );
 	mex::pc saved_pc = { min::NULL_STUB, 0 };
 	mex::set_saved_pc ( p, ret, saved_pc );
+	ret->saved_level = 0;
 	ret->saved_fp = 0;
 	ret->saved_nargs = 0;
-	ret->level = ret->nresults = 0;
+	ret->nresults = 0;
 	RW_UNS32 p->return_stack->length = 1;
 
 	RW_UNS32 pc.index = pc.index + 1;

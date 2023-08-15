@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Aug 14 22:54:59 EDT 2023
+// Date:	Tue Aug 15 03:25:03 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -260,9 +260,9 @@ min::uns32 DISP ( const mex::pc S::* d )
 struct ret
 {
     const mex::pc saved_pc;
+    min::uns32 saved_level;
     min::uns32 saved_fp;
     min::uns32 saved_nargs;
-    min::uns32 level;
     min::uns32 nresults;
 };
 
@@ -276,6 +276,7 @@ struct process_header
     min::printer printer;
     const mex::pc pc;
     mex::return_stack return_stack;
+    min::uns32 level;
     min::uns32 fp[mex::max_lexical_level + 1];
     min::uns32 nargs[mex::max_lexical_level + 1];
     min::uns32 trace_depth;
