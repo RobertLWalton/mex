@@ -1052,33 +1052,29 @@ are explained in Tracing and Exceptions, \itemref{TRACING-AND-EXCEPTIONS}.
     & minimum number of arguments expected.
 \\\hline
 \TT{ENDF}
-    & Pop element $e$ from the return stack and check that \TT{$e$.level}
-      equals \\
-    & \TT{immedB} and \TT{$e$.nresults} equals zero.  Set the process's
-       \TT{sp} member \\
-    & to \TT{fp[immedB] - $e$.nargs}.  Then set the process's \TT{fp[immedB]} \\
-    & and \TT{pc} members to \TT{$e$.saved\_fp} and \TT{$e$.saved\_pc}
-      respectively.
+    & Same as a \TT{RET} instruction (below) with
+      \TT{immedA} = \TT{immedC} = 0. 
 \\\hline
 \TT{CALLM}
-    & Push a \TT{mex::ret} value into the return stack, setting its
-      \TT{saved\_pc} \\
-    & member to point to the instruction after the \TT{CALLM},
-      and setting its \\
-    & \TT{nargs} member to \TT{immedA} and its \TT{nresults} member
-      to \TT{immedB}.  \\
-    & Then set the \TT{index} of the process's \TT{pc} member to \TT{immedC}, \\
-    & which must reference a \TT{BEGF} instruction.
+    & Push a \TT{mex::ret} value $e$ into the return stack, setting
+      \TT{$e$.saved\_pc} \\
+    & to point to the instruction after the \TT{CALLM}, and then
+      set the \TT{index} \\
+    & of \TT{p->pc} to \TT{immedC}, which must reference a
+      \TT{BEGF} instruction.
     \\[0.5ex]
-    & Check that the \TT{nargs} value is at least as great as the \TT{BEGF}
-      \TT{immedC}, \\
-    & the minimum number of expected arguments.  Then take the target \\
-    & function's lexical level $L$ from the \TT{BEGF} \TT{immedB} value,
-      set the \\
-    & \TT{mex:ret} value's \TT{saved\_fp} member to the process's
-      \TT{fp[$L$]} member, \\
-    & and set the process's \TT{fp[$L$]} member to the process's
-      \TT{sp} member.
+    & Check that the \TT{CALL} \TT{immedA} value, the number of arguments \\
+    & passed, is at least as great as the \TT{BEGF}
+      \TT{immedC}, the minimum \\
+    & number of arguments expected.  Take the target 
+      function's lexical \\
+    & level $L$ from the \TT{BEGF} \TT{immedB} value, and save
+      \TT{p->\{level,fp[$L$],} \\
+    & \TT{nargs[$L$]\}} in \TT{$e$.saved\_\{level,fp,nargs\}}.
+       Next set \TT{p->level} \\
+    & to $L$, \TT{p->fp[$L$]} to \TT{sp}, \TT{p->nargs[$L$]} to \TT{immedA},
+      and \TT{$e$.nresults} \\
+    & to \TT{immedB}.
     \\[0.5ex]
     & Lastly add +1 to the process current \TT{pc} to skip the \TT{BEGF}.
 \\\hline
@@ -1088,17 +1084,19 @@ are explained in Tracing and Exceptions, \itemref{TRACING-AND-EXCEPTIONS}.
     & member from \TT{immedD} (which must convert to a \TT{mex::module}).
 \\\hline
 \TT{RET}
-    & Subtract \TT{immedA} to \TT{sp} (popping the stack \TT{immedA} times).
-      The \\
-    & values popped are always trace values.  Pop element $e$ from the \\
-    & return stack and check that \TT{immedB} and \TT{immedC} equal
-      \TT{$e$.level} \\
-    & and \TT{$e$.nresults}, respectively.  Pop \TT{immedC} values from
-      the stack \\
-    & and save them.  Set \TT{sp} to \TT{fp[immedB] - $e$.nargs} and then push \\
-    & the saved values into the stack.  Set the process's \TT{fp[immedB]} and \\
-    & \TT{pc} members to \TT{$e$.saved\_fp} and \TT{$e$.saved\_pc}
-      respectively.
+    & Check that \TT{immedB} equals \TT{p->level}.  Then subtract
+      \TT{immedA} from \\
+    & \TT{sp} (popping the stack \TT{immedA} times).  The
+      values popped are \\
+    & always trace values.  Pop element $e$ from the
+      return stack and \\
+    & check that \TT{immedC} equals \TT{$e$.nresults}.  Pop \TT{immedC}
+      values from \\
+    & the stack and save them.  Set \TT{sp} to
+      \TT{fp[immedB] - nargs[immedB]} \\
+    & (popping the current function execution stack values).   Then push \\
+    & the saved values into the stack.  Lastly restore the process \\
+    & members saved in \TT{$e$.saved\_\{pc,level,fp,nargs\}}.
 \\\hline
 \TT{PUSHA}
     & Push the stack vector value with index \TT{fp[immedB] - immedA}.

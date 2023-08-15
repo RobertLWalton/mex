@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Aug 15 03:25:30 EDT 2023
+// Date:	Tue Aug 15 04:10:46 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -603,14 +603,14 @@ static bool optimized_run_process ( mex::process p )
 	case mex::ENDF:
 	{
 	    min::uns32 immedB = pc->immedB;
+	    if ( immedB != p->level )
+	        goto ERROR_EXIT;
 	    min::uns32 rp = p->return_stack->length;
 	    if ( rp == 0 )
 	        goto ERROR_EXIT;
 	    -- rp;
 	    const mex::ret * ret =
 	       ~ ( p->return_stack + rp );
-	    if ( immedB != p->level )
-	        goto ERROR_EXIT;
 
 	    min::gen * new_sp =
 	        spbegin + p->fp[immedB]
@@ -653,14 +653,14 @@ static bool optimized_run_process ( mex::process p )
 	    min::uns32 immedA = pc->immedA;
 	    min::uns32 immedB = pc->immedB;
 	    min::uns32 immedC = pc->immedC;
+	    if ( immedB != p->level )
+	        goto ERROR_EXIT;
 	    min::uns32 rp = p->return_stack->length;
 	    if ( rp == 0 )
 	        goto ERROR_EXIT;
 	    -- rp;
 	    const mex::ret * ret =
 	       ~ ( p->return_stack + rp );
-	    if ( immedB != p->level )
-	        goto ERROR_EXIT;
 	    if ( immedC != ret->nresults )
 	        goto ERROR_EXIT;
 
@@ -1748,6 +1748,12 @@ bool mex::run_process ( mex::process p )
 		// Fall through
 	    case mex::RET:
 	    {
+		if ( immedB != p->level )
+		{
+		    message = "immedB != current"
+		              " lexical level";
+		    goto INNER_FATAL;
+		}
 		min::uns32 rp = p->return_stack->length;
 		if ( rp == 0 )
 		{
@@ -1757,12 +1763,6 @@ bool mex::run_process ( mex::process p )
 		-- rp;
 		const mex::ret * ret =
 		   ~ ( p->return_stack + rp );
-		if ( immedB != p->level )
-		{
-		    message = "immedB != current"
-		              " lexical level";
-		    goto INNER_FATAL;
-		}
 		if ( immedC != ret->nresults )
 		{
 		    message =
