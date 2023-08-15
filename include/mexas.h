@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Aug  9 01:26:36 EDT 2023
+// Date:	Tue Aug 15 10:32:57 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -69,7 +69,8 @@ inline void push_instr
 void push_push_instr
         ( min::gen new_name, min::gen name,
 	  const min::phrase_position & pp =
-	      min::MISSING_PHRASE_POSITION );
+	      min::MISSING_PHRASE_POSITION,
+	  min::uns32 offset = 0 );
     // Just like mexas:push_inst, but constructs the
     // instruction to be pushed to the code vector
     // using a PUSH... op code and using the `name'
@@ -91,6 +92,11 @@ void push_push_instr
     // unless the location is in a module, in which case
     // it is [< new_name module_name name >].  New_name
     // may be mexas::star but name may not be.
+    //
+    // Offset is added to the immedA value of any PUSHS,
+    // and is the number of trace values pushed before
+    // the current PUSH, as these are not recorded in
+    // the variables stack.
 
 extern min::uns8 lexical_level;
     // Current lexical_level.

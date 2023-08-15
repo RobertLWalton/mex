@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Aug 13 17:26:01 EDT 2023
+// Date:	Tue Aug 15 10:01:20 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -815,7 +815,8 @@ void mexas::trace_instr
 
 void mexas::push_push_instr
         ( min::gen new_name, min::gen name,
-	  const min::phrase_position & pp )
+	  const min::phrase_position & pp,
+	  min::uns32 offset )
 {
     mex::instr instr =
 	{ 0, 0, 0, 0, 0, 0, 0, min::MISSING() };
@@ -831,7 +832,7 @@ void mexas::push_push_instr
 	{
 	    instr.op_code = mex::PUSHS;
 	    instr.trace_class = mex::T_PUSH;
-	    instr.immedA = SP - i - 1;
+	    instr.immedA = SP - i - 1 + offset;
 	}
 	else if ( i >= mexas::fp[k] )
 	{
@@ -900,7 +901,7 @@ min::uns32 mexas::get_trace_info
 	if ( mexas::is_name ( n ) )
 	{
 	    mexas::push_push_instr
-	        ( mexas::star, n, pp );
+	        ( mexas::star, n, pp, j - 1 );
 	}
 	else
 	{
@@ -1557,6 +1558,9 @@ mex::module mexas::compile ( min::file file )
 	    }
 	    case ::STACKS:
 	    {
+		if ( (   compile_trace_flags
+                       & mexas::TRACE ) == 0 )
+		    continue;
 		min::printer printer =
 		    mexas::input_file->printer;
 		if (   compile_trace_flags
