@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Aug 15 04:10:46 EDT 2023
+// Date:	Tue Aug 15 05:59:42 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -401,7 +401,7 @@ static bool optimized_run_process ( mex::process p )
 		* sp ++ = m->globals[i];
 		break;
 	    }
-	    if ( j > mex::max_lexical_level )
+	    if ( j > p->level )
 	        goto ERROR_EXIT;
 	    i += p->fp[j];
 	    if ( i >= sp - spbegin )
@@ -413,10 +413,10 @@ static bool optimized_run_process ( mex::process p )
 	{
 	    min::uns32 i = pc->immedA;
 	    min::uns32 j = pc->immedB;
-	    if ( j > mex::max_lexical_level )
+	    if ( j < 1 || j > p->level )
 	        goto ERROR_EXIT;
 	    min::uns32 k = p->fp[j];
-	    if ( i > k )
+	    if ( i < 1 || i > p->nargs[j] )
 	        goto ERROR_EXIT;
 	    k -= i;
 	    if ( i >= sp - spbegin )
@@ -427,7 +427,7 @@ static bool optimized_run_process ( mex::process p )
 	case mex::PUSHNARGS:
 	{
 	    min::uns32 immedB = pc->immedB;
-	    if ( immedB > mex::max_lexical_level )
+	    if ( immedB < 1 || immedB > p->level )
 	        goto ERROR_EXIT;
 	    if ( sp >= spend )
 	        goto ERROR_EXIT;
@@ -437,7 +437,7 @@ static bool optimized_run_process ( mex::process p )
 	case mex::PUSHV:
 	{
 	    min::uns32 j = pc->immedB;
-	    if ( j < 1 || j > mex::max_lexical_level )
+	    if ( j < 1 || j > p->level )
 	        goto ERROR_EXIT;
 	    if ( sp <= spbegin )
 	        goto ERROR_EXIT;
@@ -594,6 +594,8 @@ static bool optimized_run_process ( mex::process p )
 	    min::uns32 immedC = pc->immedC;
 	    if ( immedC > pc - pcbegin )
 	        goto ERROR_EXIT;
+	    if ( immedB > p->level + 1 )
+	        goto ERROR_EXIT;
 	    if ( immedB > mex::max_lexical_level )
 	        goto ERROR_EXIT;
 	    pc += immedC;
@@ -728,7 +730,7 @@ static bool optimized_run_process ( mex::process p )
 	    if ( target->op_code != mex::BEGF )
 	        goto ERROR_EXIT;
 	    min::uns32 level = target->immedB;
-	    if ( level > mex::max_lexical_level )
+	    if ( level > p->level + 1 )
 	        goto ERROR_EXIT;
 	    if ( pc->immedA < target->immedA )
 	        goto ERROR_EXIT;
@@ -1244,8 +1246,7 @@ bool mex::run_process ( mex::process p )
 	    case mex::PUSHV:
 	    {
 		min::uns32 j = pc->immedB;
-		if (    j < 1
-		     || j > mex::max_lexical_level )
+		if ( j < 1 || j > p->level )
 		{
 		    message = "invalid immedB";
 		    goto INNER_FATAL;
@@ -1610,7 +1611,7 @@ bool mex::run_process ( mex::process p )
 		    }
 		    break;
 		}
-		if ( immedB > mex::max_lexical_level )
+		if ( immedB > p->level )
 		{
 		    message = "immedB too large";
 		    goto INNER_FATAL;
@@ -1630,9 +1631,9 @@ bool mex::run_process ( mex::process p )
 			spbegin[p->fp[immedB] + immedA];
 		break;
 	    case mex::PUSHA:
-		if ( immedB > mex::max_lexical_level )
+		if ( immedB < 1 || immedB > p->level )
 		{
-		    message = "immedB too large";
+		    message = "invalid immedB";
 		    goto INNER_FATAL;
 		}
 		if ( immedA > p->fp[i] )
@@ -1644,9 +1645,9 @@ bool mex::run_process ( mex::process p )
 		    [p->fp[immedB] - (int) immedA];
 		break;
 	    case mex::PUSHNARGS:
-		if ( immedB > mex::max_lexical_level )
+		if ( immedB < 1 || immedB > p->level )
 		{
-		    message = "immedB too large";
+		    message = "invalid immedB";
 		    goto INNER_FATAL;
 		}
 		if ( p->return_stack->length == 0 )
@@ -1735,6 +1736,11 @@ bool mex::run_process ( mex::process p )
 	        if ( immedC > pcend - pc )
 		{
 		    message = "immedC too large";
+		    goto INNER_FATAL;
+		}
+		if ( immedB > p->level + 1 )
+		{
+		    message = "immedB too large";
 		    goto INNER_FATAL;
 		}
 	        if ( immedB > mex::max_lexical_level )
@@ -1870,7 +1876,7 @@ bool mex::run_process ( mex::process p )
 		    goto INNER_FATAL;
 		}
 		min::uns32 level = target->immedB;
-		if ( level > mex::max_lexical_level )
+		if ( level > p->level + 1 )
 		{
 		    message =
 		        "BEGF immedB is too large";

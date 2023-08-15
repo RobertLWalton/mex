@@ -1099,18 +1099,22 @@ are explained in Tracing and Exceptions, \itemref{TRACING-AND-EXCEPTIONS}.
     & members saved in \TT{$e$.saved\_\{pc,level,fp,nargs\}}.
 \\\hline
 \TT{PUSHA}
-    & Push the stack vector value with index \TT{fp[immedB] - immedA}.
+    & Push the stack vector value with index \TT{fp[immedB] - immedA}. \\
+    & \TT{immedA} must be 
+      in the range \TT{[1,p->nargs[immedB]]}.
 \\\hline
 \TT{PUSHNARGS}
-    & Push the \TT{nargs} member of the top value of the \TT{return\_stack} \\
-    & (which is a natural number) converted to IEEE 64-bit floating \\
-    & point.
+    & Push \TT{p->nargs[immedB]} (which is a natural number)
+      converted \\
+    & to IEEE 64-bit floating point.
 \\\hline
 \TT{PUSHV}
     & Replace the top stack value \TT{V} with the value of the stack vector \\
-    & element with index \TT{fp[immedB] - V}.  \TT{V} must convert to an \\
-    & integer in a suitable range, else an invalid exception is raised \\
-    & and the result is a \TT{NaN}.
+    & element with index \TT{fp[immedB] - V}.  \TT{V} must convert to an
+      integer \\
+    & in the range \TT{[1,p->nargs[immedB]]},
+    else an invalid exception is \\
+    & raised and the result is a \TT{NaN}.
 \\\hline
 \end{tabular}
 \end{center}
