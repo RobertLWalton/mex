@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Aug 16 03:47:41 EDT 2023
+// Date:	Wed Aug 16 05:26:43 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -589,6 +589,8 @@ static bool optimized_run_process ( mex::process p )
 	    break;
 	}
 	case mex::SET_TRACE:
+	case mex::TRACE:
+	case mex::WARN:
 	case mex::ERROR:
 	    goto ERROR_EXIT;
 	case mex::BEGF:
@@ -849,6 +851,8 @@ mex::op_info mex::op_infos [ mex::NUMBER_OF_OP_CODES ] =
     { mex::CONT, NONA, T_CONT, "CONT", NULL },
     { mex::SET_TRACE, NONA, T_SET_TRACE, "SET_TRACE",
                       NULL },
+    { mex::TRACE, NONA, T_ALWAYS, "TRACE", NULL },
+    { mex::WARN, NONA, T_ALWAYS, "WARN", NULL },
     { mex::ERROR, NONA, T_ALWAYS, "ERROR", NULL },
     { mex::BEGF, NONA, T_BEGF, "BEGF", NULL },
     { mex::ENDF, NONA, T_ENDF, "ENDF", NULL },
@@ -1534,8 +1538,6 @@ bool mex::run_process ( mex::process p )
 	    min::uns32 immedC = pc->immedC;
 	    min::gen immedD = pc->immedD;
 
-	    bool fatal_error = false;
-	        // Set true by terminating ERROR.
 	    min::gen value;
 	        // Value to be pushed or popped.
 		// Computed early for tracing.
@@ -1729,10 +1731,10 @@ bool mex::run_process ( mex::process p )
 		break;
 	    case mex::SET_TRACE:
 	        break;
+	    case mex::TRACE:
+	    case mex::WARN:
 	    case mex::ERROR:
-	        if (    immedB != 0 )
-		    fatal_error = true;
-		else if ( immedA > sp - spbegin )
+		if ( immedA > sp - spbegin )
 		{
 		    message = "immedA too large";
 		    goto INNER_FATAL;
@@ -1937,18 +1939,14 @@ bool mex::run_process ( mex::process p )
 
 	    } // end switch ( op_code )
 
-	    if ( fatal_error
-	         ||
-		 ( trace_flags & (1 << trace_class ) ) )
+	    if ( trace_flags & (1 << trace_class ) )
 	    {
 		SAVE;
 
 		p->printer << min::bol;
-		if ( fatal_error )
+		if ( op_code == mex::ERROR )
 		    p->printer
 		        << "!!! FATAL ERROR: "
-			   " ERROR instruction with"
-			   " non-zero immedB"
 			<< min::eol;
 
 		min::phrase_position pp =
@@ -2052,12 +2050,6 @@ bool mex::run_process ( mex::process p )
 			        p->printer << "?";
 			}
 		    }
-		    else switch ( op_code )
-		    {
-		    case mex::ERROR:
-		        p->printer << immedB;
-			break;
-		    }
 		    break;
 		}
 
@@ -2065,7 +2057,7 @@ bool mex::run_process ( mex::process p )
 
 		p->printer << min::eom;
 
-		if ( fatal_error )
+		if ( op_code == mex::ERROR )
 		{
 		    p->state = mex::ERROR_STOP;
 		    return false;
@@ -2138,6 +2130,8 @@ bool mex::run_process ( mex::process p )
 	    case mex::SET_TRACE:
 	        p->trace_flags = (min::uns8) immedA;
 	        break;
+	    case mex::TRACE:
+	    case mex::WARN:
 	    case mex::ERROR:
 	    {
 	        sp -= immedA;

@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Aug 15 03:25:03 EDT 2023
+// Date:	Wed Aug 16 05:26:18 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -81,7 +81,7 @@ enum op_code {
     BEGL,
     ENDL, CONT,
     SET_TRACE,
-    ERROR,
+    TRACE, WARN, ERROR,
     BEGF, ENDF,
     CALLM, CALLG,
     RET,

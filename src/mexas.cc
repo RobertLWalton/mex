@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Aug 16 03:40:46 EDT 2023
+// Date:	Wed Aug 16 06:10:05 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -2025,6 +2025,52 @@ mex::module mexas::compile ( min::file file )
 			  statement[first+i],
 			  L, mexas::depth[L] );
 		break;
+	    }
+	    case mex::TRACE:
+	    case mex::WARN:
+	    case mex::ERROR:
+	    {
+		min::locatable_gen trace_info;
+	        min::uns32 tvars =
+		    mexas::get_trace_info
+			( trace_info, index, pp );
+		instr.immedA = tvars;
+		mexas::push_instr
+		    ( instr, pp, trace_info );
+	    }
+	    case mex::SET_TRACE:
+	    {
+		min::uns32 first = index;
+		while ( mexas::get_name ( index )
+		        !=
+			min::NONE() );
+		min::uns32 nflags = index - first;
+
+		min::uns32 flags = 0;
+		for ( min::uns32 i = 0; i < nflags;
+		                        ++ i )
+		{
+		    min::gen fname = statement[first+i];
+		    min::gen fbit = min::get
+		        ( mexas::trace_flag_table,
+			  fname );
+		    if ( fbit != min::NONE() )
+		    {
+		        min::float64 f =
+			    min::direct_float_of
+			        ( fbit );
+			flags |= (min::uns32) f;
+		    }
+		    else
+			mexas::compile_error
+			    ( pp, "Unrecognized trace"
+			          " flag: ",
+				  min::pgen ( fname ),
+				  "; ignored" );
+		}
+		instr.immedA = flags;
+
+		mexas::push_instr ( instr, pp );
 	    }
 	    }
 	}
