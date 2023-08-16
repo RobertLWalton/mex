@@ -541,7 +541,6 @@ static bool optimized_run_process ( mex::process p )
 	}
 	case mex::BEG:
 	case mex::NOP:
-	    break;
 	case mex::END:
 	{
 	    min::uns32 i = pc->immedA;
@@ -552,12 +551,16 @@ static bool optimized_run_process ( mex::process p )
 	}
 	case mex::BEGL:
 	{
-	    min::uns32 i = pc->immedB;
-	    if ( i > sp - spbegin )
+	    min::uns32 immedA = pc->immedA;
+	    min::uns32 immedB = pc->immedB;
+	    if ( immedA + immedB < immedA )
 	        goto ERROR_EXIT;
-	    if ( i > spend - sp )
+	    if ( immedA + immedB > sp - spbegin )
 	        goto ERROR_EXIT;
-	    min::gen * q1 = sp - i;
+	    if ( sp + immedB > spend + immedA )
+	        goto ERROR_EXIT;
+	    sp -= (int) immedA;
+	    min::gen * q1 = sp - (int) immedB;
 	    min::gen * q2 = sp;
 	    while ( q1 < q2 )
 		* sp ++ = * q1 ++;
@@ -1679,9 +1682,7 @@ bool mex::run_process ( mex::process p )
 		value = sp[-1];
 		break;
 	    case mex::BEG:
-	        break;
 	    case mex::NOP:
-	        break;
 	    case mex::END:
 	    {
 		if ( immedA > sp - spbegin )
@@ -1689,12 +1690,17 @@ bool mex::run_process ( mex::process p )
 		break;
 	    }
 	    case mex::BEGL:
-	        if ( immedB > sp - spbegin )
+	        if ( immedA + immedB < immedA )
 		{
-		    message = "immedB too large";
+		    message = "immedA+immedB too large";
 		    goto INNER_FATAL;
 		}
-		if ( sp + immedB > spend )
+	        if ( immedA + immedB > sp - spbegin )
+		{
+		    message = "immedA+immedB too large";
+		    goto INNER_FATAL;
+		}
+		if ( sp + immedB > spend + immedA )
 		{
 		    message =
 		        "stack too large for push";
@@ -2095,17 +2101,17 @@ bool mex::run_process ( mex::process p )
 	    }
 	    case mex::BEG:
 		++ p->trace_depth;
-	        break;
+		// Fall Through
 	    case mex::NOP:
-	        break;
+		sp -= (int) immedA;
+		break;
 	    case mex::END:
-	    {
-		sp -= immedA;
+		sp -= (int) immedA;
 		-- p->trace_depth;
 		break;
-	    }
 	    case mex::BEGL:
 	    {
+		sp -= (int) immedA;
 		min::gen * q1 = sp - (int) immedB;
 		min::gen * q2 = sp;
 		while ( q1 < q2 )
