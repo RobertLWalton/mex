@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Aug 16 06:10:05 EDT 2023
+// Date:	Wed Aug 16 08:24:19 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -2037,6 +2037,7 @@ mex::module mexas::compile ( min::file file )
 		instr.immedA = tvars;
 		mexas::push_instr
 		    ( instr, pp, trace_info );
+		break;
 	    }
 	    case mex::SET_TRACE:
 	    {
