@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Aug 15 05:59:42 EDT 2023
+// Date:	Wed Aug 16 03:47:41 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1957,7 +1957,7 @@ bool mex::run_process ( mex::process p )
 		    min::MISSING_PHRASE_POSITION;
 
 		print_indent ( p );
-		p->printer << min::bom << "{";
+		p->printer << "{";
 
 		if ( pp )
 		    p->printer
@@ -1968,7 +1968,7 @@ bool mex::run_process ( mex::process p )
 			   << (int) ( sp - spbegin )
 			   << "} "
 		           << op_infos[op_code].name
-			   << ": ";
+			   << ": " << min::bom;
 
 		min::gen tinfo  = min::MISSING();
 		if (   p->pc.index
@@ -2037,14 +2037,14 @@ bool mex::run_process ( mex::process p )
 		    {
 		        min::uns32 len =
 			    min::lablen ( lp );
-		        p->printer << ":  " << lp[0];
+		        p->printer << lp[0];
 			for ( min::uns32 i = 1;
 			      i < len; ++ i )
 			{
 			    min::uns32 j = len - i;
 			    p->printer
 			        << ", " << lp[i]
-				<< " = ";
+				<< "=";
 			    if ( j <= p->length )
 			        p->printer
 				    << p[p->length-j];
@@ -2055,7 +2055,7 @@ bool mex::run_process ( mex::process p )
 		    else switch ( op_code )
 		    {
 		    case mex::ERROR:
-		        p->printer << " " << immedB;
+		        p->printer << immedB;
 			break;
 		    }
 		    break;
