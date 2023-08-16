@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Aug 16 05:26:43 EDT 2023
+// Date:	Wed Aug 16 16:37:32 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -849,7 +849,7 @@ mex::op_info mex::op_infos [ mex::NUMBER_OF_OP_CODES ] =
     { mex::BEGL, NONA, T_BEGL, "BEGL", NULL },
     { mex::ENDL, NONA, T_ENDL, "ENDL", NULL },
     { mex::CONT, NONA, T_CONT, "CONT", NULL },
-    { mex::SET_TRACE, NONA, T_SET_TRACE, "SET_TRACE",
+    { mex::SET_TRACE, NONA, T_ALWAYS, "SET_TRACE",
                       NULL },
     { mex::TRACE, NONA, T_ALWAYS, "TRACE", NULL },
     { mex::WARN, NONA, T_ALWAYS, "WARN", NULL },
@@ -2007,7 +2007,6 @@ bool mex::run_process ( mex::process p )
 		}
 		case mex::SET_TRACE:
 		{
-		    const char * prefix = ": T_";
 		    for ( unsigned i = 0;
 		          i < mex::
 			    NUMBER_OF_TRACE_CLASSES;
@@ -2016,11 +2015,10 @@ bool mex::run_process ( mex::process p )
 		        if ( immedA & (1 << i) )
 			{
 			    p->printer
-			        << prefix 
+			        << " " 
 				<< mex::
 				     trace_class_infos
 				         [i].name;
-			    prefix = ", T_";
 			}
 		    }
 		    break;
@@ -2128,7 +2126,8 @@ bool mex::run_process ( mex::process p )
 		break;
 	    }
 	    case mex::SET_TRACE:
-	        p->trace_flags = (min::uns8) immedA;
+	        p->trace_flags = immedA | ( 1 << mex::T_ALWAYS );
+	        p->trace_flags &= ~ ( 1 << mex::T_NEVER );
 	        break;
 	    case mex::TRACE:
 	    case mex::WARN:
