@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Aug 16 05:26:18 EDT 2023
+// Date:	Thu Aug 17 02:59:32 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -118,11 +118,6 @@ enum trace_class
     T_CALLG,
     T_RET,
     NUMBER_OF_TRACE_CLASSES
-};
-
-enum trace_flags
-{
-    TRACE_LINES = 1 << NUMBER_OF_TRACE_CLASSES
 };
 
 enum op_type

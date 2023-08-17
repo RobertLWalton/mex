@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Aug 16 08:24:19 EDT 2023
+// Date:	Thu Aug 17 02:58:57 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -116,7 +116,9 @@ const unsigned NUMBER_OF_TRACE_GROUPS = 4;
 static struct trace_group
   { const char * name; min::uns32 flags; }
     trace_groups[NUMBER_OF_TRACE_GROUPS] = {
-    { "ALL", (min::uns32) -1 },
+    { "ALL", ( (1<<mex::NUMBER_OF_TRACE_CLASSES) - 1 )
+             & ~ ( (1<<mex::T_NEVER)
+	          +(1<<mex::T_ALWAYS))},
     { "NONE", 0 },
     { "FUNC", (1<<mex::T_CALLM) | (1<<mex::T_CALLG) |
               (1<<mex::T_BEGF) },
@@ -155,14 +157,11 @@ static void init_trace_flag_table ( void )
 
     trace_group * q = trace_groups;
     trace_group * endq = q + NUMBER_OF_TRACE_GROUPS;
-    min::uns32 mask =
-        (1<<mex::NUMBER_OF_TRACE_CLASSES) - 1;
-    mask &= ~ (1<<mex::T_NEVER);
     while ( q < endq )
     {
         tmp = min::new_str_gen ( q->name );
 	min::locate ( ap, tmp );
-	tmp = min::new_num_gen ( q->flags & mask );
+	tmp = min::new_num_gen ( q->flags );
 	min::set ( ap, tmp );
         ++ q;
     }
