@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Aug 16 16:37:32 EDT 2023
+// Date:	Thu Aug 17 03:10:22 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -2021,6 +2021,12 @@ bool mex::run_process ( mex::process p )
 				         [i].name;
 			}
 		    }
+		    break;
+		}
+		case mex::BEGF:
+		{
+		    // trace_info only used by CALL...
+		    //
 		    break;
 		}
 

@@ -44,7 +44,7 @@ CALL MIN 2 Z
     [29:11;1] CALLM T_CALLM 2 1 0 [$ MISSING $]; [< MIN Z >]
     STACKS: VARIABLES: Z
             FUNCTIONS: MIN
-* {13:0;0} BEGF: MIN, ARG1=?, ARG2=?
+* {13:0;0} BEGF:
 * {26:9;0} PUSHI:  X <=== 23
 * {27:10;1} PUSHI:  Y <=== 157
 *** {13:0;2} CALLM: MIN, ARG1=23, ARG2=157

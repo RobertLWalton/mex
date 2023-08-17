@@ -1,0 +1,98 @@
+// MEXAS Compile Test 5 Input
+//
+// File:	mexas_compile_test_5.in
+// Author:	Bob Walton (walton@acm.org)
+// Date:	Tue Aug 15 09:55:27 EDT 2023
+//
+// The authors have placed this program in the public
+// domain; they make no warranty and accept no liability
+// for this program.
+
+// Restrict tracing to BEG... and END....
+
+// BEG ... END Test
+// Z = MIN ( X, Y )
+//
+PUSHI 295 X
+PUSHI 196 Y
+PUSHI 0 Z
+BEG "Begin MIN Block" X Y
+    PUSH X
+    PUSH Y
+    JMPLT ITS-X
+    PUSH Y
+    POP Z
+    JMP DONE
+    LABEL ITS-X
+    PUSH X
+    POP Z
+    LABEL DONE
+    PUSHI 2000 UNUSED
+END "End MIN Block" X Y Z
+STACKS
+POP
+POP
+POP
+
+// BEGL ... ENDL Test
+// Z = SUM { I: I = 4 TO I = 6 }
+//
+PUSHI 6 LIMIT
+PUSHI 0 SUM
+PUSHI 4 I
+BEGL 2 "Begin SUM loop" SUM I LIMIT
+    STACKS
+    PUSH I
+    PUSH LIMIT
+    JMPGT DONE
+    PUSH SUM
+    PUSH I
+    ADD
+    POP next-SUM
+    PUSH I
+    PUSHI 1
+    ADD
+    POP next-I
+ENDL "End SUM loop iteration" next-SUM next-I LIMIT
+STACKS
+LABEL DONE
+TRACE "End of SUM loop" SUM I LIMIT
+POP
+POP
+POP
+
+WARN 'oh oh'
+SET_TRACE PUSH
+PUSHI 100 X
+PUSH X
+POP
+POP
+
+SET_TRACE PUSH POP
+PUSHI 100 X
+PUSH X
+WARN "This is X" X
+POP
+POP
+
+// BEGF ... ENDF Test
+// RESULT = MIN ( ARG1, ARG2 )
+//
+SET_TRACE FUNC
+BEGF MIN ARG1 ARG2
+    STACKS
+    PUSH ARG1
+    PUSH ARG2
+    JMPLT ITS-ARG1
+    PUSH ARG2
+    RET 1
+    LABEL ITS-ARG1
+    PUSH ARG1
+    RET 1
+    STACKS
+ENDF
+
+PUSHI 23 X
+PUSHI 157 Y
+CALL MIN 2 Z
+STACKS

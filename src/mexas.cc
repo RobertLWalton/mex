@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Aug 17 02:58:57 EDT 2023
+// Date:	Thu Aug 17 03:04:33 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -121,7 +121,7 @@ static struct trace_group
 	          +(1<<mex::T_ALWAYS))},
     { "NONE", 0 },
     { "FUNC", (1<<mex::T_CALLM) | (1<<mex::T_CALLG) |
-              (1<<mex::T_BEGF) },
+              (1<<mex::T_RET) | (1<<mex::T_ENDF) },
     { "LOOP", (1<<mex::T_BEGL) | (1<<mex::T_CONT) |
               (1<<mex::T_ENDL) }
     };
