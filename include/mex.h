@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Aug 17 02:59:32 EDT 2023
+// Date:	Sat Aug 19 15:28:57 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -47,7 +47,7 @@ namespace mex {
 
 struct instr {
     min::uns8 op_code, trace_class, trace_depth,
-              unused2;
+              unused;
     min::uns32 immedA, immedB, immedC;
     min::gen immedD;
 };
@@ -279,9 +279,9 @@ struct process_header
     int excepts;
     int excepts_accumulator;
     bool optimize;
-    mex::state state;
     min::uns32 counter;
     min::uns32 limit;
+    mex::state state;
 };
 
 MIN_REF ( min::printer, printer, mex::process )

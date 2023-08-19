@@ -665,6 +665,7 @@ The interface to a MEX module and its code vector is:
 \verb|    min::uns32 | & \TTMKEY{control}{in {\tt mex::code\_header}} \\
 \verb|    min::uns32 | & \TTMKEY{length}{in {\tt mex::code\_header}} \\
 \verb|    min::uns32 | & \TTMKEY{max\_length}{in {\tt mex::code\_header}} \\
+\verb|    min::gen | & \TTMKEY{name}{in {\tt mex::code\_header}} \\
 \verb|    min::phrase_position_vec | & \TTMKEY{position}
                                               {in {\tt mex::code\_header}} \\
 \verb|    min::packed_vec_ptr<min::gen> | & \TTMKEY{globals}
@@ -682,11 +683,17 @@ The interface to a MEX module and its code vector is:
 
 The \TT{module} vector is the module's code vector.
 
+The \ttikey{name}{of module} member of the \TT{module} is derived
+from the module's file name by removing any \TT{.mex} extension.
+If the module is input from the standard input, and not a file,
+the \TT{name} is \TT{min::MISSING()}.
+
 The \ttikey{position}{of module} member of the \TT{module} gives a
 \TT{min::\EOL phrase\_\EOL position} for every \TT{mex::instr}
 element of the \TT{module} vector, and also gives the
 \TT{position->\EOL file->\EOL file\_\EOL name} of the source
-file of the \TT{module}.  This information can be used to
+file of the \TT{module} (may be \TT{min::MISSING()} is input was
+from standard input).  This information can be used to
 print trace and error messages.
 
 The \ttikey{globals}{of module} member of the \TT{module}
@@ -742,17 +749,17 @@ a return stack, and other parameters.  Specifically:
 \verb|min::uns32 | & \TTMKEY{control}{in {\tt mex::process\_header}} \\
 \verb|min::uns32 | & \TTMKEY{length}{in {\tt mex::process\_header}} \\
 \verb|min::uns32 | & \TTMKEY{max\_length}{in {\tt mex::process\_header}} \\
+\verb|min::printer | & \TTMKEY{printer}{in {\tt mex::process\_header}} \\
 \verb|mex::pc | & \TTMKEY{pc}{in {\tt mex::process\_header}} \\
 \verb|min::packed_vec_insptr<mex::ret> | & \TTMKEY{return\_stack}%
                                               {in {\tt mex::process\_header}} \\
-\verb|min::uns32 | & \TTMKEY{rp}{in {\tt mex::process\_header}} \\
 \verb|min::uns32 | & \TTMKEY{level}{in {\tt mex::process\_header}} \\
 \verb|min::uns32 | & \TTMKEY{fp}{in {\tt mex::process\_header}}%
                      \TT{[mex::max\_lexical\_level+1]} \\
 \verb|min::uns32 | & \TTMKEY{nargs}{in {\tt mex::process\_header}}%
                      \TT{[mex::max\_lexical\_level+1]} \\
 \verb|min::uns32 | & \TTMKEY{trace\_depth}{in {\tt mex::process\_header}} \\
-\verb|min::uns8 | & \TTMKEY{trace\_flags}{in {\tt mex::process\_header}} \\
+\verb|min::uns32 | & \TTMKEY{trace\_flags}{in {\tt mex::process\_header}} \\
 \verb|int | & \TTMKEY{excepts}{in {\tt mex::process\_header}} \\
 \verb|int | & \TTMKEY{excepts\_accumulator}%
                          {in {\tt mex::process\_header}} \\

@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Aug 17 03:04:33 EDT 2023
+// Date:	Sat Aug 19 15:55:07 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -2114,6 +2114,8 @@ mex::module mexas::compile ( min::file file )
     process->trace_flags = mexas::run_trace_flags;
     process->limit = mex::run_counter_limit;
     mex::run_process ( process );
+
+    // TBD: check for errors, make globals.
 
     min::push ( mexas::modules ) = m;
 
