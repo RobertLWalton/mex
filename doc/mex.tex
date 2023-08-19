@@ -239,7 +239,7 @@
 
 \author{Robert L. Walton}
 
-\date{August 17, 2023}
+\date{August 19, 2023}
  
 \maketitle
 
@@ -867,6 +867,8 @@ The \TT{trace\_depth}, \TT{trace\_flags}, \TT{excepts},
 members of a process
 are explained in Tracing and Exceptions, \itemref{TRACING-AND-EXCEPTIONS}.
 
+\pagebreak
+
 
 \begin{boxedfigure}
 
@@ -953,9 +955,12 @@ are explained in Tracing and Exceptions, \itemref{TRACING-AND-EXCEPTIONS}.
 \label{ARITHMETIC-INSTRUCTIONS}
 \end{boxedfigure}
 
+\pagebreak
+
 \begin{boxedfigure}
 
 \begin{center}
+\small
 \begin{tabular}{|l|l|}
 \hline
 \TT{PUSHS}
@@ -1002,7 +1007,7 @@ are explained in Tracing and Exceptions, \itemref{TRACING-AND-EXCEPTIONS}.
     & Ditto, but \TT{JMP} if the second popped is \\
     & greater-than/greater-than-or-equal-to the first popped.
 \\\hline
-\TT{BEG}/\TT{NOP}/\TT{END}
+\TT{BEG}/\TT{END}
     & Subtract \TT{immedA} to \TT{sp} (popping the stack \TT{immedA} times). \\
     & The values popped are always trace values.
 \\\hline
@@ -1024,12 +1029,16 @@ are explained in Tracing and Exceptions, \itemref{TRACING-AND-EXCEPTIONS}.
     & The process \TT{trace\_flags} member is set from the low order \\
     & 8 bits of \TT{immedA}.
 \\\hline
-\TT{ERROR}
-    & This instruction is always traced.  If \TT{immedB} is not zero, \\
-    & the process terminates.
-      Otherwise \TT{immedA} is subtracted \\
-    & from \TT{sp} (popping the stack \TT{immedA} times).
-      See \itemref{ERROR-INSTRUCTION}.
+\TT{NOP}/\TT{TRACE}
+    & Subtract \TT{immedA} to \TT{sp} (popping the stack \TT{immedA} times).
+      The \\
+\TT{WARN}/\TT{ERROR}
+    & values popped are always trace values.  All these instructions \\
+    & but \TT{NOP} are in the \TT{ALWAYS} trace class.  All these instructions
+      are \\
+    & no-operations used only for tracing, except \TT{ERROR} prints \\
+    & a `Fatal Error' message before its trace and then terminates \\
+    & the process with an \TT{ERROR\_STOP} state.
 \\\hline
 \end{tabular}
 \end{center}
@@ -1037,6 +1046,8 @@ are explained in Tracing and Exceptions, \itemref{TRACING-AND-EXCEPTIONS}.
 \caption{Housekeeping Instructions}
 \label{HOUSEKEEPING-INSTRUCTIONS}
 \end{boxedfigure}
+
+\pagebreak
 
 \begin{boxedfigure}
 
