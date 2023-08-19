@@ -648,23 +648,13 @@ The interface to a MEX module and its code vector is:
 \LABEL{MEX::INSTR} \\
 \verb|{                   | \\
 \verb|    min::uns8 | & \TTMKEY{op\_code}{in {\tt mex::instr}} \\
-\verb|    min::uns8 | & \TTMKEY{trace\_flags}{in {\tt mex::instr}} \\
-\verb|    min::uns16 | & \TTMKEY{immedA}{in {\tt mex::instr}} \\
-\verb|    min::uns16 | & \TTMKEY{immedB}{in {\tt mex::instr}} \\
-\verb|    min::uns16 | & \TTMKEY{immedC}{in {\tt mex::instr}} \\
+\verb|    min::uns8 | & \TTMKEY{trace\_class}{in {\tt mex::instr}} \\
+\verb|    min::uns8 | & \TTMKEY{trace\_depth}{in {\tt mex::instr}} \\
+\verb|    min::uns8 | & \TTMKEY{unused}{in {\tt mex::instr}} \\
+\verb|    min::uns32 | & \TTMKEY{immedA}{in {\tt mex::instr}} \\
+\verb|    min::uns32 | & \TTMKEY{immedB}{in {\tt mex::instr}} \\
+\verb|    min::uns32 | & \TTMKEY{immedC}{in {\tt mex::instr}} \\
 \verb|    min::gen | & \TTMKEY{immedD}{in {\tt mex::instr}} \\
-\verb|}                   | \\
-\end{tabular}
-
-\begin{tabular}{@{}r@{~}l}
-\verb|enum         mex::| & \MEXKEY{trace\_flag}
-\LABEL{MEX::TRACE_FLAG} \\
-\verb|{                   | \\
-\verb|mex:|\TTMKEY{TRACE\_DEPTH}{in {\tt mex::trace\_flag}} & \tt = 7 <{}< 0
-\label{MEX::TRACE_DEPTH} \\
-\verb|mex:|\TTMKEY{TRACE\_LINES}{in {\tt mex::trace\_flag}} & \tt = 1 <{}< 3 \\
-\verb|mex:|\TTMKEY{TRACE\_NOJMP}{in {\tt mex::trace\_flag}} & \tt = 1 <{}< 4 \\
-\verb|mex:|\TTMKEY{TRACE}{in {\tt mex::trace\_flag}} & \tt = 1 <{}< 7 \\
 \verb|}                   | \\
 \end{tabular}
 
@@ -1139,25 +1129,29 @@ are explained in Tracing and Exceptions, \itemref{TRACING-AND-EXCEPTIONS}.
 \label{INSTRUCTIONS}
 
 A MEX instruction (a \TT{mex::instr}, see \pagref{MEX::INSTR})
-consists of an \TT{op\_code}, \TT{trace\_flags},
+consists of an \TT{op\_code}, \TT{trace\_class}, \TT{trace\_\EOL depth},
 and up to 4 immediate values,
 \TT{immedA}, \TT{immedB}, \TT{immedC}, and \TT{immedD}.
-The \TT{trace\_flags} are explained in Tracing and Exceptions,
-\itemref{TRACING-AND-EXCEPTIONS}.
+\TT{Trace\_class} is explained in Tracing and Exceptions,
+\itemref{TRACING-AND-EXCEPTIONS}, and
+\TT{trace\_depth} is explained in Trace Depth,
+\itemref{TRACE-DEPTH}.
 
 Some examples:
 \begin{indpar}\begin{verbatim}
-mex::instr an_add_instruction = {mex::ADD};
+mex::instr an_add_instruction = {mex::ADD, mex::T_AOP};
     // Pop 2 values and push their sum.
-mex::instr an_add_immediate_instruction = {mex::ADDI,,,,,3.14159};
+mex::instr an_add_immediate_instruction =
+        {mex::ADDI,mex::T_AOP,,,,,3.14159};
     // Add 3.14159 to top value.
-mex::instr a_begin_instruction = {mex::BEG};
+mex::instr a_begin_instruction = {mex::BEG, mex::T_BEG};
     // Do nothing.
-mex::instr an_end_instruction = {mex::END,,10};
+mex::instr an_end_instruction = {mex::END,mex::T_END,,10};
     // Pop 10 values and discard them.
-mex::instr a_jump_instruction = {mex::JMP,,10,5,32,min::MISSING()};
-    // Pop 10 values and discard them, then push min::MISSING()
-    // 5 times, then add 32 to program counter to skip 32 instructions.
+mex::instr a_jump_instruction = {mex::JMP,mex::T_JMP,1,,10,,32};
+    // Pop 10 values and discard them, then decrement the process's
+    // trace_depth by 1, then add 32 to program counter to skip
+    // 32 instructions.
 \end{verbatim}\end{indpar}
 
 The arithmetic instruction set is in Figure~\ref{ARITHMETIC-INSTRUCTIONS}.
@@ -1396,6 +1390,9 @@ the message would be something like:
 The 4 {\tt ""}'s skip the two values being compared and the two \TT{next}
 values in the stack.
 
+\subsection{Trace Depth}
+\label{TRACE-DEPTH}
+
 Trace messages are indented by the process's \TT{trace\_depth} member
 times the global variable:
 \begin{indpar}
@@ -1412,22 +1409,13 @@ by the following instructions:
 \begin{center}
 \begin{tabular}{l@{~~~~}l}
 \TT{BEG} ~ \TT{BEGL} ~ \TT{CALL}+\TT{BEGF} & Increment by 1. \\
-\TT{END} ~ \TT{ENDL} ~ \TT{ENDF} ~ \TT{RET} & Decrement by 1. \\
-\TT{JMP\ldots} & Decrement by low order 3 bits of instruction's \\
-               & \TT{trace\_flags} member (the bits masked by \\
-               & \TT{mex::TRACE\_DEPTH}: \pagref{MEX::TRACE_DEPTH}). \\
+\TT{END} ~ \TT{ENDF} ~ \TT{RET} & Decrement by 1. \\
+\TT{JMP\ldots} & Decrement by the instruction's \\
+               & \TT{trace\_depth} member. \\
 \end{tabular}
 \end{center}
-
-\subsection{ERROR Instruction}
-\label{ERROR-INSTRUCTION}
-
-The \TT{ERROR} instruction is always traced, even in optimized mode.
-The effective trace flags for this instruction are just the
-\TT{trace\_flags} member of the instruction with the \TT{TRACE} flag forced on.
-
-The trace message for the \TT{ERROR} instruction is thus in effect an
-error message.
+Note: \TT{JMP\ldots} is the only way to exit a loop (\TT{ENDL} and
+\TT{CONT} start a new iteration).
 
 \subsection{Fatal Errors}
 \label{FATAL-ERRORS}
