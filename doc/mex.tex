@@ -1211,15 +1211,21 @@ does not have the \TT{ALWAYS} class.
 Each instruction trace message begins with:
 \begin{center}
 \TT{\{}{\em line-number}\TT{:}{\em code-vector-location}%
-                        \TT{;}{\em stack-length}\TT{\}}
+                        \TT{,}{\em stack-length}%
+                        \TT{,}{\em process-counter}\TT{\}}
 \end{center}
 The {\em stack-length} is the number of values in the stack
-just before the instruction executes.
+just before the traced instruction executes.
+The {\em process-counter} is the number of instruction executions
+since the process was originally initialized before the traced
+instruction executes.
 
 Arithmetic instructions that have errors raise exception flags.
-In normal mode, an error message is also produced.  In both
+In normal mode, an error message is also produced if for exceptions
+that are enabled.  In both
 normal and optimized modes, an error message is produced
-when the process terminates if any exception flags have been raised.
+when the process terminates if any enabled exception flags have been raised.
+See Arithmetic Exceptions, \itemref{ARITHMETIC-EXCEPTIONS}.
 
 \subsection{Arithmetic Tracing}
 \label{ARITHMETIC-TRACING}
