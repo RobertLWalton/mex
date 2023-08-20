@@ -239,7 +239,7 @@
 
 \author{Robert L. Walton}
 
-\date{August 19, 2023}
+\date{August 20, 2023}
  
 \maketitle
 
@@ -323,7 +323,7 @@ External MEX data and functions are placed in the
 A MEX \key{program} consists of one or more modules.
 A MEX \key{module} is a data structure compiled from
 a source code file.  A module has a code vector,
-an interface, and a global variable stack.  A \key{code vector} is a vector
+an interface, and a global variable vector.  A \key{code vector} is a vector
 of instructions.  An \key{interface} is a data structure
 that allows the compilation of references to the
 global variables of the module and function calls to the
@@ -336,9 +336,9 @@ Interfaces are provided by and used by the compiler, and
 not by MEX.  Typically a module may reference interfaces
 of previously compiled modules.
 
-Immediately after a module is compiled, it is executed.  The
+Immediately after a module is compiled, it is executed.  A copy of the
 resulting execution stack (see Stacks, \itemref{STACKS}) becomes the
-module's \key{global variable stack}, i.e., its vector of
+module's \key{global variable vector}, i.e., its vector of
 global variables.
 
 Each module is compiled sequentially, and it is possible to add
@@ -362,17 +362,22 @@ assumes a few compilation behaviors.
 \section{Stacks}
 \label{STACKS}
 
-MEX is stack oriented.  A stack is a vector of \TT{min::gen}
+MEX is stack oriented.  A \key{stack} is a vector of
 values.  The end of this vector is referred to as the
 \ikey{top}{of stack} of the stack.  Values may be \ikey{pushed}{into stack}
 into the stack, meaning they are added to the end of the stack vector,
 or \ikey{popped}{from stack} from the stack,
 meaning that they are removed from the
-end of the stack vector.
+end of the stack vector. The length of the stack is referred to as the
+\key{stack pointer} and is one greater than the vector index of the top of
+the stack, unless the stack is empty and its vector length is zero.
 
-MEX assumes that variables in the stack are read-only, unless
-they are being assigned values by a block of code.  MEX assumes
-that the variables to be assigned by a block are pushed into the stack
+The word `stack' without qualification refers to the main
+processing stack, which is a stack of \TT{min::gen} values.
+MEX supports the programming paradigm
+in which variables in the stack are read-only, unless
+they are being assigned values by a block of code.  Using this paradigm
+variables to be assigned by a block are pushed into the stack
 by the compiler and made write-only.  Then the block is executed
 and writes these variables.  When the block finishes, it pops
 all the values that code inside the block has pushed into the stack,
@@ -388,27 +393,26 @@ When a function executes, it begins with just its arguments
 in the stack.  When it returns, it pops these and everything
 else the function pushed into the stack, and then pushes
 the return values of the function into the stack.
+The arguments and all the values the function pushes into the
+stack are called the function's \key{frame}.  The stack pointer
+value when the function begins is called the function's
+\key{frame pointer}, and points just after the last argument
+of the function.
 
 Builtin instructions behave like function calls: for example,
 the \TT{ADD} instruction pops its two arguments from the stack
 and then pushes their sum into the stack.
 
 Immediately after it compiles, a module executes as if it were a function
-of no arguments.  At its end, it does not pop its stack, but
-leaves the stack as the module's global variable stack.
+of no arguments.  At its end, the module's
+global variable vector is created by making
+a copy of the final execution stack.
 
-The number of values above the current function arguments in the
-stack (or the number above the beginning of the stack for a
-module execution) is a parameter of the current instruction known
-to the compiler.  To maintain this rule, forward jumps must push
-null values into the stack to take the place of the values that would be
-pushed by the code being skipped.  Backward jumps are only allowed when
-a loop iteration block ends, and these pop values that were pushed
-during the iteration block.
-
-Forward jumps that leave a block may pop values from the stack
-instead of pushing values.  In general a jump may first pop
-values from the stack, and then push null values.
+Backward jumps are only allowed at the end of a loop blocks.
+These pop the values pushed into the stack by the loop block.
+Forward jumps are the only means of exiting a loop block.  These
+pop all values pushed into the stack by code between the jump
+and the target of the jump.
 
 There are special considerations involving the stack if the
 compiler allows functions to be nested inside other functions.
@@ -843,7 +847,7 @@ the \TT{return\_stack} and stores its \TT{saved\_pc}
 in the current program counter
 of the process (\TT{p->pc}).
 
-The \TT{CALL} also changed the process \TT{level} to the lexical level
+The \TT{CALL} also changes the process \TT{level} to the lexical level
 of the function being called (determined by the function's \TT{BEGF}
 instruction) and if this level is $L$, changes \TT{fp[$L$]} to the
 frame pointer of that function and \TT{nargs[$L$]} to the number of
@@ -1148,6 +1152,8 @@ Some examples:
 \begin{indpar}\begin{verbatim}
 mex::instr an_add_instruction = {mex::ADD, mex::T_AOP};
     // Pop 2 values and push their sum.
+    // mex::T_AOP is the trace class of all arithmetic
+    // operations.
 mex::instr an_add_immediate_instruction =
         {mex::ADDI,mex::T_AOP,,,,,3.14159};
     // Add 3.14159 to top value.
@@ -1528,7 +1534,6 @@ The \TT{fp[\ldots]}, \TT{trace\_\EOL depth},
 members are set to \TT{0}.
 The \TT{state} is set to \TT{NEVER\_\EOL STARTED}.
 
-The \TT{trace\_function} member is set to \TT{mex::default\_trace}.
 \end{indpar}
 
 {\tt min::locatable\_var<min::printer> mex::}\MEXKEY{default\_printer}
@@ -1549,7 +1554,7 @@ except:
 \item The \TT{pc} member is set to \TT{\{m,0\}}.
 \item The following members are not set: \\
 \hspace*{2em}
-\TT{printer}, \TT{optimze}, \TT{trace\_flags}, \TT{trace\_function},
+\TT{printer}, \TT{optimze}, \TT{trace\_flags},
 \TT{excepts}
 \end{itemize}
 
