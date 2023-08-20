@@ -1,25 +1,25 @@
-* {18:5;5} BEG: "Begin MIN Block", X=295, Y=196
-*** {30:18;7} END: "End MIN Block", X=295, Y=196, Z=196
-* {42:28;6} BEGL: "Begin SUM loop", SUM=0, I=4, LIMIT=6
-*** {55:43;8}
+* {18:5,5,5} BEG: "Begin MIN Block", X=295, Y=196
+*** {30:18,7,16} END: "End MIN Block", X=295, Y=196, Z=196
+* {42:28,6,26} BEGL: "Begin SUM loop", SUM=0, I=4, LIMIT=6
+*** {55:43,8,41}
     ENDL: "End SUM loop iteration", next-SUM=4, next-I=5, LIMIT=6
-*** {55:43;8}
+*** {55:43,8,56}
     ENDL: "End SUM loop iteration", next-SUM=9, next-I=6, LIMIT=6
-*** {55:43;8}
+*** {55:43,8,71}
     ENDL: "End SUM loop iteration", next-SUM=15, next-I=7, LIMIT=6
-* {58:47;6} TRACE: "End of SUM loop", SUM=15, I=7, LIMIT=6
-* {63:51;0} WARN: "oh oh"
-* {64:52;0} SET_TRACE:  PUSH
-* {65:53;0} PUSHI:  X <=== 100
-* {66:54;1} PUSHS:  * <=== X = 100
-* {70:57;0} SET_TRACE:  PUSH POP
-* {71:58;0} PUSHI:  X <=== 100
-* {72:59;1} PUSHS:  * <=== X = 100
-* {73:60;2} PUSHS:  * <=== X = 100
-* {73:61;3} WARN: "This is X", X=100
-* {74:62;2} POPS:  * <=== * = 100
-* {75:63;1} POPS:  * <=== X = 100
-* {80:64;0} SET_TRACE:  ENDF CALLM CALLG RET
-*** {81:65;2} CALLM: MIN, ARG1=23, ARG2=157
-* {96:76;1} RET: MIN, Z=23
+* {58:47,6,78} TRACE: "End of SUM loop", SUM=15, I=7, LIMIT=6
+* {63:51,0,82} WARN: "oh oh"
+* {64:52,0,83} SET_TRACE:  PUSH
+* {65:53,0,84} PUSHI:  X <=== 100
+* {66:54,1,85} PUSHS:  * <=== X = 100
+* {70:57,0,88} SET_TRACE:  PUSH POP
+* {71:58,0,89} PUSHI:  X <=== 100
+* {72:59,1,90} PUSHS:  * <=== X = 100
+* {73:60,2,91} PUSHS:  * <=== X = 100
+* {73:61,3,92} WARN: "This is X", X=100
+* {74:62,2,93} POPS:  * <=== * = 100
+* {75:63,1,94} POPS:  * <=== X = 100
+* {80:64,0,95} SET_TRACE:  ENDF CALLM CALLG RET
+*** {81:65,2,99} CALLM: MIN, ARG1=23, ARG2=157
+* {96:76,1,104} RET: MIN, Z=23
 mexas_compile_test_5.mex successfully compiled

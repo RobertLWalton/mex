@@ -1199,15 +1199,14 @@ and the \key{trace flags} $F$ of the process.  If
 
 In optimized mode, instructions are \underline{not} traced.
 
-As an exception, \TT{ERROR} instructions are traced in all cases.
+Instructions in the \ttkey{ALWAYS} trace class are always
+traced.  These include the \TT{TRACE}, \TT{SET\_TRACE},
+\TT{WARN}, and \TT{ERROR} instructions.
 
-When an instruction is traced and the process
-trace flag's \TT{TRACE\_LINES} flag is on,
-the instruction source lines are output
-using \TT{min::\EOL print\_\EOL phrase\_\EOL lines} and the
-instruction's \TT{min::\EOL phrase\_\EOL position} value from its module's
-\TT{min::phrase\_\EOL position\_\EOL vec}.  This is then followed by
-the instruction specific trace message.
+Instructions in the \ttkey{NEVER} trace class are never
+traced.  Typically there are compiler switches that will
+change to \TT{NEVER} the trace class stored in every instruction that
+does not have the \TT{ALWAYS} class.
 
 Each instruction trace message begins with:
 \begin{center}

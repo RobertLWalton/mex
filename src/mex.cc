@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Aug 17 03:10:22 EDT 2023
+// Date:	Sun Aug 20 07:28:37 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -931,6 +931,26 @@ static void check_trace_class_infos ( void )
     }
 }
 
+inline min::printer print_message_header
+	( mex::process p, min::phrase_position pp )
+{
+    print_indent ( p );
+    p->printer << "{";
+
+    if ( pp )
+	p->printer
+	    << pp.end.line - 1
+	    << ":";
+
+    p->printer << p->pc.index
+	       << ","
+	       << p->length
+	       << ","
+	       << p->counter
+	       << "}";
+    return p->printer;
+}
+
 bool mex::run_process ( mex::process p )
 {
     mex::module m = p->pc.module;
@@ -1320,18 +1340,9 @@ bool mex::run_process ( mex::process p )
 		    m->position[p->pc.index] :
 		    min::MISSING_PHRASE_POSITION;
 
-		print_indent ( p );
-		p->printer << min::bom << "{";
-
-		if ( pp )
-		    p->printer
-		        << pp.end.line - 1
-			<< ":";
-		p->printer << (int) ( pc - pcbegin )
-		           << ";"
-			   << (int) ( sp - spbegin )
-			   << "} "
-		           << op_info->name << ": ";
+		print_message_header ( p, pp )
+		    << " " << min::bom
+		    << op_info->name << ": ";
 
 		if ( m->trace_info != min::NULL_STUB  )
 		{
@@ -1460,18 +1471,9 @@ bool mex::run_process ( mex::process p )
 		    m->position[p->pc.index] :
 		    min::MISSING_PHRASE_POSITION;
 
-		print_indent ( p );
-
-		p->printer << min::bom << "{";
-		if ( pp )
-		    p->printer
-		        << pp.end.line - 1
-			<< ":";
-		p->printer << (int) ( pc - pcbegin )
-		           << ";"
-			   << (int) ( sp - spbegin )
-			   << "} "
-		           << op_info->name << ": ";
+		print_message_header ( p, pp )
+		    << " " << min::bom
+		    << op_info->name << ": ";
 
 		if ( m->trace_info != min::NULL_STUB
 		     &&
@@ -1954,19 +1956,9 @@ bool mex::run_process ( mex::process p )
 		    m->position[p->pc.index] :
 		    min::MISSING_PHRASE_POSITION;
 
-		print_indent ( p );
-		p->printer << "{";
-
-		if ( pp )
-		    p->printer
-		        << pp.end.line - 1
-			<< ":";
-		p->printer << (int) ( pc - pcbegin )
-		           << ";"
-			   << (int) ( sp - spbegin )
-			   << "} "
-		           << op_infos[op_code].name
-			   << ": " << min::bom;
+		print_message_header ( p, pp )
+		    << " " << op_infos[op_code].name
+		    << ": " << min::bom;
 
 		min::gen tinfo  = min::MISSING();
 		if (   p->pc.index
