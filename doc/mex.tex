@@ -485,7 +485,7 @@ write-only values get updated.  At the end of each
 iteration, the 2 write-only locations are copied to the
 2 read-only locations in preparation for the next
 iteration, and any values pushed into the stack by
-code inside the loop block (there are no such vallues
+code inside the loop block (there are no such values
 in the example) are popped from the stack.  The end of
 the loop pops these values and the write-only values,
 leaving the names {\tt i} and {\tt sum} pointing at the read-only values
@@ -511,7 +511,8 @@ If $F$ is a function inside another function $F'$, then $F$ can
 reference the variables that $F'$ can reference when $F$ is
 defined.  To locate these variables, knowing the frame pointer for the
 execution of $F'$ is sufficient.  The frame pointer is defined as the
-stack index of the last argument to $F'$, or equivalently, the stack
+stack pointer that points just after the last argument to $F'$,
+or equivalently, the stack
 pointer when $F'$ is called.
 
 MEX keeps track of the needed frame pointers using the following:%
@@ -587,11 +588,12 @@ of the smallest execution of any function of level $L'$ that contains $E$.
 \end{indpar}
 
 If follows that during $E$ the variables of $F'$ can be accessed by
-\TT{PUSHL} with \TT{immedB} = $L'$, the arguments of $F'$ can be
-accessed by \TT{PUSHA} with \TT{immedB} = $L'$:
-see Figure~\ref{FUNCTION-INSTRUCTIONS}.
-The global variables can be accessed by \TT{PUSHM} or \TT{PUSHG}:
-see Figure~\ref{HOUSEKEEPING-INSTRUCTIONS}.
+\TT{PUSHL} with \TT{immedB} = $L'$ (Figure~\ref{HOUSEKEEPING-INSTRUCTIONS}),
+and the arguments of $F'$ can be
+accessed by \TT{PUSHA} with \TT{immedB} = $L'$
+(Figure~\ref{FUNCTION-INSTRUCTIONS}).
+The global variables can be accessed by \TT{PUSHM} or \TT{PUSHG}
+(Figure~\ref{HOUSEKEEPING-INSTRUCTIONS}).
 
 \section{Code Vectors}
 \label{CODE-VECTORS}
