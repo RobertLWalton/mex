@@ -1895,21 +1895,30 @@ the bottommost, and accept the first element found with the desired name.
 \item Modules are named by the name of the file assembled to produce
 the module, with the suffix \TT{.mex} deleted.  Such a name is
 a \emkey{module-name}.
-\item When a {\em variable-name} is assigned to a new variable stack
-element, `\TT{*}' is used as the {\em variable-name} to indicate
-that the element has no name.
-\item When an instruction assigns a {\em new-variable-name}
-to a newly created variable stack element, the {\em new-variable-name}
+\item Some instructions have an optional {\em new-variable-name} argument
+that names an element being pushed to the variables stack.
+The {\em new-variable-name}
 must \underline{not} be the same as the name of any variable of
 less lexical level or depth than the instruction, or the same name
 as that of an argument of a function (see \TT{BEGF}), or the same name as a
 \TT{next-} variable of a loop (see \TT{BEGL}).
+
+If {\em new-variable-name} is missing or `\TT{*}',
+the element just gets the name `\TT{*}'.
+
 \item A variable cannot be written if it has a lexical level less than
 that of the writting instruction, or is a function argument variable.
 \item The operands that take integer values must have values in the
 range $[0,2^{32})$ (so they will fit into \TT{immedA}, \TT{immedB},
 or \TT{immedC} instruction
 members).
+\item Some instructions have a {\em level}\label{LEVEL} argument, which must
+specify a lexical level in the range [1,$L$], where $L$ is the lexical
+level of the instruction.  If the argument is missing or \TT{0},
+the specified lexical level is $L$.
+If the argument is a positive integer, it is the specified lexical level
+(and must be in range).  If the argument is a negative integer -$i$,
+the specified lexical level is $L-i$ (and must be in range).
 \item Some instructions have a {\em trace-message} argument
 and some have {\em trace-info} arguments, where:
 \begin{indpar}
@@ -2166,7 +2175,9 @@ Figure~\itemref{FUNCTION-INSTRUCTIONS}.  At assembly-time,
 the actions are the same as for \TT{CALL}.
 
 The {\em function-name} is searched for in the function stack of
-the previously assembled module named.
+the previously assembled module named, as it is at the
+end of the compilation of that module (only level 1 functions
+of the module are present in this stack).
 \end{indpar}
 
 \ttkey{CALL} {\em function-name}
@@ -2187,28 +2198,24 @@ this instruction pops {\em nresults} elements from the
 variables stack.
 \end{indpar}
 
-\ttkey{PUSHNARGS} {\em new-variable-name}\QMARK{}
+\ttkey{PUSHNARGS} {\em level}\QMARK{} {\em new-variable-name}\QMARK{}
 \begin{indpar}
 At run-time this instruction's actions are as described in
-Figure~\itemref{FUNCTION-INSTRUCTIONS}.  At assembly-time,
+Figure~\itemref{FUNCTION-INSTRUCTIONS} with \TT{immedB} set
+to the lexical level specified by {\em level} (see \pagref{LEVEL}).
+At assembly-time,
 this instruction pushes into the variable stack an element
-with the given {\em variable-name}.
+with the given {\em new-variable-name}.
 \end{indpar}
 
 \ttkey{PUSHV} {\em level}\QMARK{} {\em new-variable-name}\QMARK{}
 \begin{indpar}
-Here {\em level} is an integer specifing the lexical level
-$L$ used as the \TT{immedB} parameter of the run-time
-\TT{PUSHV} instruction.  If {\em level} > 0, then $L$ = {\em level}.
-If {\em level} $\leq$ 0, $L$ = $K$ + {\em level} where
-$K$ is the lexical level of the \TT{PUSHV} instruction.
-If {\em level} is missing, $L$ = $K$.
-
 At run-time this instruction's actions are as described in
-Figure~\itemref{FUNCTION-INSTRUCTIONS}.  At assembly-time,
-this instruction does nothing if {\em variable-name} is
-not given, and otherwise changes the name of the top
-variable stack element to {\em variable-name}.
+Figure~\itemref{FUNCTION-INSTRUCTIONS} with \TT{immedB} set
+to the lexical level specified by {\em level} (see \pagref{LEVEL}).
+
+At assembly-time, this instruction changes the name of the top
+variable stack element to {\em new-variable-name}.
 \end{indpar}
 
 \subsection{MEXAS Declarations}
@@ -2219,21 +2226,10 @@ variable stack element to {\em variable-name}.
 See \pagref{LABEL}.
 \end{indpar}
 
-\ttkey{INSTRUCTION\_TRACE} {\em trace-option}\STAR{}
+\ttkey{STACKS}
 \begin{indpar}
-Set the \TT{trace\_flags} of the next instruction to those
-given by the options (i.e., \TT{TRACE},
-\TT{TRACE\_LINES}, \TT{TRACE\_NOJMP}).
-\end{indpar}
-
-\ttkey{DEFAULT\_TRACE} {\em trace-option}\STAR{}
-\begin{indpar}
-Set the default trace flags to those
-given by the options (i.e., \TT{TRACE},
-\TT{TRACE\_LINES}, \TT{TRACE\_NOJMP}).
-In the absence of an immediately preceding \TT{INSTRUCTION\_TRACE}
-declaration, an instruction's \TT{trace\_flags} are set to the
-default trace flags.
+Prints the names in the assembly time variables and functions stacks.
+Used mostly for testing the assembler.
 \end{indpar}
 
 \subsection{Instruction Tracing}
