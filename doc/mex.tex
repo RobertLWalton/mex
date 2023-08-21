@@ -1970,7 +1970,9 @@ element with the {\em new-variable-name} if given, or
 with no name otherwise.
 
 The variable stack searched for {\em variable-name} is the variable
-stack of the previously assembled module named.
+stack of the previously assembled module named, as it is at the
+end of the compilation of that module (only level 0 variables
+of the module are present in this stack).
 \end{indpar}
 
 \ttkey{PUSH} {\em variable-name}
@@ -2022,10 +2024,7 @@ or in a different module.
 At run-time this instruction's actions are as described in
 Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}.  At assembly-time,
 this instruction adds an element to the pending jump
-list (see \itemref{JMP-TARGETS}).
-
-The statement following a \TT{JMP} must
-be a \TT{LABEL} declaration or an \TT{END\ldots} instruction.
+list (see JMP Targets, \itemref{JMP-TARGETS}).
 \end{indpar}
 
 \ttkey{JMP\ldots} {\em jmp-target}
@@ -2035,7 +2034,8 @@ Here \ldots~denotes one of \TT{EQ}, \TT{NE}, etc.
 At run-time these instruction's actions are as described in
 Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}.  At assembly-time,
 these instructions pop two elements from the variable stack
-and then add an element to the pending jump list.
+and then add an element to the pending jump list
+(see JMP Targets, \itemref{JMP-TARGETS}).
 
 Note that
 the pending jump list element
@@ -2056,8 +2056,8 @@ At run-time this instruction's actions are as described in
 Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}.  At assembly-time,
 it pops from the variable and function stacks all elements with the
 same lexical level and depth as the \TT{END} instruction, then
-decrements the depth, then updates the jump list (see
-JMP Targets\pagnote{JMP-TARGETS}).
+decrements the depth, then updates the jump list
+(see JMP Targets, \itemref{JMP-TARGETS}).
 \end{indpar}
 
 \ttkey{BEGL} {\em nnext} {\em trace-info}\QMARK{}
@@ -2093,33 +2093,27 @@ Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}.  At assembly-time,
 this instruction does nothing.
 \end{indpar}
 
-\ttkey{NOP} {\em trace-info}\QMARK{}
-\begin{indpar}
-At run-time this instruction does nothing
-(see Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}).  At assembly-time,
-this instruction does nothing.  This instruction is usually
-used for tracing.
-\end{indpar}
-
-\ttkey{SET\_TRACE} {\em trace-class}\STAR{}
+\ttkey{SET\_TRACE} \{ {\em trace-class} $|$ {\em trace-class-group} \}\STAR{}
 \begin{indpar}
 At run-time set the process \TT{trace\_flags} parameter so as
-to have a flag for each {\em trace-class} given.
+to have a flag for each {\em trace-class} given, or each trace class
+in a given {\em trace-class-group}.  This instruction itself has
+the \TT{ALWAYS} trace class.
 See Instruction Tracing\pagnote{INSTRUCTION-TRACING} for details.
 
 At assembly-time,
 this instruction does nothing.
 \end{indpar}
 
-\ttkey{ERROR} {\em error-code} {\em trace-info}\QMARK{}
+\ttkey{NOP}/\ttkey{TRACE}/\ttkey{WARN}/\ttkey{ERROR} {\em trace-info}\QMARK{}
 \begin{indpar}
-If {\em error-code} is non-zero, this instruction terminates
-the process at run-time.
-This instruction is \underline{always} traced, regardless
-of the setting of compile options and the process
-\TT{trace\_flags}.
+At run-time these instructions do nothing, except that the \TT{ERROR}
+instruction terminates the process
+(see Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}).  At assembly-time,
+these instructions do nothing.
 
-At assembly time this instruction does nothing.
+All these instructions except \TT{NOP} are in the \TT{ALWAYS}
+trace class.
 \end{indpar}
 
 \ttkey{BEGF}\label{BEGF} {\em function-name} {\em variable-name}\STAR{}
