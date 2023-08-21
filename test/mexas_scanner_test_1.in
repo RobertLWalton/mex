@@ -4,3 +4,5 @@ line2 x«y» 'hello there' "I said: 'hello there'" 4 5 6 1.1 2.2 -7.4 NaN
 
 line3 xy zw hoho \
       hehe x∭y
+
+line4 with a // comment

@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat Aug 19 15:55:07 EDT 2023
+// Date:	Mon Aug 21 03:58:57 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1014,6 +1014,7 @@ bool mexas::next_statement ( void )
 	        ++ p;
 
 	    if ( p >= endp ) goto END_LINE;
+
 	    statement_started = true;
 
 	    // Scan lexeme into work.
@@ -1064,11 +1065,11 @@ bool mexas::next_statement ( void )
 	    }
 	    * q = 0;
 	   
-	    if ( ! lexeme_found
-	         &&
-		 type == 0
+	    if ( type == 0
 		 &&
-		 ::strcmp ( work, "//" ) == 0 )
+		 work[0] == '/'
+		 &&
+		 work[1] == '/' )
 	    {
 	        // Comment Line
 		//
