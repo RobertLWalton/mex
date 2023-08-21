@@ -6,3 +6,6 @@ line3 xy zw hoho \
       hehe x∭y
 
 line4 with a // comment
+
+line5 a continued line: \ // with a comment
+    this is the continuation

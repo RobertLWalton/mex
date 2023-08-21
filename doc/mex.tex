@@ -239,7 +239,7 @@
 
 \author{Robert L. Walton}
 
-\date{August 20, 2023}
+\date{August 21, 2023}
  
 \maketitle
 
@@ -1643,17 +1643,19 @@ advanced MEX compilers.
 \label{MEXAS-SYNTAX}
 
 MEXAS programs are written in ASCII.  Control characters other
-than whitespace are forbidden.
+than whitespace, and non-ASCII characters, are illegal and are
+replaced by `\#'.
 
 A MEXAS program consists of statements which are instructions
 or declarations, each encoded as a sequence of lexemes.
 
- A line ending with the `\ttkey{\textbackslash}' lexeme
+If a lexeme begins with `\ttkey{//}', it and the rest of the
+line are a \key{comment} and are ignored (except for detecting
+illegal characters).  Blank lines are ignored.
+
+If the last lexeme on a line is `\ttkey{\textbackslash}', the statement
 is \key{continued} on the next line (the `\TT{\textbackslash}' is
-otherwise ignored).
-If the first lexeme on a line is `\ttkey{//}', the entire line
-is a \key{comment line} and is ignored (comment lines cannot
-be continued).  Blank lines are ignored.
+discarded).
 
 A \key{statement} is a sequence of lines beginning with a non-blank
 line and ending with a non-blank, non-comment line that is

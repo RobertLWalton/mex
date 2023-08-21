@@ -20,3 +20,7 @@ line3 x<SOH>y z<FF>w hoho \
 line ####:
 line4 with a // comment
     line4 with a
+lines ####-####
+line5 a continued line: \ // with a comment
+    this is the continuation
+    line5 a continued "line:" this is the continuation
