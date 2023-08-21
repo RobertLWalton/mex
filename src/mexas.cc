@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Aug 21 04:27:09 EDT 2023
+// Date:	Mon Aug 21 08:36:09 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -2030,19 +2030,6 @@ mex::module mexas::compile ( min::file file )
 			  L, mexas::depth[L] );
 		break;
 	    }
-	    case mex::TRACE:
-	    case mex::WARN:
-	    case mex::ERROR:
-	    {
-		min::locatable_gen trace_info;
-	        min::uns32 tvars =
-		    mexas::get_trace_info
-			( trace_info, index, pp );
-		instr.immedA = tvars;
-		mexas::push_instr
-		    ( instr, pp, trace_info );
-		break;
-	    }
 	    case mex::SET_TRACE:
 	    {
 		min::uns32 first = index;
@@ -2076,6 +2063,32 @@ mex::module mexas::compile ( min::file file )
 		instr.immedA = flags;
 
 		mexas::push_instr ( instr, pp );
+		break;
+	    }
+	    case mex::NOP:
+	    case mex::TRACE:
+	    case mex::WARN:
+	    case mex::ERROR:
+	    {
+		min::locatable_gen trace_info;
+	        min::uns32 tvars =
+		    mexas::get_trace_info
+			( trace_info, index, pp );
+		instr.immedA = tvars;
+		mexas::push_instr
+		    ( instr, pp, trace_info );
+		break;
+	    }
+	    case mex::PUSHNARGS:
+	    case mex::PUSHV:
+	    {
+		min::uns32 level;
+	        min::gen lev = mexas::get_num ( index );
+		if ( lev == min::NONE() )
+		    level = L;
+		// else TBD
+
+		break;
 	    }
 	    }
 	}

@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Aug 15 10:32:57 EDT 2023
+// Date:	Mon Aug 21 08:44:05 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -523,6 +523,16 @@ min::uns32 get_trace_info
     // at the initial i position; otherwise trace_info
     // is set to min::MISSING(), no PUSH... instructions
     // are output, and 0 is returned.
+
+// Given a min::gen that is a number, convert it to an
+// uns32 suitable for use in an immedX parameter.  If
+// it does not convert, return NOT_FOUND and output
+// an error message.  Pname is the name of the parameter
+// (e.g. nresults).
+//
+min::uns32 check_parameter
+    ( min::gen n, const min::phrase_position & pp,
+                  const char * pname );
 
 extern min::uns32 run_trace_flags;
     // Initial trace_flags value for processes.
