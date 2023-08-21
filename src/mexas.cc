@@ -993,28 +993,20 @@ bool mexas::next_statement ( void )
 
 	char work[end_offset - begin_offset + 10];
 
-	const char * p = ~ ( buffer + begin_offset );
-	const char * endp =
-	    p + end_offset - begin_offset;
-	    // buffer + end_offset is illegal in case
-	    // of partial line at end of file.
+	const char * p = ~ min::begin_ptr_of ( buffer );
+	const char * endp = p + end_offset;
+	p += begin_offset;
+	    // buffer + XX is illegal in case of partial
+	    // line at end of file and XX == end_offset.
 	bool illegal_character_found = false;
 	bool lexeme_found = false;
 
 #	define SAVE \
 	    begin_offset = end_offset - ( endp - p );
 #	define RESTORE \
-	    if ( end_offset != begin_offset ) \
-	    { \
-		p = ~ ( buffer + begin_offset ); \
-		endp = p + end_offset - begin_offset; \
-	    }
-	    // If begin_offset == end_offset and the
-	    // line is a partial line at the end of
-	    // the file, buffer + begin_offset will
-	    // get a subscript too large error.
-	    // In this case RESTORE leaves p and endp
-	    // untouched but with p == endp.
+	    p = ~ min::begin_ptr_of ( buffer ); \
+	    endp = p + end_offset; \
+	    p += begin_offset;
 
 	while ( true )
 	{
