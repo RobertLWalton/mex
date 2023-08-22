@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Aug 21 08:44:05 EDT 2023
+// Date:	Tue Aug 22 06:32:27 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -524,15 +524,24 @@ min::uns32 get_trace_info
     // is set to min::MISSING(), no PUSH... instructions
     // are output, and 0 is returned.
 
-// Given a min::gen that is a number, convert it to an
-// uns32 suitable for use in an immedX parameter.  If
-// it does not convert, return NOT_FOUND and output
-// an error message.  Pname is the name of the parameter
-// (e.g. nresults).
-//
-min::uns32 check_parameter
-    ( min::gen n, const min::phrase_position & pp,
-                  const char * pname );
+bool check_parameter
+    ( min::uns32 & param, min::gen n,
+      const min::phrase_position & pp,
+      const char * pname, bool is_level = false );
+    // Convert n to an uns32 param suitable for use as
+    // an immedX parameter.  If it does convert, store
+    // it in param and return true.  Otherwise output
+    // an error message and return false.  Pname is
+    // the name of the parameter (e.g. nresults).
+    //
+    // If is_level is true, convert n to a lexical level
+    // L'.  If n > 0, L' = n, but if n < 0, L' = L + n.
+    // If L' is not in the range [1,L], output an error
+    // message and return false.
+    //
+    // If an error message is output, it ends with
+    // `instruction ignored'.  So if false is returned,
+    // the instruction should be ignored.
 
 extern min::uns32 run_trace_flags;
     // Initial trace_flags value for processes.

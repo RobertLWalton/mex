@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Aug 21 08:36:09 EDT 2023
+// Date:	Tue Aug 22 06:16:24 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -20,6 +20,7 @@
 // ----- --- ----
 
 # include <mexas.h>
+# include <cmath>
 
 # define L mexas::lexical_level
 # define SP mexas::variables->length
@@ -920,6 +921,49 @@ min::uns32 mexas::get_trace_info
     return len - 1;
 }
 
+bool mexas::check_parameter
+	( min::uns32 & param, min::gen n,
+	  const min::phrase_position & pp,
+	  const char * pname, bool is_level )
+{
+    min::float64 nf = min::direct_float_of ( n );
+
+    if ( std::isnan ( nf )
+	 ||
+	 nf != (min::int64) nf )
+    {
+	mexas::compile_error
+	    ( pp, "bad ", min::pnop, pname, min::pnop,
+	          " parameter; instruction ignored" );
+	return false;
+    }
+
+    if ( is_level )
+    {
+        if ( - L < nf && nf <= 0 )
+	{
+	    param = L + nf;
+	    return true;
+	}
+	else if ( 1 <= nf && nf <= L )
+	{
+	    param = nf;
+	    return true;
+	}
+    }
+    else if ( 0 <= nf && nf < (1ul << 32) )
+    {
+	param = nf;
+	return true;
+    }
+
+    mexas::compile_error
+	( pp, pname, min::pnop,
+	      " parameter out of range;"
+	      " instruction ignored" );
+    return false;
+}
+
 
 // Scanner Function
 // ------- --------
@@ -1243,20 +1287,10 @@ mex::module mexas::compile ( min::file file )
 			      " instruction ignored" );
 		    continue;
 		}
-		min::float64 ef =
-		    min::direct_float_of ( en );
-		if ( ef < 0
-		     ||
-		     ef >= (1ul << 32 )
-		     ||
-		     ef != (min::uns32) ef )
-		{
-		    mexas::compile_error
-			( pp, "bad exponent parameter;"
-			      " instruction ignored" );
+		if ( !  mexas::check_parameter
+		            ( instr.immedA, en,
+			      pp, "exponent" ) )
 		    continue;
-		}
-		instr.immedA = (min::uns32) ef;
 	    }
 	    min::pop ( variables );
 	    goto ARITHMETIC;
@@ -1673,20 +1707,11 @@ mex::module mexas::compile ( min::file file )
 			      " instruction ignored" );
 		    continue;
 		}
-		min::float64 nf =
-		    min::direct_float_of ( nn );
-		if ( nf < 0
-		     ||
-		     nf >= (1ul << 32 )
-		     ||
-		     nf != (min::uns32) nf )
-		{
-		    mexas::compile_error
-			( pp, "bad nnext parameter;"
-			      " instruction ignored" );
+		min::uns32 nnext;
+		if ( !  mexas::check_parameter
+		            ( nnext, nn,
+			      pp, "nnext" ) )
 		    continue;
-		}
-		min::uns32 nnext = (min::uns32) nf;
 
 		min::locatable_gen trace_info;
 	        min::uns32 tvars =
@@ -1795,20 +1820,11 @@ mex::module mexas::compile ( min::file file )
 			      " instruction ignored" );
 		    continue;
 		}
-		min::float64 nf =
-		    min::direct_float_of ( nn );
-		if ( nf < 0
-		     ||
-		     nf >= (1ul << 32 )
-		     ||
-		     nf != (min::uns32) nf )
-		{
-		    mexas::compile_error
-			( pp, "bad nresults parameter;"
-			      " instruction ignored" );
+		min::uns32 nresults;
+		if ( !  mexas::check_parameter
+		            ( nresults, nn,
+			      pp, "nresults" ) )
 		    continue;
-		}
-		min::uns32 nresults = (min::uns32) nf;
 		instr.immedB = L;
 		instr.immedC = nresults;
 		mexas::push_instr ( instr, pp );
@@ -1965,20 +1981,11 @@ mex::module mexas::compile ( min::file file )
 			      " instruction ignored" );
 		    continue;
 		}
-		min::float64 nf =
-		    min::direct_float_of ( na );
-		if ( nf < 0
-		     ||
-		     nf >= (1ul << 32 )
-		     ||
-		     nf != (min::uns32) nf )
-		{
-		    mexas::compile_error
-			( pp, "bad nargs parameter;"
-			      " instruction ignored" );
+		min::uns32 nargs;
+		if ( !  mexas::check_parameter
+		            ( nargs, na,
+			      pp, "nargs" ) )
 		    continue;
-		}
-		min::uns32 nargs = (min::uns32) nf;
 
 		if ( ip->immedA > nargs )
 		{
@@ -2083,10 +2090,41 @@ mex::module mexas::compile ( min::file file )
 	    case mex::PUSHV:
 	    {
 		min::uns32 level;
-	        min::gen lev = mexas::get_num ( index );
-		if ( lev == min::NONE() )
+	        min::gen nl = mexas::get_num ( index );
+		if ( nl == min::NONE() )
 		    level = L;
-		// else TBD
+		else if ( !  mexas::check_parameter
+		                 ( level, nl,
+			           pp, "level", true ) )
+		    continue;
+
+		min::gen new_name =
+		    mexas::get_name ( index );
+		if ( new_name != min::NONE() )
+		    check_new_name ( new_name, pp );
+		else
+		    new_name =
+		        mexas::get_star ( index );
+		if ( new_name == min::NONE() )
+		    new_name = mexas::star;
+
+		char buffer[30];
+		min::gen name;
+		
+		// TBD
+
+		min::gen labbuf[2] =
+		    { new_name, name };
+		min::locatable_gen trace_info
+		    ( min::new_lab_gen
+			  ( labbuf, 2 ) );
+		mexas::push_instr
+		    ( instr, pp, trace_info );
+
+		mexas::push_variable
+		    ( mexas::variables, new_name,
+		      L, mexas::depth[L] );
+		goto TRACE;
 
 		break;
 	    }
