@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Aug 22 21:55:35 EDT 2023
+// Date:	Wed Aug 23 05:44:21 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1279,7 +1279,11 @@ mex::module mexas::compile ( min::file file )
 	case mex::A1:
 	    if ( SP < mexas::stack_limit + 1 )
 	        goto STACK_TOO_SHORT;
-	    if ( op_code == mex::POWI )
+	    if ( op_code == mex::PUSHV )
+	        goto NON_ARITHMETIC;
+		    // PUSHV executes as A1 and
+		    // compiles mostly as NONA.
+	    else if ( op_code == mex::POWI )
 	    {
 	        min::gen en = mexas::get_num ( index );
 		if ( en == min::NONE() )
@@ -1483,7 +1487,7 @@ mex::module mexas::compile ( min::file file )
 		mexas::push_variable
 		    ( mexas::variables, new_name,
 		      L, mexas::depth[L] );
-		goto TRACE;
+		break;
 	    }
 	    case mex::PUSHI:
 	    {
@@ -1512,7 +1516,7 @@ mex::module mexas::compile ( min::file file )
 		mexas::push_variable
 		    ( mexas::variables, new_name,
 		      L, mexas::depth[L] );
-		goto TRACE;
+		break;
 	    }
 	    case ::POP:
 	    {
@@ -1570,7 +1574,7 @@ mex::module mexas::compile ( min::file file )
 		mexas::push_instr
 		    ( instr, pp, trace_info );
 		min::pop ( mexas::variables );
-		goto TRACE;
+		break;
 	    }
 	    case ::LABEL:
 	    {
@@ -1687,7 +1691,7 @@ mex::module mexas::compile ( min::file file )
 			( trace_info, index, pp );
 		mexas::begx
 		    ( instr, 0, tvars, trace_info, pp );
-		goto TRACE;
+		break;
 	    }
 	    case mex::END:
 	    {
@@ -1697,7 +1701,7 @@ mex::module mexas::compile ( min::file file )
 			( trace_info, index, pp );
 		mexas::endx
 		    ( instr, tvars, trace_info, pp );
-		goto TRACE;
+		break;
 	    }
 	    case mex::BEGL:
 	    {
@@ -1722,7 +1726,7 @@ mex::module mexas::compile ( min::file file )
 		mexas::begx
 		    ( instr, nnext, tvars, trace_info,
 		             pp );
-		goto TRACE;
+		break;
 	    }
 	    case mex::ENDL:
 	    {
@@ -1732,7 +1736,7 @@ mex::module mexas::compile ( min::file file )
 			( trace_info, index, pp );
 		mexas::endx
 		    ( instr, tvars, trace_info, pp );
-		goto TRACE;
+		break;
 	    }
 	    case mex::CONT:
 	    {
@@ -1742,7 +1746,7 @@ mex::module mexas::compile ( min::file file )
 			( trace_info, index, pp );
 		mexas::cont
 		    ( instr, tvars, trace_info, pp );
-		goto TRACE;
+		break;
 	    }
 	    case mex::BEGF:
 	    {
@@ -1790,7 +1794,7 @@ mex::module mexas::compile ( min::file file )
 			( mexas::variables,
 			  statement[first+i],
 			  L, mexas::depth[L] );
-		goto TRACE;
+		break;
 	    }
 	    case mex::ENDF:
 	    {
@@ -2099,6 +2103,7 @@ mex::module mexas::compile ( min::file file )
 		                 ( level, nl,
 			           pp, "level", true ) )
 		    continue;
+		instr.immedB = level;
 
 		min::gen new_name =
 		    mexas::get_name ( index );
@@ -2116,8 +2121,6 @@ mex::module mexas::compile ( min::file file )
 		mexas::push_variable
 		    ( mexas::variables, new_name,
 		      L, mexas::depth[L] );
-		goto TRACE;
-
 		break;
 	    }
 	    }
@@ -2162,8 +2165,10 @@ mex::module mexas::compile ( min::file file )
     process->trace_flags = mexas::run_trace_flags;
     process->limit = mex::run_counter_limit;
     mex::run_process ( process );
+    if ( process->state != mex::MODULE_END )
+        return min::NULL_STUB;
 
-    // TBD: check for errors, make globals.
+    // TBD: make globals.
 
     min::push ( mexas::modules ) = m;
 

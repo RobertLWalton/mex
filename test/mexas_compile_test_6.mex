@@ -1,0 +1,66 @@
+// MEXAS Compile Test 3 Input
+//
+// File:	mexas_compile_test_6.in
+// Author:	Bob Walton (walton@acm.org)
+// Date:	Wed Aug 23 03:50:47 EDT 2023
+//
+// The authors have placed this program in the public
+// domain; they make no warranty and accept no liability
+// for this program.
+
+// Visible Variables and PUSH{NARGS,V} Test.
+//
+BEGF F1 F1ARG1
+    PUSHI -1 IMMED1
+    BEGF F2 F2ARG1 F2ARG2
+        PUSHI -2 IMMED2
+        BEGF F3 F3ARG1 F3ARG2 F3ARG3
+	    PUSHI -3 IMMED3
+
+	    PUSH F1ARG1
+	    PUSH F2ARG1
+	    PUSH F2ARG2
+	    PUSH F3ARG1
+	    PUSH F3ARG1
+	    PUSH F3ARG1
+
+	    PUSH IMMED1
+	    PUSH IMMED2
+	    PUSH IMMED3
+
+	    PUSHNARGS 1
+	    PUSHNARGS 2
+	    PUSHNARGS 3
+	    PUSHNARGS
+	    PUSHNARGS 0
+	    PUSHNARGS -1
+	    PUSHNARGS -2
+
+	    PUSHI 1
+	    PUSHV
+	    PUSHI 2
+	    PUSHV 0
+	    PUSHI 3
+	    PUSHV
+
+	    PUSHI 1
+	    PUSHV -1
+	    PUSHI 2
+	    PUSHV 2
+
+	    PUSHI 1
+	    PUSHV 1
+
+
+	ENDF
+	PUSHI 3001
+	PUSHI 3002
+	PUSHI 3003
+	CALL F3 3
+    ENDF
+    PUSHI 2001
+    PUSHI 2002
+    CALL F2 2
+ENDF
+PUSHI 1001
+CALL F1 1

@@ -239,7 +239,7 @@
 
 \author{Robert L. Walton}
 
-\date{August 21, 2023}
+\date{August 23, 2023}
  
 \maketitle
 
@@ -1123,12 +1123,11 @@ are explained in Tracing and Exceptions, \itemref{TRACING-AND-EXCEPTIONS}.
     & to IEEE 64-bit floating point.
 \\\hline
 \TT{PUSHV}
-    & Replace the top stack value \TT{V} with the value of the stack vector \\
-    & element with index \TT{fp[immedB] - V}.  \TT{V} must convert to an
-      integer \\
-    & in the range \TT{[1,p->nargs[immedB]]},
-    else an invalid exception is \\
-    & raised and the result is a \TT{NaN}.
+    & Replace the top stack value \TT{V} with the value of the stack element \\
+    & with index \TT{p->fp[immedB] - p->nargs[immedB] + V - 1}. \\ 
+    & \TT{V} must convert to an integer in the
+      range \TT{[1,p->nargs[immedB]]}, \\
+    & else an invalid exception is raised and the result is a \TT{NaN}.
 \\\hline
 \end{tabular}
 \end{center}

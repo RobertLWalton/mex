@@ -1,0 +1,3 @@
+line ####:
+A line in a file with no ending line feed!<END-OF-FILE>
+    A line in a file with no ending line "feed!"

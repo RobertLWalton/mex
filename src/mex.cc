@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Aug 23 03:46:06 EDT 2023
+// Date:	Wed Aug 23 04:48:49 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -441,7 +441,6 @@ static bool optimized_run_process ( mex::process p )
 	        goto ERROR_EXIT;
 	    if ( sp <= spbegin )
 	        goto ERROR_EXIT;
-	    min::uns32 k = p->fp[j];
 	    min::float64 f = FG ( sp[-1] );
 	    min::float64 ff = floor ( f );
 	    if ( std::isnan ( ff )
@@ -456,8 +455,8 @@ static bool optimized_run_process ( mex::process p )
 	    else
 	    {
 		min::uns32 i = (int) ff;
-		k -= i;
-		sp[-1] = spbegin[k];
+		min::uns32 k = p->fp[j] - p->nargs[j];
+		sp[-1] = spbegin[k + i - 1];
 	    }
 	    break;
 	}
@@ -1278,7 +1277,6 @@ bool mex::run_process ( mex::process p )
 		    message = "invalid immedB";
 		    goto INNER_FATAL;
 		}
-		min::uns32 k = p->fp[j];
 		min::float64 ff = floor ( arg1 );
 		if ( std::isnan ( ff )
 		     ||
@@ -1292,9 +1290,10 @@ bool mex::run_process ( mex::process p )
 		else
 		{
 		    min::uns32 i = (min::uns32) ff;
-		    k -= i;
+		    min::uns32 k =
+		        p->fp[j] - p->nargs[j];
 		    result = MUP::direct_float_of
-		                ( spbegin[k] );
+		                ( spbegin[k + i - 1] );
 		}
 		break;
 	    }
@@ -1368,8 +1367,11 @@ bool mex::run_process ( mex::process p )
 		else if ( op_code == mex::PUSHV )
 		    sprintf
 			( buffer,
-			  " = %.15g <= fp[%u][-%.15g]",
-			  result, pc->immedB, arg1 );
+			  " = %.15g"
+			  " <= fp[%u]"
+			  "[-nargs[%u]+%.15g-1]",
+			  result, pc->immedB,
+			  pc->immedB, arg1 );
 
 		else if ( op_info->op_type == mex::A1 )
 		    sprintf
@@ -1651,9 +1653,10 @@ bool mex::run_process ( mex::process p )
 		    message = "invalid immedB";
 		    goto INNER_FATAL;
 		}
-		if ( immedA > p->fp[i] )
+		if (    immedA < 1
+		     || immedA > p->nargs[immedB] )
 		{
-		    message = "immedA too large";
+		    message = "immedA out of range";
 		    goto INNER_FATAL;
 		}
 		value = spbegin
@@ -1848,6 +1851,8 @@ bool mex::run_process ( mex::process p )
 		while ( q < qend )
 		    * ++ new_sp = * ++ q;
 		sp = new_sp;
+
+		p->level = ret->saved_level;
 		-- p->trace_depth;
 
 		m = em;
@@ -2258,6 +2263,9 @@ FATAL:
 	       << p->return_stack->length
 	       << ", RETURN STACK MAX_LENGTH = "
 	       << p->return_stack->max_length
+	       << min::indent
+	       << "PROCESS LEXICAL LEVEL = "
+	       << p->level
 	       << min::eom;
 		        
     return false;

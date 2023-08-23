@@ -1,0 +1,156 @@
+// MEXAS Compile Test 3 Input
+//
+// File:        mexas_compile_test_6.in
+// Author:      Bob Walton (walton@acm.org)
+// Date:        Wed Aug 23 03:50:47 EDT 2023
+//
+// The authors have placed this program in the public
+// domain; they make no warranty and accept no liability
+// for this program.
+
+// Visible Variables and PUSH{NARGS,V} Test.
+//
+BEGF F1 F1ARG1
+    [13:0;1] BEGF T_BEGF 1 1 0 [$ MISSING $]; [< F1 F1ARG1 >]
+    PUSHI -1 IMMED1
+    [14:1;2] PUSHI T_PUSH 0 0 0 -1; IMMED1
+    BEGF F2 F2ARG1 F2ARG2
+    [15:2;4] BEGF T_BEGF 2 2 0 [$ MISSING $]; [< F2 F2ARG1 F2ARG2 >]
+        PUSHI -2 IMMED2
+    [16:3;5] PUSHI T_PUSH 0 0 0 -2; IMMED2
+        BEGF F3 F3ARG1 F3ARG2 F3ARG3
+    [17:4;8] BEGF T_BEGF 3 3 0 [$ MISSING $]; [< F3 F3ARG1 F3ARG2
+    F3ARG3 >]
+            PUSHI -3 IMMED3
+    [18:5;9] PUSHI T_PUSH 0 0 0 -3; IMMED3
+            PUSH F1ARG1
+    [20:6;10] PUSHA T_PUSH 1 1 0 [$ MISSING $]; [< F1ARG1 * >]
+            PUSH F2ARG1
+    [21:7;11] PUSHA T_PUSH 2 2 0 [$ MISSING $]; [< F2ARG1 * >]
+            PUSH F2ARG2
+    [22:8;12] PUSHA T_PUSH 1 2 0 [$ MISSING $]; [< F2ARG2 * >]
+            PUSH F3ARG1
+    [23:9;13] PUSHS T_PUSH 6 0 0 [$ MISSING $]; [< F3ARG1 * >]
+            PUSH F3ARG1
+    [24:10;14] PUSHS T_PUSH 7 0 0 [$ MISSING $]; [< F3ARG1 * >]
+            PUSH F3ARG1
+    [25:11;15] PUSHS T_PUSH 8 0 0 [$ MISSING $]; [< F3ARG1 * >]
+            PUSH IMMED1
+    [27:12;16] PUSHL T_PUSH 0 1 0 [$ MISSING $]; [< IMMED1 * >]
+            PUSH IMMED2
+    [28:13;17] PUSHL T_PUSH 0 2 0 [$ MISSING $]; [< IMMED2 * >]
+            PUSH IMMED3
+    [29:14;18] PUSHS T_PUSH 8 0 0 [$ MISSING $]; [< IMMED3 * >]
+            PUSHNARGS 1
+    [31:15;19] PUSHNARGS T_PUSH 0 1 0 [$ MISSING $]; *
+            PUSHNARGS 2
+    [32:16;20] PUSHNARGS T_PUSH 0 2 0 [$ MISSING $]; *
+            PUSHNARGS 3
+    [33:17;21] PUSHNARGS T_PUSH 0 3 0 [$ MISSING $]; *
+            PUSHNARGS
+    [34:18;22] PUSHNARGS T_PUSH 0 3 0 [$ MISSING $]; *
+            PUSHNARGS 0
+    [35:19;23] PUSHNARGS T_PUSH 0 3 0 [$ MISSING $]; *
+            PUSHNARGS -1
+    [36:20;24] PUSHNARGS T_PUSH 0 2 0 [$ MISSING $]; *
+            PUSHNARGS -2
+    [37:21;25] PUSHNARGS T_PUSH 0 1 0 [$ MISSING $]; *
+            PUSHI 1
+    [39:22;26] PUSHI T_PUSH 0 0 0 1; *
+            PUSHV
+    [40:23;27] PUSHV T_PUSH 0 3 0 [$ MISSING $]; *
+            PUSHI 2
+    [41:24;28] PUSHI T_PUSH 0 0 0 2; *
+            PUSHV 0
+    [42:25;29] PUSHV T_PUSH 0 3 0 [$ MISSING $]; *
+            PUSHI 3
+    [43:26;30] PUSHI T_PUSH 0 0 0 3; *
+            PUSHV
+    [44:27;31] PUSHV T_PUSH 0 3 0 [$ MISSING $]; *
+            PUSHI 1
+    [46:28;32] PUSHI T_PUSH 0 0 0 1; *
+            PUSHV -1
+    [47:29;33] PUSHV T_PUSH 0 2 0 [$ MISSING $]; *
+            PUSHI 2
+    [48:30;34] PUSHI T_PUSH 0 0 0 2; *
+            PUSHV 2
+    [49:31;35] PUSHV T_PUSH 0 2 0 [$ MISSING $]; *
+            PUSHI 1
+    [51:32;36] PUSHI T_PUSH 0 0 0 1; *
+            PUSHV 1
+    [52:33;37] PUSHV T_PUSH 0 1 0 [$ MISSING $]; *
+        ENDF
+    [17:4;37] BEGF T_BEGF 3 3 31 [$ MISSING $]; [< F3 F3ARG1 F3ARG2
+    F3ARG3 >]
+    [55:34;5] ENDF T_ENDF 0 3 0 [$ MISSING $]; [$ MISSING $]
+        PUSHI 3001
+    [56:35;6] PUSHI T_PUSH 0 0 0 3001; *
+        PUSHI 3002
+    [57:36;7] PUSHI T_PUSH 0 0 0 3002; *
+        PUSHI 3003
+    [58:37;8] PUSHI T_PUSH 0 0 0 3003; *
+        CALL F3 3
+    [59:38;5] CALLM T_CALLM 3 0 4 [$ MISSING $]; [< F3 >]
+    ENDF
+    [15:2;5] BEGF T_BEGF 2 2 38 [$ MISSING $]; [< F2 F2ARG1 F2ARG2 >]
+    [60:39;2] ENDF T_ENDF 0 2 0 [$ MISSING $]; [$ MISSING $]
+    PUSHI 2001
+    [61:40;3] PUSHI T_PUSH 0 0 0 2001; *
+    PUSHI 2002
+    [62:41;4] PUSHI T_PUSH 0 0 0 2002; *
+    CALL F2 2
+    [63:42;2] CALLM T_CALLM 2 0 2 [$ MISSING $]; [< F2 >]
+ENDF
+    [13:0;2] BEGF T_BEGF 1 1 44 [$ MISSING $]; [< F1 F1ARG1 >]
+    [64:43;0] ENDF T_ENDF 0 1 0 [$ MISSING $]; [$ MISSING $]
+PUSHI 1001
+    [65:44;1] PUSHI T_PUSH 0 0 0 1001; *
+CALL F1 1
+    [66:45;0] CALLM T_CALLM 1 0 0 [$ MISSING $]; [< F1 >]
+* {12:0,0,0} BEGF:
+* {64:44,0,1} PUSHI:  * <=== 1001
+*** {12:0,1,2} CALLM: F1, F1ARG1=1001
+*** {13:1,1,3} PUSHI:  IMMED1 <=== -1
+*** {14:2,2,4} BEGF:
+*** {60:40,2,5} PUSHI:  * <=== 2001
+*** {61:41,3,6} PUSHI:  * <=== 2002
+***** {14:2,4,7} CALLM: F2, F2ARG1=2001, F2ARG2=2002
+***** {15:3,4,8} PUSHI:  IMMED2 <=== -2
+***** {16:4,5,9} BEGF:
+***** {55:35,5,10} PUSHI:  * <=== 3001
+***** {56:36,6,11} PUSHI:  * <=== 3002
+***** {57:37,7,12} PUSHI:  * <=== 3003
+******* {16:4,8,13} CALLM: F3, F3ARG1=3001, F3ARG2=3002, F3ARG3=3003
+******* {17:5,8,14} PUSHI:  IMMED3 <=== -3
+******* {19:6,9,15} PUSHA:  * <=== F1ARG1 = 1001
+******* {20:7,10,16} PUSHA:  * <=== F2ARG1 = 2001
+******* {21:8,11,17} PUSHA:  * <=== F2ARG2 = 2002
+******* {22:9,12,18} PUSHS:  * <=== F3ARG1 = 3001
+******* {23:10,13,19} PUSHS:  * <=== F3ARG1 = 3001
+******* {24:11,14,20} PUSHS:  * <=== F3ARG1 = 3001
+******* {26:12,15,21} PUSHL:  * <=== IMMED1 = -1
+******* {27:13,16,22} PUSHL:  * <=== IMMED2 = -2
+******* {28:14,17,23} PUSHS:  * <=== IMMED3 = -3
+******* {30:15,18,24} PUSHNARGS:  * <=== nargs[1] = 1
+******* {31:16,19,25} PUSHNARGS:  * <=== nargs[2] = 2
+******* {32:17,20,26} PUSHNARGS:  * <=== nargs[3] = 3
+******* {33:18,21,27} PUSHNARGS:  * <=== nargs[3] = 3
+******* {34:19,22,28} PUSHNARGS:  * <=== nargs[3] = 3
+******* {35:20,23,29} PUSHNARGS:  * <=== nargs[2] = 2
+******* {36:21,24,30} PUSHNARGS:  * <=== nargs[1] = 1
+******* {38:22,25,31} PUSHI:  * <=== 1
+******* {39:23,26,32} PUSHV: * = 3001 <= fp[3][-nargs[3]+1-1]
+******* {40:24,26,33} PUSHI:  * <=== 2
+******* {41:25,27,34} PUSHV: * = 3002 <= fp[3][-nargs[3]+2-1]
+******* {42:26,27,35} PUSHI:  * <=== 3
+******* {43:27,28,36} PUSHV: * = 3003 <= fp[3][-nargs[3]+3-1]
+******* {45:28,28,37} PUSHI:  * <=== 1
+******* {46:29,29,38} PUSHV: * = 2001 <= fp[2][-nargs[2]+1-1]
+******* {47:30,29,39} PUSHI:  * <=== 2
+******* {48:31,30,40} PUSHV: * = 2002 <= fp[2][-nargs[2]+2-1]
+******* {50:32,30,41} PUSHI:  * <=== 1
+******* {51:33,31,42} PUSHV: * = 1001 <= fp[1][-nargs[1]+1-1]
+***** {58:38,5,43} ENDF: F3
+*** {62:42,2,44} ENDF: F2
+* {65:45,0,45} ENDF: F1
+mexas_compile_test_6.mex successfully compiled
