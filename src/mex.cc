@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Aug 22 21:27:19 EDT 2023
+// Date:	Wed Aug 23 03:46:06 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1665,11 +1665,6 @@ bool mex::run_process ( mex::process p )
 		    message = "invalid immedB";
 		    goto INNER_FATAL;
 		}
-		if ( p->return_stack->length == 0 )
-		{
-		    message = "return stack empty";
-		    goto INNER_FATAL;
-		}
 		if ( sp >= spend )
 		{
 		    message =
@@ -2002,6 +1997,10 @@ bool mex::run_process ( mex::process p )
 		        p->printer << " "
 			           << tinfo
 				   << " <===";
+		    if ( op_code == mex::PUSHNARGS )
+		        p->printer << " nargs["
+			           << immedB
+				   << "] =";
 		    p->printer << " " << value;
 		    break;
 		}
