@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Aug 20 07:28:37 EDT 2023
+// Date:	Tue Aug 22 21:27:19 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1291,7 +1291,7 @@ bool mex::run_process ( mex::process p )
 		}
 		else
 		{
-		    min::uns32 i = (int) ff;
+		    min::uns32 i = (min::uns32) ff;
 		    k -= i;
 		    result = MUP::direct_float_of
 		                ( spbegin[k] );
@@ -1364,18 +1364,26 @@ bool mex::run_process ( mex::process p )
 			  result,
 			  op_info->oper, arg1,
 			  pc->immedA );
+
+		else if ( op_code == mex::PUSHV )
+		    sprintf
+			( buffer,
+			  " = %.15g <= fp[%u][-%.15g]",
+			  result, pc->immedB, arg1 );
+
 		else if ( op_info->op_type == mex::A1 )
 		    sprintf
 			( buffer,
 			  " = %.15g <= %s %.15g",
-			  result,
-			  op_info->oper, arg1 );
+			  result, op_info->oper, arg1 );
+
 		else
 		    sprintf
 			( buffer,
 			  " = %.15g <= %.15g %s %.15g",
 			  result,
 			  arg1, op_info->oper, arg2 );
+
 		p->printer << buffer << min::eom;
 
 	        RESTORE;

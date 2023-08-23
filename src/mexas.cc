@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Aug 22 06:16:24 EDT 2023
+// Date:	Tue Aug 22 21:55:35 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -24,6 +24,8 @@
 
 # define L mexas::lexical_level
 # define SP mexas::variables->length
+
+# define MUP min::unprotected
 
 min::uns8 mexas::compile_trace_flags = 0;
 min::uns32 mexas::run_trace_flags = mex::T_ALWAYS;
@@ -926,7 +928,7 @@ bool mexas::check_parameter
 	  const min::phrase_position & pp,
 	  const char * pname, bool is_level )
 {
-    min::float64 nf = min::direct_float_of ( n );
+    min::float64 nf = MUP::direct_float_of ( n );
 
     if ( std::isnan ( nf )
 	 ||
@@ -2108,18 +2110,8 @@ mex::module mexas::compile ( min::file file )
 		if ( new_name == min::NONE() )
 		    new_name = mexas::star;
 
-		char buffer[30];
-		min::gen name;
-		
-		// TBD
-
-		min::gen labbuf[2] =
-		    { new_name, name };
-		min::locatable_gen trace_info
-		    ( min::new_lab_gen
-			  ( labbuf, 2 ) );
 		mexas::push_instr
-		    ( instr, pp, trace_info );
+		    ( instr, pp, new_name );
 
 		mexas::push_variable
 		    ( mexas::variables, new_name,
