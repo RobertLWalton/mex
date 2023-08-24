@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Aug 23 04:48:49 EDT 2023
+// Date:	Thu Aug 24 14:46:10 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -853,6 +853,10 @@ mex::op_info mex::op_infos [ mex::NUMBER_OF_OP_CODES ] =
     { mex::TRACE, NONA, T_ALWAYS, "TRACE", NULL },
     { mex::WARN, NONA, T_ALWAYS, "WARN", NULL },
     { mex::ERROR, NONA, T_ALWAYS, "ERROR", NULL },
+    { mex::SET_EXCEPTS, NONA, T_SET_EXCEPTS,
+                          "SET_EXCEPTS", NULL },
+    { mex::TRACE_EXCEPTS, NONA, T_ALWAYS,
+                          "TRACE_EXCEPTS", NULL },
     { mex::BEGF, NONA, T_BEGF, "BEGF", NULL },
     { mex::ENDF, NONA, T_ENDF, "ENDF", NULL },
     { mex::CALLM, NONA, T_CALLM, "CALLM", NULL },
@@ -863,7 +867,7 @@ mex::op_info mex::op_infos [ mex::NUMBER_OF_OP_CODES ] =
     { mex::PUSHV, A1, T_PUSH, "PUSHV", "pushv" },
 };
 
-// Operation Information Table.
+// Trace Class Information Table.
 //
 mex::trace_class_info mex::trace_class_infos
 	[ mex::NUMBER_OF_TRACE_CLASSES ] =
@@ -877,7 +881,7 @@ mex::trace_class_info mex::trace_class_infos
     { T_JMPS, "JMPS" },
     { T_JMPF, "JMPF" },
     { T_NOP, "NOP" },
-    { T_SET_TRACE, "SET_TRACE" },
+    { T_SET_EXCEPTS, "SET_EXCEPTS" },
     { T_BEG, "BEG" },
     { T_END, "END" },
     { T_BEGL, "BEGL" },
@@ -890,6 +894,17 @@ mex::trace_class_info mex::trace_class_infos
     { T_RET, "RET" },
 };
 
+// Excepts Information Table.
+//
+mex::except_info mex::except_infos
+	[ mex::NUMBER_OF_EXCEPTS ] =
+{
+    { FE_DIVBYZERO, "DIVBYZERO" },
+    { FE_INEXACT, "INEXACT" },
+    { FE_INVALID, "INVALID" },
+    { FE_OVERFLOW, "OVERFLOW" },
+    { FE_UNDERFLOW, "UNDERFLOW" }
+};
 
 static void check_op_infos ( void )
 {
@@ -2136,8 +2151,10 @@ bool mex::run_process ( mex::process p )
 		break;
 	    }
 	    case mex::SET_TRACE:
-	        p->trace_flags = immedA | ( 1 << mex::T_ALWAYS );
-	        p->trace_flags &= ~ ( 1 << mex::T_NEVER );
+	        p->trace_flags =
+		    immedA | ( 1 << mex::T_ALWAYS );
+	        p->trace_flags &=
+		    ~ ( 1 << mex::T_NEVER );
 	        break;
 	    case mex::TRACE:
 	    case mex::WARN:

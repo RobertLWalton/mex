@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat Aug 19 15:28:57 EDT 2023
+// Date:	Thu Aug 24 14:45:35 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -82,6 +82,8 @@ enum op_code {
     ENDL, CONT,
     SET_TRACE,
     TRACE, WARN, ERROR,
+    SET_EXCEPTS,
+    TRACE_EXCEPTS,
     BEGF, ENDF,
     CALLM, CALLG,
     RET,
@@ -106,7 +108,7 @@ enum trace_class
 	// JMP..., is T_JMPS.  +1 is added at run-time
 	// if the jump fails.
     T_NOP,
-    T_SET_TRACE,
+    T_SET_EXCEPTS,
     T_BEG,
     T_END,
     T_BEGL,
@@ -166,6 +168,14 @@ struct trace_class_info
         // Name of trace_class: e.g, "T_POP".
 };
 extern trace_class_info trace_class_infos[];
+
+struct except_info
+{
+    int mask;
+    const char * name;
+};
+const int NUMBER_OF_EXCEPTS = 5;
+extern except_info except_infos[NUMBER_OF_EXCEPTS];
 
 
 // Modules
