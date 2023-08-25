@@ -20,6 +20,6 @@
 * {75:62,2,93} POPS: * <=== * = 100
 * {76:63,1,94} POPS: * <=== X = 100
 * {81:64,0,95} SET_TRACE: ENDF CALLM CALLG RET
-* {97:76,2,99} CALLM: MIN, ARG1=23, ARG2=157
-*** {91:72,3,104} RET: MIN, Z=23
+* {97:76,2,99} CALLM to BEGF: MIN, ARG1=23, ARG2=157
+*** {91:72,3,104} RET to CALLM: MIN, Z=23
 mexas_compile_test_5.mex successfully compiled

@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Aug 25 17:14:47 EDT 2023
+// Date:	Fri Aug 25 17:41:44 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1599,6 +1599,9 @@ bool mex::run_process ( mex::process p )
 		tinfo = m->trace_info[location];
 		// CALL.../RET/ENDF replace this
 		// before tracing is executed.
+	    min::uns8 to_op_code = mex::_NONE_;
+		// CALL.../RET/ENDF replace this
+		// before tracing is executed.
 	     
 
 	    // Pre-trace check for fatal errors.
@@ -1884,6 +1887,9 @@ bool mex::run_process ( mex::process p )
 			tinfo = em->trace_info[new_pc];
 		    else
 			tinfo  = min::MISSING();
+
+		    to_op_code =
+		        (& em[new_pc])->op_code;
 		}
 
 		min::uns32 new_fp = ret->saved_fp;
@@ -1947,6 +1953,8 @@ bool mex::run_process ( mex::process p )
 		    tinfo = cm->trace_info[immedC];
 		else
 		    tinfo  = min::MISSING();
+
+		to_op_code = target->op_code;
 
 		break;
 	    }
@@ -2061,6 +2069,12 @@ bool mex::run_process ( mex::process p )
 
 		default:
 		{
+		    if ( to_op_code != mex::_NONE_ )
+		        p->printer << " to "
+			           << mex::op_infos
+				        [ to_op_code ]
+					.name;
+
 		    min::lab_ptr lp ( tinfo );
 		    if ( lp != min::NULL_STUB
 		         &&
