@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Aug 25 16:10:10 EDT 2023
+// Date:	Fri Aug 25 17:14:47 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1969,8 +1969,7 @@ bool mex::run_process ( mex::process p )
 		    min::MISSING_PHRASE_POSITION;
 
 		print_message_header ( p, pp )
-		    << " " << op_infos[op_code].name
-		    << ": " << min::bom;
+		    << " " << op_infos[op_code].name;
 
 		switch ( op_code )
 		{
@@ -1980,6 +1979,7 @@ bool mex::run_process ( mex::process p )
 		case mex::PUSHA:
 		case mex::POPS:
 		{
+		    p->printer << ":";
 		    min::lab_ptr lp ( tinfo );
 		    if ( lp != min::NULL_STUB
 		         &&
@@ -1991,12 +1991,14 @@ bool mex::run_process ( mex::process p )
 				   << lp[0]
 				   << " =";
 		    }
-		    p->printer << " " << value;
+		    p->printer << " " << value
+		               << min::eol;
 		    break;
 		}
 		case mex::PUSHI:
 		case mex::PUSHNARGS:
 		{
+		    p->printer << ":";
 		    if ( min::is_str ( tinfo ) )
 		        p->printer << " "
 			           << tinfo
@@ -2005,11 +2007,14 @@ bool mex::run_process ( mex::process p )
 		        p->printer << " nargs["
 			           << immedB
 				   << "] =";
-		    p->printer << " " << value;
+		    p->printer << " " << value
+		               << min::eol;
 		    break;
 		}
 		case mex::SET_TRACE:
 		{
+		    p->printer << ": " << min::bom;
+		    bool first = true;
 		    for ( unsigned i = 0;
 		          i < mex::
 			    NUMBER_OF_TRACE_CLASSES;
@@ -2017,28 +2022,34 @@ bool mex::run_process ( mex::process p )
 		    {
 		        if ( immedA & (1 << i) )
 			{
+			    if ( first ) first = false;
+			    else p->printer << " ";
 			    p->printer
-			        << " " 
 				<< mex::
 				     trace_class_infos
 				         [i].name;
 			}
 		    }
+		    p->printer << min::eom;
 		    break;
 		}
 		case mex::SET_EXCEPTS:
 		{
+		    p->printer << ": " << min::bom;
 		    print_excepts
 		        ( p->printer, immedA,
 			  p->excepts_accumulator );
+		    p->printer << min::eom;
 		    break;
 		}
 		case mex::TRACE_EXCEPTS:
 		{
+		    p->printer << ": " << min::bom;
 		    print_excepts
 		        ( p->printer,
 			  p->excepts_accumulator,
 			  p->excepts );
+		    p->printer << min::eom;
 		    break;
 		}
 		case mex::BEGF:
@@ -2055,6 +2066,7 @@ bool mex::run_process ( mex::process p )
 		         &&
 			 min::lablen ( lp ) > 0 )
 		    {
+			p->printer << ": " << min::bom;
 		        min::uns32 len =
 			    min::lablen ( lp );
 		        p->printer << lp[0];
@@ -2071,13 +2083,12 @@ bool mex::run_process ( mex::process p )
 			    else
 			        p->printer << "?";
 			}
+			p->printer << min::eom;
 		    }
 		    break;
 		}
 
 		}
-
-		p->printer << min::eom;
 
 		if ( op_code == mex::ERROR )
 		{

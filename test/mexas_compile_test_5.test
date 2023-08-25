@@ -9,17 +9,17 @@
     ENDL: "End SUM loop iteration", next-SUM=15, next-I=7, LIMIT=6
 * {59:47,6,78} TRACE: "End of SUM loop", SUM=15, I=7, LIMIT=6
 * {64:51,0,82} WARN: "oh oh"
-* {65:52,0,83} SET_TRACE:  PUSH
-* {66:53,0,84} PUSHI:  X <=== 100
-* {67:54,1,85} PUSHS:  * <=== X = 100
-* {71:57,0,88} SET_TRACE:  PUSH POP
-* {72:58,0,89} PUSHI:  X <=== 100
-* {73:59,1,90} PUSHS:  * <=== X = 100
-* {74:60,2,91} PUSHS:  * <=== X = 100
+* {65:52,0,83} SET_TRACE: PUSH
+* {66:53,0,84} PUSHI: X <=== 100
+* {67:54,1,85} PUSHS: * <=== X = 100
+* {71:57,0,88} SET_TRACE: PUSH POP
+* {72:58,0,89} PUSHI: X <=== 100
+* {73:59,1,90} PUSHS: * <=== X = 100
+* {74:60,2,91} PUSHS: * <=== X = 100
 * {74:61,3,92} WARN: "This is X", X=100
-* {75:62,2,93} POPS:  * <=== * = 100
-* {76:63,1,94} POPS:  * <=== X = 100
-* {81:64,0,95} SET_TRACE:  ENDF CALLM CALLG RET
+* {75:62,2,93} POPS: * <=== * = 100
+* {76:63,1,94} POPS: * <=== X = 100
+* {81:64,0,95} SET_TRACE: ENDF CALLM CALLG RET
 * {97:76,2,99} CALLM: MIN, ARG1=23, ARG2=157
 *** {91:72,3,104} RET: MIN, Z=23
 mexas_compile_test_5.mex successfully compiled

@@ -44,13 +44,13 @@ CALL MIN 2 Z
     [29:11;1] CALLM T_CALLM 2 1 0 [$ MISSING $]; [< MIN Z >]
     STACKS: VARIABLES: Z
             FUNCTIONS: MIN
-* {14:0,0,0} BEGF:
-* {27:9,0,1} PUSHI:  X <=== 23
-* {28:10,1,2} PUSHI:  Y <=== 157
+* {14:0,0,0} BEGF
+* {27:9,0,1} PUSHI: X <=== 23
+* {28:10,1,2} PUSHI: Y <=== 157
 * {29:11,2,3} CALLM: MIN, ARG1=23, ARG2=157
-*** {16:1,2,4} PUSHS:  * <=== ARG1 = 23
-*** {17:2,3,5} PUSHS:  * <=== ARG2 = 157
+*** {16:1,2,4} PUSHS: * <=== ARG1 = 23
+*** {17:2,3,5} PUSHS: * <=== ARG2 = 157
 *** {18:3,4,6} JMPLT:  ITS-ARG1 is successful: true <= 23 < 157
-*** {22:6,2,7} PUSHS:  * <=== ARG1 = 23
+*** {22:6,2,7} PUSHS: * <=== ARG1 = 23
 *** {23:7,3,8} RET: MIN, Z=23
 mexas_compile_test_3.mex successfully compiled
