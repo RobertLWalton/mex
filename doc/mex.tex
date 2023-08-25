@@ -714,7 +714,8 @@ The \ttikey{trace\_info}{of module} member of the \TT{module} points
 at a vector of \TT{min::gen} values such that for module \TT{m},
 \TT{m->\EOL trace\_\EOL info[i]} gives information that can be used
 to print trace messages for instruction \TT{m[i]}.  See
-Tracing and Exceptions, \itemref{TRACING-AND-EXCEPTIONS}.
+Trace-Info Based Trace Messages,
+\itemref{TRACE-INFO-BASED-TRACE-MESSAGES}.
 
 \section{Processes}
 \label{PROCESSES}
@@ -868,7 +869,8 @@ see \TT{mex::run\_process}, \pagref{MEX::RUN_PROCESS},
 The \TT{trace\_depth}, \TT{trace\_flags}, \TT{excepts},
 \TT{excepts\_accumuator}, and \TT{optimize}
 members of a process
-are explained in Tracing and Exceptions, \itemref{TRACING-AND-EXCEPTIONS}.
+are explained in Arithmetic Exceptions, \itemref{ARITHMETIC-EXCEPTIONS}
+and Instruction Tracing, \itemref{INSTRUCTION-TRACING}.
 
 
 \section{Instructions}
@@ -878,8 +880,8 @@ A MEX instruction (a \TT{mex::instr}, see \pagref{MEX::INSTR})
 consists of an \TT{op\_code}, \TT{trace\_class}, \TT{trace\_\EOL depth},
 and up to 4 immediate values,
 \TT{immedA}, \TT{immedB}, \TT{immedC}, and \TT{immedD}.
-\TT{Trace\_class} is explained in Tracing and Exceptions,
-\itemref{TRACING-AND-EXCEPTIONS}, and
+\TT{Trace\_class} is explained in Instruction Tracing,
+\itemref{INSTRUCTION-TRACING}, and
 \TT{trace\_depth} is explained in Trace Depth,
 \itemref{TRACE-DEPTH}.
 
@@ -904,8 +906,8 @@ mex::instr a_jump_instruction = {mex::JMP,mex::T_JMP,1,,10,,32};
 
 The arithmetic instruction set is in Figure~\ref{ARITHMETIC-INSTRUCTIONS}.
 IEEE 64-bit floating point operations and the C \TT{math.h}
-library are used.  See Tracing and Exceptions,
-\itemref{TRACING-AND-EXCEPTIONS} for error
+library are used.  See Arithmetic Exceptions,
+\itemref{ARITHMETIC-EXCEPTIONS} for error
 handling.
 
 The stack and flow control instruction set is in
@@ -1199,69 +1201,7 @@ Figure~\ref{HOUSEKEEPING-INSTRUCTIONS}.
 \label{HOUSEKEEPING-INSTRUCTIONS}
 \end{boxedfigure}
 
-
-\section{Tracing and Exceptions}
-\label{TRACING-AND-EXCEPTIONS}
-
-A process has two modes: \key{normal} and \key{optimized}, as
-determined by the \TT{optimize} member of the process.
-The default setting of the \TT{optimize} member of a process
-is \TT{false}.
-
-In normal mode, tracing of an instruction
-is controlled by the \key{trace class} $C$ of the instruction
-and the \key{trace flags} $F$ of the process.  If
-\TT{$F$ \& ( 1 <{}< $C$ ) != 0} the instruction is traced.
-
-In optimized mode, instructions are \underline{not} traced.
-
-Instructions in the \ttkey{ALWAYS} trace class are always
-traced.  These include the \TT{TRACE}, \TT{SET\_\EOL TRACE},
-\TT{WARN}, and \TT{ERROR} instructions.
-
-Instructions in the \ttkey{NEVER} trace class are never
-traced.  Typically there are compiler switches that will
-change to \TT{NEVER} the trace class stored in every instruction that
-does not have the \TT{ALWAYS} class.
-
-Each instruction trace message begins with:
-\begin{center}
-\TT{\{}{\em line-number}\TT{:}{\em code-vector-location}%
-                        \TT{,}{\em stack-length}%
-                        \TT{,}{\em process-counter}\TT{\}}
-\end{center}
-The {\em stack-length} is the number of values in the stack
-just before the traced instruction executes.
-The {\em process-counter} is the number of instruction executions
-since the process was originally initialized before the traced
-instruction executes.
-
-Arithmetic instructions that have errors raise exception flags.
-In normal mode, an error message is also produced if for exceptions
-that are enabled.  In both
-normal and optimized modes, an error message is produced
-when the process terminates if any enabled exception flags have been raised.
-See Arithmetic Exceptions, \itemref{ARITHMETIC-EXCEPTIONS}.
-
-\subsection{Arithmetic Tracing}
-\label{ARITHMETIC-TRACING}
-
-The trace message of an arithmetic instruction has the form:
-\begin{center}
-{\em op-code}\TT{:} {\em new-variable-name} \TT{=} {\em value}
-                    \TT{<=} {\em value}\QMARK{}
-                    {\em operator} {\em value}
-\end{center}
-except for the \TT{POWI} instruction whose trace message has the form:
-\begin{center}
-\TT{POWI:} {\em new-variable-name} \TT{=} {\em value}
-                    \TT{<=} \TT{pow} {\em exponent} {\em value}
-\end{center}
-If {\em new-variable-name} is not given in the instruction,
-\TT{*} is used instead.
-Note that arithmetic instructions are usually not traced.
-
-\subsection{Arithmetic Exceptions}
+\section{Arithmetic Exceptions}
 \label{ARITHMETIC-EXCEPTIONS}
 
 Arithmetic instructions (Figure~\ref{ARITHMETIC-INSTRUCTIONS})
@@ -1293,11 +1233,12 @@ associated with a flag bit defined in \TT{fenv.h}
 \end{tabular}
 \end{center}
 
-In normal mode, an instruction that raises an exception prints
+In non-optimized mode, an instruction that raises an exception prints
 an error message if the instruction raises any exception whose bit
 is on in the process's \TT{excepts} member.
 This error message is always followed by a trace of the instruction
-(regardless of the process trace flag settings).
+(regardless of the process trace flag settings): see
+Instruction Tracing, \itemref{INSTRUCTION-TRACING}.
 
 In optimized mode, instructions do not print error messages
 involving exceptions.
@@ -1320,7 +1261,162 @@ When the process is not running, it is stored in the latter.  When
 a process is optimized and is running and has not been interrupted,
 it is store in the hardware register.
 
-\subsection{Jump Tracing}
+
+\section{Instruction Tracing}
+\label{INSTRUCTION-TRACING}
+
+A process has two modes: \key{normal} and \key{optimized}, as
+determined by the \TT{optimize} member of the process.
+The default setting of the \TT{optimize} member of a process
+is \TT{false}.
+
+In normal mode, tracing of an instruction
+is controlled by the \key{trace class} $C$ of the instruction
+and the \key{trace flags} $F$ of the process.  If
+\TT{$F$ \& ( 1 <{}< $C$ ) != 0} the instruction is traced.
+
+In optimized mode, instructions are \underline{not} traced.
+
+Instructions in the \ttkey{ALWAYS} trace class are always
+traced.  These include the \TT{TRACE}, \TT{TRACE\_\EOL EXCEPTS},
+\TT{SET\_\EOL TRACE},
+\TT{WARN}, and \TT{ERROR} instructions.
+
+Instructions in the \ttkey{NEVER} trace class are never
+traced.  Typically there are compiler switches that will
+change to \TT{NEVER} the trace class stored in every instruction that
+does not have the \TT{ALWAYS} class
+(see The MEXAS Program, \itemref{THE-MEXAS-PROGRAM}).
+
+The trace classes are given in Figure \ref{TRACE-CLASSES-AND-GROUPS}.
+Also given there are trace groups that can be used for convenience
+to set the trace flags of a process to a pre-defined group of trace classes.
+Trace class names and trace group names are used by compiler switches
+which set the initial trace flags of processes, and by the
+\TT{SET\_EOL TRACE} instruction that sets the current trace flags
+of a process.
+
+Notice that all arithmetic instruction have the same
+trace class, all \TT{PUSH\ldots} instructions have the same trace
+class, and all conditional \TT{JMP\ldots} instructions have the
+same two trace classes, one for a successful jump and one for
+a failed jump.  Other instructions each have their own trace class,
+except for those with the \TT{ALWAYS} class.
+
+In C++ code trace class \TT{XX} is a number that is the value of
+the \TT{mex::T\_XX} constant.  Thus the trace class of \TT{ADD}
+is \TT{mex::T\_AOP}.
+
+
+\begin{boxedfigure}[t]
+
+\begin{center}
+
+\bigskip
+
+{\Large \bf Trace Classes}
+\\[2ex]
+\begin{tabular}{|l|p{5in}|}
+\hline
+\ttikey{NEVER}{trace class} & Instruction is never traced.
+\\\hline
+\ttikey{ALWAYS}{trace class} & Instruction is always traced.
+    Only the \TT{ERROR} instruction has this class.
+\\\hline
+\ttikey{AOP}{trace class} & Arithmetic instructions in Figure
+    \ref{ARITHMETIC-INSTRUCTIONS}.
+\\\hline
+\ttikey{PUSH}{trace class} & All \TT{PUSH\ldots} instructions in Figures
+    \ref{HOUSEKEEPING-INSTRUCTIONS} and
+    \ref{FUNCTION-INSTRUCTIONS}.
+\\\hline
+\ttikey{POP}{trace class} & The \TT{POP} instruction in Figure
+    \ref{HOUSEKEEPING-INSTRUCTIONS}.
+\\\hline
+\ttikey{JMP}{trace class} & The \TT{JMP} instruction.
+\\\hline
+\begin{tabular}[t]{@{}l@{}}
+\ttikey{JMPS}{trace class} \\
+\ttikey{JMPF}{trace class}
+\end{tabular} & \TT{JMP\ldots} instructions in
+	        Figure \ref{HOUSEKEEPING-INSTRUCTIONS}.
+		When compiled the instruction is given the \TT{JMPS}
+		class.  When executed, if the jump test succeeds
+		(jump is taken),
+		the instruction trace class is left unchanged, but if
+		the jump test fails (there is no actual jump),
+		the trace class is changed
+		to \TT{JMPF}.
+\\\hline
+\ttikey{XXX}{trace class} & Instruction with operation code \TT{XXX},
+                            for instructions not mentioned above
+			    (e.g., for \TT{NOP}, \TT{BEG}, etc.,
+			    but \underline{not} for \TT{ADD},
+			    \TT{PUSH}, \TT{JMPEQ}, \TT{ERROR}, etc.).
+\\\hline
+\end{tabular}
+\end{center}
+
+\bigskip
+
+\begin{center}
+{\Large \bf Trace Class Groups}
+\\[2ex]
+\begin{tabular}{|l|l|}
+\hline
+\ttmkey{ALL}{trace class group} &  All trace classes.
+\\\hline
+\ttmkey{NONE}{trace class group} &  No trace classes.
+\\\hline
+\ttmkey{FUNC}{trace class group} &  \TT{CALLM} \TT{CALLG} \TT{RET} \TT{ENDF}
+\\\hline
+\ttmkey{LOOP}{trace class group} &  \TT{BEGL} \TT{CONT} \TT{ENDL}
+\\\hline
+\end{tabular}
+\end{center}
+\caption{Trace Classes and Groups}
+\label{TRACE-CLASSES-AND-GROUPS}
+\end{boxedfigure}
+
+\subsection{Trace Messages}
+\label{TRACE-MESSAGES}
+
+Each instruction trace message begins with:
+\begin{center}
+\TT{\{}{\em line-number}\TT{:}{\em code-vector-location}%
+                        \TT{,}{\em stack-length}%
+                        \TT{,}{\em process-counter}\TT{\}} ~ {\em op-code}
+\end{center}
+The {\em code-vector-location} is the index of the instruction
+in its code vector.
+The {\em stack-length} is the number of values in the stack
+just before the traced instruction executes.
+The {\em process-counter} is the number of instruction executions
+since the process was originally initialized before the traced
+instruction executes.  The {\em op-code} is the instruction operation code.
+
+The rest of the instruction trace message is specific to the type of
+instruction and is specified in the following subsections.
+
+\subsubsection{Arithmetic Tracing}
+\label{ARITHMETIC-TRACING}
+
+The trace message of an arithmetic instruction has the form:
+\begin{center}
+{\em op-code}\TT{:} {\em new-variable-name} \TT{=} {\em value}
+                    \TT{<=} {\em value}\QMARK{}
+                    {\em operator} {\em value}
+\end{center}
+except for the \TT{POWI} instruction whose trace message has the form:
+\begin{center}
+\TT{POWI:} {\em new-variable-name} \TT{=} {\em value}
+                    \TT{<=} \TT{pow} {\em exponent} {\em value}
+\end{center}
+If {\em new-variable-name} is not given in the instruction,
+\TT{*} is used instead.
+Note that arithmetic instructions are usually not traced.
+
+\subsubsection{Jump Tracing}
 \label{JUMP-TRACING}
 
 \TT{JMP\ldots} instruction trace messages have the form:
@@ -1340,7 +1436,7 @@ or for a plain unconditional \TT{JMP} instruction, just:
 \TT{JMP:} {\em jmp-target}
 \end{center}
 
-\subsection{Push/Pop Tracing}
+\subsubsection{Push/Pop Tracing}
 \label{PUSH/POP-TRACING}
 
 \TT{PUSH\ldots} instructions and the \TT{POP} instruction are in essence
@@ -1358,6 +1454,49 @@ For \TT{POP} the {\em to-variable} is the instruction {\em variable}
 and the {\em from-variable} is the name of the top of the stack.
 
 As always in tracing, `\TT{*}' is used for a missing variable name.
+
+
+\subsubsection{Trace-Info Based Trace Messages}
+\label{TRACE-INFO-BASED-TRACE-MESSAGES}
+
+Many instructions end with a {\em trace-info} that has the syntax:
+\begin{indpar}
+{\em trace-message} ::= {\em string}
+\\[0.5ex]
+{\em trace-info} ::= {\em trace-message} ~ {\em trace-variable}\STAR{}
+\end{indpar}
+
+For these instructions, the {\em trace-message} is printed
+after the operation code in the trace message, followed by
+the names and values of the {\em trace-variables} named in the
+{\em trace-info}.
+
+When an instruction has a {\em trace-info}, \TT{PUSH\ldots}
+instructions are generated just before the instruction to
+push the {\em trace-variable} values onto the stack.  The values are then
+printed from the stack if the instruction is traced.  Then
+when the instruction executes, it begins by popping these
+{\em tracek-variable} values from the stack.  This is why instructions
+like \TT{BEG} can pop the stack; it is only because the
+instruction may have to pop {\em trace-variable} values.
+
+\subsubsection{\TT{CALL} and \TT{RET} Trace Messages}
+\label{CALL-AND-RET-TRACE-MESSAGES}
+
+In the cases of instructions
+like \TT{BEGF} and \TT{CALL} that have a list of {\em variable}s
+as part of the instruction proper, and not as part of a
+{\em trace-info}, the list of variables in the instruction proper
+is used as the {\em trace-info} variables list.
+
+
+Note that when a function is called, it is the \TT{BEGF}
+instruction that is traced, and the \TT{CALL} instruction
+is not traced.  Similarly when the function returns,
+it is the \TT{CALL} instruction that is traced, and the
+\TT{ENDF} or \TT{RET} instruction is not traced.  Also,
+jumping out of blocks prevents the block ending instruction
+from being traced.
 
 
 \subsection{Non-Arithmetic Tracing}
@@ -1940,7 +2079,7 @@ and some have {\em trace-info} arguments, where:
 \begin{indpar}
 \emkey{trace-message} ::= {\em string}
 \\[0.5ex]
-\emkey{trace-info} ::= {\em trace-message} {\em variable}\STAR{}
+\emkey{trace-info} ::= {\em trace-message} {\em trace-variable}\STAR{}
 \end{indpar}
 See Instruction Tracing\pagnote{INSTRUCTION-TRACING} for details.
 \end{enumerate}
@@ -2247,144 +2386,6 @@ See \pagref{LABEL}.
 Prints the names in the assembly time variables and functions stacks.
 Used mostly for testing the assembler.
 \end{indpar}
-
-\subsection{Instruction Tracing}
-\label{INSTRUCTION-TRACING}
-
-Instruction tracing is controlled by \skey{trace class}{es}
-which are part of each instruction and \skey{trace flag}s which
-are part of each process.  For example, all \TT{PUSH\ldots}
-instructions have the \TT{PUSH} trace class, and a process
-has a \TT{PUSH} trace flag which if on causes all instructions
-with the \TT{PUSH} trace class to be traced.
-
-The trace classes are given in Figure \ref{TRACE-CLASSES-AND-GROUPS}.
-
-\begin{boxedfigure}[t]
-
-\begin{center}
-
-\bigskip
-
-{\Large \bf Trace Classes}
-\\[2ex]
-\begin{tabular}{|l|p{5in}|}
-\hline
-\ttikey{NEVER}{trace class} & Instruction is never traced.
-\\\hline
-\ttikey{ALWAYS}{trace class} & Instruction is always traced.
-    Only the \TT{ERROR} instruction has this class.
-\\\hline
-\ttikey{AOP}{trace class} & Arithmetic instructions in Figure
-    \ref{ARITHMETIC-INSTRUCTIONS}.
-\\\hline
-\ttikey{PUSH}{trace class} & All \TT{PUSH\ldots} instructions in Figures
-    \ref{HOUSEKEEPING-INSTRUCTIONS} and
-    \ref{FUNCTION-INSTRUCTIONS}.
-\\\hline
-\ttikey{POP}{trace class} & The \TT{POP} instruction in Figure
-    \ref{HOUSEKEEPING-INSTRUCTIONS}.
-\\\hline
-\ttikey{JMP}{trace class} & The \TT{JMP} instruction.
-\\\hline
-\begin{tabular}[t]{@{}l@{}}
-\ttikey{JMPS}{trace class} \\
-\ttikey{JMPF}{trace class}
-\end{tabular} & \TT{JMP\ldots} instructions in
-	        Figure \ref{HOUSEKEEPING-INSTRUCTIONS}.
-		When compiled the instruction is given the \TT{JMPS}
-		class.  When executed, if the jump test succeeds
-		(jump is taken),
-		the instruction trace class is left unchanged, but if
-		the jump test fails (there is no actual jump),
-		the trace class is changed
-		to \TT{JMPF}.
-\\\hline
-\ttikey{XXX}{trace class} & Instruction with operation code \TT{XXX},
-                            for instructions not mentioned above
-			    (e.g., for \TT{NOP}, \TT{BEG}, etc.,
-			    but \underline{not} for \TT{ADD},
-			    \TT{PUSH}, \TT{JMPEQ}, \TT{ERROR}, etc.).
-\\\hline
-\end{tabular}
-\end{center}
-
-\bigskip
-
-\begin{center}
-{\Large \bf Trace Class Groups}
-\\[2ex]
-\begin{tabular}{|l|l|}
-\hline
-\ttmkey{ALL}{trace class group} &  All trace classes.
-\\\hline
-\ttmkey{NONE}{trace class group} &  No trace classes.
-\\\hline
-\ttmkey{FUNC}{trace class group} &  \TT{CALLM} \TT{CALLG} \TT{RET} \TT{ENDF}
-\\\hline
-\ttmkey{LOOP}{trace class group} &  \TT{BEGL} \TT{CONT} \TT{ENDL}
-\\\hline
-\end{tabular}
-\end{center}
-\caption{Trace Classes and Groups}
-\label{TRACE-CLASSES-AND-GROUPS}
-\end{boxedfigure}
-
-If a module is compiled with the \TT{-tcn} (trace class never)
-flag (see The MEXAS Program, \itemref{THE-MEXAS-PROGRAM}),
-all instructions that do not normally have the \TT{ALWAYS}
-class are given the \TT{NEVER} class instead of their normal
-class, thus providing that they will never be traced.  Note
-that the \TT{ERROR} instruction is not affected by this flag.
-
-Whether or not an instruction is actually traced depends on
-the instruction's trace class and on the setting of the
-process's \TT{trace\_flags}.  A trace class \TT{XX} has a
-numeric code \TT{mex::T\_XX} and a trace flag
-\TT{1<<mex::T\_XX}.  An instruction is traced if and only
-if the flag of its trace class is set in the process's
-\TT{trace\_flags}.
-
-Note that the trace flag for \TT{ALWAYS} is always set
-and the trace flag for \TT{NEVER} is always clear.
-
-The MEXAS program \TT{-t:\ldots} flag sets trace flags
-which then become the initial trace flags of any process.
-The \TT{SET\_TRACE} instruction sets the process trace
-flags.  Both take a list of trace class names, as in
-\begin{center}
-\tt SET\_TRACE POP CALL BEGF
-\end{center}
-and also the trace class group names in
-Figure \ref{TRACE-CLASSES-AND-GROUPS}.
-
-Note that when a function is called, it is the \TT{BEGF}
-instruction that is traced, and the \TT{CALL} instruction
-is not traced.  Similarly when the function returns,
-it is the \TT{CALL} instruction that is traced, and the
-\TT{ENDF} or \TT{RET} instruction is not traced.  Also,
-jumping out of blocks prevents the block ending instruction
-from being traced.
-
-Tracing an instruction with a {\em trace-message} causes
-the {\em trace-message} to be printed.
-
-Tracing an instruction with a {\em trace-info} in addition causes
-the names and values of the {\em variable}s named in the
-{\em trace-info} to be printed.  In the cases of instructions
-like \TT{BEGF} and \TT{CALL} that have a list of {\em variable}s
-as part of the instruction proper, and not as part of a
-{\em trace-info}, the list of variables in the instruction proper
-is used as the {\em trace-info} variables list.
-
-When an instruction has a {\em trace-info}, \TT{PUSH\ldots}
-instructions are generated just before the instruction to
-push the variable values onto the stack.  The values are then
-printed from the stack if the instruction is traced.  Then
-when the instruction executes, it begins by popping these
-variable values from the stack.  This is why instructions
-like \TT{BEG} can pop the stack; it is only because the
-instruction may have to pop trace variable values.
 
 
 \subsection{The MEXAS Program}
