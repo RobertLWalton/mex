@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Aug 25 16:07:41 EDT 2023
+// Date:	Fri Aug 25 16:10:10 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1591,6 +1591,14 @@ bool mex::run_process ( mex::process p )
 	    min::gen value;
 	        // Value to be pushed or popped.
 		// Computed early for tracing.
+
+	    min::uns32 location = pc - pcbegin;
+	    min::gen tinfo  = min::MISSING();
+	    if (   location
+		 < m->trace_info->length )
+		tinfo = m->trace_info[location];
+		// CALL.../RET/ENDF replace this
+		// before tracing is executed.
 	     
 
 	    // Pre-trace check for fatal errors.
@@ -1851,6 +1859,9 @@ bool mex::run_process ( mex::process p )
 		}
 		mex::module em = ret->saved_pc.module;
 		min::uns32 new_pc = ret->saved_pc.index;
+
+		// RET/ENDF uses CALL trace_info.
+		//
 		if ( em == min::NULL_STUB )
 		{
 		    if ( new_pc != 0 )
@@ -1858,6 +1869,7 @@ bool mex::run_process ( mex::process p )
 			message = "bad saved_pc value";
 			goto INNER_FATAL;
 		    }
+		    tinfo  = min::MISSING();
 		}
 		else
 		{
@@ -1866,6 +1878,12 @@ bool mex::run_process ( mex::process p )
 			message = "bad saved_pc value";
 			goto INNER_FATAL;
 		    }
+
+		    if (   new_pc
+			 < em->trace_info->length )
+			tinfo = em->trace_info[new_pc];
+		    else
+			tinfo  = min::MISSING();
 		}
 
 		min::uns32 new_fp = ret->saved_fp;
@@ -1875,37 +1893,6 @@ bool mex::run_process ( mex::process p )
 		    goto INNER_FATAL;
 		}
 
-
-		// RET/ENDF is executed before tracing,
-		// so what is traced is the CALL
-		// instruction, but with op_code ==
-		// RET/ENDF.
-		//
-		mex::set_pc ( p, ret->saved_pc );
-		p->fp[immedB] = new_fp;
-		p->nargs[immedB] = ret->saved_nargs;
-		RW_UNS32 p->return_stack->length = rp;
-
-		min::gen * qend = sp - (int) immedA;
-		min::gen * q = qend - (int) immedC;
-		while ( q < qend )
-		    * ++ new_sp = * ++ q;
-		sp = new_sp;
-
-		p->level = ret->saved_level;
-		-- p->trace_depth;
-
-		m = em;
-		if ( m == min::NULL_STUB )
-		{
-		    RET_SAVE;
-		    p->state = mex::CALL_END;
-		    return true;
-		}
-
-		pcbegin = ~ min::begin_ptr_of ( m );
-		pc = pcbegin + new_pc;
-		pcend = pcbegin + m->length;
 		break;
 	    }
 	    case mex::CALLM:
@@ -1953,37 +1940,14 @@ bool mex::run_process ( mex::process p )
 		    goto INNER_FATAL;
 		}
 
-		// CALL... is executed before tracing,
-		// so what is traced is the BEGF
-		// instruction, but with op_code ==
-		// CALL....
+		// CALL uses BEGF trace_info.
 		//
-		mex::ret * ret =
-		    ~ min::begin_ptr_of
-		          ( p->return_stack )
-		    + rp;
-		mex::pc new_pc =
-		    { m, (min::uns32)
-			 ( pc - pcbegin ) };
-		mex::set_saved_pc ( p, ret, new_pc );
-		ret->saved_level = p->level;
-		ret->saved_fp = p->fp[level];
-		ret->saved_nargs = p->nargs[level];
-		p->level = level;
-		p->fp[level] = ( sp - spbegin );
-		p->nargs[level] = immedA;
-		ret->nresults = immedB;
-		RW_UNS32 p->return_stack->length =
-		    rp + 1;
+		if (   immedC
+		     < cm->trace_info->length )
+		    tinfo = cm->trace_info[immedC];
+		else
+		    tinfo  = min::MISSING();
 
-		new_pc = { cm, immedC };
-		mex::set_pc ( p, new_pc );
-
-		m = cm;
-		pcbegin = ~ min::begin_ptr_of ( m );
-		pc = pcbegin + immedC;
-		pcend = pcbegin + m->length;
-		++ p->trace_depth;
 		break;
 	    }
 
@@ -2007,11 +1971,6 @@ bool mex::run_process ( mex::process p )
 		print_message_header ( p, pp )
 		    << " " << op_infos[op_code].name
 		    << ": " << min::bom;
-
-		min::gen tinfo  = min::MISSING();
-		if (   p->pc.index
-		     < m->trace_info->length )
-		    tinfo = m->trace_info[p->pc.index];
 
 		switch ( op_code )
 		{
@@ -2216,19 +2175,81 @@ bool mex::run_process ( mex::process p )
 	    case mex::ENDF:
 	    case mex::RET:
 	    {
-		// RET/ENDF was executed before tracing
-		// so the CALL instruction would be
-		// traced.
-		//
+		min::uns32 rp = p->return_stack->length;
+		-- rp;
+		const mex::ret * ret =
+		   ~ ( p->return_stack + rp );
+	        min::gen * new_sp =
+		    spbegin + p->fp[immedB]
+		            - p->nargs[immedB];
+		mex::module em = ret->saved_pc.module;
+		min::uns32 new_pc = ret->saved_pc.index;
+
+		mex::set_pc ( p, ret->saved_pc );
+		p->fp[immedB] = ret->saved_fp;
+		p->nargs[immedB] = ret->saved_nargs;
+		RW_UNS32 p->return_stack->length = rp;
+
+		min::gen * qend = sp - (int) immedA;
+		min::gen * q = qend - (int) immedC;
+		while ( q < qend )
+		    * ++ new_sp = * ++ q;
+		sp = new_sp;
+
+		p->level = ret->saved_level;
+		-- p->trace_depth;
+
+		m = em;
+		if ( m == min::NULL_STUB )
+		{
+		    RET_SAVE;
+		    p->state = mex::CALL_END;
+		    return true;
+		}
+
+		pcbegin = ~ min::begin_ptr_of ( m );
+		pc = pcbegin + new_pc;
+		pcend = pcbegin + m->length;
 		break;
 	    }
 	    case mex::CALLM:
 	    case mex::CALLG:
 	    {
-		// CALL.. was executed before tracing
-		// to the BEGF instruction would be
-		// traced.
-		//
+		mex::module cm =
+		    ( op_code == mex::CALLG ?
+		      pc->immedD :
+		      m );
+		const mex::instr * target =
+		    ~ ( cm + immedC );
+		min::uns32 level = target->immedB;
+		min::uns32 rp = p->return_stack->length;
+		mex::ret * ret =
+		    ~ min::begin_ptr_of
+		          ( p->return_stack )
+		    + rp;
+
+		mex::pc new_pc =
+		    { m, (min::uns32)
+			 ( pc - pcbegin ) };
+		mex::set_saved_pc ( p, ret, new_pc );
+		ret->saved_level = p->level;
+		ret->saved_fp = p->fp[level];
+		ret->saved_nargs = p->nargs[level];
+		p->level = level;
+		p->fp[level] = ( sp - spbegin );
+		p->nargs[level] = immedA;
+		ret->nresults = immedB;
+		RW_UNS32 p->return_stack->length =
+		    rp + 1;
+
+		new_pc = { cm, immedC };
+		mex::set_pc ( p, new_pc );
+
+		m = cm;
+		pcbegin = ~ min::begin_ptr_of ( m );
+		pc = pcbegin + immedC;
+		pcend = pcbegin + m->length;
+		++ p->trace_depth;
 		break;
 	    }
 
