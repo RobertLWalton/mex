@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Aug 22 06:32:27 EDT 2023
+// Date:	Thu Aug 24 22:19:01 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -129,12 +129,17 @@ extern min::locatable_gen op_code_table;
 
 extern min::locatable_gen trace_flag_table;
     // For trace_class T_XX < ::NUMBER_OF_TRACE_CLASSES:
-    //   get ( trace_class_table, new_str_gen ( "XX" ) )
+    //   get ( trace_flag_table, new_str_gen ( "XX" ) )
     //          == new_num_gen ( 1<<T_XX )
     // For trace group GG := XX1 XX2 ...:
-    //   get ( trace_class_table, new_str_gen ( "GG" ) )
+    //   get ( trace_flag_table, new_str_gen ( "GG" ) )
     //          == bitwise OR of
     //                (1<<T_XX1), (1<<T_XX2), ...
+
+extern min::locatable_gen except_flag_table;
+    // For except named "XX" with mask M:
+    //   get ( except_flag_table, new_str_gen ( "XX" ) )
+    //          == new_num_gen ( M )
 
 // Variable Stack
 //

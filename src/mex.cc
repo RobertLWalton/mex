@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Aug 24 14:46:10 EDT 2023
+// Date:	Thu Aug 24 22:03:21 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -144,6 +144,25 @@ inline void print_indent ( mex::process p )
 	-- j;
     }
     p->printer << ' ';
+}
+
+void mex::print_excepts
+    ( min::printer printer, int excepts,
+                            int highlight )
+{
+    const char * prefix = "";
+    for ( int i = 0; i < mex::NUMBER_OF_EXCEPTS; ++ i )
+    {
+        mex::except_info & ei = mex::except_infos[i];
+	if ( excepts & ei.mask )
+	{
+	    printer << prefix;
+	    prefix = " ";
+	    if ( highlight & ei.mask )
+	        printer << "*";
+	    printer << ei.name;
+	}
+    }
 }
         
 
@@ -591,6 +610,8 @@ static bool optimized_run_process ( mex::process p )
 	case mex::TRACE:
 	case mex::WARN:
 	case mex::ERROR:
+	case mex::SET_EXCEPTS:
+	case mex::TRACE_EXCEPTS:
 	    goto ERROR_EXIT;
 	case mex::BEGF:
 	{
@@ -1753,8 +1774,10 @@ bool mex::run_process ( mex::process p )
 		}
 		break;
 	    case mex::SET_TRACE:
+	    case mex::SET_EXCEPTS:
 	        break;
 	    case mex::TRACE:
+	    case mex::TRACE_EXCEPTS:
 	    case mex::WARN:
 	    case mex::ERROR:
 		if ( immedA > sp - spbegin )
@@ -2042,6 +2065,21 @@ bool mex::run_process ( mex::process p )
 		    }
 		    break;
 		}
+		case mex::SET_EXCEPTS:
+		{
+		    print_excepts
+		        ( p->printer, immedA,
+			  p->excepts_accumulator );
+		    break;
+		}
+		case mex::TRACE_EXCEPTS:
+		{
+		    print_excepts
+		        ( p->printer,
+			  p->excepts_accumulator,
+			  p->excepts );
+		    break;
+		}
 		case mex::BEGF:
 		{
 		    // trace_info only used by CALL...
@@ -2156,7 +2194,11 @@ bool mex::run_process ( mex::process p )
 	        p->trace_flags &=
 		    ~ ( 1 << mex::T_NEVER );
 	        break;
+	    case mex::SET_EXCEPTS:
+	        p->excepts = immedA;
+	        break;
 	    case mex::TRACE:
+	    case mex::TRACE_EXCEPTS:
 	    case mex::WARN:
 	    case mex::ERROR:
 	    {

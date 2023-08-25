@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Aug 24 14:45:35 EDT 2023
+// Date:	Thu Aug 24 21:48:51 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -176,6 +176,14 @@ struct except_info
 };
 const int NUMBER_OF_EXCEPTS = 5;
 extern except_info except_infos[NUMBER_OF_EXCEPTS];
+
+void print_excepts
+    ( min::printer printer, int excepts,
+                            int highlight = 0 );
+    // Print a single space separated list of the names
+    // of the except bits on in excepts.  Procede a
+    // name with * if its bit is also on in highlight.
+
 
 
 // Modules

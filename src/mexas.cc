@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Aug 23 05:44:21 EDT 2023
+// Date:	Thu Aug 24 22:17:37 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -49,6 +49,7 @@ min::locatable_gen mexas::F;
 
 min::locatable_gen mexas::op_code_table;
 min::locatable_gen mexas::trace_flag_table;
+min::locatable_gen mexas::except_flag_table;
 
 enum op_code
     // Extends mex::op_code to include pseudo-ops and
@@ -170,6 +171,29 @@ static void init_trace_flag_table ( void )
     }
 }
 
+static void init_except_flag_table ( void )
+{
+    min::uns32 n = mex::NUMBER_OF_EXCEPTS + 20;
+    mexas::except_flag_table = min::new_obj_gen
+        ( 10 * n, 4 * n, 1 * n );
+
+    min::obj_vec_insptr vp ( mexas::except_flag_table );
+    min::attr_insptr ap ( vp );
+
+    min::locatable_gen tmp;
+    mex::except_info * p = mex::except_infos;
+    mex::except_info * endp =
+        p + mex::NUMBER_OF_EXCEPTS;
+    while  ( p < endp )
+    {
+        tmp = min::new_str_gen ( p->name );
+	min::locate ( ap, tmp );
+	tmp = min::new_num_gen ( p->mask );
+	min::set ( ap, tmp );
+	++ p;
+    }
+}
+
 static min::uns32 variable_element_gen_disp[] =
 {
     min::DISP ( & mexas::variable_element::name ),
@@ -255,6 +279,7 @@ static void initialize ( void )
 
     ::init_op_code_table();
     ::init_trace_flag_table();
+    ::init_except_flag_table();
 
     mexas::variables =
 	::variable_stack_vec_type.new_stub ( 1000 );
@@ -2078,8 +2103,44 @@ mex::module mexas::compile ( min::file file )
 		mexas::push_instr ( instr, pp );
 		break;
 	    }
+	    case mex::SET_EXCEPTS:
+	    {
+		min::uns32 first = index;
+		while ( mexas::get_name ( index )
+		        !=
+			min::NONE() );
+		min::uns32 nflags = index - first;
+
+		min::uns32 flags = 0;
+		for ( min::uns32 i = 0; i < nflags;
+		                        ++ i )
+		{
+		    min::gen fname = statement[first+i];
+		    min::gen fbit = min::get
+		        ( mexas::trace_flag_table,
+			  fname );
+		    if ( fbit != min::NONE() )
+		    {
+		        min::float64 f =
+			    min::direct_float_of
+			        ( fbit );
+			flags |= (min::uns32) f;
+		    }
+		    else
+			mexas::compile_error
+			    ( pp, "Unrecognized except"
+			          " flag: ",
+				  min::pgen ( fname ),
+				  "; ignored" );
+		}
+		instr.immedA = flags;
+
+		mexas::push_instr ( instr, pp );
+		break;
+	    }
 	    case mex::NOP:
 	    case mex::TRACE:
+	    case mex::TRACE_EXCEPTS:
 	    case mex::WARN:
 	    case mex::ERROR:
 	    {
