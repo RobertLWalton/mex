@@ -239,7 +239,7 @@
 
 \author{Robert L. Walton}
 
-\date{August 23, 2023}
+\date{August 25, 2023}
  
 \maketitle
 
@@ -870,6 +870,56 @@ The \TT{trace\_depth}, \TT{trace\_flags}, \TT{excepts},
 members of a process
 are explained in Tracing and Exceptions, \itemref{TRACING-AND-EXCEPTIONS}.
 
+
+\section{Instructions}
+\label{INSTRUCTIONS}
+
+A MEX instruction (a \TT{mex::instr}, see \pagref{MEX::INSTR})
+consists of an \TT{op\_code}, \TT{trace\_class}, \TT{trace\_\EOL depth},
+and up to 4 immediate values,
+\TT{immedA}, \TT{immedB}, \TT{immedC}, and \TT{immedD}.
+\TT{Trace\_class} is explained in Tracing and Exceptions,
+\itemref{TRACING-AND-EXCEPTIONS}, and
+\TT{trace\_depth} is explained in Trace Depth,
+\itemref{TRACE-DEPTH}.
+
+Some examples:
+\begin{indpar}\begin{verbatim}
+mex::instr an_add_instruction = {mex::ADD, mex::T_AOP};
+    // Pop 2 values and push their sum.
+    // mex::T_AOP is the trace class of all arithmetic
+    // operations.
+mex::instr an_add_immediate_instruction =
+        {mex::ADDI,mex::T_AOP,,,,,3.14159};
+    // Add 3.14159 to top value.
+mex::instr a_begin_instruction = {mex::BEG, mex::T_BEG};
+    // Do nothing.
+mex::instr an_end_instruction = {mex::END,mex::T_END,,10};
+    // Pop 10 values and discard them.
+mex::instr a_jump_instruction = {mex::JMP,mex::T_JMP,1,,10,,32};
+    // Pop 10 values and discard them, then decrement the process's
+    // trace_depth by 1, then add 32 to program counter to skip
+    // 32 instructions.
+\end{verbatim}\end{indpar}
+
+The arithmetic instruction set is in Figure~\ref{ARITHMETIC-INSTRUCTIONS}.
+IEEE 64-bit floating point operations and the C \TT{math.h}
+library are used.  See Tracing and Exceptions,
+\itemref{TRACING-AND-EXCEPTIONS} for error
+handling.
+
+The stack and flow control instruction set is in
+Figure~\ref{STACK-AND-FLOW-CONTROL-INSTRUCTIONS}.
+See Stacks, \itemref{STACKS}, for an overview of stack handling.
+
+The function instruction set is in
+Figure~\ref{FUNCTION-INSTRUCTIONS}.
+See Nested Functions, \itemref{NESTED-FUNCTIONS},
+for details concerning nested functions.
+
+The housekeeping instruction set is in
+Figure~\ref{HOUSEKEEPING-INSTRUCTIONS}.
+
 \pagebreak
 
 
@@ -963,7 +1013,6 @@ are explained in Tracing and Exceptions, \itemref{TRACING-AND-EXCEPTIONS}.
 \begin{boxedfigure}
 
 \begin{center}
-\small
 \begin{tabular}{|l|l|}
 \hline
 \TT{PUSHS}
@@ -1028,26 +1077,11 @@ are explained in Tracing and Exceptions, \itemref{TRACING-AND-EXCEPTIONS}.
     & \TT{immedC} from the \TT{pc} (jumping backwards to just after \\
     & the associated \TT{BEGL}).
 \\\hline
-\TT{SET\_TRACE}
-    & The process \TT{trace\_flags} member is set from the low order \\
-    & 8 bits of \TT{immedA}.
-\\\hline
-\TT{NOP}/\TT{TRACE}
-    & Subtract \TT{immedA} to \TT{sp} (popping the stack \TT{immedA} times).
-      The \\
-\TT{WARN}/\TT{ERROR}
-    & values popped are always trace values.  All these instructions \\
-    & but \TT{NOP} are in the \TT{ALWAYS} trace class.  All these instructions
-      are \\
-    & no-operations used only for tracing, except \TT{ERROR} prints \\
-    & a `Fatal Error' message before its trace and then terminates \\
-    & the process with an \TT{ERROR\_STOP} state.
-\\\hline
 \end{tabular}
 \end{center}
 \vspace*{-3ex}
-\caption{Housekeeping Instructions}
-\label{HOUSEKEEPING-INSTRUCTIONS}
+\caption{Stack and Flow Control Instructions}
+\label{STACK-AND-FLOW-CONTROL-INSTRUCTIONS}
 \end{boxedfigure}
 
 \pagebreak
@@ -1137,51 +1171,34 @@ are explained in Tracing and Exceptions, \itemref{TRACING-AND-EXCEPTIONS}.
 
 \clearpage
 
-\section{Instructions}
-\label{INSTRUCTIONS}
+\begin{boxedfigure}
 
-A MEX instruction (a \TT{mex::instr}, see \pagref{MEX::INSTR})
-consists of an \TT{op\_code}, \TT{trace\_class}, \TT{trace\_\EOL depth},
-and up to 4 immediate values,
-\TT{immedA}, \TT{immedB}, \TT{immedC}, and \TT{immedD}.
-\TT{Trace\_class} is explained in Tracing and Exceptions,
-\itemref{TRACING-AND-EXCEPTIONS}, and
-\TT{trace\_depth} is explained in Trace Depth,
-\itemref{TRACE-DEPTH}.
+\begin{center}
+\small
+\begin{tabular}{|l|l|}
+\hline
+\TT{SET\_TRACE}
+    & The process \TT{trace\_flags} member is set from the low order \\
+    & 8 bits of \TT{immedA}.
+\\\hline
+\TT{NOP}/\TT{TRACE}
+    & Subtract \TT{immedA} to \TT{sp} (popping the stack \TT{immedA} times).
+      The \\
+\TT{WARN}/\TT{ERROR}
+    & values popped are always trace values.  All these instructions \\
+    & but \TT{NOP} are in the \TT{ALWAYS} trace class.  All these instructions
+      are \\
+    & no-operations used only for tracing, except \TT{ERROR} prints \\
+    & a `Fatal Error' message before its trace and then terminates \\
+    & the process with an \TT{ERROR\_STOP} state.
+\\\hline
+\end{tabular}
+\end{center}
+\vspace*{-3ex}
+\caption{Housekeeping Instructions}
+\label{HOUSEKEEPING-INSTRUCTIONS}
+\end{boxedfigure}
 
-Some examples:
-\begin{indpar}\begin{verbatim}
-mex::instr an_add_instruction = {mex::ADD, mex::T_AOP};
-    // Pop 2 values and push their sum.
-    // mex::T_AOP is the trace class of all arithmetic
-    // operations.
-mex::instr an_add_immediate_instruction =
-        {mex::ADDI,mex::T_AOP,,,,,3.14159};
-    // Add 3.14159 to top value.
-mex::instr a_begin_instruction = {mex::BEG, mex::T_BEG};
-    // Do nothing.
-mex::instr an_end_instruction = {mex::END,mex::T_END,,10};
-    // Pop 10 values and discard them.
-mex::instr a_jump_instruction = {mex::JMP,mex::T_JMP,1,,10,,32};
-    // Pop 10 values and discard them, then decrement the process's
-    // trace_depth by 1, then add 32 to program counter to skip
-    // 32 instructions.
-\end{verbatim}\end{indpar}
-
-The arithmetic instruction set is in Figure~\ref{ARITHMETIC-INSTRUCTIONS}.
-IEEE 64-bit floating point operations and the C \TT{math.h}
-library are used.  See Tracing and Exceptions,
-\itemref{TRACING-AND-EXCEPTIONS} for error
-handling.
-
-The housekeeping instruction set is in
-Figure~\ref{HOUSEKEEPING-INSTRUCTIONS}.
-See Stacks, \itemref{STACKS}, for an overview of stack handling.
-
-The function instruction set is in
-Figure~\ref{FUNCTION-INSTRUCTIONS}.
-See Nested Functions, \itemref{NESTED-FUNCTIONS},
-for details concerning nested functions.
 
 \section{Tracing and Exceptions}
 \label{TRACING-AND-EXCEPTIONS}
@@ -1199,7 +1216,7 @@ and the \key{trace flags} $F$ of the process.  If
 In optimized mode, instructions are \underline{not} traced.
 
 Instructions in the \ttkey{ALWAYS} trace class are always
-traced.  These include the \TT{TRACE}, \TT{SET\_TRACE},
+traced.  These include the \TT{TRACE}, \TT{SET\_\EOL TRACE},
 \TT{WARN}, and \TT{ERROR} instructions.
 
 Instructions in the \ttkey{NEVER} trace class are never
