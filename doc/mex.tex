@@ -1396,7 +1396,13 @@ since the process was originally initialized before the traced
 instruction executes.  The {\em op-code} is the instruction operation code.
 
 The rest of the instruction trace message is specific to the type of
-instruction and is specified in the following subsections.
+instruction and is specified in the following subsections.  However
+in all cases it is based on the value of
+\TT{module->\EOL trace\_\EOL info[i]} where \TT{i} is the index of
+the instruction in its code vector.
+If \TT{module->\EOL trace\_\EOL info[i]} does not exist
+or equals \TT{min::MISSING()}, only the message beginning just
+given is produced.
 
 \subsubsection{Arithmetic Tracing}
 \label{ARITHMETIC-TRACING}
@@ -1415,6 +1421,10 @@ except for the \TT{POWI} instruction whose trace message has the form:
 If {\em new-variable-name} is not given in the instruction,
 \TT{*} is used instead.
 Note that arithmetic instructions are usually not traced.
+
+For an arithmetic instruction the value of
+\TT{module->\EOL trace\_\EOL info[i]} is {\em new-variable-name}
+or \TT{*} as a MIN string.
 
 \subsubsection{Jump Tracing}
 \label{JUMP-TRACING}
@@ -1436,6 +1446,10 @@ or for a plain unconditional \TT{JMP} instruction, just:
 \TT{JMP:} {\em jmp-target}
 \end{center}
 
+For a jump instruction the value of
+\TT{module->\EOL trace\_\EOL info[i]} is {\em jmp-target}
+as a MIN string.
+
 \subsubsection{Push/Pop Tracing}
 \label{PUSH/POP-TRACING}
 
@@ -1454,6 +1468,12 @@ For \TT{POP} the {\em to-variable} is the instruction {\em variable}
 and the {\em from-variable} is the name of the top of the stack.
 
 As always in tracing, `\TT{*}' is used for a missing variable name.
+
+For a \TT{PUSH\ldots} or \TT{POP} instruction
+in Figure~\ref{STACK-AND-FLOW-CONTROL-INSTRUCTIONS}
+the value of
+\TT{module->\EOL trace\_\EOL info[i]} is the MIN label
+\TT{[<} {\em from-variable} ~ {\em to-variable} \TT{>]}.
 
 
 \subsubsection{Trace-Info Based Trace Messages}
@@ -1480,8 +1500,15 @@ when the instruction executes, it begins by popping these
 like \TT{BEG} can pop the stack; it is only because the
 instruction may have to pop {\em trace-variable} values.
 
+For trace-info based instructions
+the value of
+\TT{module->\EOL trace\_\EOL info[i]} is the MIN label
+\TT{[<} {\em trace-message} ~ {\em trace-variable}\STAR{} \TT{>]}.
+
 \subsubsection{\TT{CALL} and \TT{RET} Trace Messages}
 \label{CALL-AND-RET-TRACE-MESSAGES}
+
+TBD
 
 In the cases of instructions
 like \TT{BEGF} and \TT{CALL} that have a list of {\em variable}s
