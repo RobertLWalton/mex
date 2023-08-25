@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Aug 24 22:03:21 EDT 2023
+// Date:	Fri Aug 25 16:07:41 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -974,7 +974,9 @@ inline min::printer print_message_header
 
     if ( pp )
 	p->printer
-	    << pp.end.line - 1
+	    << pp.end.line
+	        // - 1 for pp line number with origin 0
+		// + 1 to make it origin 1
 	    << ":";
 
     p->printer << p->pc.index
