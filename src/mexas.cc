@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Aug 24 22:17:37 EDT 2023
+// Date:	Sat Aug 26 16:52:18 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -301,7 +301,8 @@ static min::initializer initializer ( ::initialize );
 // ------- ---------
 
 static void print_error_or_warning
-	( const min::phrase_position & pp,
+	( const char * type,
+	  const min::phrase_position & pp,
 	  const char * message1,
 	  const min::op & message2,
 	  const char * message3,
@@ -313,7 +314,8 @@ static void print_error_or_warning
 	  const char * message9 )
 {
     min::printer printer = mexas::input_file->printer;
-    printer << min::bom;
+    printer << min::bol << min::bom
+            << type << ": " << min::place_indent ( 0 );
     if ( pp )
         printer << "in "
 		<< min::pline_numbers
@@ -342,9 +344,9 @@ void mexas::compile_error
 	  const min::op & message8,
 	  const char * message9 )
 {
-    mexas::input_file->printer << min::bol << "ERROR: ";
     ::print_error_or_warning
-        ( pp, message1, message2, message3,
+        ( "ERROR", pp,
+	      message1, message2, message3,
 	      message4, message5, message6,
 	      message7, message8, message9 );
     ++ mexas::error_count;
@@ -362,10 +364,9 @@ void mexas::compile_warn
 	  const min::op & message8,
 	  const char * message9 )
 {
-    mexas::input_file->printer
-        << min::bol << "WARNING: ";
     ::print_error_or_warning
-        ( pp, message1, message2, message3,
+        ( "WARNING", pp,
+	      message1, message2, message3,
 	      message4, message5, message6,
 	      message7, message8, message9 );
     ++ mexas::warning_count;
@@ -816,13 +817,14 @@ void mexas::trace_instr
 	min::print_phrase_lines
 	    ( printer, mexas::input_file, pp );
 
-    printer << min::bol << "    " << min::bom;
     mex::instr instr = m[location];
     printer
+        << min::bol << min::bom <<"    "
 	<< "[" << pp.end.line
 	<< ":" << location
 	<< ";" << variables->length
 	<< "] "
+	<< min::place_indent ( 0 )
 	<< mex::op_infos[instr.op_code].name
         << " T_"
         << mex::trace_class_infos
@@ -1000,7 +1002,8 @@ static void scan_error
 	  const char * header = "ERROR" )
 {
     mexas::input_file->printer
-        << min::bol << header << ": " << min::bom
+        << min::bol << min::bom << header << ": "
+	<< min::place_indent ( 0 )
 	<< "line " << mexas::last_line_number + 1
 	<< ": " << message << min::eom;
     print_line ( mexas::input_file->printer,
@@ -1645,10 +1648,12 @@ mex::module mexas::compile ( min::file file )
 			      spp );
 		}
 
-		printer << min::bol << "    STACKS: "
-		        << min::bom;
+		printer << min::bol << min::bom
+		        << "    STACKS: "
+		        << min::place_indent ( 0 );
 
-		printer << "VARIABLES: " << min::bom;
+		printer << min::bom << "VARIABLES: "
+		        << min::place_indent ( 0 );
 		min::uns32 level = L;
 		min::uns32 depth = mexas::depth[L];
 		for ( min::uns32 i = variables->length;
@@ -1679,8 +1684,9 @@ mex::module mexas::compile ( min::file file )
 		    continue;
 		}
 
-		printer << min::indent << "FUNCTIONS: "
-		        << min::bom;
+		printer << min::indent << min::bom
+		        << "FUNCTIONS: "
+		        << min::place_indent ( 0 );
 		level = L;
 		depth = mexas::depth[L];
 		for ( min::uns32 i = functions->length;

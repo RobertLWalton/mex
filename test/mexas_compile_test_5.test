@@ -1,12 +1,12 @@
 * {19:5,5,5} BEG: "Begin MIN Block", X=295, Y=196
 *** {31:18,7,16} END: "End MIN Block", X=295, Y=196, Z=196
 * {43:28,6,26} BEGL: "Begin SUM loop", SUM=0, I=4, LIMIT=6
-*** {56:43,8,41}
-    ENDL: "End SUM loop iteration", next-SUM=4, next-I=5, LIMIT=6
-*** {56:43,8,56}
-    ENDL: "End SUM loop iteration", next-SUM=9, next-I=6, LIMIT=6
-*** {56:43,8,71}
-    ENDL: "End SUM loop iteration", next-SUM=15, next-I=7, LIMIT=6
+*** {56:43,8,41} ENDL: "End SUM loop iteration", next-SUM=4, next-I=5,
+                       LIMIT=6
+*** {56:43,8,56} ENDL: "End SUM loop iteration", next-SUM=9, next-I=6,
+                       LIMIT=6
+*** {56:43,8,71} ENDL: "End SUM loop iteration", next-SUM=15, next-I=7,
+                       LIMIT=6
 * {59:47,6,78} TRACE: "End of SUM loop", SUM=15, I=7, LIMIT=6
 * {64:51,0,82} WARN: "oh oh"
 * {65:52,0,83} SET_TRACE: PUSH

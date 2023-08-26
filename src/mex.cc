@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Aug 25 17:41:44 EDT 2023
+// Date:	Sat Aug 26 16:30:53 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -128,22 +128,6 @@ static min::float64 powi ( min::float64 x, unsigned i )
 	z = z * z;
     }
     return r;
-}
-
-inline void print_indent ( mex::process p )
-{
-    unsigned i = p->trace_depth % 10;
-    if ( p->optimize ) i = 0;
-       // In optimize mode an instruction might
-       // occassionally be executed in non-optimize
-       // mode and change the depth.
-    unsigned j = ( i + 1 ) * mex::trace_indent;
-    while ( 1 < j )
-    {
-	p->printer << mex::trace_mark;
-	-- j;
-    }
-    p->printer << ' ';
 }
 
 void mex::print_excepts
@@ -969,7 +953,21 @@ static void check_trace_class_infos ( void )
 inline min::printer print_message_header
 	( mex::process p, min::phrase_position pp )
 {
-    print_indent ( p );
+    p->printer << min::bom;
+
+    unsigned i = p->trace_depth % 10;
+    if ( p->optimize ) i = 0;
+       // In optimize mode an instruction might
+       // occassionally be executed in non-optimize
+       // mode and change the depth.
+    unsigned j = ( i + 1 ) * mex::trace_indent;
+    while ( 1 < j )
+    {
+	p->printer << mex::trace_mark;
+	-- j;
+    }
+    p->printer << ' ';
+
     p->printer << "{";
 
     if ( pp )
@@ -985,6 +983,7 @@ inline min::printer print_message_header
 	       << ","
 	       << p->counter
 	       << "}";
+    p->printer << min::place_indent ( 1 );
     return p->printer;
 }
 
@@ -1378,8 +1377,7 @@ bool mex::run_process ( mex::process p )
 		    min::MISSING_PHRASE_POSITION;
 
 		print_message_header ( p, pp )
-		    << " " << min::bom
-		    << op_info->name << ": ";
+		    << " " << op_info->name << ": ";
 
 		if ( m->trace_info != min::NULL_STUB  )
 		{
@@ -1520,8 +1518,7 @@ bool mex::run_process ( mex::process p )
 		    min::MISSING_PHRASE_POSITION;
 
 		print_message_header ( p, pp )
-		    << " " << min::bom
-		    << op_info->name << ": ";
+		    << " " << op_info->name << ": ";
 
 		if ( m->trace_info != min::NULL_STUB
 		     &&
@@ -1999,8 +1996,7 @@ bool mex::run_process ( mex::process p )
 				   << lp[0]
 				   << " =";
 		    }
-		    p->printer << " " << value
-		               << min::eol;
+		    p->printer << " " << value;
 		    break;
 		}
 		case mex::PUSHI:
@@ -2015,14 +2011,14 @@ bool mex::run_process ( mex::process p )
 		        p->printer << " nargs["
 			           << immedB
 				   << "] =";
-		    p->printer << " " << value
-		               << min::eol;
+		    p->printer << " " << value;
 		    break;
 		}
 		case mex::SET_TRACE:
 		{
-		    p->printer << ": " << min::bom;
-		    bool first = true;
+		    p->printer
+		        << ":"
+		        << min::place_indent ( 1 );
 		    for ( unsigned i = 0;
 		          i < mex::
 			    NUMBER_OF_TRACE_CLASSES;
@@ -2030,34 +2026,34 @@ bool mex::run_process ( mex::process p )
 		    {
 		        if ( immedA & (1 << i) )
 			{
-			    if ( first ) first = false;
-			    else p->printer << " ";
 			    p->printer
+			        << " "
 				<< mex::
 				     trace_class_infos
 				         [i].name;
 			}
 		    }
-		    p->printer << min::eom;
 		    break;
 		}
 		case mex::SET_EXCEPTS:
 		{
-		    p->printer << ": " << min::bom;
+		    p->printer
+		        << ":"
+		        << min::place_indent ( 1 );
 		    print_excepts
 		        ( p->printer, immedA,
 			  p->excepts_accumulator );
-		    p->printer << min::eom;
 		    break;
 		}
 		case mex::TRACE_EXCEPTS:
 		{
-		    p->printer << ": " << min::bom;
+		    p->printer
+		        << ":"
+		        << min::place_indent ( 1 );
 		    print_excepts
 		        ( p->printer,
 			  p->excepts_accumulator,
 			  p->excepts );
-		    p->printer << min::eom;
 		    break;
 		}
 		case mex::BEGF:
@@ -2080,7 +2076,10 @@ bool mex::run_process ( mex::process p )
 		         &&
 			 min::lablen ( lp ) > 0 )
 		    {
-			p->printer << ": " << min::bom;
+			p->printer
+			    << ": "
+		            << min::place_indent ( 0 );
+
 		        min::uns32 len =
 			    min::lablen ( lp );
 		        p->printer << lp[0];
@@ -2097,12 +2096,12 @@ bool mex::run_process ( mex::process p )
 			    else
 			        p->printer << "?";
 			}
-			p->printer << min::eom;
 		    }
 		    break;
 		}
 
 		}
+		p->printer << min::eom;
 
 		if ( op_code == mex::ERROR )
 		{
