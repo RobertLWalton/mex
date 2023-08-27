@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat Aug 26 16:52:18 EDT 2023
+// Date:	Sun Aug 27 00:56:40 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1648,11 +1648,12 @@ mex::module mexas::compile ( min::file file )
 			      spp );
 		}
 
-		printer << min::bol << min::bom
+		printer << min::bom
 		        << "    STACKS: "
 		        << min::place_indent ( 0 );
 
-		printer << min::bom << "VARIABLES: "
+		printer << min::save_indent
+                        << "VARIABLES: "
 		        << min::place_indent ( 0 );
 		min::uns32 level = L;
 		min::uns32 depth = mexas::depth[L];
@@ -1676,7 +1677,7 @@ mex::module mexas::compile ( min::file file )
 		    printer << v.name;
 		    if ( i > 0 ) printer << " ";
 		}
-		printer << min::eom;
+		printer << min::restore_indent;
 
 		if ( functions->length == 0 )
 		{
@@ -1684,7 +1685,8 @@ mex::module mexas::compile ( min::file file )
 		    continue;
 		}
 
-		printer << min::indent << min::bom
+		printer << min::indent
+                        << min::save_indent
 		        << "FUNCTIONS: "
 		        << min::place_indent ( 0 );
 		level = L;
@@ -1709,7 +1711,7 @@ mex::module mexas::compile ( min::file file )
 		    printer << f.name;
 		    if ( i > 0 ) printer << " ";
 		}
-		printer << min::eom;
+		printer << min::restore_indent;
 
 		printer << min::eom;
 		continue;

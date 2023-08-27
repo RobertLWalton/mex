@@ -2,7 +2,7 @@
 //
 // File:	mexas_scanner_test.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Jul 17 03:01:12 EDT 2023
+// Date:	Sun Aug 27 00:57:56 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -37,8 +37,8 @@ int main ( int argc, char * argv[] )
 	min::print_phrase_lines
 	    ( mex::default_printer,
 	      mexas::input_file, pp );
-        mex::default_printer << min::bol << "    "
-	                     << min::bom;
+        mex::default_printer << min::bom << "    "
+	                     << min::place_indent ( 0 );
 	for ( min::uns32 i = 0;
 	      i < mexas::statement->length; ++ i )
 	    mex::default_printer 
