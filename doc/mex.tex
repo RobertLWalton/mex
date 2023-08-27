@@ -1746,6 +1746,7 @@ Execute \TT{p} until it terminates.
 Returns \TT{true} on normal termination
 and \TT{false} otherwise.  The process \TT{state} is
 set as follows to indicate cause of termination:
+\end{indpar}
 \begin{center}
 \begin{tabular}{lp{3.0in}l}
 \verb|mex::|\MEXKEY{MODULE\_END}
@@ -1769,12 +1770,18 @@ set as follows to indicate cause of termination:
     & \raggedright program formatting error (likely a compiler
       error)
     & returns \TT{false} \\
+\verb|mex::|\MEXKEY{EXCEPTS\_ERROR}
+    & \raggedright program terminated successfully (as per
+      \TT{MODULE\_END} or \TT{CALL\_END}) but with an excepts bit on in
+      both \TT{p->excepts} and \TT{p->excepts\_accumulator}
+    & returns \TT{false} \\
 \end{tabular}
 \end{center}
-\end{indpar}
 
 Notes:
 \begin{enumerate}
+\item If \TT{run\_process} returns \TT{false}, it also prints
+an error message.
 \item On \TT{LIMIT\_STOP}, you can increase \TT{p->limit}
 and call \TT{run\_process} again to continue execution.
 \item You can use \TT{init\_process ( m )} followed by \TT{run\_process}
@@ -1790,7 +1797,7 @@ of \TT{m} (i.e., execute the added code).
 \key{MEXAS} is an assembly language for MEX.  The \ttkey{mexas}
 assembler can be use as a MEX compiler.
 
-MEXAS is a tool for debugging MEX and a prototype for more
+MEXAS is a tool for debugging MEX and a rough prototype for more
 advanced MEX compilers.
 
 \subsection{MEXAS Syntax}
