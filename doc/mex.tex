@@ -239,7 +239,7 @@
 
 \author{Robert L. Walton}
 
-\date{August 25, 2023}
+\date{August 27, 2023}
  
 \maketitle
 
@@ -1475,6 +1475,21 @@ the value of
 \TT{module->\EOL trace\_\EOL info[i]} is the MIN label
 \TT{[<} {\em from-variable} ~ {\em to-variable} \TT{>]}.
 
+However there are two exceptions with different {\em from-variables}
+and with {\em trace\_\EOL info[i]} equal to just {\em to-variable}.
+They are:
+\begin{center}
+\begin{tabular}{l@{~~~~~}l}
+\bf Op Code & \bf \em from-variable
+\\\hline
+\TT{PUSHNARGS} & \TT{nargs[$L$]} \\
+\TT{PUSHV}     & \TT{sp[fp[$L$]-nargs[$L$]+$V$-1]}
+\end{tabular}
+\\[1ex]
+where $L$ is the lexical level \\
+and $V$ is the value at the top of the stack
+\end{center}
+
 
 \subsubsection{Trace-Info Based Trace Messages}
 \label{TRACE-INFO-BASED-TRACE-MESSAGES}
@@ -1502,95 +1517,51 @@ instruction may have to pop {\em trace-variable} values.
 
 For trace-info based instructions
 the value of
-\TT{module->\EOL trace\_\EOL info[i]} is the MIN label
-\TT{[<} {\em trace-message} ~ {\em trace-variable}\STAR{} \TT{>]}.
+\TT{module->\EOL trace\_\EOL info[i]} is the MIN label:
+\begin{center}
+\vspace*{-1ex}
+\TT{[<} {\em trace-message} ~ {\em trace-variable}\STAR{} \TT{>]}
+\end{center}
 
 \subsubsection{\TT{CALL} and \TT{RET} Trace Messages}
 \label{CALL-AND-RET-TRACE-MESSAGES}
 
-TBD
+The traces of the \TT{CALL\ldots}, \TT{RET}, and \TT{ENDF}
+instructions are like those {\em trace-info} instructions with
+a difference.
 
-In the cases of instructions
-like \TT{BEGF} and \TT{CALL} that have a list of {\em variable}s
-as part of the instruction proper, and not as part of a
-{\em trace-info}, the list of variables in the instruction proper
-is used as the {\em trace-info} variables list.
+For \TT{CALL\ldots}, the op code in the trace is replaced by
+`\TT{CALL\ldots to BEGF}', the {\em trace-message} is taken
+from the target \TT{BEGF} (this defaults to the function name),
+and the {\em trace-variables} are the argument variables listed
+in the \TT{BEGF} instruction.  The most important thing to note
+is that the argument variable names are those used inside the
+function, and not those used at the point of the call instruction.
 
+For \TT{RET}, the op code in the trace is replaced by
+`\TT{RET to CALL\ldots}', the {\em trace-message} is taken
+from the target \TT{CALL\ldots} (this defaults to the function name),
+and the {\em trace-variables} are the result variables listed
+in the \TT{CALL\ldots} instruction.  The most important thing to
+note is that the result variable names are those used after the
+call instruction and not those used inside the function
+at the point of the return instruction.
 
-Note that when a function is called, it is the \TT{BEGF}
-instruction that is traced, and the \TT{CALL} instruction
-is not traced.  Similarly when the function returns,
-it is the \TT{CALL} instruction that is traced, and the
-\TT{ENDF} or \TT{RET} instruction is not traced.  Also,
-jumping out of blocks prevents the block ending instruction
-from being traced.
+\TT{ENDF} is just like a \TT{RET} with no return values.
 
+\subsubsection{Other Instruction Trace Messages}
+\label{OTHER-INSTRUCTION-TRACE-MESSAGES}
 
-\subsection{Non-Arithmetic Tracing}
-\label{NON-ARITHMETIC-TRACING}
-
-TBD
-
-The trace message of the non-arithmetic instruction
-\TT{module[i]} uses
-$I$ = \TT{module->\EOL trace\_\EOL info[i]}.  If this is missing
-or equals \TT{min::MISSING()}, a minimal message
-is produced, such as:
 \begin{center}
-\tt POP 1.527 to sp[-6]
+\begin{tabular}{lp{4.5in}}
+\bf Op Code     & \bf Trace Message
+\\\hline
+\TT{SET\_TRACE} & \TT{SET\_TRACE:} {\em trace-class}\STAR{} \\
+                & The {\em trace-classes} being enabled are
+	          listed, but they are \underline{not}
+		  aggregated into {\em trace-class-groups}.
+\end{tabular}
 \end{center}
-Otherwise $I$ is used to produce the message as follows.
-
-For instructions that reference a single stack or global location,
-namely \TT{PUSH\ldots} and \TT{POP\ldots} instructions,
-$I$ should be a MIN string, and a message such
-as:
-\begin{center}
-\tt $I$ 1.527
-\end{center}
-is produced.  Here $I$ would be expected to something
-like `{\tt my variable =}' or `{\tt POP: my variable =}'.
-Note that \TT{PUSH\ldots} instructions are usually
-\underline{not} traced.
-
-For other functions $I$ needs to be a \TT{min::object}
-whose vector elements are MIN strings naming of stack
-elements.  Specifically, $I$\TT{[i]} names \TT{sp[-i]}.
-If this name is a \underline{non-empty} MIN string,
-then the message contains `$I$\TT{[i]} = <value of \TT{sp[-i]}'.
-These stack value parts of the message, if they exist, are separated
-by commas and are all appended to the message prefix followed by a `\TT{:}'.
-
-The message prefix $P$ is the value of the \TT{"prefix"} attribute
-of $I$.  For \TT{JMP\ldots} instructions, the prefix is modified as
-follows.  For a successful jump, the prefix is like
-`$P$ because 5.8 < 7.2'.  For an unsuccessful jump the prefix
-is like `no $P$ because not 5.8 < 7.2'.
-
-The following are examples.
-
-For the \TT{BEGF} instruction of a function names {\tt sum} with
-two arguments, {\tt X} and {\tt Y}, if
-\begin{center}
-$I$ = {\tt \{"": prefix = "ENTRY TO SUM"|"X","Y"|\}}
-\end{center}
-the message would be something like:
-\begin{center}
-\tt ENTRY TO SUM: X = 5.89, Y = 12
-\end{center}
-
-For a \TT{JMPGEQ} instruction used to break out of a loop
-at a time when the only variables were two loop variables,
-{\tt i} and {\tt sum}, as in the example on \pagref{EXAMPLE-LOOP}, if
-\begin{center}
-$I$ = {\tt \{"": prefix = "BREAK"|"", "", "", "", "i","sum"|\}}
-\end{center}
-the message would be something like:
-\begin{center}
-\tt BREAK because 5 > 4: i = 5, sum = 10
-\end{center}
-The 4 {\tt ""}'s skip the two values being compared and the two \TT{next}
-values in the stack.
 
 \subsection{Trace Depth}
 \label{TRACE-DEPTH}

@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat Aug 26 16:30:53 EDT 2023
+// Date:	Sun Aug 27 06:54:54 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1403,11 +1403,11 @@ bool mex::run_process ( mex::process p )
 		else if ( op_code == mex::PUSHV )
 		    sprintf
 			( buffer,
-			  " = %.15g"
-			  " <= fp[%u]"
-			  "[-nargs[%u]+%.15g-1]",
-			  result, pc->immedB,
-			  pc->immedB, arg1 );
+			  " <= sp[fp[%u]"
+			  "-nargs[%u]+%.15g-1]"
+			  " = %.15g",
+			  pc->immedB, pc->immedB, arg1,
+			  result );
 
 		else if ( op_info->op_type == mex::A1 )
 		    sprintf
