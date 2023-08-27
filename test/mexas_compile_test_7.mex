@@ -1,0 +1,29 @@
+// MEXAS Compile Test 7 Input
+//
+// File:	mexas_compile_test_7.in
+// Author:	Bob Walton (walton@acm.org)
+// Date:	Sun Aug 27 13:03:12 EDT 2023
+//
+// The authors have placed this program in the public
+// domain; they make no warranty and accept no liability
+// for this program.
+
+// Excepts tests.
+//
+TRACE_EXCEPTS
+PUSHI 1e200
+PUSHI 1e200
+MUL
+TRACE_EXCEPTS
+NEG
+LOG
+TRACE_EXCEPTS
+PUSHI 10
+PUSHI 0
+DIV
+TRACE_EXCEPTS
+SET_EXCEPTS INVALID
+PUSHI 10
+PUSHI 0
+DIV
+TRACE_EXCEPTS

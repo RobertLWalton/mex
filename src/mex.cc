@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Aug 27 06:54:54 EDT 2023
+// Date:	Sun Aug 27 13:07:33 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -147,6 +147,21 @@ void mex::print_excepts
 	    printer << ei.name;
 	}
     }
+}
+
+static bool excepts_test ( mex::process p )
+{
+    int flags =
+        p->excepts & p->excepts_accumulator;
+    if ( flags == 0 ) return true;
+    p->printer
+        << min::bom
+        << "PROCESS TERMINATION EXCEPTS ERROR(S): "
+        << min::place_indent ( 0 );
+    mex::print_excepts ( p->printer, flags );
+    p->printer << min::eom;
+    p->state = mex::EXCEPTS_ERROR;
+    return false;
 }
         
 
@@ -1067,7 +1082,7 @@ bool mex::run_process ( mex::process p )
 	{
 	    SAVE;
 	    p->state = mex::MODULE_END;
-	    return true;
+	    return excepts_test ( p );
 	}
 	if ( limit == 0 )
 	{
@@ -1085,7 +1100,7 @@ bool mex::run_process ( mex::process p )
 		    p->state = mex::CALL_END;
 		else
 		    p->state = mex::MODULE_END;
-	        return true;
+	        return excepts_test ( p );
 	    }
 	    min::interrupt();
 	    mex::module om = p->pc.module;
@@ -1095,7 +1110,7 @@ bool mex::run_process ( mex::process p )
 		if ( oi == 0 )
 		{
 		    p->state = mex::CALL_END;
-		    return true;
+		    return excepts_test ( p );
 		}
 		message = "Illegal PC: no module and"
 		          " index > 0";
@@ -1106,7 +1121,7 @@ bool mex::run_process ( mex::process p )
 		if ( oi == m->length )
 		{
 		    p->state = mex::MODULE_END;
-		    return true;
+		    return excepts_test ( p );
 		}
 		message = "Illegal PC: index too large";
 		goto FATAL;
@@ -2038,7 +2053,7 @@ bool mex::run_process ( mex::process p )
 		case mex::SET_EXCEPTS:
 		{
 		    p->printer
-		        << ":"
+		        << ": "
 		        << min::place_indent ( 1 );
 		    print_excepts
 		        ( p->printer, immedA,
@@ -2048,7 +2063,7 @@ bool mex::run_process ( mex::process p )
 		case mex::TRACE_EXCEPTS:
 		{
 		    p->printer
-		        << ":"
+		        << ": "
 		        << min::place_indent ( 1 );
 		    print_excepts
 		        ( p->printer,
@@ -2228,7 +2243,7 @@ bool mex::run_process ( mex::process p )
 		{
 		    RET_SAVE;
 		    p->state = mex::CALL_END;
-		    return true;
+		    return excepts_test ( p );
 		}
 
 		pcbegin = ~ min::begin_ptr_of ( m );

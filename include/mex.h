@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Aug 24 21:48:51 EDT 2023
+// Date:	Sun Aug 27 16:00:54 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -239,7 +239,8 @@ enum state
     LIMIT_STOP,
     ERROR_STOP,
     JMP_ERROR,
-    FORM_ERROR
+    FORM_ERROR,
+    EXCEPTS_ERROR
 };
 
 const unsigned max_lexical_level = 16;

@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Aug 27 00:56:40 EDT 2023
+// Date:	Sun Aug 27 15:10:00 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -21,6 +21,7 @@
 
 # include <mexas.h>
 # include <cmath>
+# include <cfenv>
 
 # define L mexas::lexical_level
 # define SP mexas::variables->length
@@ -28,8 +29,10 @@
 # define MUP min::unprotected
 
 min::uns8 mexas::compile_trace_flags = 0;
-min::uns32 mexas::run_trace_flags = mex::T_ALWAYS;
 bool mexas::compile_trace_never = false;
+min::uns32 mexas::run_trace_flags = mex::T_ALWAYS;
+min::uns32 mexas::run_excepts =
+    FE_DIVBYZERO|FE_INVALID|FE_OVERFLOW;
 
 min::uns32 mexas::error_count;
 min::uns32 mexas::warning_count;
@@ -2125,7 +2128,7 @@ mex::module mexas::compile ( min::file file )
 		{
 		    min::gen fname = statement[first+i];
 		    min::gen fbit = min::get
-		        ( mexas::trace_flag_table,
+		        ( mexas::except_flag_table,
 			  fname );
 		    if ( fbit != min::NONE() )
 		    {
@@ -2232,6 +2235,7 @@ mex::module mexas::compile ( min::file file )
     min::locatable_var<mex::process> process
         ( mex::init_process ( m ) );
     process->trace_flags = mexas::run_trace_flags;
+    process->excepts = mexas::run_excepts;
     process->limit = mex::run_counter_limit;
     mex::run_process ( process );
     if ( process->state != mex::MODULE_END )

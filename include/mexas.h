@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Aug 24 22:19:01 EDT 2023
+// Date:	Sun Aug 27 15:05:36 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -550,6 +550,8 @@ bool check_parameter
 
 extern min::uns32 run_trace_flags;
     // Initial trace_flags value for processes.
+extern min::uns32 run_excepts;
+    // Initial excepts value for processes.
 enum compile_trace_flags
 {
     TRACE       = 1 << 0,
