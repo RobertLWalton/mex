@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Aug 27 13:07:33 EDT 2023
+// Date:	Mon Aug 28 06:21:23 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -868,15 +868,6 @@ mex::op_info mex::op_infos [ mex::NUMBER_OF_OP_CODES ] =
     { mex::BEGL, NONA, T_BEGL, "BEGL", NULL },
     { mex::ENDL, NONA, T_ENDL, "ENDL", NULL },
     { mex::CONT, NONA, T_CONT, "CONT", NULL },
-    { mex::SET_TRACE, NONA, T_ALWAYS, "SET_TRACE",
-                      NULL },
-    { mex::TRACE, NONA, T_ALWAYS, "TRACE", NULL },
-    { mex::WARN, NONA, T_ALWAYS, "WARN", NULL },
-    { mex::ERROR, NONA, T_ALWAYS, "ERROR", NULL },
-    { mex::SET_EXCEPTS, NONA, T_SET_EXCEPTS,
-                          "SET_EXCEPTS", NULL },
-    { mex::TRACE_EXCEPTS, NONA, T_ALWAYS,
-                          "TRACE_EXCEPTS", NULL },
     { mex::BEGF, NONA, T_BEGF, "BEGF", NULL },
     { mex::ENDF, NONA, T_ENDF, "ENDF", NULL },
     { mex::CALLM, NONA, T_CALLM, "CALLM", NULL },
@@ -885,6 +876,17 @@ mex::op_info mex::op_infos [ mex::NUMBER_OF_OP_CODES ] =
     { mex::PUSHA, NONA, T_PUSH, "PUSHA", NULL },
     { mex::PUSHNARGS, NONA, T_PUSH, "PUSHNARGS", NULL },
     { mex::PUSHV, A1, T_PUSH, "PUSHV", "pushv" },
+    { mex::SET_TRACE, NONA, T_ALWAYS,
+                      "SET_TRACE", NULL },
+    { mex::TRACE, NONA, T_ALWAYS, "TRACE", NULL },
+    { mex::WARN, NONA, T_ALWAYS, "WARN", NULL },
+    { mex::ERROR, NONA, T_ALWAYS, "ERROR", NULL },
+    { mex::SET_EXCEPTS, NONA, T_SET_EXCEPTS,
+                        "SET_EXCEPTS", NULL },
+    { mex::TRACE_EXCEPTS, NONA, T_ALWAYS,
+                          "TRACE_EXCEPTS", NULL },
+    { mex::SET_OPTIMIZE, NONA, T_SET_OPTIMIZE,
+                         "SET_OPTIMIZE", NULL },
 };
 
 // Trace Class Information Table.
@@ -900,8 +902,6 @@ mex::trace_class_info mex::trace_class_infos
     { T_JMP, "JMP" },
     { T_JMPS, "JMPS" },
     { T_JMPF, "JMPF" },
-    { T_NOP, "NOP" },
-    { T_SET_EXCEPTS, "SET_EXCEPTS" },
     { T_BEG, "BEG" },
     { T_END, "END" },
     { T_BEGL, "BEGL" },
@@ -912,6 +912,9 @@ mex::trace_class_info mex::trace_class_infos
     { T_CALLM, "CALLM" },
     { T_CALLG, "CALLG" },
     { T_RET, "RET" },
+    { T_NOP, "NOP" },
+    { T_SET_EXCEPTS, "SET_EXCEPTS" },
+    { T_SET_OPTIMIZE, "SET_OPTIMIZE" },
 };
 
 // Excepts Information Table.

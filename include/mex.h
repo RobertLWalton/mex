@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Aug 27 16:00:54 EDT 2023
+// Date:	Mon Aug 28 06:17:01 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -80,16 +80,17 @@ enum op_code {
     END,
     BEGL,
     ENDL, CONT,
-    SET_TRACE,
-    TRACE, WARN, ERROR,
-    SET_EXCEPTS,
-    TRACE_EXCEPTS,
     BEGF, ENDF,
     CALLM, CALLG,
     RET,
     PUSHA,
     PUSHNARGS,
     PUSHV,
+    SET_TRACE,
+    TRACE, WARN, ERROR,
+    SET_EXCEPTS,
+    TRACE_EXCEPTS,
+    SET_OPTIMIZE,
     NUMBER_OF_OP_CODES
 };
 
@@ -107,8 +108,6 @@ enum trace_class
 	// JMPs.  Trace class of conditional jumps,
 	// JMP..., is T_JMPS.  +1 is added at run-time
 	// if the jump fails.
-    T_NOP,
-    T_SET_EXCEPTS,
     T_BEG,
     T_END,
     T_BEGL,
@@ -119,6 +118,9 @@ enum trace_class
     T_CALLM,
     T_CALLG,
     T_RET,
+    T_NOP,
+    T_SET_EXCEPTS,
+    T_SET_OPTIMIZE,
     NUMBER_OF_TRACE_CLASSES
 };
 
