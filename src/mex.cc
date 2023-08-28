@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Aug 28 06:28:08 EDT 2023
+// Date:	Mon Aug 28 08:19:49 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -665,6 +665,8 @@ static bool optimized_run_process ( mex::process p )
 	    p->nargs[immedB] = ret->saved_nargs;
 	    RW_UNS32 p->return_stack->length = rp;
 
+	    sp = new_sp;
+
 	    if ( em == min::NULL_STUB )
 	        goto RET_EXIT;
 
@@ -725,7 +727,7 @@ static bool optimized_run_process ( mex::process p )
 	    min::gen * qend = sp - (int) immedA;
 	    min::gen * q = qend - (int) immedC;
 	    while ( q < qend )
-	        * ++ new_sp = * ++ q;
+	        * new_sp ++ = * q ++;
 	    sp = new_sp;
 
 	    if ( em == min::NULL_STUB )
@@ -2251,7 +2253,7 @@ bool mex::run_process ( mex::process p )
 		min::gen * qend = sp - (int) immedA;
 		min::gen * q = qend - (int) immedC;
 		while ( q < qend )
-		    * ++ new_sp = * ++ q;
+		    * new_sp ++ = * q ++;
 		sp = new_sp;
 
 		p->level = ret->saved_level;
