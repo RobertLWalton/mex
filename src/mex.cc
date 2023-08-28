@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Aug 28 06:21:23 EDT 2023
+// Date:	Mon Aug 28 06:28:08 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -611,6 +611,7 @@ static bool optimized_run_process ( mex::process p )
 	case mex::ERROR:
 	case mex::SET_EXCEPTS:
 	case mex::TRACE_EXCEPTS:
+	case mex::SET_OPTIMIZE:
 	    goto ERROR_EXIT;
 	case mex::BEGF:
 	{
@@ -1803,6 +1804,7 @@ bool mex::run_process ( mex::process p )
 		break;
 	    case mex::SET_TRACE:
 	    case mex::SET_EXCEPTS:
+	    case mex::SET_OPTIMIZE:
 	        break;
 	    case mex::TRACE:
 	    case mex::TRACE_EXCEPTS:
@@ -2074,6 +2076,17 @@ bool mex::run_process ( mex::process p )
 			  p->excepts );
 		    break;
 		}
+		case mex::SET_OPTIMIZE:
+		{
+		    p->printer
+		        << ": "
+		        << ( ( immedA & 1 ) ?
+			     "ON" : "OFF" )
+		        << " <=== "
+		        << ( p->optimize ?
+			     "ON" : "OFF" );
+		    break;
+		}
 		case mex::BEGF:
 		{
 		    // trace_info only used by CALL...
@@ -2199,6 +2212,9 @@ bool mex::run_process ( mex::process p )
 	        break;
 	    case mex::SET_EXCEPTS:
 	        p->excepts = immedA;
+	        break;
+	    case mex::SET_OPTIMIZE:
+	        p->optimize = ( immedA & 1 );
 	        break;
 	    case mex::TRACE:
 	    case mex::TRACE_EXCEPTS:
