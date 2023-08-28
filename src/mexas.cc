@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Aug 27 23:27:49 EDT 2023
+// Date:	Mon Aug 28 14:04:38 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -270,6 +270,8 @@ min::uns32 mexas::first_line_number,
 min::locatable_gen mexas::single_quote;
 min::locatable_gen mexas::double_quote;
 static min::locatable_gen backslash;
+static min::locatable_gen on;
+static min::locatable_gen off;
 
 static void initialize ( void )
 {
@@ -279,6 +281,8 @@ static void initialize ( void )
     mexas::single_quote = min::new_str_gen ( "'" );
     mexas::double_quote = min::new_str_gen ( "\"" );
     ::backslash = min::new_str_gen ( "\\" );
+    ::on = min::new_str_gen ( "ON" );
+    ::off = min::new_str_gen ( "OFF" );
 
     ::init_op_code_table();
     ::init_trace_flag_table();
@@ -2145,6 +2149,24 @@ mex::module mexas::compile ( min::file file )
 				  "; ignored" );
 		}
 		instr.immedA = flags;
+
+		mexas::push_instr ( instr, pp );
+		break;
+	    }
+	    case mex::SET_OPTIMIZE:
+	    {
+	        min::gen param =
+		    mexas::get_name ( index );
+		if ( param == ::on )
+		    instr.immedA = 1;
+		else if ( param == ::off )
+		    instr.immedA = 0;
+		else
+		    mexas::compile_error
+		        ( pp, "SET_OPTIMIZE requires"
+			      " `ON' or `OFF'"
+			      " parameter; `OFF'"
+			      " assumed" );
 
 		mexas::push_instr ( instr, pp );
 		break;
