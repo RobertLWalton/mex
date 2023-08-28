@@ -1180,8 +1180,8 @@ Figure~\ref{HOUSEKEEPING-INSTRUCTIONS}.
 \begin{tabular}{|l|l|}
 \hline
 \TT{SET\_TRACE}
-    & The process \TT{trace\_flags} member is set from the low order \\
-    & 8 bits of \TT{immedA}.
+    & The process \TT{trace\_flags} member is set to \TT{immedA}. \\
+    & This instruction is in the \TT{ALWAYS} trace class.
 \\\hline
 \TT{NOP}/\TT{TRACE}
     & Subtract \TT{immedA} to \TT{sp} (popping the stack \TT{immedA} times).
@@ -1193,6 +1193,14 @@ Figure~\ref{HOUSEKEEPING-INSTRUCTIONS}.
     & no-operations used only for tracing, except \TT{ERROR} prints \\
     & a `Fatal Error' message before its trace and then terminates \\
     & the process with an \TT{ERROR\_STOP} state.
+\\\hline
+\TT{TRACE\_EXCEPTS}
+    & No operation.  When traced prints the process
+      \TT{excepts\_accumulator}.  \\
+    & This instruction is in the \TT{ALWAYS} trace class.
+\\\hline
+\TT{SET\_EXCEPTS}
+    & The process \TT{excepts} member is set to \TT{immedA}.
 \\\hline
 \end{tabular}
 \end{center}
@@ -1322,7 +1330,9 @@ is \TT{mex::T\_AOP}.
 \ttikey{NEVER}{trace class} & Instruction is never traced.
 \\\hline
 \ttikey{ALWAYS}{trace class} & Instruction is always traced.
-    Only the \TT{ERROR} instruction has this class.
+    The following instructions have this trace class:
+    \TT{ERROR}, \TT{WARN}, \TT{TRACE}, \TT{TRACE\_\EOL EXCEPTS},
+    \TT{SET\_\EOL TRACE}.
 \\\hline
 \ttikey{AOP}{trace class} & Arithmetic instructions in Figure
     \ref{ARITHMETIC-INSTRUCTIONS}.
@@ -1505,7 +1515,12 @@ Many instructions end with a {\em trace-info} that has the syntax:
 For these instructions, the {\em trace-message} is printed
 after the operation code in the trace message, followed by
 the names and values of the {\em trace-variables} named in the
-{\em trace-info}.
+{\em trace-info}.  Its form is:
+\begin{indpar}
+{\em trace-info-message} ::=
+    {\em trace-message} ~
+    \{\TT{,} {\em trace-variable}\TT{=}{\em value} \} \STAR{}
+\end{indpar}
 
 When an instruction has a {\em trace-info}, \TT{PUSH\ldots}
 instructions are generated just before the instruction to
@@ -1561,6 +1576,19 @@ at the point of the return instruction.
                 & The {\em trace-classes} being enabled are
 	          listed, but they are \underline{not}
 		  aggregated into {\em trace-class-groups}.
+\\[0.5ex]
+\TT{SET\_EXCEPTS} & \TT{SET\_EXCEPTS:}
+                    \{ \TT{*}\QMARK{}{\em except-name} \}\STAR{} \\
+                & The names of the excepts being enable in
+		  \TT{p->excepts} are listed, and those that are
+		  also in \TT{p->excepts\_accumulator} are starred with
+		  \TT{*}.
+\\[0.5ex]
+\TT{TRACE\_EXCEPTS} & \TT{TRACE\_EXCEPTS:}
+                    \{ \TT{*}\QMARK{}{\em except-name} \}\STAR{} \\
+                & The names of the excepts in \TT{p->excepts\_accumuator}
+		  are listed, and those that are also in \TT{p->excepts}
+		  are starred with \TT{*}.
 \end{tabular}
 \end{center}
 
@@ -2263,29 +2291,6 @@ Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}.  At assembly-time,
 this instruction does nothing.
 \end{indpar}
 
-\ttkey{SET\_TRACE} \{ {\em trace-class} $|$ {\em trace-class-group} \}\STAR{}
-\begin{indpar}
-At run-time set the process \TT{trace\_flags} parameter so as
-to have a flag for each {\em trace-class} given, or each trace class
-in a given {\em trace-class-group}.  This instruction itself has
-the \TT{ALWAYS} trace class.
-See Instruction Tracing\pagnote{INSTRUCTION-TRACING} for details.
-
-At assembly-time,
-this instruction does nothing.
-\end{indpar}
-
-\ttkey{NOP}/\ttkey{TRACE}/\ttkey{WARN}/\ttkey{ERROR} {\em trace-info}\QMARK{}
-\begin{indpar}
-At run-time these instructions do nothing, except that the \TT{ERROR}
-instruction terminates the process
-(see Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}).  At assembly-time,
-these instructions do nothing.
-
-All these instructions except \TT{NOP} are in the \TT{ALWAYS}
-trace class.
-\end{indpar}
-
 \ttkey{BEGF}\label{BEGF} {\em function-name} {\em variable-name}\STAR{}
 	{\em trace-message}\QMARK{}
 \begin{indpar}
@@ -2377,6 +2382,46 @@ to the lexical level specified by {\em level} (see \pagref{LEVEL}).
 
 At assembly-time, this instruction changes the name of the top
 variable stack element to {\em new-variable-name}.
+\end{indpar}
+
+\ttkey{SET\_TRACE} \{ {\em trace-class} $|$ {\em trace-class-group} \}\STAR{}
+\begin{indpar}
+At run-time set the process \TT{trace\_flags} parameter so as
+to have a flag for each {\em trace-class} given, or each trace class
+in a given {\em trace-class-group}.  This instruction itself has
+the \TT{ALWAYS} trace class.
+See Instruction Tracing\pagnote{INSTRUCTION-TRACING} for details.
+
+At assembly-time,
+this instruction does nothing.
+\end{indpar}
+
+\ttkey{NOP}/\ttkey{TRACE}/\ttkey{WARN}/\ttkey{ERROR} {\em trace-info}\QMARK{}
+\begin{indpar}
+At run-time these instructions do nothing, except that the \TT{ERROR}
+instruction terminates the process
+(see Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}).  At assembly-time,
+these instructions do nothing.
+
+All these instructions except \TT{NOP} are in the \TT{ALWAYS}
+trace class.
+\end{indpar}
+
+\ttkey{SET\_EXCEPTS} {\em except-name}\STAR{}
+\begin{indpar}
+At run-time set the process \TT{excepts} parameter so as
+to have a flag for each named except.
+At assembly-time,
+this instruction does nothing.
+\end{indpar}
+
+\ttkey{TRACE\_EXCEPTS}
+\begin{indpar}
+At run-time, this instruction is just traced as specified
+in Other Instruction Trace Messages,
+\itemref{OTHER-INSTRUCTION-TRACE-MESSAGES}.
+At assembly-time,
+this instruction does nothing.
 \end{indpar}
 
 \subsection{MEXAS Declarations}

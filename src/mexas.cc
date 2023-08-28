@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Aug 27 15:10:00 EDT 2023
+// Date:	Sun Aug 27 23:27:49 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -2151,7 +2151,6 @@ mex::module mexas::compile ( min::file file )
 	    }
 	    case mex::NOP:
 	    case mex::TRACE:
-	    case mex::TRACE_EXCEPTS:
 	    case mex::WARN:
 	    case mex::ERROR:
 	    {
@@ -2195,6 +2194,9 @@ mex::module mexas::compile ( min::file file )
 		      L, mexas::depth[L] );
 		break;
 	    }
+
+	    default:
+		mexas::push_instr ( instr, pp );
 	    }
 	}
 	TRACE:
