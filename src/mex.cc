@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Aug 28 21:52:12 EDT 2023
+// Date:	Tue Aug 29 06:32:57 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -674,7 +674,6 @@ static bool optimized_run_process ( mex::process p )
 	    pcbegin = ~ min::begin_ptr_of ( m );
 	    pc = pcbegin + new_pc;
 	    pcend = pcbegin + m->length;
-	    -- pc;
 	    break;
 	}
 	case mex::RET:
@@ -737,7 +736,6 @@ static bool optimized_run_process ( mex::process p )
 	    pcbegin = ~ min::begin_ptr_of ( m );
 	    pc = pcbegin + new_pc;
 	    pcend = pcbegin + m->length;
-	    -- pc;
 	    break;
 	}
 	case mex::CALLM:
@@ -769,8 +767,7 @@ static bool optimized_run_process ( mex::process p )
 	        ~ min::begin_ptr_of ( p->return_stack )
 		+ rp;
 	    mex::pc new_pc =
-	        { m, (min::uns32)
-		     ( pc - pcbegin + 1 ) };
+	        { m, (min::uns32) ( pc - pcbegin ) };
 	    mex::set_saved_pc ( p, ret, new_pc );
 	    ret->saved_level = p->level;
 	    ret->saved_fp = p->fp[level];
@@ -781,9 +778,12 @@ static bool optimized_run_process ( mex::process p )
 	    ret->nresults = pc->immedB;
 	    RW_UNS32 p->return_stack->length = rp + 1;
 
-	    new_pc = { cm, immedC + 1 };
+	    new_pc = { cm, immedC };
 	    mex::set_pc ( p, new_pc );
 	    m = cm;
+	    pcbegin = ~ min::begin_ptr_of ( m );
+	    pc = pcbegin + immedC;
+	    pcend = pcbegin + m->length;
 	    break;
 	}
 
