@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Aug 28 08:19:49 EDT 2023
+// Date:	Mon Aug 28 21:52:12 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -375,7 +375,7 @@ static bool optimized_run_process ( mex::process p )
 	    min::uns32 i = pc->immedA;
 	    if ( sp >= spend || i >= sp - spbegin )
 	        goto ERROR_EXIT;
-	    * sp = sp[-i-1];
+	    * sp = sp[-(int)i-1];
 	    ++ sp;
 	    break;
 	}
@@ -484,7 +484,7 @@ static bool optimized_run_process ( mex::process p )
 	    if ( sp <= spbegin || i >= sp - spbegin )
 	        goto ERROR_EXIT;
 	    -- sp;
-	    sp[-i] = * sp;
+	    sp[-(int)i] = * sp;
 	    break;
 	}
 	case mex::JMP:
@@ -598,8 +598,8 @@ static bool optimized_run_process ( mex::process p )
 	        goto ERROR_EXIT;
 	    if ( immedC > pc - pcbegin )
 	        goto ERROR_EXIT;
-	    sp -= immedA;
-	    for ( min::uns32 i = immedB; 0 < i; -- i )
+	    sp -= (int) immedA;
+	    for ( int i = immedB; 0 < i; -- i )
 	        sp[-(int)immedB-i] = sp[-i];
 	    pc -= immedC;
 	    -- pc;
@@ -641,7 +641,7 @@ static bool optimized_run_process ( mex::process p )
 
 	    min::gen * new_sp =
 	        spbegin + p->fp[immedB]
-		        - p->nargs[immedB];
+		        - (int) p->nargs[immedB];
 	    min::uns32 new_fp = ret->saved_fp;
 	    if ( new_fp > new_sp - spbegin )
 		goto ERROR_EXIT;
@@ -695,7 +695,7 @@ static bool optimized_run_process ( mex::process p )
 
 	    min::gen * new_sp =
 	        spbegin + p->fp[immedB]
-		        - p->nargs[immedB];
+		        - (int) p->nargs[immedB];
 	    min::uns32 new_fp = ret->saved_fp;
 	    if ( new_fp > new_sp - spbegin )
 		goto ERROR_EXIT;
@@ -1868,7 +1868,7 @@ bool mex::run_process ( mex::process p )
 
 	        min::gen * new_sp =
 		    spbegin + p->fp[immedB]
-		            - p->nargs[immedB];
+		            - (int) p->nargs[immedB];
 
 		if ( immedA + immedC < immedA
 		     ||
@@ -2241,7 +2241,7 @@ bool mex::run_process ( mex::process p )
 		   ~ ( p->return_stack + rp );
 	        min::gen * new_sp =
 		    spbegin + p->fp[immedB]
-		            - p->nargs[immedB];
+		            - (int) p->nargs[immedB];
 		mex::module em = ret->saved_pc.module;
 		min::uns32 new_pc = ret->saved_pc.index;
 
