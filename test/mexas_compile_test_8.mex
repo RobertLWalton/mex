@@ -1,0 +1,97 @@
+// MEXAS Compile Test 8 Input
+//
+// File:	mexas_compile_test_8.mex
+// Author:	Bob Walton (walton@acm.org)
+// Date:	Mon Aug 28 06:36:14 EDT 2023
+//
+// The authors have placed this program in the public
+// domain; they make no warranty and accept no liability
+// for this program.
+
+// Basic Optimize Test
+//
+SET_TRACE SET_OPTIMIZE
+SET_OPTIMIZE OFF
+BEGF MIN X Y
+    PUSHI 0 Z
+    BEG
+	PUSH X
+	PUSH Y
+	JMPGT ITS-Y
+	PUSH X
+	POP Z
+	JMP DONE
+	LABEL ITS-Y
+	PUSH Y
+	POP Z
+    END
+    LABEL DONE
+    TRACE "Z = MIN ( X, Y )" X Y Z
+ENDF
+
+PUSHI 5.5
+PUSHI 3.4
+CALL MIN 2
+SET_OPTIMIZE ON
+PUSHI 5.5
+PUSHI 3.4
+CALL MIN 2
+
+BEGF TEST-BASIC-ARITHMETIC X Y
+    PUSH X
+    PUSH Y
+    ADD Z
+    TRACE 'Z = X + Y' X Y Z
+    POP
+    PUSH X
+    PUSH Y
+    SUB Z
+    TRACE 'Z = X - Y' X Y Z
+    POP
+    PUSH X
+    PUSH Y
+    MUL Z
+    TRACE 'Z = X * Y' X Y Z
+    POP
+    PUSH X
+    PUSH Y
+    DIV Z
+    TRACE 'Z = X / Y' X Y Z
+    POP
+ENDF
+
+SET_OPTIMIZE OFF
+PUSHI 100
+PUSHI 200
+CALL TEST-BASIC-ARITHMETIC 2
+SET_OPTIMIZE ON
+PUSHI 100
+PUSHI 200
+CALL TEST-BASIC-ARITHMETIC 2
+
+BEGF SUM X Y
+    PUSHI 0 S
+    PUSH X I
+    BEGL 2
+        PUSH I
+	PUSH Y
+	JMPGT DONE
+	PUSH S
+	PUSH I
+	ADD
+	POP next-S
+        PUSH I
+	ADDI 1
+	POP next-I
+    ENDL
+    LABEL DONE
+    TRACE 'S = SUM I FOR X <= I <= Y' S X Y
+ENDF
+SET_OPTIMIZE OFF
+PUSHI 1
+PUSHI 10
+CALL SUM 2
+SET_OPTIMIZE ON
+PUSHI 1
+PUSHI 10
+CALL SUM 2
