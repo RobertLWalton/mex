@@ -10,7 +10,7 @@
 
 // Arithmetic Operation Optimize Test
 //
-SET_TRACE SET_OPTIMIZE
+SET_TRACE SET_OPTIMIZE NOP
 
 // Arithmetic Operations Optimize Test
 //
@@ -55,10 +55,137 @@ BEGF AOP-2ARG-TEST
     PUSH Y
     MODR Z
     TRACE 'Z = Y MOD X' X Y Z
+    NOP 'Only Traced if Optimize is OFF'
 ENDF
 
 SET_OPTIMIZE OFF
 CALL AOP-2ARG-TEST 0
 SET_OPTIMIZE ON
 CALL AOP-2ARG-TEST 0
+
+BEGF AOP-IMMED-TEST
+    PUSHI 1.2345 X
+    PUSH X
+    ADDI 0.0005 Z
+    TRACE 'Z = X + 0.0005' X Z
+    PUSH X
+    SUBI 0.03 Z
+    TRACE 'Z = X - 0.03' X Z
+    PUSH X
+    SUBRI 0.23 Z
+    TRACE 'Z = 0.23 - X' X Z
+    PUSH X
+    MULI 3 Z
+    TRACE 'Z = 3 * X' X Z
+
+    PUSHI 5 X
+    PUSH X
+    DIVI 2 Z
+    TRACE 'Z = X / 2' X Z
+    PUSH X
+    DIVRI 2 Z
+    TRACE 'Z = 2 / X' X Z
+    PUSH X
+    MODI 2 Z
+    TRACE 'Z = X MOD 2' X Z
+    PUSH X
+    MODRI 12 Z
+    TRACE 'Z = 12 MOD X' X Z
+
+    PUSHI 3 X
+    PUSH X
+    POWI 3 Z
+    TRACE 'Z = X^3' X Z
+    PUSHI 0.5 X
+    PUSH X
+    POWI 10 Z
+    TRACE 'Z = X^10' X Z
+    PUSH Z
+    MULI 1024 W
+    TRACE 'W = 1024 * Z' Z W
+
+    NOP 'Only Traced if Optimize is OFF'
+ENDF
+
+SET_OPTIMIZE OFF
+CALL AOP-IMMED-TEST 0
+SET_OPTIMIZE ON
+CALL AOP-IMMED-TEST 0
+
+BEGF AOP-1ARG-TEST
+    PUSHI -53 X
+    PUSH X
+    NEG Z
+    TRACE 'Z = - X' X Z
+    PUSH X
+    ABS Z
+    TRACE 'Z = ABS ( X )' X Z
+
+    PUSHI 1 X
+    PUSH X
+    EXP Z
+    TRACE 'Z = EXP ( X )' X Z
+    PUSH Z
+    LOG W
+    TRACE 'W = LOG ( Z )' Z W
+
+    PUSHI 3 X
+    PUSH X
+    EXP10 Z
+    TRACE 'Z = EXP10 ( X )' X Z
+    PUSH Z
+    LOG10 W
+    TRACE 'W = LOG10 ( Z )' Z W
+
+    PUSHI 3.141592653589793238462643383279502884197 PI
+    PUSH PI
+    DIVI 6 X
+    PUSH X
+    SIN Z
+    TRACE 'Z = SIN (X = PI/6 )' X Z
+    PUSH Z
+    ASIN W
+    TRACE 'W = ASIN ( Z )' Z W
+
+    PUSH PI
+    DIVI 3 X
+    PUSH X
+    COS Z
+    TRACE 'Z = COS (X = PI/3 )' X Z
+    PUSH Z
+    ACOS W
+    TRACE 'W = ACOS ( Z )' Z W
+
+    PUSH PI
+    DIVI 4 X
+    PUSH X
+    TAN Z
+    TRACE 'Z = TAN (X = PI/4 )' X Z
+    PUSH Z
+    ATAN W
+    TRACE 'W = ATAN ( Z )' Z W
+
+    PUSHI -1
+    PUSHI +1
+    ATAN2 Z
+    TRACE 'Z = ATAN2 ( -1, +1 )' Z
+    PUSH PI
+    DIVI 4 X
+    TRACE 'X = PI/4' X
+    PUSHI -1
+    PUSHI +1
+    ATAN2R Z
+    TRACE 'Z = ATAN2R ( -1, +1 )' Z
+    PUSH PI
+    DIVI 4
+    MULI 3 X
+    TRACE 'X = 3*PI/4' X
+
+    NOP 'Only Traced if Optimize is OFF'
+ENDF
+
+SET_OPTIMIZE OFF
+CALL AOP-1ARG-TEST 0
+SET_OPTIMIZE ON
+CALL AOP-1ARG-TEST 0
 
