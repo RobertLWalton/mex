@@ -2,7 +2,7 @@
 //
 // File:	mexas_compile_test_8.mex
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Aug 28 06:36:14 EDT 2023
+// Date:	Tue Aug 29 22:27:30 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -37,6 +37,8 @@ PUSHI 5.5
 PUSHI 3.4
 CALL MIN 2
 
+// Basic Arithmetic Operations Optimize Test
+//
 BEGF TEST-BASIC-ARITHMETIC X Y
     PUSH X
     PUSH Y
@@ -58,6 +60,11 @@ BEGF TEST-BASIC-ARITHMETIC X Y
     DIV Z
     TRACE 'Z = X / Y' X Y Z
     POP
+    PUSH X
+    PUSH Y
+    MOD Z
+    TRACE 'Z = X MOD Y' X Y Z
+    POP
 ENDF
 
 SET_OPTIMIZE OFF
@@ -69,6 +76,8 @@ PUSHI 100
 PUSHI 200
 CALL TEST-BASIC-ARITHMETIC 2
 
+// Loop Optimize Test
+//
 BEGF SUM X Y
     PUSHI 0 S
     PUSH X I
