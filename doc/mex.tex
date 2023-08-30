@@ -239,7 +239,7 @@
 
 \author{Robert L. Walton}
 
-\date{August 27, 2023}
+\date{August 29, 2023}
  
 \maketitle
 
@@ -1618,6 +1618,14 @@ by the following instructions:
 \end{center}
 Note: \TT{JMP\ldots} is the only way to exit a loop (\TT{ENDL} and
 \TT{CONT} start a new iteration).
+
+A process's \TT{trace\_depth} is maintained even when the process's
+\TT{optimize} switch is \TT{true} (only a few instructions change
+the trace depth).  Housekeeping instructions (those in
+Figure~\ref{HOUSEKEEPING-INSTRUCTIONS}) execute in the same manner regardless
+of the setting of \TT{optimize}, and can be traced when \TT{optimize}
+is \TT{true}.  In particular, the \TT{TRACE} instrution works regardless
+of the setting of \TT{optimize}.
 
 \subsection{Fatal Errors}
 \label{FATAL-ERRORS}
