@@ -61,7 +61,7 @@ PUSHI 4 I
     [40:19;3] PUSHI T_PUSH 0 0 0 4; I
 BEGL 2
     [41:20;5] BEGL T_BEGL 0 2 0 [$ MISSING $]; [$ MISSING $]
-    STACKS: VARIABLES: next-I next-SUM ; I SUM LIMIT
+    STACKS: VARIABLES: ; next-I next-SUM I SUM LIMIT
     PUSH I
     [43:21;6] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< I * >]
     PUSH LIMIT

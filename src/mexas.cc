@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Aug 28 14:04:38 EDT 2023
+// Date:	Wed Aug 30 04:30:24 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -617,8 +617,9 @@ void mexas::begx ( mex::instr & instr,
 	        // To protect against excessively
 		// large nvars values.
 	}
-        ++ mexas::depth[L];
 
+	// Push next- vars before incrementing depth.
+	//
 	for ( min::uns32 i = 0; i < nvars; ++ i )
 	{
 	    min::locatable_gen name;
@@ -643,6 +644,8 @@ void mexas::begx ( mex::instr & instr,
 	        ( mexas::variables, name,
 		  L, mexas::depth[L] );
 	}
+
+        ++ mexas::depth[L];
 	instr.immedA = tvars;
 	instr.immedB = nvars;
     }
@@ -1574,16 +1577,44 @@ mex::module mexas::compile ( min::file file )
 				  " ignored" );
 			continue;
 		    }
-		    if ( j < mexas::fp[L] )
+		    mexas::variable_element * ve =
+		        ~ ( mexas::variables + j );
+		    if ( ve->level < L )
 		    {
 			mexas::compile_error
 			    ( pp, "variable named ",
 				  min::pgen ( name ),
 				  " is of lower than"
 				  " current lexical"
-				  " level, or is"
-				  " argument to current"
-				  " lexical level, and"
+				  " level, and"
+				  " as such cannot"
+				  " legally be written;"
+				  " instruction"
+				  " ignored" );
+			continue;
+		    }
+		    if ( j < mexas::fp[L] )
+		    {
+			mexas::compile_error
+			    ( pp, "variable named ",
+				  min::pgen ( name ),
+				  " is an argument to"
+				  " the current"
+				  " function, and"
+				  " as such cannot"
+				  " legally be written;"
+				  " instruction"
+				  " ignored" );
+			continue;
+		    }
+		    if ( ve->depth == mexas::depth[L] )
+		    {
+			mexas::compile_error
+			    ( pp, "variable named ",
+				  min::pgen ( name ),
+				  " has the same depth"
+				  " as the POP"
+				  " instruction, and"
 				  " as such cannot"
 				  " legally be written;"
 				  " instruction"

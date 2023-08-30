@@ -239,7 +239,7 @@
 
 \author{Robert L. Walton}
 
-\date{August 29, 2023}
+\date{August 30, 2023}
  
 \maketitle
 
@@ -2216,7 +2216,8 @@ At assembly time, pops the variable stack.
 
 The variable stack search for {\em variable-name} is restricted to
 elements with the same lexical level as the \TT{POP} instruction
-that are not arguments to that lexical level.
+that are not arguments to that lexical level and that are of
+lesser depth than the \TT{POP} instruction.
 
 \ttkey{POP} assembles to the run-time instruction \TT{POPS}.
 Note that \TT{POPL}, \TT{POPG}, and \TT{POPA} do

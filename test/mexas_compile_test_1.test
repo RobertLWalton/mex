@@ -2,7 +2,7 @@
 //
 // File:        mexas_compile_test_1.mex
 // Author:      Bob Walton (walton@acm.org)
-// Date:        Fri Aug  4 17:21:54 EDT 2023
+// Date:        Wed Aug 30 04:32:46 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -56,16 +56,16 @@ JMPLT ITS-X
     [37:13;3] JMPLT T_JMPS 0 0 0 [$ MISSING $]; ITS-X
 PUSH Y
     [38:14;4] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< Y * >]
-POP Z
-    [39:15;3] POPS T_POP 1 0 0 [$ MISSING $]; [< * Z >]
+POP // Z, but illegal as Z has same depth
+    [39:15;3] POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
 JMP DONE
     [40:16;3] JMP T_JMP 0 0 0 [$ MISSING $]; DONE
 LABEL ITS-X
     [37:13;3] JMPLT T_JMPS 0 0 4 [$ MISSING $]; ITS-X
 PUSH X
     [42:17;4] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< X * >]
-POP Z
-    [43:18;3] POPS T_POP 1 0 0 [$ MISSING $]; [< * Z >]
+POP // Z, but illegal as Z has same depth
+    [43:18;3] POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
 LABEL DONE
     [40:16;3] JMP T_JMP 0 0 3 [$ MISSING $]; DONE
     STACKS: VARIABLES: Z Y X

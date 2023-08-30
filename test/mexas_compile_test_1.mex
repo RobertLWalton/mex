@@ -2,7 +2,7 @@
 //
 // File:	mexas_compile_test_1.mex
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Aug  4 17:21:54 EDT 2023
+// Date:	Wed Aug 30 04:32:46 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -36,11 +36,11 @@ PUSH Y
 STACKS
 JMPLT ITS-X
 PUSH Y
-POP Z
+POP // Z, but illegal as Z has same depth
 JMP DONE
 LABEL ITS-X
 PUSH X
-POP Z
+POP // Z, but illegal as Z has same depth
 LABEL DONE
 STACKS
 POP
