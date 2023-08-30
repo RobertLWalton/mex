@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Aug 29 06:32:57 EDT 2023
+// Date:	Tue Aug 29 21:46:30 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -551,14 +551,19 @@ static bool optimized_run_process ( mex::process p )
 		break;
 	    }
 
+	    p->trace_depth -= pc->trace_depth;
 	    sp = new_sp - (int) immedA;
 	    pc += immedC;
 	    -- pc;
 	    break;
 	}
 	case mex::BEG:
-	case mex::NOP:
+	    ++ p->trace_depth;
+	    goto nop;
 	case mex::END:
+	    -- p->trace_depth;
+	nop:
+	case mex::NOP:
 	{
 	    min::uns32 i = pc->immedA;
 	    if ( i > sp - spbegin )
@@ -581,6 +586,7 @@ static bool optimized_run_process ( mex::process p )
 	    min::gen * q2 = sp;
 	    while ( q1 < q2 )
 		* sp ++ = * q1 ++;
+	    ++ p->trace_depth;
 	    break;
 	}
 	case mex::ENDL:
@@ -667,6 +673,8 @@ static bool optimized_run_process ( mex::process p )
 
 	    sp = new_sp;
 
+	    -- p->trace_depth;
+
 	    if ( em == min::NULL_STUB )
 	        goto RET_EXIT;
 
@@ -729,6 +737,8 @@ static bool optimized_run_process ( mex::process p )
 	        * new_sp ++ = * q ++;
 	    sp = new_sp;
 
+	    -- p->trace_depth;
+
 	    if ( em == min::NULL_STUB )
 	        goto RET_EXIT;
 
@@ -784,6 +794,8 @@ static bool optimized_run_process ( mex::process p )
 	    pcbegin = ~ min::begin_ptr_of ( m );
 	    pc = pcbegin + immedC;
 	    pcend = pcbegin + m->length;
+
+	    ++ p->trace_depth;
 	    break;
 	}
 
@@ -977,10 +989,6 @@ inline min::printer print_message_header
     p->printer << min::bom;
 
     unsigned i = p->trace_depth % 10;
-    if ( p->optimize ) i = 0;
-       // In optimize mode an instruction might
-       // occassionally be executed in non-optimize
-       // mode and change the depth.
     unsigned j = ( i + 1 ) * mex::trace_indent;
     while ( 1 < j )
     {
