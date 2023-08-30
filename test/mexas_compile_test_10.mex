@@ -1,0 +1,18 @@
+// MEXAS Compile Test 10 Input
+//
+// File:	mexas_compile_test_10.mex
+// Author:	Bob Walton (walton@acm.org)
+// Date:	Wed Aug 30 17:06:07 EDT 2023
+//
+// The authors have placed this program in the public
+// domain; they make no warranty and accept no liability
+// for this program.
+
+// TRACE, WARN, ERROR test
+//
+SET_TRACE NONE
+PUSHI 1 X
+PUSHI 2 Y
+TRACE 'X and Y differ' X Y
+WARN "X and Y differ" X Y
+ERROR "X and Y differ" X Y

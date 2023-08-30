@@ -1,0 +1,39 @@
+// MEXAS Compile Test 10 Input
+//
+// File:        mexas_compile_test_10.mex
+// Author:      Bob Walton (walton@acm.org)
+// Date:        Wed Aug 30 17:06:07 EDT 2023
+//
+// The authors have placed this program in the public
+// domain; they make no warranty and accept no liability
+// for this program.
+
+// TRACE, WARN, ERROR test
+//
+SET_TRACE NONE
+    [13:0;0] SET_TRACE T_ALWAYS 0 0 0 [$ MISSING $]; [$ MISSING $]
+PUSHI 1 X
+    [14:1;1] PUSHI T_PUSH 0 0 0 1; X
+PUSHI 2 Y
+    [15:2;2] PUSHI T_PUSH 0 0 0 2; Y
+    [16:3;2] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< X * >]
+    [16:4;2] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< Y * >]
+TRACE 'X and Y differ' X Y
+    [16:5;2] TRACE T_ALWAYS 2 0 0 [$ MISSING $]; [< "X and Y differ" X
+             Y >]
+    [17:6;2] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< X * >]
+    [17:7;2] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< Y * >]
+WARN "X and Y differ" X Y
+    [17:8;2] WARN T_ALWAYS 2 0 0 [$ MISSING $]; [< "X and Y differ" X
+             Y >]
+    [18:9;2] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< X * >]
+    [18:10;2] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< Y * >]
+ERROR "X and Y differ" X Y
+    [18:11;2] ERROR T_ALWAYS 2 0 0 [$ MISSING $]; [< "X and Y differ" X
+              Y >]
+* {13:0,0,0} SET_TRACE:
+* {16:5,4,5} TRACE: "X and Y differ", X=1, Y=2
+* {17:8,4,8} WARN: "X and Y differ", X=1, Y=2
+!!! FATAL ERROR:
+* {18:11,4,11} ERROR: "X and Y differ", X=1, Y=2
+exiting due to compile errors

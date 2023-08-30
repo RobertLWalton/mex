@@ -2,7 +2,7 @@
 #
 # File:		Makefile
 # Author:	Bob Walton (walton@acm.org)
-# Date:		Wed Aug 30 06:30:53 EDT 2023
+# Date:		Wed Aug 30 17:07:44 EDT 2023
 #
 # The authors have placed this program in the public
 # domain; they make no warranty and accept no liability
@@ -36,7 +36,8 @@ TESTS = mexas_scanner_test_1 \
         mexas_compile_test_6 \
         mexas_compile_test_7 \
         mexas_compile_test_8 \
-        mexas_compile_test_9
+        mexas_compile_test_9 \
+        mexas_compile_test_10
 
 
 MIN_H =	${MIN}/include/min.h
