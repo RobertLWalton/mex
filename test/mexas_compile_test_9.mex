@@ -1,0 +1,64 @@
+// MEXAS Compile Test 9 Input
+//
+// File:	mexas_compile_test_8.mex
+// Author:	Bob Walton (walton@acm.org)
+// Date:	Tue Aug 29 22:27:30 EDT 2023
+//
+// The authors have placed this program in the public
+// domain; they make no warranty and accept no liability
+// for this program.
+
+// Arithmetic Operation Optimize Test
+//
+SET_TRACE SET_OPTIMIZE
+
+// Arithmetic Operations Optimize Test
+//
+BEGF AOP-2ARG-TEST
+    PUSHI 4.321 X
+    PUSHI -0.002 Y
+    PUSH X
+    PUSH Y
+    ADD Z
+    TRACE 'Z = X + Y' X Y Z
+    PUSH X
+    PUSH Y
+    SUB Z
+    TRACE 'Z = X - Y' X Y Z
+    PUSH X
+    PUSH Y
+    SUBR Z
+    TRACE 'Z = - X + Y' X Y Z
+    PUSH X
+    PUSH Y
+    MUL Z
+    TRACE 'Z = X * Y' X Y Z
+    PUSHI 4.321 X
+    PUSHI 43.21 Y
+    PUSH X
+    PUSH Y
+    DIV Z
+    TRACE 'Z = X / Y' X Y Z
+    PUSH X
+    PUSH Y
+    DIVR Z
+    TRACE 'Z = Y / X' X Y Z
+    PUSHI 4.321 X
+    PUSHI 2 Y
+    PUSH X
+    PUSH Y
+    MOD Z
+    TRACE 'Z = X MOD Y' X Y Z
+    PUSHI 2 X
+    PUSHI 5.321 Y
+    PUSH X
+    PUSH Y
+    MODR Z
+    TRACE 'Z = Y MOD X' X Y Z
+ENDF
+
+SET_OPTIMIZE OFF
+CALL AOP-2ARG-TEST 0
+SET_OPTIMIZE ON
+CALL AOP-2ARG-TEST 0
+
