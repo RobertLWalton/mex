@@ -2475,7 +2475,7 @@ appear in its arguments.  The syntax is:
     \ttkey{-palines}			& [ditto and include source lines] \\
     \ttkey{-paoff}			& [do not trace
                                            assembled instructions] \\
-    \ttkey{-tcnever}			& [assemble with \TT{T\_NEVER}
+    \ttkey{-tcnever}			& [assemble with \TT{NEVER}
                                            trace class] \\
     \ttkey{-tcnormal}			& [assemble with normal trace class] \\
     \ttkey{-tc:}{\em tc-list}		& [run tracing listed trace classes] \\
@@ -2502,18 +2502,54 @@ Note that the symbol :::= is used to indicate that syntactic components
 can\underline{not} be separated by whitespace, whereas ::= indicates
 that components can and often should be separated by whitespace.
 
+A {\em mexas-operation} is effective for all subsequent
+{\em mexas-operations} until it is overriden.  E.g.,
+\TT{-oon} will cause following all executions to be optimized
+until an \TT{-ooff} is encountered.
+
 Details are:
 \begin{center}
 \begin{tabular}{lp{4.5in}}
 {\em mexas-filname} & Name of file, usually ending in \TT{.mex}, containing
                       instructions as described in
                       MEXAS Instructions, \itemref{MEXAS-INSTRUCTIONS}.
+		      The file is assembled as a module and given the
+		      filename minus any \TT{.mex} extension as its
+		      module name.
 \\[0.5ex]
 \TT{-pa\ldots}	    & Determines whether an instruction is printed after
                       it is assembled, and if so, whether source lines
 		      from the file are printed before the instruction.
 		      See Assembled Instruction Printing,
 		      \itemref{ASSEMBLED-INSTRUCTION-PRINTING}.
+\\[0.5ex]
+\TT{-tc\ldots}	    & Determines the trace class of an assembled instruction. \\
+		    & \TT{-tcnormal} sets the trace class of the op code
+		      given by Figure~\ref{TRACE-CLASSES-AND-GROUPS}.
+                      \TT{-tcnever} sets the class to \TT{NEVER} unless
+		      the normal instruction trace class is \TT{ALWAYS}.
+\\[0.5ex]
+\TT{-tc:}{\em tc-list}
+		    & Sets the process \TT{trace\_flags} at the start of mex
+		      program execution.  \TT{ALWAYS} and \TT{NEVER}
+		      can\underline{not} be listed: their flags are always
+		      on and off, respectively.
+\\[0.5ex]
+\TT{-ex:}{\em ex-list}
+		    & Sets the process \TT{excepts} at the start of mex
+		      program execution.
+\\[0.5ex]
+\TT{-o\ldots}       & Sets the process \TT{optimize} flag \TT{on} or \TT{off}
+                      at the start of mex program execution.
+\\[0.5ex]
+\TT{-r} {\em function-name}
+                    & Calls the named function, which must be of lexical
+		      level 1 in some previously assembled module.
+		      To find the function, the name is searched for
+		      in the modules, most recently assembled first.
+\\[0.5ex]
+		    & The function must take no arguments and return no
+		      results.
 \end{tabular}
 \end{center}
 
