@@ -11,6 +11,7 @@
 \usepackage{wasysym}
 \usepackage{makeidx}
 \usepackage{upquote}
+\usepackage{needspace}
 
 \makeindex
 
@@ -239,7 +240,7 @@
 
 \author{Robert L. Walton}
 
-\date{August 30, 2023}
+\date{August 31, 2023}
  
 \maketitle
 
@@ -790,6 +791,7 @@ a return stack, and other parameters.  Specifically:
 \verb|mex::| & \TTMKEY{ERROR\_STOP}{in {\tt mex::state}} \\
 \verb|mex::| & \TTMKEY{JMP\_ERROR}{in {\tt mex::state}} \\
 \verb|mex::| & \TTMKEY{FORM\_ERROR}{in {\tt mex::state}} \\
+\verb|mex::| & \TTMKEY{EXCEPTS\_ERROR}{in {\tt mex::state}} \\
 \verb|}                 | \\
 \end{tabular}
 
@@ -1213,36 +1215,38 @@ Figure~\ref{HOUSEKEEPING-INSTRUCTIONS}.
 \label{ARITHMETIC-EXCEPTIONS}
 
 Arithmetic instructions (Figure~\ref{ARITHMETIC-INSTRUCTIONS})
-may raise the following exceptions, each
-associated with a flag bit defined in \TT{fenv.h}
-(see fenv(3) in the unix manual):
+may raise the exceptions in Figure~\ref{EXCEPTIONS}.
+\begin{boxedfigure}[b!]
 \begin{center}
 \begin{tabular}{|l|l|}
 \hline
-\ttkey{FE\_DIVBYZERO} &  An operation on finite numbers produces infinity \\
-                      &  as a result (e.g., {\tt 5/+0}).
+\ttkey{DIVBYZERO} &  An operation on finite numbers produces infinity \\
+                  &  as a result (e.g., {\tt 5/+0}).
 \\\hline
-\ttkey{FE\_INVALID} & An operation has no well defined result
-                      (e.g., {\tt 0/0}). \\
-		    & \TT{NaN} becomes the result.
+\ttkey{INVALID} & An operation has no well defined result
+                  (e.g., {\tt 0/0}). \\
+		& \TT{NaN} becomes the result.
 \\\hline
-\ttkey{FE\_OVERFLOW} & An operation produces a finite result too large to
-                       store. \\
-		     & An infinity becomes the result.
+\ttkey{OVERFLOW} & An operation produces a finite result too large to
+                   store. \\
+		 & An infinity becomes the result.
 \\\hline
-\ttkey{FE\_UNDERFLOW} & An operation produces a finite result too small to
-                        store. \\
-	              & {\tt +0} or {\tt -0} becomes the result.
+\ttkey{UNDERFLOW} & An operation produces a finite result too small to
+                    store. \\
+	          & {\tt +0} or {\tt -0} becomes the result.
 \\\hline
-\ttkey{FE\_INEXACT} & An operation produces a finite result that cannot
-                      be stored exactly. \\
-		    & The result is rounded to the nearest value.
+\ttkey{INEXACT} & An operation produces a finite result that cannot
+                  be stored exactly. \\
+		& The result is rounded to the nearest value.
 \\\hline
 \end{tabular}
 \end{center}
+\caption{Exceptions}
+\label{EXCEPTIONS}
+\end{boxedfigure}
 
 In non-optimized mode, an instruction that raises an exception prints
-an error message if the instruction raises any exception whose bit
+an error message if the instruction exception is one whose bit
 is on in the process's \TT{excepts} member.
 This error message is always followed by a trace of the instruction
 (regardless of the process trace flag settings): see
@@ -1255,11 +1259,12 @@ In both modes, if any instruction raised an exception whose bit
 is on in the process's \TT{excepts} member, a notice message is
 printed when the process terminates.
 
+\needspace{5\baselineskip}
+
 The \TT{mexas} program's (see \itemref{THE-MEXAS-PROGRAM}) initial setting of
-a process's \TT{excepts} member
-is:
+a process's \TT{excepts} member is:
 \begin{center}
-\TT{FE\_DIVBYZERO|FE\_INVALID|FE\_OVERFLOW}
+\TT{DIVBYZERO} ~~ \TT{INVALID} ~~ \TT{OVERFLOW}
 \end{center}
 
 The process has a register that is the logical OR of the flag bits
@@ -1269,6 +1274,10 @@ and partly in the process's \TT{excepts\_\EOL accumulator} member.
 When the process is not running, it is stored in the latter.  When
 a process is optimized and is running and has not been interrupted,
 it is store in the hardware register.
+
+In C/C++ the \TT{excepts} bit associated with except \TT{XX}
+is \TT{FE\_XX}, as defined as a bit mask macro in \TT{fenv.h}
+(see fenv(3) in the unix manual):
 
 
 \section{Instruction Tracing}
@@ -2450,6 +2459,43 @@ Used mostly for testing the assembler.
 
 \subsection{The MEXAS Program}
 \label{THE-MEXAS-PROGRAM}
+
+The \key{MEXAS program} executes {\em mexas-operations} that
+appear in its arguments.  The syntax is:
+
+\begin{indpar}
+\emkey{MEXAS-command} ::= \ttkey{mexas} {\em mexas-operation}\STAR{}
+\\[0.5ex]
+\emkey{mexas-operation} ::=
+    \begin{tabular}[t]{l@{~~~~~}l}
+    {\em mex-file}			& [assemble the file] \\
+    \ttkey{-ta} 			& [trace assembled instructions] \\
+    \ttkey{-talines}			& [ditto and include source lines] \\
+    \ttkey{-taoff}			& [do not trace
+                                           assembled instructions] \\
+    \ttkey{-tanever}			& [assemble with \TT{T\_NEVER}
+                                           trace class] \\
+    \ttkey{-tanormal}			& [assemble with normal trace class] \\
+    \ttkey{-tc:}{\em tc-list}		& [run tracing listed trace classes] \\
+    \ttkey{-ex:}{\em ex-list}		& [run with listed excepts] \\
+    \ttkey{-oon}			& [run with optimize on] \\
+    \ttkey{-ooff}			& [run with optimize off] \\
+    \ttkey{-r} {\em function-name}	& [run named function] \\
+    \end{tabular}
+\\[0.5ex]
+\emkey{tc-list} :::= $|$ {\em trace-class-or-group}
+                         \{ \TT{,} {\em trace-class-or-group} \}\STAR{} \\
+\emkey{trace-class-or-group} :::= {\em trace-class} $|$ {\em trace-group} \\
+\emkey{trace-class} :::= trace class
+    listed in Figure~\itemref{TRACE-CLASSES-AND-GROUPS} \\
+\emkey{trace-group} :::= trace group
+    listed in Figure~\itemref{TRACE-CLASSES-AND-GROUPS} \\
+\\[0.5ex]
+\emkey{ex-list} :::= $|$ {\em except} \{ \TT{,} {\em except} \}\STAR{} \\
+\emkey{except} :::= except listed on TBD
+
+\end{indpar}
+
 
 
 \clearpage
