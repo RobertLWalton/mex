@@ -1407,6 +1407,8 @@ Each instruction trace message begins with:
                         \TT{,}{\em stack-length}%
                         \TT{,}{\em process-counter}\TT{\}} ~ {\em op-code}
 \end{center}
+The {\em line-number} is the number of the \underline{last} source code
+line containing code that generated the instruction.
 The {\em code-vector-location} is the index of the instruction
 in its code vector.
 The {\em stack-length} is the number of values in the stack
@@ -2468,14 +2470,14 @@ appear in its arguments.  The syntax is:
 \\[0.5ex]
 \emkey{mexas-operation} ::=
     \begin{tabular}[t]{l@{~~~~~}l}
-    {\em mex-file}			& [assemble the file] \\
-    \ttkey{-ta} 			& [trace assembled instructions] \\
-    \ttkey{-talines}			& [ditto and include source lines] \\
-    \ttkey{-taoff}			& [do not trace
+    \emkey{mexas-filename}		& [assemble the file] \\
+    \ttkey{-pa} 			& [print assembled instructions] \\
+    \ttkey{-palines}			& [ditto and include source lines] \\
+    \ttkey{-paoff}			& [do not trace
                                            assembled instructions] \\
-    \ttkey{-tanever}			& [assemble with \TT{T\_NEVER}
+    \ttkey{-tcnever}			& [assemble with \TT{T\_NEVER}
                                            trace class] \\
-    \ttkey{-tanormal}			& [assemble with normal trace class] \\
+    \ttkey{-tcnormal}			& [assemble with normal trace class] \\
     \ttkey{-tc:}{\em tc-list}		& [run tracing listed trace classes] \\
     \ttkey{-ex:}{\em ex-list}		& [run with listed excepts] \\
     \ttkey{-oon}			& [run with optimize on] \\
@@ -2491,11 +2493,66 @@ appear in its arguments.  The syntax is:
 \emkey{trace-group} :::= trace group
     listed in Figure~\itemref{TRACE-CLASSES-AND-GROUPS} \\
 \\[0.5ex]
-\emkey{ex-list} :::= $|$ {\em except} \{ \TT{,} {\em except} \}\STAR{} \\
-\emkey{except} :::= except listed on TBD
+\emkey{ex-list} :::= $|$ {\em exception} \{ \TT{,} {\em exception} \}\STAR{} \\
+\emkey{exception} :::= except listed on Figure~\itemref{EXCEPTIONS}
 
 \end{indpar}
 
+Note that the symbol :::= is used to indicate that syntactic components
+can\underline{not} be separated by whitespace, whereas ::= indicates
+that components can and often should be separated by whitespace.
+
+Details are:
+\begin{center}
+\begin{tabular}{lp{4.5in}}
+{\em mexas-filname} & Name of file, usually ending in \TT{.mex}, containing
+                      instructions as described in
+                      MEXAS Instructions, \itemref{MEXAS-INSTRUCTIONS}.
+\\[0.5ex]
+\TT{-pa\ldots}	    & Determines whether an instruction is printed after
+                      it is assembled, and if so, whether source lines
+		      from the file are printed before the instruction.
+		      See Assembled Instruction Printing,
+		      \itemref{ASSEMBLED-INSTRUCTION-PRINTING}.
+\end{tabular}
+\end{center}
+
+
+\subsubsection{Assembled Instruction Printing}
+\label{ASSEMBLED-INSTRUCTION-PRINTING}
+
+The printout of an assembled instruction begins with the source
+lines of the code that contained the instruction, if this is
+enabled.  All code lines not printed for previous instructions
+are printed.
+
+An instruction printout has the syntax:
+\begin{indpar}
+\emkey{instruction-printout} ::= \\
+\hspace*{2em} {\em printout-header}
+    \begin{tabular}[t]{l}
+    {\em op-code} \TT{T\_}{\em trace-class}
+               \{ \TT{[} {\em trace-depth} \TT{]} \}\QMARK{} \\
+    {\em immedA} {\em immedB} {\em immedC} {\em immedD}
+	       \{ \TT{;} {\em trace-info} \}\QMARK{} \\
+    \end{tabular}
+\\[0.5ex]
+\emkey{printout-header} ::=
+    \TT{[}{\em line-number}\TT{:}{\em code-vector-location}%
+                        \TT{,}{\em variables-stack-length} \TT{]}
+\end{indpar}
+The {\em line-number} is the number of the \underline{last} source code
+line containing code that generated the instruction (the first line is
+number \TT{1}).  The first {\em code-vector-location} is \TT{0}.
+The {\em variables-stack-length} is the value \underline{before}
+the instruction
+is assembled. The {\em trace-depth} is printed only if it is not zero,
+and the {\em trace-info} is printed only if it is not \TT{min::MISSING()}.
+
+In some cases assembling an instruction or declaration (e.g., \TT{LABEL})
+modifies a previously assembled instruction.  In these cases the
+modified previously assembled instruction is printed just after it has
+been modified, and before any instruction currently being assembled.
 
 
 \clearpage
