@@ -2,11 +2,22 @@
 //
 // File:	mexas_compile_test_10.mex
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Aug 30 17:06:07 EDT 2023
+// Date:	Fri Sep  1 04:49:00 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
 // for this program.
+
+// Test of -ex:INVALID option (no OVERFLOW or DIVBYZERO)
+//
+// Cause OVERFLOW and DIVBYZERO
+//
+PUSHI 1e200
+PUSHI 1e200
+MUL
+PUSHI 100
+PUSHI 0
+DIV
 
 // TRACE, WARN, ERROR test
 //

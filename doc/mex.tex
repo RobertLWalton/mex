@@ -1347,11 +1347,11 @@ is \TT{mex::T\_AOP}.
     \ref{ARITHMETIC-INSTRUCTIONS}.
 \\\hline
 \ttikey{PUSH}{trace class} & All \TT{PUSH\ldots} instructions in Figures
-    \ref{HOUSEKEEPING-INSTRUCTIONS} and
+    \ref{STACK-AND-FLOW-CONTROL-INSTRUCTIONS} and
     \ref{FUNCTION-INSTRUCTIONS}.
 \\\hline
 \ttikey{POP}{trace class} & The \TT{POP} instruction in Figure
-    \ref{HOUSEKEEPING-INSTRUCTIONS}.
+    \ref{STACK-AND-FLOW-CONTROL-INSTRUCTIONS}.
 \\\hline
 \ttikey{JMP}{trace class} & The \TT{JMP} instruction.
 \\\hline
@@ -1359,13 +1359,13 @@ is \TT{mex::T\_AOP}.
 \ttikey{JMPS}{trace class} \\
 \ttikey{JMPF}{trace class}
 \end{tabular} & \TT{JMP\ldots} instructions in
-	        Figure \ref{HOUSEKEEPING-INSTRUCTIONS}.
+	        Figure \ref{STACK-AND-FLOW-CONTROL-INSTRUCTIONS}.
 		When compiled the instruction is given the \TT{JMPS}
 		class.  When executed, if the jump test succeeds
 		(jump is taken),
 		the instruction trace class is left unchanged, but if
 		the jump test fails (there is no actual jump),
-		the trace class is changed
+		the effective trace class is changed
 		to \TT{JMPF}.
 \\\hline
 \ttikey{XXX}{trace class} & Instruction with operation code \TT{XXX},
@@ -1376,8 +1376,6 @@ is \TT{mex::T\_AOP}.
 \\\hline
 \end{tabular}
 \end{center}
-
-\bigskip
 
 \begin{center}
 {\Large \bf Trace Class Groups}
@@ -2517,36 +2515,48 @@ Details are:
 		      filename minus any \TT{.mex} extension as its
 		      module name.
 \\[0.5ex]
-\TT{-pa\ldots}	    & Determines whether an instruction is printed after
+\begin{tabular}[t]{l}
+\TT{-pa} \\
+\TT{-pasource} \\
+\TT{-paoff} \\
+\end{tabular}	    & Determines whether an instruction is printed after
                       it is assembled, and if so, whether source lines
 		      from the file are printed before the instruction.
+		      Default is \TT{-paoff}.
 		      See Assembled Instruction Printing,
 		      \itemref{ASSEMBLED-INSTRUCTION-PRINTING}.
 \\[0.5ex]
-\TT{-tc\ldots}	    & Determines the trace class of an assembled instruction. \\
-		    & \TT{-tcnormal} sets the trace class of the op code
+\TT{-tcnever}	    & Determines the trace class of an assembled instruction. \\
+\TT{-tcnormal}	    & \TT{-tcnormal} sets the trace class of the op code
 		      given by Figure~\ref{TRACE-CLASSES-AND-GROUPS}.
                       \TT{-tcnever} sets the class to \TT{NEVER} unless
 		      the normal instruction trace class is \TT{ALWAYS}.
+		      Default is \TT{-tcnormal}.
 \\[0.5ex]
 \TT{-tc:}{\em tc-list}
 		    & Sets the process \TT{trace\_flags} at the start of mex
 		      program execution.  \TT{ALWAYS} and \TT{NEVER}
 		      can\underline{not} be listed: their flags are always
 		      on and off, respectively.
+		      Default is \TT{-tc:NONE}.
 \\[0.5ex]
 \TT{-ex:}{\em ex-list}
 		    & Sets the process \TT{excepts} at the start of mex
 		      program execution.
+		      Default is \TT{-ex:DIVBYZERO,INVALID,OVERFLOW}.
 \\[0.5ex]
-\TT{-o\ldots}       & Sets the process \TT{optimize} flag \TT{on} or \TT{off}
+\begin{tabular}[t]{l}
+\TT{-ooff} \\
+\TT{-oon} \\
+\end{tabular}	    & Sets the process \TT{optimize} flag \TT{on} or \TT{off}
                       at the start of mex program execution.
+		      Default is \TT{-ooff}.
 \\[0.5ex]
 \TT{-r} {\em function-name}
                     & Calls the named function, which must be of lexical
 		      level 1 in some previously assembled module.
 		      To find the function, the name is searched for
-		      in the modules, most recently assembled first.
+		      in the modules, most recently assembled module first.
 \\[0.5ex]
 		    & The function must take no arguments and return no
 		      results.

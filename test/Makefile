@@ -2,7 +2,7 @@
 #
 # File:		Makefile
 # Author:	Bob Walton (walton@acm.org)
-# Date:		Thu Aug 31 22:00:11 EDT 2023
+# Date:		Fri Sep  1 04:46:09 EDT 2023
 #
 # The authors have placed this program in the public
 # domain; they make no warranty and accept no liability
@@ -78,10 +78,6 @@ test:		${TESTS:=.test}
 	    -e '/lines [0-9][0-9]*-[0-9][0-9]*:/s//lines ####-####/g' \
             < $*.out | diff ${DIFFOPT} $*.test -
 
-%.out:	%
-	rm -f $*.out
-	${RUNENV} $* > $*.out
-
 mex.o:	\
 	${MIN_H} \
 	../include/mex.h \
@@ -128,9 +124,11 @@ mexas_scanner_test_%.out:	\
 	    < mexas_scanner_test_$*.in \
 	    > mexas_scanner_test_$*.out
 
-TRACE = -pasource -t:ALL
+TRACE = -pasource -tc:ALL
 mexas_compile_test_5.out: \
-    TRACE = -t:BEG,BEGL,END,ENDL
+    TRACE = -tc:BEG,BEGL,END,ENDL
+mexas_compile_test_10.out: \
+    TRACE = -ex:INVALID -pasource -tc:ALL
 
 mexas_compile_test_%.out:	\
 		mexas \

@@ -2,7 +2,7 @@
 //
 // File:	mexas_main.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Aug 31 21:40:54 EDT 2023
+// Date:	Fri Sep  1 03:19:23 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -41,10 +41,10 @@ int main ( int argc, char * argv[] )
 	else if ( strcmp ( "-tcnever", arg ) == 0 )
 	    mexas::assemble_trace_never = true;
 
-	else if ( strncmp ( "-t:", arg, 3 ) == 0 )
+	else if ( strncmp ( "-tc:", arg, 4 ) == 0 )
 	{
 	    min::uns32 flags = (1 << mex::T_ALWAYS );
-	    const char * p = arg + 3;
+	    const char * p = arg + 4;
 	    while ( * p )
 	    {
 	        const char * q = p;
@@ -76,6 +76,43 @@ int main ( int argc, char * argv[] )
 		p = q;
 	    }
 	    mexas::run_trace_flags = flags;
+	}
+
+	else if ( strncmp ( "-ex:", arg, 4 ) == 0 )
+	{
+	    int excepts = 0;
+	    const char * p = arg + 4;
+	    while ( * p )
+	    {
+	        const char * q = p;
+		while ( * q && * q != ',' ) ++ q;
+		if ( q > p )
+		{
+		    tmp1 = min::new_str_gen
+		        ( p, q - p );
+		    tmp2 = min::get
+		        ( mexas::except_flag_table,
+			  tmp1 );
+		    if ( tmp2 != min::NONE() )
+		    {
+		        min::float64 f =
+			    min::direct_float_of
+			        ( tmp2 );
+			excepts |= (int) f;
+		    }
+		    else
+		        printer
+			    << min::bol
+			    << "except name "
+			    << min::pgen ( tmp1 )
+			    << " unrecognized;"
+			       " ignored"
+			    << min::eol;
+		}
+		if ( * q ) ++ q;
+		p = q;
+	    }
+	    mexas::run_excepts = excepts;
 	}
 	else if ( strcmp ( "-", arg ) == 0 )
 	{
