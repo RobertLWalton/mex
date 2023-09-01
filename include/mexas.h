@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Aug 31 22:00:43 EDT 2023
+// Date:	Fri Sep  1 05:15:55 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -552,6 +552,8 @@ extern min::uns32 run_trace_flags;
     // Initial trace_flags value for processes.
 extern int run_excepts;
     // Initial excepts value for processes.
+extern bool run_optimize;
+    // Initial optimize value for processes.
 enum assemble_print
 {
     NO_PRINT,
