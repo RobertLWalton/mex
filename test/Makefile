@@ -2,7 +2,7 @@
 #
 # File:		Makefile
 # Author:	Bob Walton (walton@acm.org)
-# Date:		Fri Sep  1 08:42:48 EDT 2023
+# Date:		Fri Sep  1 14:33:30 EDT 2023
 #
 # The authors have placed this program in the public
 # domain; they make no warranty and accept no liability
@@ -38,7 +38,10 @@ TESTS = mexas_scanner_test_1 \
         mexas_compile_test_8 \
         mexas_compile_test_9 \
         mexas_compile_test_10 \
-        mexas_time_test
+        mexas_time_test_1 \
+        mexas_time_test_1o \
+        mexas_time_test_2 \
+        mexas_time_test_2o
 
 
 MIN_H =	${MIN}/include/min.h
@@ -140,14 +143,23 @@ mexas_compile_test_%.out:	\
 	    mexas_compile_test_$*.mex \
 	    > mexas_compile_test_$*.out
 
-mexas_time_test.out:	\
+mexas_time_test_%.out:	\
 		mexas \
-		mexas_time_test.mex \
+		mexas_time_test_%.mex \
 		Makefile
-	rm -f mexas_time_test.out
-	-time ${RUNENV} mexas -pa -oon \
-	    mexas_time_test.mex \
-	    > mexas_time_test.out
+	rm -f mexas_time_test_$*.out
+	-time ${RUNENV} mexas \
+	    mexas_time_test_$*.mex \
+	    > mexas_time_test_$*.out
+
+mexas_time_test_%o.out:	\
+		mexas \
+		mexas_time_test_%.mex \
+		Makefile
+	rm -f mexas_time_test_$*o.out
+	-time ${RUNENV} mexas -oon \
+	    mexas_time_test_$*.mex \
+	    > mexas_time_test_$*o.out
 
 clean:
 	rm -f ${TESTS:=.out} *.o mexas mexas_*_test
