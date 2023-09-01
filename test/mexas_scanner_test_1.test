@@ -17,10 +17,12 @@ lines ####-####
 line3 x<SOH>y z<FF>w hoho \
       hehe x<222D>y
     line3 x#y z w hoho hehe x###y
-line ####:
+lines ####-####
+
 line4 with a // comment
     line4 with a
 lines ####-####
+
 line5 a continued line: \ // with a comment
     this is the continuation
     line5 a continued "line:" this is the continuation

@@ -37,6 +37,7 @@ SUB
 POP
     [24:7;0] POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
     STACKS: VARIABLES:
+
 // JMP TEST 1
 // Z = MIN ( X, Y )
 //
@@ -71,6 +72,7 @@ LABEL DONE
     STACKS: VARIABLES: Z Y X
 POP
     [46:19;2] POPS T_POP 0 0 0 [$ MISSING $]; [< Z * >]
+
 // JMP TEST 2
 // Z = MIN ( X, Y )
 //
@@ -91,6 +93,7 @@ LABEL ITS-X
     [55:23;3] JMPLT T_JMPS 0 0 3 [$ MISSING $]; ITS-X
 POP
     [59:26;2] POPS T_POP 0 0 0 [$ MISSING $]; [< Z * >]
+
 // JMP TEST 3
 // Z = MIN ( X, Y )
 // Z pushed into stack by code jumped over
@@ -121,6 +124,7 @@ POP
     [75:33;3] POPS T_POP 0 0 0 [$ MISSING $]; [< Z * >]
 POP
     [76:34;2] POPS T_POP 0 0 0 [$ MISSING $]; [< Z * >]
+
 // JMP TEST 4
 // Z = MIN ( X, Y )
 // Z popped from stack by code jumped over

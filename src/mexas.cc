@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Aug 31 21:41:14 EDT 2023
+// Date:	Fri Sep  1 02:44:36 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1077,6 +1077,8 @@ bool mexas::next_statement ( void )
 	             ( mexas::input_file );
 	}
 
+	statement_started = true;
+
 	char work[end_offset - begin_offset + 10];
 
 	const char * p = ~ min::begin_ptr_of ( buffer );
@@ -1104,8 +1106,6 @@ bool mexas::next_statement ( void )
 	        ++ p;
 
 	    if ( p >= endp ) goto END_LINE;
-
-	    statement_started = true;
 
 	    // Scan lexeme into work.
 	    //

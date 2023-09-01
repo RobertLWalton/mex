@@ -52,6 +52,7 @@ BEGF MIN X Y
 ENDF
     [15:2;3] BEGF T_BEGF 2 1 17 [$ MISSING $]; [< MIN X Y >]
     [30:18;0] ENDF T_ENDF 0 1 0 [$ MISSING $]; [$ MISSING $]
+
 PUSHI 5.5
     [32:19;1] PUSHI T_PUSH 0 0 0 5.5; *
 PUSHI 3.4
@@ -67,6 +68,7 @@ PUSHI 3.4
     [37:24;2] PUSHI T_PUSH 0 0 0 3.4; *
 CALL MIN 2
     [38:25;0] CALLM T_CALLM 2 0 2 [$ MISSING $]; [< MIN >]
+
 // Basic Arithmetic Operations Optimize Test
 //
 BEGF TEST-BASIC-ARITHMETIC X Y
@@ -146,6 +148,7 @@ ENDF
     [42:26;2] BEGF T_BEGF 2 1 42 [$ MISSING $]; [< TEST-BASIC-ARITHMETIC
               X Y >]
     [68:67;0] ENDF T_ENDF 0 1 0 [$ MISSING $]; [$ MISSING $]
+
 SET_OPTIMIZE OFF
     [70:68;0] SET_OPTIMIZE T_SET_OPTIMIZE 0 0 0 [$ MISSING $]
               ; [$ MISSING $]
@@ -166,6 +169,7 @@ PUSHI 200
 CALL TEST-BASIC-ARITHMETIC 2
     [77:75;0] CALLM T_CALLM 2 0 26 [$ MISSING $]; [<
               TEST-BASIC-ARITHMETIC >]
+
 // Loop Optimize Test
 //
 BEGF SUM X Y

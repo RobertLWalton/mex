@@ -50,6 +50,7 @@ POP
     [32:15;1] POPS T_POP 0 0 0 [$ MISSING $]; [< Y * >]
 POP
     [33:16;0] POPS T_POP 0 0 0 [$ MISSING $]; [< X * >]
+
 // BEGL ... ENDL Test
 // Z = SUM { I: I = 4 TO I = 6 }
 //
@@ -95,6 +96,7 @@ POP
     [58:34;1] POPS T_POP 0 0 0 [$ MISSING $]; [< SUM * >]
 POP
     [59:35;0] POPS T_POP 0 0 0 [$ MISSING $]; [< LIMIT * >]
+
 // DEPTH TEST
 //
 PUSHI 1 X

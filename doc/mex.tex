@@ -240,7 +240,7 @@
 
 \author{Robert L. Walton}
 
-\date{August 31, 2023}
+\date{September 1, 2023}
  
 \maketitle
 
@@ -2009,7 +2009,7 @@ of the form:
 \end{center}
 
 \TT{JMP\ldots} instructions are forward-referencing: their
-{\em jmp-targets} are defined by \TT{LABEL} declaratios that
+{\em jmp-targets} are defined by \TT{LABEL} declarations that
 occur in source code \underline{after} the \TT{JMP\ldots} instruction.
 To manage \TT{JMP\ldots} instructions and their targets,
 the assembler maintains a list of \skey{pending jumps}:
@@ -2473,7 +2473,7 @@ appear in its arguments.  The syntax is:
     \emkey{mexas-filename}		& [assemble the file] \\
     \ttkey{-pa} 			& [print assembled instructions] \\
     \ttkey{-pasource}			& [ditto and include source lines] \\
-    \ttkey{-paoff}			& [do not trace
+    \ttkey{-paoff}			& [do not print
                                            assembled instructions] \\
     \ttkey{-tcnever}			& [assemble with \TT{NEVER}
                                            trace class] \\
@@ -2559,8 +2559,8 @@ Details are:
 
 The printout of an assembled instruction begins with the source
 lines of the code that contained the instruction, if this is
-enabled.  All code lines not printed for previous instructions
-are printed.
+enabled.  All source lines after the line ending the previous
+instruction are printed.
 
 An instruction printout has the syntax:
 \begin{indpar}

@@ -23,6 +23,7 @@ BEGF F1 F1ARG1
              F3ARG3 >]
             PUSHI -3 IMMED3
     [18:5;9] PUSHI T_PUSH 0 0 0 -3; IMMED3
+
             PUSH F1ARG1
     [20:6;10] PUSHA T_PUSH 1 1 0 [$ MISSING $]; [< F1ARG1 * >]
             PUSH F2ARG1
@@ -35,12 +36,14 @@ BEGF F1 F1ARG1
     [24:10;14] PUSHS T_PUSH 7 0 0 [$ MISSING $]; [< F3ARG1 * >]
             PUSH F3ARG1
     [25:11;15] PUSHS T_PUSH 8 0 0 [$ MISSING $]; [< F3ARG1 * >]
+
             PUSH IMMED1
     [27:12;16] PUSHL T_PUSH 0 1 0 [$ MISSING $]; [< IMMED1 * >]
             PUSH IMMED2
     [28:13;17] PUSHL T_PUSH 0 2 0 [$ MISSING $]; [< IMMED2 * >]
             PUSH IMMED3
     [29:14;18] PUSHS T_PUSH 8 0 0 [$ MISSING $]; [< IMMED3 * >]
+
             PUSHNARGS 1
     [31:15;19] PUSHNARGS T_PUSH 0 1 0 [$ MISSING $]; *
             PUSHNARGS 2
@@ -55,6 +58,7 @@ BEGF F1 F1ARG1
     [36:20;24] PUSHNARGS T_PUSH 0 2 0 [$ MISSING $]; *
             PUSHNARGS -2
     [37:21;25] PUSHNARGS T_PUSH 0 1 0 [$ MISSING $]; *
+
             PUSHI 1
     [39:22;26] PUSHI T_PUSH 0 0 0 1; *
             PUSHV
@@ -67,6 +71,7 @@ BEGF F1 F1ARG1
     [43:26;30] PUSHI T_PUSH 0 0 0 3; *
             PUSHV
     [44:27;31] PUSHV T_PUSH 0 3 0 [$ MISSING $]; *
+
             PUSHI 1
     [46:28;32] PUSHI T_PUSH 0 0 0 1; *
             PUSHV -1
@@ -75,10 +80,13 @@ BEGF F1 F1ARG1
     [48:30;34] PUSHI T_PUSH 0 0 0 2; *
             PUSHV 2
     [49:31;35] PUSHV T_PUSH 0 2 0 [$ MISSING $]; *
+
             PUSHI 1
     [51:32;36] PUSHI T_PUSH 0 0 0 1; *
             PUSHV 1
     [52:33;37] PUSHV T_PUSH 0 1 0 [$ MISSING $]; *
+
+
         ENDF
     [17:4;37] BEGF T_BEGF 3 3 31 [$ MISSING $]; [< F3 F3ARG1 F3ARG2
               F3ARG3 >]

@@ -12,6 +12,7 @@
 //
 SET_TRACE SET_OPTIMIZE NOP
     [13:0;0] SET_TRACE T_ALWAYS 1310720 0 0 [$ MISSING $]; [$ MISSING $]
+
 // Arithmetic Operations Optimize Test
 //
 BEGF AOP-2ARG-TEST
@@ -134,6 +135,7 @@ BEGF AOP-2ARG-TEST
 ENDF
     [17:1;16] BEGF T_BEGF 0 1 67 [$ MISSING $]; [< AOP-2ARG-TEST >]
     [59:67;0] ENDF T_ENDF 0 1 0 [$ MISSING $]; [$ MISSING $]
+
 SET_OPTIMIZE OFF
     [61:68;0] SET_OPTIMIZE T_SET_OPTIMIZE 0 0 0 [$ MISSING $]
               ; [$ MISSING $]
@@ -144,6 +146,7 @@ SET_OPTIMIZE ON
               ; [$ MISSING $]
 CALL AOP-2ARG-TEST 0
     [64:71;0] CALLM T_CALLM 0 0 1 [$ MISSING $]; [< AOP-2ARG-TEST >]
+
 BEGF AOP-IMMED-TEST
     [66:72;0] BEGF T_BEGF 0 1 0 [$ MISSING $]; [< AOP-IMMED-TEST >]
     PUSHI 1.2345 X
@@ -183,6 +186,7 @@ BEGF AOP-IMMED-TEST
     [79:92;5] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< Z * >]
     TRACE 'Z = 3 * X' X Z
     [79:93;5] TRACE T_ALWAYS 2 0 0 [$ MISSING $]; [< "Z = 3 * X" X Z >]
+
     PUSHI 5 X
     [81:94;6] PUSHI T_PUSH 0 0 0 5; X
     PUSH X
@@ -219,6 +223,7 @@ BEGF AOP-IMMED-TEST
     TRACE 'Z = 12 MOD X' X Z
     [93:114;10] TRACE T_ALWAYS 2 0 0 [$ MISSING $]; [< "Z = 12 MOD X" X
                 Z >]
+
     PUSHI 3 X
     [95:115;11] PUSHI T_PUSH 0 0 0 3; X
     PUSH X
@@ -249,12 +254,14 @@ BEGF AOP-IMMED-TEST
     TRACE 'W = 1024 * Z' Z W
     [105:131;15] TRACE T_ALWAYS 2 0 0 [$ MISSING $]; [< "W = 1024 * Z" Z
                  W >]
+
     NOP 'Only Traced if Optimize is OFF'
     [107:132;15] NOP T_NOP 0 0 0 [$ MISSING $]; [<
                  "Only Traced if Optimize is OFF" >]
 ENDF
     [66:72;15] BEGF T_BEGF 0 1 62 [$ MISSING $]; [< AOP-IMMED-TEST >]
     [108:133;0] ENDF T_ENDF 0 1 0 [$ MISSING $]; [$ MISSING $]
+
 SET_OPTIMIZE OFF
     [110:134;0] SET_OPTIMIZE T_SET_OPTIMIZE 0 0 0 [$ MISSING $]
                 ; [$ MISSING $]
@@ -265,6 +272,7 @@ SET_OPTIMIZE ON
                 ; [$ MISSING $]
 CALL AOP-IMMED-TEST 0
     [113:137;0] CALLM T_CALLM 0 0 72 [$ MISSING $]; [< AOP-IMMED-TEST >]
+
 BEGF AOP-1ARG-TEST
     [115:138;0] BEGF T_BEGF 0 1 0 [$ MISSING $]; [< AOP-1ARG-TEST >]
     PUSHI -53 X
@@ -286,6 +294,7 @@ BEGF AOP-1ARG-TEST
     TRACE 'Z = ABS ( X )' X Z
     [122:149;3] TRACE T_ALWAYS 2 0 0 [$ MISSING $]; [< "Z = ABS ( X )" X
                 Z >]
+
     PUSHI 1 X
     [124:150;4] PUSHI T_PUSH 0 0 0 1; X
     PUSH X
@@ -306,6 +315,7 @@ BEGF AOP-1ARG-TEST
     TRACE 'W = LOG ( Z )' Z W
     [130:160;6] TRACE T_ALWAYS 2 0 0 [$ MISSING $]; [< "W = LOG ( Z )" Z
                 W >]
+
     PUSHI 3 X
     [132:161;7] PUSHI T_PUSH 0 0 0 3; X
     PUSH X
@@ -326,6 +336,7 @@ BEGF AOP-1ARG-TEST
     TRACE 'W = LOG10 ( Z )' Z W
     [138:171;9] TRACE T_ALWAYS 2 0 0 [$ MISSING $]; [< "W = LOG10 ( Z )"
                 Z W >]
+
     PUSHI 3.141592653589793238462643383279502884197 PI
     [140:172;10] PUSHI T_PUSH 0 0 0 3.14159265358979; PI
     PUSH PI
@@ -350,6 +361,7 @@ BEGF AOP-1ARG-TEST
     TRACE 'W = ASIN ( Z )' Z W
     [148:184;13] TRACE T_ALWAYS 2 0 0 [$ MISSING $]; [< "W = ASIN ( Z )"
                  Z W >]
+
     PUSH PI
     [150:185;14] PUSHS T_PUSH 3 0 0 [$ MISSING $]; [< PI * >]
     DIVI 3 X
@@ -372,6 +384,7 @@ BEGF AOP-1ARG-TEST
     TRACE 'W = ACOS ( Z )' Z W
     [157:196;16] TRACE T_ALWAYS 2 0 0 [$ MISSING $]; [< "W = ACOS ( Z )"
                  Z W >]
+
     PUSH PI
     [159:197;17] PUSHS T_PUSH 6 0 0 [$ MISSING $]; [< PI * >]
     DIVI 4 X
@@ -394,6 +407,7 @@ BEGF AOP-1ARG-TEST
     TRACE 'W = ATAN ( Z )' Z W
     [166:208;19] TRACE T_ALWAYS 2 0 0 [$ MISSING $]; [< "W = ATAN ( Z )"
                  Z W >]
+
     PUSHI -1
     [168:209;20] PUSHI T_PUSH 0 0 0 -1; *
     PUSHI +1
@@ -431,12 +445,14 @@ BEGF AOP-1ARG-TEST
     TRACE 'X = 3*PI/4' X
     [182:227;23] TRACE T_ALWAYS 1 0 0 [$ MISSING $]; [< "X = 3*PI/4"
                  X >]
+
     NOP 'Only Traced if Optimize is OFF'
     [184:228;23] NOP T_NOP 0 0 0 [$ MISSING $]; [<
                  "Only Traced if Optimize is OFF" >]
 ENDF
     [115:138;23] BEGF T_BEGF 0 1 92 [$ MISSING $]; [< AOP-1ARG-TEST >]
     [185:229;0] ENDF T_ENDF 0 1 0 [$ MISSING $]; [$ MISSING $]
+
 SET_OPTIMIZE OFF
     [187:230;0] SET_OPTIMIZE T_SET_OPTIMIZE 0 0 0 [$ MISSING $]
                 ; [$ MISSING $]
