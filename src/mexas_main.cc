@@ -2,7 +2,7 @@
 //
 // File:	mexas_main.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Aug 10 22:06:14 EDT 2023
+// Date:	Thu Aug 31 21:40:54 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -26,18 +26,20 @@ int main ( int argc, char * argv[] )
     while ( i < argc )
     {
         const char * arg = argv[i++];
-	if ( strcmp ( "-tc", arg ) == 0 )
-	    mexas::compile_trace_flags = mexas::TRACE;
-	else if ( strcmp ( "-tcl", arg ) == 0 )
-	    mexas::compile_trace_flags =
-	        mexas::TRACE + mexas::TRACE_LINES;
-	else if ( strcmp ( "-tco", arg ) == 0 )
-	    mexas::compile_trace_flags = 0;
+	if ( strcmp ( "-pa", arg ) == 0 )
+	    mexas::assemble_print_switch =
+	        mexas::PRINT;
+	else if ( strcmp ( "-pasource", arg ) == 0 )
+	    mexas::assemble_print_switch =
+	        mexas::PRINT_WITH_SOURCE;
+	else if ( strcmp ( "-paoff", arg ) == 0 )
+	    mexas::assemble_print_switch =
+	        mexas::NO_PRINT;
 
-	else if ( strcmp ( "-ta", arg ) == 0 )
-	    mexas::compile_trace_never = false;
-	else if ( strcmp ( "-tn", arg ) == 0 )
-	    mexas::compile_trace_never = true;
+	else if ( strcmp ( "-tcnormal", arg ) == 0 )
+	    mexas::assemble_trace_never = false;
+	else if ( strcmp ( "-tcnever", arg ) == 0 )
+	    mexas::assemble_trace_never = true;
 
 	else if ( strncmp ( "-t:", arg, 3 ) == 0 )
 	{

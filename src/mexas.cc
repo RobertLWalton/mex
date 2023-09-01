@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Aug 30 04:30:24 EDT 2023
+// Date:	Thu Aug 31 21:41:14 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -28,10 +28,11 @@
 
 # define MUP min::unprotected
 
-min::uns8 mexas::compile_trace_flags = 0;
-bool mexas::compile_trace_never = false;
+mexas::assemble_print mexas::assemble_print_switch =
+    mexas::NO_PRINT;
+bool mexas::assemble_trace_never = false;
 min::uns32 mexas::run_trace_flags = mex::T_ALWAYS;
-min::uns32 mexas::run_excepts =
+int mexas::run_excepts =
     FE_DIVBYZERO|FE_INVALID|FE_OVERFLOW;
 
 min::uns32 mexas::error_count;
@@ -810,20 +811,21 @@ void mexas::cont ( mex::instr & instr,
 }
 
 void mexas::trace_instr
-	( min::uns32 location, bool no_lines )
+	( min::uns32 location, bool no_source )
 {
-    min::uns8 trace_flags = mexas::compile_trace_flags;
+    mexas::assemble_print print =
+        mexas::assemble_print_switch;
     min::printer printer =
 	mexas::input_file->printer;
     mex::module m = mexas::output_module;
 
-    if ( ( trace_flags & mexas::TRACE ) == 0 )
+    if ( print == mexas::NO_PRINT )
 	return;
 
     min::phrase_position pp = m->position[location];
-    if ( ( trace_flags & mexas::TRACE_LINES )
+    if ( print == mexas::PRINT_WITH_SOURCE
          &&
-	 ! no_lines )
+	 ! no_source )
 	min::print_phrase_lines
 	    ( printer, mexas::input_file, pp );
 
@@ -1644,9 +1646,9 @@ mex::module mexas::compile ( min::file file )
 	    }
 	    case ::LABEL:
 	    {
-		if ( mexas::compile_trace_flags
-		     &
-		     mexas::TRACE_LINES )
+		if ( mexas::assemble_print_switch
+		     ==
+		     mexas::PRINT_WITH_SOURCE )
 		    min::print_phrase_lines
 			( mexas::input_file->printer,
 			  mexas::input_file, pp );
@@ -1668,13 +1670,15 @@ mex::module mexas::compile ( min::file file )
 	    }
 	    case ::STACKS:
 	    {
-		if ( (   compile_trace_flags
-                       & mexas::TRACE ) == 0 )
+		if ( mexas::assemble_print_switch
+		     ==
+		     mexas::NO_PRINT )
 		    continue;
 		min::printer printer =
 		    mexas::input_file->printer;
-		if (   compile_trace_flags
-		     & mexas::TRACE_LINES )
+		if ( mexas::assemble_print_switch
+		     ==
+		     mexas::PRINT_WITH_SOURCE )
 		{
 		    min::phrase_position spp = pp;
 		    -- spp.end.line;
@@ -1869,9 +1873,9 @@ mex::module mexas::compile ( min::file file )
 	    }
 	    case mex::ENDF:
 	    {
-		if ( mexas::compile_trace_flags
-		     &
-		     mexas::TRACE_LINES )
+		if ( mexas::assemble_print_switch
+		     ==
+		     mexas::PRINT_WITH_SOURCE )
 		    min::print_phrase_lines
 			( mexas::input_file->printer,
 			  mexas::input_file, pp );

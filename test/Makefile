@@ -2,7 +2,7 @@
 #
 # File:		Makefile
 # Author:	Bob Walton (walton@acm.org)
-# Date:		Wed Aug 30 17:07:44 EDT 2023
+# Date:		Thu Aug 31 22:00:11 EDT 2023
 #
 # The authors have placed this program in the public
 # domain; they make no warranty and accept no liability
@@ -128,7 +128,7 @@ mexas_scanner_test_%.out:	\
 	    < mexas_scanner_test_$*.in \
 	    > mexas_scanner_test_$*.out
 
-TRACE = -tcl -t:ALL
+TRACE = -pasource -t:ALL
 mexas_compile_test_5.out: \
     TRACE = -t:BEG,BEGL,END,ENDL
 

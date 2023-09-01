@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Aug 27 15:05:36 EDT 2023
+// Date:	Thu Aug 31 22:00:43 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -38,7 +38,7 @@ extern min::locatable_var<mex::module_ins>
 // The following pushes an instruction into the module
 // code vector.
 //
-extern bool compile_trace_never;
+extern bool assemble_trace_never;
     // Forces the trace_class of the instruction to be
     // T_NEVER unless that trace_class is T_ALWAYS.
 inline void push_instr
@@ -47,7 +47,7 @@ inline void push_instr
 	      min::MISSING_PHRASE_POSITION,
 	  min::gen trace_info = min::MISSING() )
 {
-    if ( mexas::compile_trace_never
+    if ( mexas::assemble_trace_never
          &&
 	 instr.trace_class != mex::T_ALWAYS )
         instr.trace_class = mex::T_NEVER;
@@ -550,21 +550,21 @@ bool check_parameter
 
 extern min::uns32 run_trace_flags;
     // Initial trace_flags value for processes.
-extern min::uns32 run_excepts;
+extern int run_excepts;
     // Initial excepts value for processes.
-enum compile_trace_flags
+enum assemble_print
 {
-    TRACE       = 1 << 0,
-    TRACE_LINES = 1 << 1
+    NO_PRINT,
+    PRINT,
+    PRINT_WITH_SOURCE
 };
-extern min::uns8 compile_trace_flags;
-    // mexas::TRACE and mexas::TRACE_LINES to print
-    // compiled instructions as they are assembled.
+extern mexas::assemble_print assemble_print_switch;
 void trace_instr ( min::uns32 location,
-                   bool no_lines = false );
+                   bool no_source = false );
     // Print trace of instruction at mexas::ouput_
-    // _module[location], as per compile_trace_flags,
-    // except ignore TRACE_LINES if no_lines is true.
+    // _module[location], as per assemble_print_switch
+    // except do not print source lines if no_source
+    // is true.
 
 unsigned jump_list_delete
 	( mexas::jump_list jlist );
