@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Sep  1 05:20:39 EDT 2023
+// Date:	Fri Sep  1 08:41:35 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -31,7 +31,7 @@
 mexas::assemble_print mexas::assemble_print_switch =
     mexas::NO_PRINT;
 bool mexas::assemble_trace_never = false;
-min::uns32 mexas::run_trace_flags = mex::T_ALWAYS;
+min::uns32 mexas::run_trace_flags = (1 << mex::T_ALWAYS);
 int mexas::run_excepts =
     FE_DIVBYZERO|FE_INVALID|FE_OVERFLOW;
 bool mexas::run_optimize = false;
@@ -2088,6 +2088,10 @@ mex::module mexas::compile ( min::file file )
 		min::uns32 first = index;
 		while ( mexas::get_name ( index )
 		        !=
+			min::NONE()
+			||
+			mexas::get_star ( index )
+			!=
 			min::NONE() );
 		min::uns32 nresults = index - first;
 		min::gen message =
