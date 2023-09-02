@@ -240,7 +240,7 @@
 
 \author{Robert L. Walton}
 
-\date{September 1, 2023}
+\date{September 2, 2023}
  
 \maketitle
 
@@ -790,7 +790,7 @@ a return stack, and other parameters.  Specifically:
 \verb|mex::| & \TTMKEY{LIMIT\_STOP}{in {\tt mex::state}} \\
 \verb|mex::| & \TTMKEY{ERROR\_STOP}{in {\tt mex::state}} \\
 \verb|mex::| & \TTMKEY{JMP\_ERROR}{in {\tt mex::state}} \\
-\verb|mex::| & \TTMKEY{FORM\_ERROR}{in {\tt mex::state}} \\
+\verb|mex::| & \TTMKEY{FORMAT\_ERROR}{in {\tt mex::state}} \\
 \verb|mex::| & \TTMKEY{EXCEPTS\_ERROR}{in {\tt mex::state}} \\
 \verb|}                 | \\
 \end{tabular}
@@ -1811,7 +1811,7 @@ set as follows to indicate cause of termination:
       invalid operand(s)
       (either a \TT{NaN} or both infinities of the same sign)
     & returns \TT{false} \\
-\verb|mex::|\MEXKEY{FORM\_ERROR}
+\verb|mex::|\MEXKEY{FORMAT\_ERROR}
     & \raggedright program formatting error (likely a compiler
       error)
     & returns \TT{false} \\

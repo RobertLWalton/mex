@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Aug 28 06:17:01 EDT 2023
+// Date:	Sat Sep  2 02:59:00 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -241,9 +241,19 @@ enum state
     LIMIT_STOP,
     ERROR_STOP,
     JMP_ERROR,
-    FORM_ERROR,
-    EXCEPTS_ERROR
+    FORMAT_ERROR,
+    EXCEPTS_ERROR,
+    NUMBER_OF_STATES
 };
+
+struct state_info
+{
+    mex::state state;
+    const char * name;
+    const char * description;
+};
+extern state_info state_infos[];
+    
 
 const unsigned max_lexical_level = 16;
 

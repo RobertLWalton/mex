@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Aug 29 21:46:30 EDT 2023
+// Date:	Sat Sep  2 03:15:13 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -104,10 +104,12 @@ static min::packed_vec<mex::ret>
 
 static void check_op_infos ( void );
 static void check_trace_class_infos ( void );
+static void check_state_infos ( void );
 static void initialize ( void )
 {
     check_op_infos();
     check_trace_class_infos();
+    check_state_infos();
 }
 static min::initializer initializer ( ::initialize );
 
@@ -944,6 +946,34 @@ mex::except_info mex::except_infos
     { FE_UNDERFLOW, "UNDERFLOW" }
 };
 
+// State Information Table.
+//
+mex::state_info mex::state_infos
+	[ mex::NUMBER_OF_STATES ] =
+{
+    { NEVER_STARTED, "NEVER_STARTED",
+                     "program never started" },
+    { RUNNING, "RUNNING",
+               "program still running" },
+    { MODULE_END, "MODULE_END",
+                  "module initialization terminated"
+		  " normally" },
+    { CALL_END, "CALL_END",
+                "function call terminated normally" },
+    { LIMIT_STOP, "LIMIT_STOP",
+    		  "instruction counter reached limit" },
+    { ERROR_STOP, "ERROR_STOP",
+                  "ERROR instruction executed" },
+    { JMP_ERROR, "JMP_ERROR",
+                 "invalid operand to JMP instruction" },
+    { FORMAT_ERROR, "FORMAT_ERROR",
+                    "bad program format" },
+    { EXCEPTS_ERROR, "EXCEPTS_ERROR",
+                     "illegal exception was raised"
+		     " during otherwise successful"
+		     " program execution" }
+};
+
 static void check_op_infos ( void )
 {
     mex::op_info * p = mex::op_infos;
@@ -976,6 +1006,25 @@ static void check_trace_class_infos ( void )
 	    std::cerr << "BAD TRACE_CLASS_INFOS["
 	              << p - mex::trace_class_infos
 	              << "] != " << p->trace_class
+		      << std::endl;
+	    std::exit ( 1 );
+	}
+	++ p;
+    }
+}
+
+static void check_state_infos ( void )
+{
+    mex::state_info * p = mex::state_infos;
+    mex::state_info * endp =
+        p + mex::NUMBER_OF_STATES;
+    while  ( p < endp )
+    {
+        if ( p - mex::state_infos != p->state )
+	{
+	    std::cerr << "BAD STATE_INFOS["
+	              << p - mex::state_infos
+	              << "] != " << p->state
 		      << std::endl;
 	    std::exit ( 1 );
 	}
@@ -2345,7 +2394,7 @@ bool mex::run_process ( mex::process p )
 // compiler has made a mistake.
 //
 FATAL:
-    p->state = mex::FORM_ERROR;
+    p->state = mex::FORMAT_ERROR;
     char fatal_buffer[100];
     char instr_buffer[400];
     char * q = instr_buffer;

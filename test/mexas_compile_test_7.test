@@ -66,4 +66,8 @@ TRACE_EXCEPTS
 * {28:15,4,15} DIV: * = inf <= 10 / 0
 * {29:16,3,16} TRACE_EXCEPTS: DIVBYZERO INEXACT *INVALID OVERFLOW
 PROCESS TERMINATION EXCEPTS ERROR(S): INVALID
+ERROR: module initialization process did not terminate normally at
+       module end: illegal exception was raised during otherwise
+       successful program execution; exceptions are: DIVBYZERO INEXACT
+       *INVALID OVERFLOW
 exiting due to compile errors

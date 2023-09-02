@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Sep  1 08:41:35 EDT 2023
+// Date:	Sat Sep  2 03:12:00 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -2304,7 +2304,25 @@ mex::module mexas::compile ( min::file file )
     process->limit = mex::run_counter_limit;
     mex::run_process ( process );
     if ( process->state != mex::MODULE_END )
+    {
+        process->printer
+	    << min::bom << "ERROR: "
+	    << min::place_indent ( 0 )
+	    << "module initialization process did not"
+	       " terminate normally at module end: "
+	    << mex::state_infos[process->state]
+	    	    .description;
+        if ( process->state == mex::EXCEPTS_ERROR )
+	{
+	    process->printer << "; exceptions are: ";
+	    mex::print_excepts
+	        ( process->printer,
+		  process->excepts_accumulator,
+		  process->excepts );
+	}
+	process->printer << min::eom;
         return min::NULL_STUB;
+    }
 
     // TBD: make globals.
 
