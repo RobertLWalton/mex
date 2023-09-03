@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat Sep  2 20:23:22 EDT 2023
+// Date:	Sun Sep  3 04:48:54 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -194,7 +194,7 @@ static bool optimized_run_process ( mex::process p )
     min::gen * sp = spbegin + i;
     min::gen * spend = spbegin + p->max_length;
 
-    min::uns32 limit = p->limit;
+    min::uns32 limit = p->counter_limit;
     if ( p->counter >= limit ) return false;
     limit -= p->counter;
 
@@ -810,7 +810,7 @@ RET_EXIT:
     RW_UNS32 p->length = sp - spbegin;
     p->excepts_accumulator |= 
 	fetestexcept ( FE_ALL_EXCEPT );
-    p->counter = p->limit - limit;
+    p->counter = p->counter_limit - limit;
     return result;
 
 #   undef CHECK1
@@ -1108,7 +1108,7 @@ bool mex::run_process ( mex::process p )
     sp = spbegin + i;
     spend = spbegin + p->max_length;
 
-    limit = p->limit;
+    limit = p->counter_limit;
     if ( p->counter >= limit )
     {
         p->state = mex::LIMIT_STOP;
@@ -1127,11 +1127,11 @@ bool mex::run_process ( mex::process p )
 #   define SAVE \
 	RW_UNS32 p->pc.index = pc - pcbegin; \
 	RW_UNS32 p->length = sp - spbegin; \
-	p->counter = p->limit - limit;
+	p->counter = p->counter_limit - limit;
 
 #   define RET_SAVE \
 	RW_UNS32 p->length = sp - spbegin; \
-	p->counter = p->limit - limit;
+	p->counter = p->counter_limit - limit;
 
 #   define RESTORE \
 	pcbegin = ~ min::begin_ptr_of ( m ); \
@@ -1140,7 +1140,7 @@ bool mex::run_process ( mex::process p )
 	spbegin = ~ min::begin_ptr_of ( p ); \
 	sp = spbegin + p->length; \
 	spend = spbegin + p->max_length; \
-        limit = p->limit - p->counter;
+        limit = p->counter_limit - p->counter;
 
     p->state = mex::RUNNING;
     while ( true ) // Inner loop.
@@ -1194,7 +1194,7 @@ bool mex::run_process ( mex::process p )
 		goto FATAL;
 	    }
 
-	    if ( p->counter >= p->limit )
+	    if ( p->counter >= p->counter_limit )
 	    {
 		p->state = mex::LIMIT_STOP;
 		return false;
@@ -2518,17 +2518,18 @@ mex::process mex::create_process
     mex::pc pc = { min::NULL_STUB, 0 };
     mex::set_pc ( p, pc );
     p->optimize = false;
-    p->level = 0;
+    p->trace_flags = mex::run_trace_flags;
+    p->excepts = mex::run_excepts;
+    p->counter_limit = mex::run_counter_limit;
+
     for ( unsigned i = 0;
           i <= mex::max_lexical_level; ++ i )
         p->fp[i] = p->nargs[i] = 0;
+    p->level = 0;
     p->trace_depth = 0;
-    p->trace_flags = 0;
-    p->excepts = 0;
+    p->counter = 0;
     p->excepts_accumulator = 0;
     p->state = mex::NEVER_STARTED;
-    p->counter = 0;
-    p->limit = 0;
 
     return p;
 }
@@ -2545,15 +2546,15 @@ mex::process mex::init_process
     RW_UNS32 p->return_stack->length = 0;
     mex::pc pc = { m, 0 };
     mex::set_pc ( p, pc );
-    p->level = 0;
+
     for ( unsigned i = 0;
           i <= mex::max_lexical_level; ++ i )
         p->fp[i] = p->nargs[i] = 0;
+    p->level = 0;
     p->trace_depth = 0;
+    p->counter = 0;
     p->excepts_accumulator = 0;
     p->state = mex::NEVER_STARTED;
-    p->counter = 0;
-    p->limit = 0;
 
     return p;
 }
@@ -2565,15 +2566,15 @@ mex::process mex::init_process
         p = mex::create_process();
     RW_UNS32 p->length = 0;
     RW_UNS32 p->return_stack->length = 0;
-    p->level = 0;
+
     for ( unsigned i = 0;
           i <= mex::max_lexical_level; ++ i )
         p->fp[i] = p->nargs[i] = 0;
+    p->level = 0;
     p->trace_depth = 0;
+    p->counter = 0;
     p->excepts_accumulator = 0;
     p->state = mex::NEVER_STARTED;
-    p->counter = 0;
-    p->limit = 0;
 
     if ( pc.index >= pc.module->length )
         goto ERROR_EXIT;

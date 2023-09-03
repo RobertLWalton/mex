@@ -2,7 +2,7 @@
 //
 // File:	mexas_main.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Sep  1 05:22:43 EDT 2023
+// Date:	Sun Sep  3 05:02:25 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -42,9 +42,9 @@ int main ( int argc, char * argv[] )
 	    mexas::assemble_trace_never = true;
 
 	else if ( strcmp ( "-oon", arg ) == 0 )
-	    mexas::run_optimize = false;
+	    mex::run_optimize = false;
 	else if ( strcmp ( "-ooff", arg ) == 0 )
-	    mexas::run_optimize = true;
+	    mex::run_optimize = true;
 
 	else if ( strncmp ( "-tc:", arg, 4 ) == 0 )
 	{
@@ -80,7 +80,7 @@ int main ( int argc, char * argv[] )
 		if ( * q ) ++ q;
 		p = q;
 	    }
-	    mexas::run_trace_flags = flags;
+	    mex::run_trace_flags = flags;
 	}
 
 	else if ( strncmp ( "-ex:", arg, 4 ) == 0 )
@@ -117,7 +117,7 @@ int main ( int argc, char * argv[] )
 		if ( * q ) ++ q;
 		p = q;
 	    }
-	    mexas::run_excepts = excepts;
+	    mex::run_excepts = excepts;
 	}
 	else if ( strcmp ( "-", arg ) == 0 )
 	{

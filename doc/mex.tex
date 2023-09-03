@@ -240,7 +240,7 @@
 
 \author{Robert L. Walton}
 
-\date{September 2, 2023}
+\date{September 3, 2023}
  
 \maketitle
 
@@ -1710,6 +1710,11 @@ automatically if necessary.
 
 \end{indpar}
 
+{\tt min::locatable\_var<min::printer> mex::}\MEXKEY{default\_printer}
+\begin{indpar}
+Default printer for \TT{create\_process}.  Initially \TT{min::NULL\_STUB}.
+\end{indpar}
+
 {\tt mex::process mex::}\MEXKEY{create\_process} \\
 \hspace*{10em}\verb|( min::printer printer = mex::default_printer )|
 \begin{indpar}
@@ -1729,22 +1734,32 @@ is set to the value of the global variable:
 \end{indpar}
 
 Note: the stack's \TT{max\_length} members are \underline{not} permitted
-to change during process execution.
+to change during process execution, but see \TT{mex::\EOL run\_\EOL process}.
 
 The \TT{printer} member is set to the \TT{printer} argument.
+The \TT{trace\_flags}, \TT{excepts}, and \TT{optimize} members
+are set respectively from:
+\begin{indpar}\begin{tabular}{r@{}l}
+\verb|min::uns32 mex::| & \MEXKEY{run\_counter\_limit} \\
+                        & \verb|// Default == 1 << 20|
+\\[0.5ex]
+\verb|min::uns32 mex::| & \MEXKEY{run\_trace\_flags} \\
+                        & \verb|// Default == 1 << mex::T_ALWAYS|
+\\[0.5ex]
+\verb|int mex::| & \MEXKEY{run\_excepts} \\
+            & \verb+// Default == FE_DIVBYZERO|FE_INVALID|FE_OVERFLOW+
+\\[0.5ex]
+\verb|bool mex::| & \MEXKEY{run\_optimize} \\
+            & \verb|// Default == false|
+\end{tabular}\end{indpar}
+
 The \TT{pc} member is set to \TT{\{min::NULL\_STUB,0\}}.
-The \TT{optimize} member is set to \TT{false}.
-The \TT{fp[\ldots]}, \TT{trace\_\EOL depth},
-\TT{trace\_flags}, \TT{excepts}, \TT{excepts\_\EOL accumulator},
-\TT{counter}, and \TT{limit}
+The \TT{fp[\ldots]}, \TT{nargs[\ldots]}, \TT{level}, \TT{trace\_\EOL depth},
+\TT{counter}, and \TT{excepts\_\EOL accumulator}
 members are set to \TT{0}.
 The \TT{state} is set to \TT{NEVER\_\EOL STARTED}.
 
-\end{indpar}
 
-{\tt min::locatable\_var<min::printer> mex::}\MEXKEY{default\_printer}
-\begin{indpar}
-See \TT{mex::create\_process}.
 \end{indpar}
 
 {\tt mex::process mex::}\MEXKEY{init\_process} \\
@@ -1754,15 +1769,16 @@ Initialize \TT{p} (which is created by \TT{mex::create\_process}
 if that is \TT{NULL\_STUB}) to run the code in \TT{m}.
 Return the process.
 
-The process members are set as they would be by \TT{mex::create\_process},
-except:
-\begin{itemize}
-\item The \TT{pc} member is set to \TT{\{m,0\}}.
-\item The following members are not set: \\
-\hspace*{2em}
-\TT{printer}, \TT{optimze}, \TT{trace\_flags},
-\TT{excepts}
-\end{itemize}
+The \TT{pc} member is set to \TT{\{m,0\}}.
+
+The \TT{fp[\ldots]}, \TT{nargs[\ldots]}, \TT{level}, \TT{trace\_\EOL depth},
+\TT{counter}, and \TT{excepts\_\EOL accumula\-tor}
+members are set to \TT{0}.
+The \TT{state} is set to \TT{NEVER\_\EOL STARTED}.
+
+The stack sizes, \TT{counter\_limit}, \TT{trace\_flags},
+\TT{excepts}, and \TT{optimize} members are
+\underline{not} changed.
 
 \end{indpar}
 
