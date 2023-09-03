@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat Sep  2 03:15:13 EDT 2023
+// Date:	Sat Sep  2 20:23:22 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -33,10 +33,6 @@
     // Change `const min::uns32' to `min::uns32'.
 
 min::locatable_var<min::printer> mex::default_printer;
-min::uns32 mex::module_length = 1 << 12;
-min::uns32 mex::stack_limit = 1 << 14;
-min::uns32 mex::return_stack_limit = 1 << 12;
-min::uns32 mex::run_counter_limit = 1 << 20;
 min::uns32 mex::trace_indent = 2;
 char mex::trace_mark = '*';
 
@@ -827,6 +823,14 @@ RET_EXIT:
 
 // Run Process
 // --- -------
+
+min::uns32 mex::run_stack_limit = 1 << 14;
+min::uns32 mex::run_return_stack_limit = 1 << 12;
+min::uns32 mex::run_counter_limit = 1 << 20;
+min::uns32 mex::run_trace_flags = 1 << mex::T_ALWAYS;
+int mex::run_excepts =
+    FE_DIVBYZERO|FE_INVALID|FE_OVERFLOW;
+bool mex::run_optimize = false;
 
 // Operation Information Table.
 //
@@ -2474,6 +2478,8 @@ FATAL:
 // Create Functions
 // ------ ---------
 
+min::uns32 mex::module_length = 1 << 12;
+
 mex::module mex::create_module ( min::file f )
 {
     min::locatable_var<mex::module_ins> m =
@@ -2503,11 +2509,11 @@ mex::process mex::create_process
 {
     mex::process p =
         (mex::process) ::process_vec_type.new_stub
-	    ( mex::stack_limit );
+	    ( mex::run_stack_limit );
     mex::return_stack_ref(p) =
         (mex::return_stack)
 	::return_stack_vec_type.new_stub
-	    ( mex::return_stack_limit );
+	    ( mex::run_return_stack_limit );
     mex::printer_ref(p) = printer;
     mex::pc pc = { min::NULL_STUB, 0 };
     mex::set_pc ( p, pc );

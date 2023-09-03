@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat Sep  2 02:59:00 EDT 2023
+// Date:	Sat Sep  2 20:23:35 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -29,21 +29,9 @@
 
 namespace mex {
 
-extern min::uns32 trace_indent;
-extern char trace_mark;
-extern min::locatable_var<min::printer> default_printer;
-extern min::uns32 module_length;
-extern min::uns32 stack_limit;
-extern min::uns32 return_stack_limit;
-extern min::uns32 run_counter_limit;
-
-}
-
 
 // Program Instructions
 // ------- ------------
-
-namespace mex {
 
 struct instr {
     min::uns8 op_code, trace_class, trace_depth,
@@ -191,6 +179,8 @@ void print_excepts
 // Modules
 // -------
 
+extern min::uns32 module_length;
+
 struct module_header
 {
     const min::uns32 control;
@@ -231,6 +221,18 @@ inline void push_instr
 
 // Processes
 // ---------
+
+extern min::locatable_var<min::printer> default_printer;
+
+extern min::uns32 trace_indent;
+extern char trace_mark;
+
+extern min::uns32 run_stack_limit;
+extern min::uns32 run_return_stack_limit;
+extern min::uns32 run_counter_limit;
+extern min::uns32 run_trace_flags;
+extern int run_excepts;
+extern bool run_optimize;
 
 enum state
 {
