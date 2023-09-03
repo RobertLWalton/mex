@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat Sep  2 21:58:38 EDT 2023
+// Date:	Sun Sep  3 06:49:47 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -240,7 +240,9 @@ enum state
     RUNNING,
     MODULE_END,
     CALL_END,
-    LIMIT_STOP,
+    COUNTER_LIMIT_STOP,
+    STACK_LIMIT_STOP,
+    RETURN_STACK_LIMIT_STOP,
     ERROR_STOP,
     JMP_ERROR,
     FORMAT_ERROR,

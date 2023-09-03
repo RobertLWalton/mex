@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Sep  3 04:48:54 EDT 2023
+// Date:	Sun Sep  3 06:49:38 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -964,8 +964,13 @@ mex::state_info mex::state_infos
 		  " normally" },
     { CALL_END, "CALL_END",
                 "function call terminated normally" },
-    { LIMIT_STOP, "LIMIT_STOP",
+    { COUNTER_LIMIT_STOP, "COUNTER_LIMIT_STOP",
     		  "instruction counter reached limit" },
+    { STACK_LIMIT_STOP, "STACK_LIMIT_STOP",
+    		  "stack size reached limit" },
+    { RETURN_STACK_LIMIT_STOP,
+                  "RETURN_STACK_LIMIT_STOP",
+    		  "return stack size reached limit" },
     { ERROR_STOP, "ERROR_STOP",
                   "ERROR instruction executed" },
     { JMP_ERROR, "JMP_ERROR",
@@ -1111,7 +1116,7 @@ bool mex::run_process ( mex::process p )
     limit = p->counter_limit;
     if ( p->counter >= limit )
     {
-        p->state = mex::LIMIT_STOP;
+        p->state = mex::COUNTER_LIMIT_STOP;
 	return false;
     }
     limit -= p->counter;
@@ -1154,7 +1159,7 @@ bool mex::run_process ( mex::process p )
 	if ( limit == 0 )
 	{
 	    SAVE;
-	    p->state = mex::LIMIT_STOP;
+	    p->state = mex::COUNTER_LIMIT_STOP;
 	    return false;
 	}
 
@@ -1196,7 +1201,7 @@ bool mex::run_process ( mex::process p )
 
 	    if ( p->counter >= p->counter_limit )
 	    {
-		p->state = mex::LIMIT_STOP;
+		p->state = mex::COUNTER_LIMIT_STOP;
 		return false;
 	    }
 
@@ -1696,20 +1701,12 @@ bool mex::run_process ( mex::process p )
 		    goto INNER_FATAL;
 		}
 		if ( sp >= spend )
-		{
-		    message =
-		        "stack too large for push";
-		    goto INNER_FATAL;
-		}
+		    goto STACK_LIMIT_STOP;
 		value = sp[-(int)immedA-1];
 		break;
 	    case mex::PUSHI:
 		if ( sp >= spend )
-		{
-		    message =
-		        "stack too large for push";
-		    goto INNER_FATAL;
-		}
+		    goto STACK_LIMIT_STOP;
 		value = immedD;
 		break;
 	    case mex::PUSHG:
@@ -1731,21 +1728,13 @@ bool mex::run_process ( mex::process p )
 		    goto INNER_FATAL;
 		}
 		if ( sp >= spend )
-		{
-		    message =
-		        "stack too large for push";
-		    goto INNER_FATAL;
-		}
+		    goto STACK_LIMIT_STOP;
 		value = mg->globals[immedA];
 		break;
 	    }
 	    case mex::PUSHL:
 		if ( sp >= spend )
-		{
-		    message =
-		        "stack too large for push";
-		    goto INNER_FATAL;
-		}
+		    goto STACK_LIMIT_STOP;
 		if (    immedB == 0
 		     && m->globals != min::NULL_STUB )
 		{
@@ -1797,11 +1786,7 @@ bool mex::run_process ( mex::process p )
 		    goto INNER_FATAL;
 		}
 		if ( sp >= spend )
-		{
-		    message =
-		        "stack too large for push";
-		    goto INNER_FATAL;
-		}
+		    goto STACK_LIMIT_STOP;
 		value = min::new_num_gen
 		    ( p->nargs[immedB] );
 		break;
@@ -1839,11 +1824,7 @@ bool mex::run_process ( mex::process p )
 		    goto INNER_FATAL;
 		}
 		if ( sp + immedB > spend + immedA )
-		{
-		    message =
-		        "stack too large for push";
-		    goto INNER_FATAL;
-		}
+		    goto STACK_LIMIT_STOP;
 	        break;
 	    case mex::ENDL:
 	    case mex::CONT:
@@ -2021,10 +2002,7 @@ bool mex::run_process ( mex::process p )
 		}
 		min::uns32 rp = p->return_stack->length;
 		if ( rp >= p->return_stack->max_length )
-		{
-		    message = "return stack is full";
-		    goto INNER_FATAL;
-		}
+		    goto RETURN_STACK_LIMIT_STOP;
 
 		// CALL uses BEGF trace_info.
 		//
@@ -2383,6 +2361,15 @@ bool mex::run_process ( mex::process p )
 	    ++ pc; -- limit;
 	    continue; // loop
 
+	STACK_LIMIT_STOP:
+	    SAVE;
+	    p->state = mex::STACK_LIMIT_STOP;
+	    return false;
+
+	RETURN_STACK_LIMIT_STOP:
+	    SAVE;
+	    p->state = mex::RETURN_STACK_LIMIT_STOP;
+	    return false;
 
 	// Fatal error discovered in loop.
 	//
