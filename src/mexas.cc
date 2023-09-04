@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Sep  3 05:01:57 EDT 2023
+// Date:	Mon Sep  4 08:09:00 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -407,7 +407,7 @@ min::uns32 mexas::global_search
           0 < i; )
     {
 	-- i;
-        mex::module m = mexas::modules[i];
+        m = mexas::modules[i];
 	if ( m->name != module_name
 	     &&
 	     mexas::star != module_name )

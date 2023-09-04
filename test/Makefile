@@ -133,6 +133,14 @@ mexas_compile_test_5.out: \
     TRACE = -tc:BEG,BEGL,END,ENDL
 mexas_compile_test_10.out: \
     TRACE = -ex:INVALID -pasource -tc:ALL
+mexas_time_test_1.out: \
+    RUN = -return-stack 8000
+mexas_time_test_1o.out: \
+    RUN = -return-stack 8000
+mexas_time_test_2.out: \
+    RUN = -counter 20000000
+mexas_time_test_2o.out: \
+    RUN = -counter 20000000
 
 mexas_compile_test_%.out:	\
 		mexas \
@@ -148,8 +156,9 @@ mexas_time_test_%.out:	\
 		mexas_time_test_%.mex \
 		Makefile
 	rm -f mexas_time_test_$*.out
-	-time ${RUNENV} mexas \
+	-time ${RUNENV} mexas -pasource \
 	    mexas_time_test_$*.mex \
+	    ${RUN} -r MAIN \
 	    > mexas_time_test_$*.out
 
 mexas_time_test_%o.out:	\
@@ -157,8 +166,9 @@ mexas_time_test_%o.out:	\
 		mexas_time_test_%.mex \
 		Makefile
 	rm -f mexas_time_test_$*o.out
-	-time ${RUNENV} mexas -oon \
+	-time ${RUNENV} mexas -pasource \
 	    mexas_time_test_$*.mex \
+	    ${RUN} -r MAIN \
 	    > mexas_time_test_$*o.out
 
 clean:

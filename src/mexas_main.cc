@@ -2,7 +2,7 @@
 //
 // File:	mexas_main.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Sep  3 21:56:09 EDT 2023
+// Date:	Mon Sep  4 08:05:52 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -151,6 +151,55 @@ int main ( int argc, char * argv[] )
 		p = q;
 	    }
 	    mex::run_excepts = excepts;
+	}
+
+	else if ( strcmp ( "-r", arg ) == 0 )
+	{
+	    min::locatable_gen name
+	        ( min::new_str_gen ( argv[i++] ) );
+	    mex::module m;
+	    min::uns32 location =
+	        mexas::global_search
+		    ( m, mexas::star, mexas::F, name );
+	    if ( location == mexas::NOT_FOUND )
+	        printer << min::bol
+		        << "function "
+			<< name
+			<< " not found;"
+			<< " run command ignored"
+			<< min::eol;
+	    else
+	    {
+	        mex::pc pc = { m, location };
+		mex::process process =
+		    mex::init_process ( pc );
+		mex::run_process ( process );
+		if ( process->state != mex::CALL_END )
+		{
+		    printer
+			<< min::bom << "ERROR: "
+			<< min::place_indent ( 0 )
+			<< "process did not terminate"
+			   " normally with return to"
+			   " call of "
+			<< name
+			<< ": "
+			<< mex::state_infos
+			       [process->state]
+			       .description;
+		    if (    process->state
+		         == mex::EXCEPTS_ERROR )
+		    {
+			printer << "; exceptions are: ";
+			mex::print_excepts
+			    ( process->printer,
+			      process->
+			          excepts_accumulator,
+			      process->excepts );
+		    }
+		    printer << min::eom;
+		}
+	    }
 	}
 	else if ( strcmp ( "-", arg ) == 0 )
 	{
