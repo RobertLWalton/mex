@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Sep  3 06:49:38 EDT 2023
+// Date:	Mon Sep  4 14:20:07 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -2585,6 +2585,8 @@ mex::process mex::init_process
 	ret->saved_nargs = 0;
 	ret->nresults = 0;
 	RW_UNS32 p->return_stack->length = 1;
+
+	p->level = 1;
 
 	RW_UNS32 pc.index = pc.index + 1;
 	mex::set_pc ( p, pc );

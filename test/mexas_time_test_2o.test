@@ -1,0 +1,77 @@
+// MEXAS Time Test
+//
+// File:        mexas_time_test_2.mex
+// Author:      Bob Walton (walton@acm.org)
+// Date:        Mon Sep  4 05:53:39 EDT 2023
+//
+// The authors have placed this program in the public
+// domain; they make no warranty and accept no liability
+// for this program.
+
+// Compute sum i for low <= i < high by loop.
+//
+BEGF sum low high
+    [13:0;2] BEGF T_BEGF 2 1 0 [$ MISSING $]; [< sum low high >]
+    PUSHI 0 sum
+    [14:1;3] PUSHI T_PUSH 0 0 0 0; sum
+    PUSH low i
+    [15:2;4] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< low i >]
+    BEGL 2
+    [16:3;6] BEGL T_BEGL 0 2 0 [$ MISSING $]; [$ MISSING $]
+        PUSH i
+    [17:4;7] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< i * >]
+        PUSH high
+    [18:5;8] PUSHS T_PUSH 5 0 0 [$ MISSING $]; [< high * >]
+        JMPGT DONE
+    [19:6;6] JMPGT T_JMPS 0 0 0 [$ MISSING $]; DONE
+        PUSH i
+    [20:7;7] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< i * >]
+        ADDI 1
+    [21:8;7] ADDI T_AOP 0 0 0 1; *
+        POP next-i
+    [22:9;6] POPS T_POP 1 0 0 [$ MISSING $]; [< * next-i >]
+        PUSH sum
+    [23:10;7] PUSHS T_PUSH 3 0 0 [$ MISSING $]; [< sum * >]
+        PUSH i
+    [24:11;8] PUSHS T_PUSH 3 0 0 [$ MISSING $]; [< i * >]
+        ADD
+    [25:12;7] ADD T_AOP 0 0 0 [$ MISSING $]; *
+        POP next-sum
+    [26:13;6] POPS T_POP 2 0 0 [$ MISSING $]; [< * next-sum >]
+    ENDL
+    [27:14;4] ENDL T_ENDL 0 2 10 [$ MISSING $]; [$ MISSING $]
+    LABEL DONE
+    [19:6;4] JMPGT T_JMPS[1] 2 0 9 [$ MISSING $]; DONE
+    PUSH sum
+    [29:15;5] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< sum * >]
+    RET 1
+    [30:16;4] RET T_RET 0 1 1 [$ MISSING $]; [$ MISSING $]
+ENDF
+    [13:0;4] BEGF T_BEGF 2 1 18 [$ MISSING $]; [< sum low high >]
+    [31:17;0] ENDF T_ENDF 0 1 0 [$ MISSING $]; [$ MISSING $]
+
+BEGF MAIN
+    [33:18;0] BEGF T_BEGF 0 1 0 [$ MISSING $]; [< MAIN >]
+    PUSHI 1 low
+    [34:19;1] PUSHI T_PUSH 0 0 0 1; low
+    PUSHI 1e6 high
+    [35:20;2] PUSHI T_PUSH 0 0 0 1000000; high
+    PUSH low
+    [36:21;3] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< low * >]
+    PUSH high
+    [37:22;4] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< high * >]
+    CALL sum 2 answer
+    [38:23;3] CALLM T_CALLM 2 1 0 [$ MISSING $]; [< sum answer >]
+    [40:24;3] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< low * >]
+    [40:25;3] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< high * >]
+    [40:26;3] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< answer * >]
+    TRACE "answer = sum i: low <= i <= high" \
+          low high answer
+    [40:27;3] TRACE T_ALWAYS 3 0 0 [$ MISSING $]; [<
+              "answer = sum i: low <= i <= high" low high answer >]
+ENDF
+    [33:18;3] BEGF T_BEGF 0 1 11 [$ MISSING $]; [< MAIN >]
+    [41:28;0] ENDF T_ENDF 0 1 0 [$ MISSING $]; [$ MISSING $]
+mexas_time_test_2.mex successfully compiled
+* {40:27,6,11000016} TRACE: "answer = sum i: low <= i <= high", low=1,
+                            high=1000000, answer=500000500000

@@ -1,0 +1,40 @@
+// MEXAS Time Test
+//
+// File:	mexas_time_test_1.mex
+// Author:	Bob Walton (walton@acm.org)
+// Date:	Mon Sep  4 14:27:34 EDT 2023
+//
+// The authors have placed this program in the public
+// domain; they make no warranty and accept no liability
+// for this program.
+
+// Compute sum i for low <= i < high by recursion.
+//
+BEGF sum low high
+    PUSH low
+    PUSH high
+    JMPGT EXIT
+    STACKS
+    PUSH low
+    ADDI 1
+    PUSH high
+    CALL sum 2 *
+    STACKS
+    PUSH low
+    STACKS
+    ADD
+    RET 1
+    LABEL EXIT
+    PUSHI 0
+    RET 1
+ENDF
+
+BEGF MAIN
+    PUSHI 1 low
+    PUSHI 1000000 high
+    PUSH low
+    PUSH high
+    CALL sum 2 answer
+    TRACE "answer = sum i: low <= i <= high" \
+          low high answer
+ENDF
