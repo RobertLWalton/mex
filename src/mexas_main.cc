@@ -2,7 +2,7 @@
 //
 // File:	mexas_main.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Sep  3 05:02:25 EDT 2023
+// Date:	Sun Sep  3 21:56:09 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -26,6 +26,8 @@ int main ( int argc, char * argv[] )
     while ( i < argc )
     {
         const char * arg = argv[i++];
+	const char * num;
+	char * q;
 	if ( strcmp ( "-pa", arg ) == 0 )
 	    mexas::assemble_print_switch =
 	        mexas::PRINT;
@@ -45,6 +47,37 @@ int main ( int argc, char * argv[] )
 	    mex::run_optimize = false;
 	else if ( strcmp ( "-ooff", arg ) == 0 )
 	    mex::run_optimize = true;
+	else if ( strcmp ( "-counter", arg ) == 0 )
+	{
+	    num = argv[i++];
+	    long L = std::strtol ( num, & q, 10 );
+	    if (    * q != 0
+	         || L < 0 || L >= (1l << 32 ) )
+	        goto BAD_NUMBER;
+	    mex::run_counter_limit = (min::uns32) L;
+
+	}
+	else if ( strcmp ( "-stack", arg ) == 0 )
+	{
+	    num = argv[i++];
+	    long L = std::strtol ( num, & q, 10 );
+	    if (    * q != 0
+	         || L < 0 || L >= (1l << 32 ) )
+	        goto BAD_NUMBER;
+	    mex::run_stack_limit = (min::uns32) L;
+
+	}
+	else if ( strcmp ( "-return-stack", arg ) == 0 )
+	{
+	    num = argv[i++];
+	    long L = std::strtol ( num, & q, 10 );
+	    if (    * q != 0
+	         || L < 0 || L >= (1l << 32 ) )
+	        goto BAD_NUMBER;
+	    mex::run_return_stack_limit =
+	        (min::uns32) L;
+
+	}
 
 	else if ( strncmp ( "-tc:", arg, 4 ) == 0 )
 	{
@@ -171,6 +204,14 @@ int main ( int argc, char * argv[] )
 		        << " successfully compiled"
 			<< min::eol;
 	}
+
+	continue;
+
+    BAD_NUMBER:
+	printer << min::bol << "bad " << arg
+		<< " parameter " << num
+		<< "; option ignored" << min::eol;
+	continue;
     }
     return 0;
 }

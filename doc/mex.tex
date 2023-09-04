@@ -2505,6 +2505,9 @@ appear in its arguments.  The syntax is:
     \ttkey{-ex:}{\em ex-list}		& [run with listed excepts] \\
     \ttkey{-oon}			& [run with optimize on] \\
     \ttkey{-ooff}			& [run with optimize off] \\
+    \ttkey{-counter} $L$		& [set instruction counter limit] \\
+    \ttkey{-stack} $L$		        & [set stack size] \\
+    \ttkey{-return-stack} $L$	        & [set return stack size] \\
     \ttkey{-r} {\em function-name}	& [run named function] \\
     \end{tabular}
 \\[0.5ex]
@@ -2540,7 +2543,7 @@ Details are:
 		      filename minus any \TT{.mex} extension as its
 		      module name.
 \\[0.5ex]
-\begin{tabular}[t]{l}
+\begin{tabular}[t]{@{}l@{}}
 \TT{-pa} \\
 \TT{-pasource} \\
 \TT{-paoff} \\
@@ -2570,12 +2573,21 @@ Details are:
 		      program execution.
 		      Default is \TT{-ex:DIVBYZERO,INVALID,OVERFLOW}.
 \\[0.5ex]
-\begin{tabular}[t]{l}
+\begin{tabular}[t]{@{}l@{}}
 \TT{-ooff} \\
 \TT{-oon} \\
 \end{tabular}	    & Sets the process \TT{optimize} flag \TT{on} or \TT{off}
                       at the start of mex program execution.
 		      Default is \TT{-ooff}.
+\\[0.5ex]
+\TT{-counter} $L$   & Sets the process \TT{counter\_limit} to integer $L$.
+\\[0.5ex]
+\TT{-stack} $L$	    & Sets the process \TT{max\_length} (stack size)
+                      to integer $L$.
+\\[0.5ex]
+\TT{-return-stack} $L$
+		    & Sets the process \TT{return\_stack->max\_length}
+		      (return stack size) to integer $L$.
 \\[0.5ex]
 \TT{-r} {\em function-name}
                     & Calls the named function, which must be of lexical
