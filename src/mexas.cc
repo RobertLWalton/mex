@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Sep  4 08:09:00 EDT 2023
+// Date:	Tue Sep  5 02:49:33 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -2259,7 +2259,53 @@ mex::module mexas::compile ( min::file file )
 	}
 	TRACE:
 	{
-	    trace_instr ( m->length - 1 );
+	    bool no_source = false;
+	    if ( index < mexas::statement->length )
+	    {
+		min::printer printer =
+		    mexas::input_file->printer;
+		min::phrase_position pp =
+		    m->position[m->length - 1];
+		printer << min::bom << "ERROR: "
+		        << min::place_indent ( 0 )
+			<< "extra stuff at end of"
+			   " instruction: ";
+		while (   index
+		        < mexas::statement->length )
+		{
+		    min::gen item =
+			mexas::statement[index++];
+		    printer << " ";
+		    if ( ( item == mexas::single_quote
+		           ||
+			   item == mexas::double_quote )
+			 &&
+			   index
+			 < mexas::statement->length )
+		        printer
+			    << min::pgen_never_quote
+			           ( item )
+			    << min::pgen_never_quote
+			           ( mexas::statement
+				         [index++] )
+			    << min::pgen_never_quote
+			           ( item );
+		    else
+		        printer << min::pgen ( item );
+		}
+		printer << min::indent
+		        << min::pline_numbers
+			       ( mexas::input_file, pp )
+			<< ":" << min::eom;
+
+		min::print_phrase_lines
+		    ( printer, mexas::input_file, pp );
+
+		++ mexas::error_count;
+
+		no_source = true;
+	    }
+	    trace_instr ( m->length - 1, no_source );
 	    continue;
 	}
 
