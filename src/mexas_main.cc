@@ -2,13 +2,15 @@
 //
 // File:	mexas_main.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Sep  4 08:05:52 EDT 2023
+// Date:	Tue Sep  5 03:23:13 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
 // for this program.
 
 # include <mexas.h>
+# include <sys/times.h>
+# include <unistd.h>
 
 int main ( int argc, char * argv[] )
 {
@@ -173,7 +175,10 @@ int main ( int argc, char * argv[] )
 	        mex::pc pc = { m, location };
 		mex::process process =
 		    mex::init_process ( pc );
+		struct tms start, stop;
+		times ( & start );
 		mex::run_process ( process );
+		times ( & stop );
 		if ( process->state != mex::CALL_END )
 		{
 		    printer
@@ -198,6 +203,29 @@ int main ( int argc, char * argv[] )
 			      process->excepts );
 		    }
 		    printer << min::eom;
+		}
+		else
+		{
+		    long ticks_per_second =
+		        sysconf ( _SC_CLK_TCK );
+		    double cpu_time =
+		        (double) (   stop.tms_utime
+			           - start.tms_utime )
+			/ ticks_per_second;
+		    printer << min::bom
+		            << "Call to " << name
+			    << " succeeded and "
+			    << min::place_indent ( 0 )
+			    << "executed "
+			    << (double) process->counter
+			       * 1e-6
+			    << " million instructions"
+			    << min::indent
+			    << "in "
+			    << min::pfloat
+			        ( cpu_time, "%.3f" )
+			    << " cpu seconds."
+			    << min::eom;
 		}
 	    }
 	}
