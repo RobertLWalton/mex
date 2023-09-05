@@ -179,7 +179,7 @@ BEGF SUM X Y
     PUSH X I
     [83:78;4] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< X I >]
     BEGL 2
-    [84:79;6] BEGL T_BEGL 0 2 0 [$ MISSING $]; [$ MISSING $]
+    [84:79;6] BEGL T_BEGL 0 2 0 [$ MISSING $]; [< LOOP S I >]
         PUSH I
     [85:80;7] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< I * >]
         PUSH Y

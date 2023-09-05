@@ -17,7 +17,7 @@ BEGF sum low high
     PUSH low i
     [15:2;4] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< low i >]
     BEGL 2
-    [16:3;6] BEGL T_BEGL 0 2 0 [$ MISSING $]; [$ MISSING $]
+    [16:3;6] BEGL T_BEGL 0 2 0 [$ MISSING $]; [< LOOP sum i >]
         PUSH i
     [17:4;7] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< i * >]
         PUSH high
@@ -76,4 +76,4 @@ mexas_time_test_2.mex successfully compiled
 * {40:27,6,11000016} TRACE: "answer = sum i: low <= i <= high", low=1,
                             high=1000000, answer=500000500000
 Call to MAIN succeeded and executed 11.000017 million instructions
-                           in 1.200 cpu seconds.
+                           in #.### cpu seconds.

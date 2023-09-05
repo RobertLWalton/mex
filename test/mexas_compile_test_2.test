@@ -61,7 +61,7 @@ PUSHI 0 SUM
 PUSHI 4 I
     [40:19;3] PUSHI T_PUSH 0 0 0 4; I
 BEGL 2
-    [41:20;5] BEGL T_BEGL 0 2 0 [$ MISSING $]; [$ MISSING $]
+    [41:20;5] BEGL T_BEGL 0 2 0 [$ MISSING $]; [< LOOP SUM I >]
     STACKS: VARIABLES: ; next-I next-SUM I SUM LIMIT
     PUSH I
     [43:21;6] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< I * >]
@@ -136,7 +136,7 @@ POP
 * {38:17,0,15} PUSHI: LIMIT <=== 6
 * {39:18,1,16} PUSHI: SUM <=== 0
 * {40:19,2,17} PUSHI: I <=== 4
-* {41:20,3,18} BEGL
+* {41:20,3,18} BEGL: LOOP, SUM=0, I=4
 *** {43:21,5,19} PUSHS: * <=== I = 4
 *** {44:22,6,20} PUSHS: * <=== LIMIT = 6
 *** {45:23,7,21} JMPGT:  DONE is UNsuccessful: false <= 4 > 6
@@ -148,7 +148,7 @@ POP
 *** {51:29,6,27} PUSHI: * <=== 1
 *** {52:30,7,28} ADD: * = 5 <= 4 + 1
 *** {53:31,6,29} POPS: next-I <=== * = 5
-*** {54:32,5,30} ENDL
+*** {54:32,5,30} ENDL: LOOP, SUM=4, I=5
 *** {43:21,5,31} PUSHS: * <=== I = 5
 *** {44:22,6,32} PUSHS: * <=== LIMIT = 6
 *** {45:23,7,33} JMPGT:  DONE is UNsuccessful: false <= 5 > 6
@@ -160,7 +160,7 @@ POP
 *** {51:29,6,39} PUSHI: * <=== 1
 *** {52:30,7,40} ADD: * = 6 <= 5 + 1
 *** {53:31,6,41} POPS: next-I <=== * = 6
-*** {54:32,5,42} ENDL
+*** {54:32,5,42} ENDL: LOOP, SUM=9, I=6
 *** {43:21,5,43} PUSHS: * <=== I = 6
 *** {44:22,6,44} PUSHS: * <=== LIMIT = 6
 *** {45:23,7,45} JMPGT:  DONE is UNsuccessful: false <= 6 > 6
@@ -172,7 +172,7 @@ POP
 *** {51:29,6,51} PUSHI: * <=== 1
 *** {52:30,7,52} ADD: * = 7 <= 6 + 1
 *** {53:31,6,53} POPS: next-I <=== * = 7
-*** {54:32,5,54} ENDL
+*** {54:32,5,54} ENDL: LOOP, SUM=15, I=7
 *** {43:21,5,55} PUSHS: * <=== I = 7
 *** {44:22,6,56} PUSHS: * <=== LIMIT = 6
 *** {45:23,7,57} JMPGT:  DONE is successful: true <= 7 > 6

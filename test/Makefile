@@ -2,7 +2,7 @@
 #
 # File:		Makefile
 # Author:	Bob Walton (walton@acm.org)
-# Date:		Mon Sep  4 14:31:06 EDT 2023
+# Date:		Tue Sep  5 05:01:35 EDT 2023
 #
 # The authors have placed this program in the public
 # domain; they make no warranty and accept no liability
@@ -73,6 +73,7 @@ test:		${TESTS:=.test}
 	sed \
 	    -e '/line [0-9][0-9]*:/s//line ####:/g' \
 	    -e '/lines [0-9][0-9]*-[0-9][0-9]*:/s//lines ####-####/g' \
+	    -e '/ [0-9][0-9.]* cpu seconds/s// #.### cpu seconds/g' \
             < $*.out > $*.test
 
 %.diff:	%.out
@@ -80,6 +81,7 @@ test:		${TESTS:=.test}
 	-@sed \
 	    -e '/line [0-9][0-9]*:/s//line ####:/g' \
 	    -e '/lines [0-9][0-9]*-[0-9][0-9]*:/s//lines ####-####/g' \
+	    -e '/ [0-9][0-9.]* cpu seconds/s// #.### cpu seconds/g' \
             < $*.out | diff ${DIFFOPT} $*.test -
 
 mex.o:	\
@@ -158,7 +160,7 @@ mexas_time_test_%.out:	\
 		mexas_time_test_%.mex \
 		Makefile
 	rm -f mexas_time_test_$*.out
-	-time ${RUNENV} mexas -pasource \
+	${RUNENV} mexas -pasource \
 	    mexas_time_test_$*.mex \
 	    ${RUN} -r MAIN \
 	    > mexas_time_test_$*.out
@@ -168,7 +170,7 @@ mexas_time_test_%o.out:	\
 		mexas_time_test_%.mex \
 		Makefile
 	rm -f mexas_time_test_$*o.out
-	-time ${RUNENV} mexas -pasource \
+	${RUNENV} mexas -pasource \
 	    mexas_time_test_$*.mex \
 	    ${RUN} -r MAIN \
 	    > mexas_time_test_$*o.out

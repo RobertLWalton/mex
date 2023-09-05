@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Sep  5 02:49:33 EDT 2023
+// Date:	Tue Sep  5 04:32:55 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -270,6 +270,7 @@ min::locatable_gen mexas::double_quote;
 static min::locatable_gen backslash;
 static min::locatable_gen on;
 static min::locatable_gen off;
+static min::locatable_gen loop;
 
 static void initialize ( void )
 {
@@ -281,6 +282,7 @@ static void initialize ( void )
     ::backslash = min::new_str_gen ( "\\" );
     ::on = min::new_str_gen ( "ON" );
     ::off = min::new_str_gen ( "OFF" );
+    ::loop = min::new_str_gen ( "LOOP" );
 
     ::init_op_code_table();
     ::init_trace_flag_table();
@@ -604,17 +606,6 @@ void mexas::begx ( mex::instr & instr,
     else if ( instr.op_code == mex::BEGL )
     {
 	e.end_op_code = mex::ENDL;
-	if ( nvars > SP - mexas::stack_limit )
-	{
-	    mexas::compile_error
-	        ( pp, "portion of stack in the"
-		      " containing block is smaller"
-		      " than the number of"
-		      " next-variables" );
-	    nvars = SP - mexas::stack_limit;
-	        // To protect against excessively
-		// large nvars values.
-	}
 
 	// Push next- vars before incrementing depth.
 	//
@@ -1791,33 +1782,48 @@ mex::module mexas::compile ( min::file file )
 			      pp, "nnext" ) )
 		    continue;
 
-		min::locatable_gen trace_info;
-	        min::uns32 tvars =
-		    mexas::get_trace_info
-			( trace_info, index, pp );
+		if ( nnext > SP - mexas::stack_limit )
+		{
+		    mexas::compile_error
+			( pp, "portion of stack in the"
+			      " containing block is"
+			      " smaller than the number"
+			      " of next-variables" );
+		    nnext = SP - mexas::stack_limit;
+			// To protect against excessively
+			// large nvars values.
+		}
+
+		min::gen message =
+		    mexas::get_str ( index );
+		if ( message == min::NONE() )
+		    message = ::loop;
+
+		min::gen labbuf[nnext+1];
+		labbuf[0] = message;
+		for ( min::uns32 i = 1;
+		      i <= nnext; ++ i )
+		    labbuf[nnext+1-i] =
+		        (   mexas::variables
+		          + ( SP - i ) )->name;
+
+		min::locatable_gen trace_info
+		    ( min::new_lab_gen
+		          ( labbuf, nnext + 1 ) );
 		mexas::begx
-		    ( instr, nnext, tvars, trace_info,
-		             pp );
+		    ( instr, nnext, 0, trace_info, pp );
 		break;
 	    }
 	    case mex::ENDL:
 	    {
-		min::locatable_gen trace_info;
-	        min::uns32 tvars =
-		    mexas::get_trace_info
-			( trace_info, index, pp );
 		mexas::endx
-		    ( instr, tvars, trace_info, pp );
+		    ( instr, 0, min::MISSING(), pp );
 		break;
 	    }
 	    case mex::CONT:
 	    {
-		min::locatable_gen trace_info;
-	        min::uns32 tvars =
-		    mexas::get_trace_info
-			( trace_info, index, pp );
 		mexas::cont
-		    ( instr, tvars, trace_info, pp );
+		    ( instr, 0, min::MISSING(), pp );
 		break;
 	    }
 	    case mex::BEGF:

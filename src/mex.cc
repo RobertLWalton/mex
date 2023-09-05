@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Sep  4 14:20:07 EDT 2023
+// Date:	Tue Sep  5 04:33:17 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -600,7 +600,7 @@ static bool optimized_run_process ( mex::process p )
 	    if (   immedA + 2 * immedB
 		 > sp - spbegin )
 	        goto ERROR_EXIT;
-	    if ( immedC > pc - pcbegin )
+	    if ( immedC + 1 > pc - pcbegin )
 	        goto ERROR_EXIT;
 	    sp -= (int) immedA;
 	    for ( int i = immedB; 0 < i; -- i )
@@ -1828,6 +1828,7 @@ bool mex::run_process ( mex::process p )
 	        break;
 	    case mex::ENDL:
 	    case mex::CONT:
+	    {
 	        if ( immedA > sp - spbegin )
 		{
 		    message = "immedA too large";
@@ -1840,12 +1841,31 @@ bool mex::run_process ( mex::process p )
 		        "immedA + 2 * immedB too large";
 		    goto INNER_FATAL;
 		}
-	        if ( immedC > pc - pcbegin )
+		min::uns32 location = pc - pcbegin;
+	        if ( immedC + 1 > location )
 		{
 		    message = "immedC too large";
 		    goto INNER_FATAL;
 		}
+
+		// ENDL/CONT uses BEGL trace_info.
+		//
+		if (   immedC
+		     < m->trace_info->length )
+		    tinfo = m->trace_info
+		        [location - immedC - 1];
+		else
+		    tinfo  = min::MISSING();
+
+		// ENDL/CONT updates stack before trace
+		//
+		sp -= immedA;
+		for ( int i = immedB; 0 < i; -- i )
+		    sp[-(int)immedB-i] = sp[-i];
+
 		break;
+	    }
+
 	    case mex::SET_TRACE:
 	    case mex::SET_EXCEPTS:
 	    case mex::SET_OPTIMIZE:
@@ -2238,9 +2258,6 @@ bool mex::run_process ( mex::process p )
 		    min::interrupt();
 		    RESTORE;
 		}
-		sp -= immedA;
-		for ( int i = immedB; 0 < i; -- i )
-		    sp[-(int)immedB-i] = sp[-i];
 		pc -= immedC;
 		-- pc;
 		break;
