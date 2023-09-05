@@ -240,7 +240,7 @@
 
 \author{Robert L. Walton}
 
-\date{September 3, 2023}
+\date{September 5, 2023}
  
 \maketitle
 
@@ -1548,11 +1548,34 @@ the value of
 \TT{[<} {\em trace-message} ~ {\em trace-variable}\STAR{} \TT{>]}
 \end{center}
 
-\subsubsection{\TT{CALL} and \TT{RET} Trace Messages}
-\label{CALL-AND-RET-TRACE-MESSAGES}
+\subsubsection{\TT{BEGL}, \TT{ENDL}, and \TT{CONT} Trace Messages}
+\label{BEGL-ENDL-AND-CONT-TRACE-MESSAGES}
+
+The traces of the \TT{BEGL}, \TT{ENDL}, and \TT{CONT}
+instructions are like those of {\em trace-info} instructions with
+a difference.
+
+The {\em trace-message} for all these instructions is taken
+from the loop \TT{BEGL} instruction, and the {\em trace-variables}
+are the {\em nnext} loop variables in the variables stack
+when the \TT{BEGL} instruction is compiled.  When traced,
+\TT{BEGL} reads the values of these from the execution stack
+when the \TT{BEGL} is encountered.  When traced,
+\TT{CONT} and \TT{ENDL} first pop the execution stack so it
+holds only loop variables and \TT{next-\ldots} variables,
+then copies the \TT{next-\ldots} variables into the loop variables,
+and then reads the top {\em nnext} variable values and uses them
+in the trace.  These are \TT{next-\ldots} variable values, but
+at the time they are traced they equal the loop variable values,
+and so the loop variable values at the start of each iteration
+are traced, and are given the loop variable names and \underline{not}
+\TT{next-\ldots} names.
+
+\subsubsection{\TT{CALL}, \TT{RET}, and \TT{ENDF} Trace Messages}
+\label{CALL-RET-AND-ENDF-TRACE-MESSAGES}
 
 The traces of the \TT{CALL\ldots}, \TT{RET}, and \TT{ENDF}
-instructions are like those {\em trace-info} instructions with
+instructions are like those of {\em trace-info} instructions with
 a difference.
 
 For \TT{CALL\ldots}, the op code in the trace is replaced by
@@ -2301,7 +2324,7 @@ decrements the depth, then updates the jump list
 (see JMP Targets, \itemref{JMP-TARGETS}).
 \end{indpar}
 
-\ttkey{BEGL} {\em nnext} {\em trace-info}\QMARK{}
+\ttkey{BEGL} {\em nnext} {\em trace-message}\QMARK{}
 \begin{indpar}
 Here {\em nnext} is the number of next variables
 (see Next Variables and Loops, \itemref{NEXT-VARIABLES-AND-LOOPS}).
@@ -2320,14 +2343,14 @@ Thus for example, if the top two stack elements have names
 pushed would have names \TT{next-X} and \TT{next-Y}.
 \end{indpar}
 
-\ttkey{ENDL} {\em trace-info}\QMARK{}
+\ttkey{ENDL}
 \begin{indpar}
 At run-time this instruction's actions are as described in
 Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}.  At assembly-time,
 \TT{ENDL} does the same thing as \TT{END}.
 \end{indpar}
 
-\ttkey{CONT} {\em trace-info}\QMARK{}
+\ttkey{CONT}
 \begin{indpar}
 At run-time this instruction's actions are as described in
 Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}.  At assembly-time,
