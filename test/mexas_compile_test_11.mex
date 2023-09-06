@@ -1,0 +1,39 @@
+// MEXAS Compile Test 11 Input
+//
+// File:	mexas_compile_test_11.mex
+// Author:	Bob Walton (walton@acm.org)
+// Date:	Wed Sep  6 00:26:44 EDT 2023
+//
+// The authors have placed this program in the public
+// domain; they make no warranty and accept no liability
+// for this program.
+// MEXAS Time Test
+
+// Compute sum i for low <= i < high by recursion.
+//
+BEGF sum low high
+    PUSH low
+    PUSH high
+    JMPGT EXIT
+    STACKS
+    PUSH low
+    ADDI 1
+    PUSH high
+    CALL sum 2 *
+    STACKS
+    PUSH low
+    STACKS
+    ADD
+    RET 1
+    LABEL EXIT
+    PUSHI 0
+    RET 1
+ENDF
+
+PUSHI 4 low
+PUSHI 10 high
+PUSH low
+PUSH high
+CALL sum 2 answer
+TRACE "answer = sum i: low <= i <= high" \
+      low high answer

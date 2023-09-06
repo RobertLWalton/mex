@@ -2,7 +2,7 @@
 #
 # File:		Makefile
 # Author:	Bob Walton (walton@acm.org)
-# Date:		Tue Sep  5 05:01:35 EDT 2023
+# Date:		Wed Sep  6 00:27:32 EDT 2023
 #
 # The authors have placed this program in the public
 # domain; they make no warranty and accept no liability
@@ -38,6 +38,7 @@ TESTS = mexas_scanner_test_1 \
         mexas_compile_test_8 \
         mexas_compile_test_9 \
         mexas_compile_test_10 \
+        mexas_compile_test_11 \
         mexas_time_test_1 \
         mexas_time_test_1o \
         mexas_time_test_2 \
@@ -135,6 +136,8 @@ mexas_compile_test_5.out: \
     TRACE = -tc:BEG,BEGL,END,ENDL
 mexas_compile_test_10.out: \
     TRACE = -ex:INVALID -pasource -tc:ALL
+mexas_compile_test_11.out: \
+    TRACE = -tc:FUNC
 mexas_time_test_1.out: \
     RUN = -stack 20000000 -return-stack 1000002 \
           -counter 20000000
