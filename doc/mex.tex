@@ -605,24 +605,26 @@ so no level can be skipped over.  QED.
 \end{indpar}
 
 \begin{indpar}
-{\bf Theorem}~~~If the last incomplete function execution of $E$
-is an execution of function $F$ of level $L$, and if $F'$ is a function
-of level $L'$ lexically containing $F$, then there is a smallest
-incomplete function execution of $F'$ in $E$ which is also the
-smallest incomplete function of level $L'$ in $E$.
+{\bf Theorem}~~~If $F'$ is a function of level $L'$ that lexically
+contains function $F$ of level $L$,
+then during the execution of instructions in $F$
+there is a smallest incomplete execution of $F'$ that is also
+the smallest incomplete function execution of level $L'$.
 \end{indpar}
 
 \begin{indpar}
-{\bf Proof of Theorem}: The largest incomplete function execution of $E$
+{\bf Proof of Theorem}: If the currently executing instruction is in $F$
+it is in the smallest incomplete function execution, and this has level $L$.
+The largest incomplete function execution
 must have level $1$ and the last incomplete function execution has level
-$L$, and by hypothesis $1\leq L'\leq L$,
+$L$, and by hypothesis $1\leq L'<L$,
 so by Corollary 3 there is an incomplete function execution of level $L'$
 and hence a smallest one $E'$.  Let $F''$ be its function.  Then all the
 incomplete function executions between $E'$ and the end of the sequence
 must have lexical level $>L'$, for otherwise applying Corollary 3 again
 there would be a smaller incomplete function execution of level $L'$.
 
-By applying Corollary 2 recursively to successive incomplete function
+Then by applying Corollary 2 recursively to successive incomplete function
 executions after $E'$, we deduce that all are executions of functions
 lexically inside $F''$, and therefore $F''$ is the unique function of
 level $L'$ containing $F$, and therefore $F''=F'$.
@@ -631,10 +633,13 @@ QED
 \end{indpar}
 
 
-TBD
+During execution MEX computes \TT{fp[$L'$]} as the frame pointer
+of the most recently called function of level $L'$, and therefore
+during the execution of $F$ in the theorem, \TT{fp[$L'$]} is the
+frame pointer of $F''$ in the theorem.
 
-
-If follows that during $E$ the variables of $F'$ can be accessed by
+If follows that during an execution of an instruction in $F$
+the variables of $F'$ can be accessed by
 \TT{PUSHL} with \TT{immedB} = $L'$ (Figure~\ref{HOUSEKEEPING-INSTRUCTIONS}),
 and the arguments of $F'$ can be
 accessed by \TT{PUSHA} with \TT{immedB} = $L'$
