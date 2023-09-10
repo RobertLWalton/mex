@@ -240,7 +240,7 @@
 
 \author{Robert L. Walton}
 
-\date{September 9, 2023}
+\date{September 10, 2023}
  
 \maketitle
 
@@ -510,10 +510,7 @@ If the function $F$ is inside a function and $F'$ is the smallest
 function containing $F$, and if $F'$ has level $L'$, then $F$
 has level $L=L'+1$.
 
-If $E$ is the execution of a function $F$ of level $L$, we will
-say that $E$ has level $L$.
-
-If $F$ is a function inside another function $F'$, then $F$ can
+If $F$ is a function lexically inside another function $F'$, then $F$ can
 reference the variables that $F'$ can reference when $F$ is
 defined.  To locate these variables, knowing the frame pointer for the
 execution of $F'$ is sufficient.  The frame pointer is defined as the
@@ -521,77 +518,104 @@ stack pointer that points just after the last argument to $F'$,
 or equivalently, the stack
 pointer when $F'$ is called.
 
-MEX keeps track of the needed frame pointers using the following:%
-\footnote{This method is the similar to that used in Ada.}
-\begin{indpar}
-{\bf Theorem}~~~If $F$ is a function of level $L$ and $1\le L'<L$,
-and if $E$ is an execution of $F$, then there exists a smallest
-execution $E'$ of some function of level $L'$ such that $E\subset E'$,
-and $E'$ is an execution
-of the unique function $F'$ of level $L'$ that lexically contains $F$.
+So how do we compute the frame pointer of $F'$?  To see how,
+we need to analyze the situation in more detail.
 
-{\bf Corollary}~~~During $E$ the frame pointer \TT{fp[$L'$]} is the
-the frame pointer of $E'$.
+We define the level of an instruction to be the level of the
+smallest function lexically containing the instruction, or \TT{0} if the
+instruction is not lexically inside any function.  If $E_I$ is an
+execution of an instruction $I$, the level of $E_I$ is the
+level of $I$.
+
+\begin{indpar}
+{\bf Lemma 1}~~~An execution of a \TT{CALL\ldots} instruction of
+level $L$ must call a function of level $L'\leq L+1$.
+\end{indpar}
+\begin{indpar}
+{\bf Proof}: To be visible to the \TT{CALL\ldots}
+instruction a function must be either defined within functions
+lexically containing the \TT{CALL\ldots} instruction, and these
+cannot have a level greater than $L+1$, or functions at global
+level, which must have level \TT{1}.  QED
+\end{indpar}
+
+Let $E$ be an incomplete program execution, consisting of the
+sequence of instruction executions in the incomplete program execution.
+An execution of a function $F$ within $E$ is defined as all the
+instruction executions from the first after $F$ is called till the
+last when $F$ returns.  A function execution can be complete, meaning
+it ends with a return from the function, or incomplete.  A function execution
+$E_i$ contains the function executions of every function called by a 
+a \TT{CALL\ldots} instruction execution in $E_i$.
+
+The lexical level of a function execution is defined as the lexical level
+of its function.
+
+The \underline{incomplete} function executions in $E$ are ordered by size, and
+identically ordered by the sequence of their first instruction executions.
+(This is the same order as the order of their return stack entries
+as per the description of \TT{CALLM} and \TT{RET} in
+Figure~\itemref{FUNCTION-INSTRUCTIONS}).
+
+\begin{indpar}
+{\bf Corollary 1 of Lemma 1}~~~Within $E$
+let $E_1$ and $E_2$ be incomplete function
+executions of lexical levels
+$L_1$ and $L_2$.  Let $E_2$ immediately following $E_1$ in the size
+ordering.  Then $L_2\leq L_1+1$.
+\end{indpar}
+\begin{indpar}
+{\bf Proof}: The \TT{CALL\ldots} to start $E_2$ must be in $E_1$
+and cannot be in a complete function execution inside $E_1$ so
+the \TT{CALL\ldots} must have level $L_1$.  QED
 \end{indpar}
 
 \begin{indpar}
-{\bf Proof of Theorem}:
-The set of current \underline{in}completed function executions is a
-list ordered by size (this order is the same as the order in the
-return stack of the \TT{mex::ret} values created by the \TT{CALL}s
-to the functions).
-
-Suppose $E_1$ and $E_2$ are two consecutive
-elements in this list with $E_2\subset E_1$, $E_1$ an execution of
-$F_1$ of lexical level $L_1$, and $E_2$ and execution of
-$F_2$ of lexical level $L_2$.  $E_2$ is initiated by a \TT{CALL}
-in $E_1$.  This \TT{CALL}
-\underline{cannot} be inside some function $F_3$ that is lexically
-inside $F_1$, else the execution of $F_3$ would be between $E_1$
-and $E_2$ in the list.  So in order for the \TT{CALL} to be in the
-scope of the definition of $F_2$, we must have $L_2 = L_1+1$ or
-$L_2\leq L_1$, or in short, $L_2\leq L_1+1$.
-
-The first element of a list is an execution of a function of level
-1, and $E$ has level $L$.  Since levels may increase by at most
-+1 for each step from one element to the next, an execution of
-every level in $[1,L)$ must exist in the list
-before $E$.  Then there exists a smallest such execution $E'\supset E$ of
-some function $F'$ of level $L'$.
-
-Now we must prove that $F'$ is the unique function of level $L'$ that
-lexically contains $F$.
-It will be sufficient to just prove that $F'$ lexically contains $F$,
-as the level $L'$ lexical container of $F$ is unique.
-
-Consider the sublist of executions beginning with $E'$ and ending with
-$E$.  All these executions but the first have level $\neq L'$.
-If any had a level $<L'$, then by the proceeding argument there
-would be a non-first element with level $L'$, which is not true,
-so all these executions but the first have level $>L'$.
-
-Consider two consective elements in this list, $E_1$ and $E_2$,
-$E_2\subset E_1$, $E_1$ an execution of $F_1$ known to be lexically
-inside $F'$, and $E_2$ and execution of
-$F_2$ of lexical level $L_2>L'$.  $E_2$ is initiated by a \TT{CALL}
-inside $F_1$ and therefore inside $F'$.
-In order for this \TT{CALL}
-to be in the scope of the definition of $F_2$, either $L_2\leq L'$,
-or $F_2$ is lexically inside $F'$ and $L_2>L'$.
-The first is not true,
-so $F_2$ is lexically inside $F'$.  By recursion we get that all
-elements of the sublist but the first are executions of functions
-lexically inside $F'$, therefore $F$ is lexically inside $F'$.
-
-QED
-
-{\bf Proof of Corollary}:  By inspection of the actions of the \TT{CALL}
-and \TT{RET} statements of Figure~\ref{FUNCTION-INSTRUCTIONS},
-the frame pointer \TT{fp[$L'$]} is the frame pointer
-of the \underline{last} \TT{CALL}ed \underline{in}complete execution
-of any function of level $L'$, and is therefore the frame pointer
-of the smallest execution of any function of level $L'$ that contains $E$.
+{\bf Corollary 2 of Lemma 1}~~~Within $E$
+let $E_1$ and $E_2$ be incomplete function
+executions of lexical levels
+$L_1$ and $L_2$, let $E_2\subset E_1$, and let $L_2>L'>L_1$.
+Then there must be an incomplete function execution $E'$ in the $E$
+that is in between $E_1$ and $E_2$ in the sequence of incomplete function
+executions of $E$ and that has level $L'$.
 \end{indpar}
+\begin{indpar}
+{\bf Proof}: Stepping through the sequence from $E_1$ to $E_2$,
+the levels at each step can increase by at most $1$ (by Corollary 1),
+so no level can be skipped over.  QED.
+\end{indpar}
+
+\begin{indpar}
+{\bf Lemma 2}~~~Let $E_1$ be an incomplete execution in $E$ of a function $F_1$
+of level $L_1$, and let all smaller incomplete function executions in $E$
+have level $>L_1$.  Then all smaller incomplete function executions are
+executions of functions that are lexically inside $F_1$.
+\end{indpar}
+\begin{indpar}
+{\bf Proof}: We step inductively through the sequence of incomplete
+function executions of $E$ from $E_1$ to the end of the sequence.
+
+The first incomplete function execution after $E_1$ in the sequence
+must by Corollary 1 of Lemma 1 have level $\leq L_1+1$, but by hypothesis
+it has level $>L_1$, it must have level $L_1+1$.  It is called by a
+\TT{CALL\ldots} instruction in $E_1$ that has level $L_1$ and therefore
+can only reference functions of level $L_1+1$ that are lexically inside
+$F_1$.
+
+Now let $E_2$ be an incomplete function execution inside $E_1$
+(later in the squence) that is an incomplete execution of a function
+$F_2$ lexically
+inside $F_1$, and consider the next incomplete function execution.
+This called by a \TT{CALL\ldots} instruction inside $F_2$ of level
+$>L_1$, and 
+
+TBD
+
+\end{indpar}
+
+
+TBD
+
 
 If follows that during $E$ the variables of $F'$ can be accessed by
 \TT{PUSHL} with \TT{immedB} = $L'$ (Figure~\ref{HOUSEKEEPING-INSTRUCTIONS}),
