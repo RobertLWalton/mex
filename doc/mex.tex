@@ -528,22 +528,23 @@ execution of an instruction $I$, the level of $E_I$ is the
 level of $I$.
 
 \begin{indpar}
-{\bf Lemma 1}~~~An execution of a \TT{CALL\ldots} instruction of
+{\bf Lemma}~~~An execution of a \TT{CALL\ldots} instruction of
 level $L$ must call a function of level $L'\leq L+1$.
 \end{indpar}
 \begin{indpar}
 {\bf Proof}: To be visible to the \TT{CALL\ldots}
-instruction a function must be either defined within functions
-lexically containing the \TT{CALL\ldots} instruction, and these
-cannot have a level greater than $L+1$, or functions at global
-level, which must have level \TT{1}.  QED
+instruction, a function must be either defined within functions
+lexically containing the \TT{CALL\ldots} instruction, in which case the
+function cannot have a level greater than $L+1$, or the function must be global,
+in which case it has level \TT{1}.  QED
 \end{indpar}
 
-Let $E$ be an incomplete program execution, consisting of the
-sequence of instruction executions in the incomplete program execution.
+Let $E$ be the sequence of instruction executions in an
+incomplete program execution.
 An execution of a function $F$ within $E$ is defined as all the
-instruction executions from the first after $F$ is called till the
-last when $F$ returns.  A function execution can be complete, meaning
+instruction executions from the first instruction execution
+after $F$ is called until the last instruction execution which returns
+from the call of $F$.  A function execution can be complete, meaning
 it ends with a return from the function, or incomplete.  A function execution
 $E_i$ contains the function executions of every function called by a 
 a \TT{CALL\ldots} instruction execution in $E_i$.
@@ -558,10 +559,10 @@ as per the description of \TT{CALLM} and \TT{RET} in
 Figure~\itemref{FUNCTION-INSTRUCTIONS}).
 
 \begin{indpar}
-{\bf Corollary 1 of Lemma 1}~~~Within $E$
+{\bf Corollary 1 of Lemma}~~~Within $E$
 let $E_1$ and $E_2$ be incomplete function
 executions of lexical levels
-$L_1$ and $L_2$.  Let $E_2$ immediately following $E_1$ in the size
+$L_1$ and $L_2$.  Let $E_2$ immediately follow $E_1$ in the size
 ordering.  Then $L_2\leq L_1+1$.
 \end{indpar}
 \begin{indpar}
@@ -571,11 +572,29 @@ the \TT{CALL\ldots} must have level $L_1$.  QED
 \end{indpar}
 
 \begin{indpar}
-{\bf Corollary 2 of Lemma 1}~~~Within $E$
+{\bf Corollary 2 of Lemma}~~~Within $E$
+let $E_1$ and $E_2$ be incomplete function
+executions of functions $F_1$ and $F_2$ which have levels $L_1$ and $L_2$
+and let  $E_2$ immediately follow $E_1$ in the size
+ordering.  If further there is a function $F$ of level $L$ that lexically
+contains $F_1$, and if $L_1\geq L$ and $L_2>L$, then $F$ lexically contains
+$F_2$.
+\end{indpar}
+\begin{indpar}
+{\bf Proof}: The \TT{CALL\ldots} to start $E_2$ must be in $E_1$
+and cannot be in a complete function execution inside $E_1$ so
+the \TT{CALL\ldots} must have level $L_1$.  This \TT{CALL\ldots}
+is lexically inside $F$ by hypothesis, and the only functions visible
+to the TT{CALL\ldots} that have levels $>L$ are also inside $F$.
+Therefore $F_2$ is lexically inside $F$.
+\end{indpar}
+
+\begin{indpar}
+{\bf Corollary 3 of Lemma}~~~Within $E$
 let $E_1$ and $E_2$ be incomplete function
 executions of lexical levels
 $L_1$ and $L_2$, let $E_2\subset E_1$, and let $L_2>L'>L_1$.
-Then there must be an incomplete function execution $E'$ in the $E$
+Then there must be an incomplete function execution $E'$ in $E$
 that is in between $E_1$ and $E_2$ in the sequence of incomplete function
 executions of $E$ and that has level $L'$.
 \end{indpar}
@@ -586,31 +605,29 @@ so no level can be skipped over.  QED.
 \end{indpar}
 
 \begin{indpar}
-{\bf Lemma 2}~~~Let $E_1$ be an incomplete execution in $E$ of a function $F_1$
-of level $L_1$, and let all smaller incomplete function executions in $E$
-have level $>L_1$.  Then all smaller incomplete function executions are
-executions of functions that are lexically inside $F_1$.
+{\bf Theorem}~~~If the last incomplete function execution of $E$
+is an execution of function $F$ of level $L$, and if $F'$ is a function
+of level $L'$ lexically containing $F$, then there is a smallest
+incomplete function execution of $F'$ in $E$ which is also the
+smallest incomplete function of level $L'$ in $E$.
 \end{indpar}
+
 \begin{indpar}
-{\bf Proof}: We step inductively through the sequence of incomplete
-function executions of $E$ from $E_1$ to the end of the sequence.
+{\bf Proof of Theorem}: The largest incomplete function execution of $E$
+must have level $1$ and the last incomplete function execution has level
+$L$, and by hypothesis $1\leq L'\leq L$,
+so by Corollary 3 there is an incomplete function execution of level $L'$
+and hence a smallest one $E'$.  Let $F''$ be its function.  Then all the
+incomplete function executions between $E'$ and the end of the sequence
+must have lexical level $>L'$, for otherwise applying Corollary 3 again
+there would be a smaller incomplete function execution of level $L'$.
 
-The first incomplete function execution after $E_1$ in the sequence
-must by Corollary 1 of Lemma 1 have level $\leq L_1+1$, but by hypothesis
-it has level $>L_1$, it must have level $L_1+1$.  It is called by a
-\TT{CALL\ldots} instruction in $E_1$ that has level $L_1$ and therefore
-can only reference functions of level $L_1+1$ that are lexically inside
-$F_1$.
+By applying Corollary 2 recursively to successive incomplete function
+executions after $E'$, we deduce that all are executions of functions
+lexically inside $F''$, and therefore $F''$ is the unique function of
+level $L'$ containing $F$, and therefore $F''=F'$.
 
-Now let $E_2$ be an incomplete function execution inside $E_1$
-(later in the squence) that is an incomplete execution of a function
-$F_2$ lexically
-inside $F_1$, and consider the next incomplete function execution.
-This called by a \TT{CALL\ldots} instruction inside $F_2$ of level
-$>L_1$, and 
-
-TBD
-
+QED
 \end{indpar}
 
 
