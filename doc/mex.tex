@@ -236,11 +236,11 @@
 \begin{document}
         
 \title{Minimal Runtime System\\[2ex]Execution Engine\\[2ex]MEX\\[2ex]
-       (Draft 1)}
+       (Version 1)}
 
 \author{Robert L. Walton}
 
-\date{September 5, 2023}
+\date{September 9, 2023}
  
 \maketitle
 
@@ -272,13 +272,17 @@ and the corresponding code:
 
 \begin{indpar}
 \begin{tabular}{p{0.8in}l}
+\ttmkey{except}{abbreviation}	& exception \\
+\ttmkey{fp}{abbreviation}	& frame pointer \\
 \ttmkey{immed}{abbreviation}	& immediate \\
 \ttmkey{info}{abbreviation}	& information \\
 \ttmkey{instr}{abbreviation}	& instruction \\
-\ttmkey{fp}{abbreviation}	& frame pointer \\
+\ttmkey{jmp}{abbreviation}	& jump (go to) \\
+\ttmkey{nargs}{abbreviation}	& number of arguments \\
+\ttmkey{nresults}{abbreviation}	& number of results \\
 \ttmkey{pc}{abbreviation}	& program counter \\
-\ttmkey{sp}{abbreviation}	& stack pointer \\
 \ttmkey{ret}{abbreviation}	& return \\
+\ttmkey{sp}{abbreviation}	& stack pointer \\
 \end{tabular}
 \end{indpar}
 
@@ -297,7 +301,8 @@ directories:
 \\[1ex]
 \ldots\TT{/}\ttkey{mex/src} & \TT{*.cc} files such as \TT{mex.cc}
 \\[1ex]
-\ldots\TT{/}\ttkey{mex/test} & test scripts such as \TT{mex\_interface\_test.cc}
+\ldots\TT{/}\ttkey{mex/test} & test files such as \TT{Makefile} and
+                               \TT{mex\_compile\_test\_1.mex}
 \\[1ex]
 \ldots\TT{/}\ttkey{mex/doc} & documentation files such as \TT{mex.tex}
 \\[1ex]
@@ -331,7 +336,7 @@ global variables of the module and function calls to the
 functions in the module code vector.
 
 When a module is compiled, it is loaded into memory
-ready for execution.  There is no MEX `binary' language.
+ready for execution.  There are no MEX `binary' files.
 
 Interfaces are provided by and used by the compiler, and
 not by MEX.  Typically a module may reference interfaces
@@ -364,8 +369,8 @@ assumes a few compilation behaviors.
 \label{STACKS}
 
 MEX is stack oriented.  A \key{stack} is a vector of
-values.  The end of this vector is referred to as the
-\ikey{top}{of stack} of the stack.  Values may be \ikey{pushed}{into stack}
+elemets.  The end of this vector is referred to as the
+\ikey{top}{of stack} of the stack.  Elements may be \ikey{pushed}{into stack}
 into the stack, meaning they are added to the end of the stack vector,
 or \ikey{popped}{from stack} from the stack,
 meaning that they are removed from the
