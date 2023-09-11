@@ -240,7 +240,7 @@
 
 \author{Robert L. Walton}
 
-\date{September 10, 2023}
+\date{September 11, 2023}
  
 \maketitle
 
@@ -760,12 +760,15 @@ The \ttikey{position}{of module} member of the \TT{module} gives a
 element of the \TT{module} vector, and also gives the
 \TT{position->\EOL file->\EOL file\_\EOL name} of the source
 file of the \TT{module} (may be \TT{min::MISSING()} is input was
-from standard input).  This information can be used to
+from standard input).  In particular, the \TT{min::phrase\_\EOL position}
+of instruction \TT{m[i]} is \TT{m->position[i]}.
+This information can be used to
 print trace and error messages.
 
 The \ttikey{globals}{of module} member of the \TT{module}
-is a copy of the stack created by executing the module code.
-This stack contains global variables exported by the module.
+is a copy of the stack created by executing the module code
+(initializing the module).
+This stack contains values of global variables exported by the module.
 
 The \ttikey{interface}{of module} member of the \TT{module} points
 at the module's interface.  MEX does not itself specify or use
@@ -833,7 +836,7 @@ a return stack, and other parameters.  Specifically:
                          {in {\tt mex::process\_header}} \\
 \verb|bool | & \TTMKEY{optimize}{in {\tt mex::process\_header}} \\
 \verb|min::uns32 | & \TTMKEY{counter}{in {\tt mex::process\_header}} \\
-\verb|min::uns32 | & \TTMKEY{limit}{in {\tt mex::process\_header}} \\
+\verb|min::uns32 | & \TTMKEY{counter\_limit}{in {\tt mex::process\_header}} \\
 \verb|mex::state | & \TTMKEY{state}%
                                    {in {\tt mex::process\_header}} \\
 \verb|}                                    | \\
@@ -847,7 +850,9 @@ a return stack, and other parameters.  Specifically:
 \verb|mex::| & \TTMKEY{RUNNING}{in {\tt mex::state}} \\
 \verb|mex::| & \TTMKEY{MODULE\_END}{in {\tt mex::state}} \\
 \verb|mex::| & \TTMKEY{CALL\_END}{in {\tt mex::state}} \\
-\verb|mex::| & \TTMKEY{LIMIT\_STOP}{in {\tt mex::state}} \\
+\verb|mex::| & \TTMKEY{COUNTER\_LIMIT\_STOP}{in {\tt mex::state}} \\
+\verb|mex::| & \TTMKEY{STACK\_LIMIT\_STOP}{in {\tt mex::state}} \\
+\verb|mex::| & \TTMKEY{RETURN\_STACK\_LIMIT\_STOP}{in {\tt mex::state}} \\
 \verb|mex::| & \TTMKEY{ERROR\_STOP}{in {\tt mex::state}} \\
 \verb|mex::| & \TTMKEY{JMP\_ERROR}{in {\tt mex::state}} \\
 \verb|mex::| & \TTMKEY{FORMAT\_ERROR}{in {\tt mex::state}} \\
@@ -867,8 +872,7 @@ being the bottom of the stack (\TT{p[0]}), assuming the stack
 is not empty.  The \key{stack pointer} (a.k.a., \TT{sp})
 is \TT{p->length}, and is the index of an element of
 the process vector which is just beyond the top of the stack,
-and is also the length of the stack.  If the stack is not empty,
-\TT{p[p->length-1]} is the top of the stack.
+and is also the length of the stack.
 
 To push a value into the stack,
 you store the value in the element \TT{p->length}
@@ -876,7 +880,8 @@ indexes, and then add +1 to \TT{p->length}.
 To pop a value, you add -1 to \TT{p->length}, and then
 read the value indexed by \TT{p->length}.
 We require that \TT{0 <= p->length <= p->max\_length} at all times,
-and \underline{never} increase \TT{p->max\_length} during execution.
+and \underline{never} increase \TT{p->max\_length} during execution
+(but see Note~\ref{LIMIT-STOP-NOTE} on page~\pageref{LIMIT-STOP-NOTE}).
 
 A \ttkey{pc}, or \key{program counter}, is a pointer to a module,
 which is a code vector, and an index in that vector of an instruction.
@@ -892,11 +897,10 @@ function.  Note that the list of currently executing functions
 in order of being called is not monotonic in level: a function
 of level $L$ may call a function of level $\leq L+1$.
 
-The process's frame pointer member, \TT{fp[\ldots]} and the \TT{met::ret}
-value's \TT{saved\_fp} member are explained in Nested Functions,
+The process's frame pointer member \TT{fp[\ldots]}
+is further explained in Nested Functions,
 \itemref{NESTED-FUNCTIONS}.  The value of \TT{fp[0]}, the frame pointer
 for lexical level \TT{0} (outside all functions), is always \TT{0}.
-
 
 The \ttkey{return\_stack} is used by \TT{CALL} and \TT{RET}
 instructions.  The value of \TT{return\_stack->\EOL length},
@@ -904,13 +908,15 @@ a.k.a.~the \key{return stack pointer}, is the index of the element of
 the return stack which is just beyond the top of the stack,
 and is also the length of the stack.  If the stack is not empty,
 \TT{p->return\_stack[return\_stack->length-1]} is the top of the stack.
+
 A \TT{CALL} instruction pushes a \TT{mex::ret} value
 into the return stack.  This contains a \TT{saved\_pc} member
-pointing at the instruction after the \TT{CALL} into the
-\TT{return\_stack}.  A \TT{RET} instruction pops a \TT{mex::ret} value from
+pointing at the \TT{CALL} instruction.
+A \TT{RET} instruction pops a \TT{mex::ret} value from
 the \TT{return\_stack} and stores its \TT{saved\_pc}
 in the current program counter
-of the process (\TT{p->pc}).
+of the process (\TT{p->pc}), and then increments that program counter
+by \TT{1}.
 
 The \TT{CALL} also changes the process \TT{level} to the lexical level
 of the function being called (determined by the function's \TT{BEGF}
@@ -921,10 +927,11 @@ saves these values in the \TT{mex::ret} value.
 The \TT{nresults} member of \TT{mex::ret}
 is the number of function results expected by the call.
 See the \TT{CALL} instruction in Figure~\ref{FUNCTION-INSTRUCTIONS}
-for more details.
+for specifics.
 
 The process's \TT{counter} is incremented once every time an instruction
-finishes execution.  The process stops when \TT{counter >= limit}. 
+finishes execution.  The process stops when
+\TT{counter >= counter\_\EOL limit}. 
 When the process terminates, \TT{state} is set.  For details
 see \TT{mex::run\_process}, \pagref{MEX::RUN_PROCESS},
 
@@ -954,11 +961,11 @@ mex::instr an_add_instruction = {mex::ADD, mex::T_AOP};
     // mex::T_AOP is the trace class of all arithmetic
     // operations.
 mex::instr an_add_immediate_instruction =
-        {mex::ADDI,mex::T_AOP,,,,,3.14159};
+        {mex::ADDI,mex::T_AOP,,,,,,3.14159};
     // Add 3.14159 to top value.
 mex::instr a_begin_instruction = {mex::BEG, mex::T_BEG};
     // Do nothing.
-mex::instr an_end_instruction = {mex::END,mex::T_END,,10};
+mex::instr an_end_instruction = {mex::END,mex::T_END,,,10};
     // Pop 10 values and discard them.
 mex::instr a_jump_instruction = {mex::JMP,mex::T_JMP,1,,10,,32};
     // Pop 10 values and discard them, then decrement the process's
@@ -1934,7 +1941,8 @@ set as follows to indicate cause of termination:
 
 Notes:
 \begin{enumerate}
-\item On \TT{\ldots\_LIMIT\_STOP}, you can increase the limit
+\item \label{LIMIT-STOP-NOTE}
+On \TT{\ldots\_LIMIT\_STOP}, you can increase the limit
 and call \TT{run\_process} again to continue execution.
 For stacks you must resize the stack.
 \item You can use \TT{init\_process ( m )} followed by \TT{run\_process}
