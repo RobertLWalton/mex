@@ -999,78 +999,78 @@ Figure~\ref{HOUSEKEEPING-INSTRUCTIONS}.
 \begin{center}
 \begin{tabular}{|l|l|}
 \hline
-\TT{ADD}/\TT{MUL}
+\ttkey{ADD}/\ttkey{MUL}
     & Pop 2 values, then push their sum/product.
 \\\hline
-\TT{ADDI}
+\ttkey{ADDI}
     & Adds \TT{immedD} to the top value.
 \\\hline
-\TT{MULI}
+\ttkey{MULI}
     & Multiplies the top value by \TT{immedD}.
 \\\hline
-\TT{SUB}/\TT{SUBR}
+\ttkey{SUB}/\ttkey{SUBR}
     & Pop 2 values, then push second/first popped minus \\
     & first/second popped.
 \\\hline
-\TT{SUBI}
+\ttkey{SUBI}
     & Subtract \TT{immedD} from top value.
 \\\hline
-\TT{SUBRI}
+\ttkey{SUBRI}
     & Replace top value by \TT{immedD} minus top value.
 \\\hline
-\TT{DIV}/\TT{DIVR}
+\ttkey{DIV}/\ttkey{DIVR}
     & Pop 2 values, then push second/first popped divided by\\
     & first/second popped.
 \\\hline
-\TT{DIVI}
+\ttkey{DIVI}
     & Divide top value by \TT{immedD}.
 \\\hline
-\TT{DIVRI}
+\ttkey{DIVRI}
     & Replace top value by \TT{immedD} divided by top value.
 \\\hline
-\TT{MOD}/\TT{MODR}
+\ttkey{MOD}/\ttkey{MODR}
     & Pop 2 values, then push the round-toward-minus-infinity \\
     & remainder of the second/first popped divided by \\
     & the first/second popped.
 \\\hline
-\TT{MODI}
+\ttkey{MODI}
     & Replace the top value by the round-toward-minus-infinity \\
     & remainder of the top value divided by \TT{immedD}.
 \\\hline
-\TT{MODRI}
+\ttkey{MODRI}
     & Replace the top value by the round-toward-minus-infinity \\
     & remainder of \TT{immedD} divided by the top value.
 \\\hline
-\TT{FLOOR}/\TT{CEIL}
+\ttkey{FLOOR}/\ttkey{CEIL}
     & Replace the top value by the an integer equal to the \\
     & top value rounded toward minus/plus infinity.
 \\\hline
-\TT{TRUNC}/\TT{ROUND}
+\ttkey{TRUNC}/\ttkey{ROUND}
     & Replace the top value by the an integer equal to the \\
     & top value rounded toward zero/the-nearest-integer, \\
     & with nearest halfway cases rounded to the even integer.
 \\\hline
-\TT{NEG}/\TT{ABS}
+\ttkey{NEG}/\ttkey{ABS}
     & Replace the top value by its negation/absolute-value.
 \\\hline
-\TT{LOG}/\TT{LOG10}
+\ttkey{LOG}/\ttkey{LOG10}
     & Replace the top value by its log base e/10.
 \\\hline
-\TT{EXP}/\TT{EXP10}
+\ttkey{EXP}/\ttkey{EXP10}
     & Replace the top value by e/10 to the top value power.
 \\\hline
-\TT{SIN}/\TT{COS}/\TT{TAN}
+\ttkey{SIN}/\ttkey{COS}/\ttkey{TAN}
     & Replace the top value by its sin/cos/tan.
 \\\hline
-\TT{ASIN}/\TT{ACOS}/\TT{ATAN}
+\ttkey{ASIN}/\ttkey{ACOS}/\ttkey{ATAN}
     & Replace the top value by its arc- sin/cos/tan.
 \\\hline
-\TT{ATAN2}/\TT{ATAN2R}
+\ttkey{ATAN2}/\ttkey{ATAN2R}
     & Pop 2 values, then push the arc-tangent of the first/second \\
     & popped (x value) divided by the second/first popped \\
     & (y value).
 \\\hline
-\TT{POWI}
+\ttkey{POWI}
     & Replace the top value by the top value to the \TT{immedA} power.
 \\\hline
 \end{tabular}
@@ -1086,61 +1086,61 @@ Figure~\ref{HOUSEKEEPING-INSTRUCTIONS}.
 \begin{center}
 \begin{tabular}{|l|l|}
 \hline
-\TT{PUSHS}
+\ttkey{PUSHS}
     & Push the \TT{immedA}'th value in the stack below the top value \\
     & into the stack (i.e., \TT{sp[- immedA - 1]},
       so \TT{immedA} = 0 \\
     & duplicates the top value).
 \\\hline
-\TT{PUSHL}
+\ttkey{PUSHL}
     & Push the stack vector value with index \TT{fp[immedB] + immedA}. \\
     & But if \TT{immedB == 0} and \TT{m->globals} is not \TT{min::NULL\_STUB} \\
     & for the module \TT{m} of the current program counter, push \\
     & \TT{m->globals[immedA]} instead.
 \\\hline
-\TT{PUSHI}
+\ttkey{PUSHI}
     & Push \TT{immedD} into the stack.
 \\\hline
-\TT{PUSHG}
+\ttkey{PUSHG}
     & Push into the stack the \TT{immedA}+1'st value of the \\
     & global value stack of the module pointed at by \TT{immedD} \\
     & (i.e., \TT{m->globals[immedA]} where \TT{m} is the module)
 \\\hline
-\TT{POPS}
+\ttkey{POPS}
     & Pop 1 value and store it in the \TT{immedA}'th value in the stack \\
     & below the value popped (i.e., store to \TT{sp[- immedA - 1]}, \\
     & so \TT{immedA} = 0 discards the top value).
 \\\hline
-\TT{JMP}
+\ttkey{JMP}
     & Subtract \TT{immedA} to \TT{sp} (popping the stack \TT{immedA} times),
       then \\
     & add \TT{immedC} to the \TT{pc} (skipping \TT{immedC} instructions).
       It is \\
     & illegal for \TT{immedC} = 0 (\TT{JMP} would jump to itself).
 \\\hline
-\TT{JMPEQ/JMPNE}
+\ttkey{JMPEQ}/\ttkey{JMPNE}
     & Pop 2 values and compare them.  If they are equal/not-equal \\
     & continue as per the \TT{JMP} instruction.  Otherwise do nothing.
 \\\hline
-\TT{JMPLT/JMPLEQ}
+\ttkey{JMPLT}/\ttkey{JMPLEQ}
     & Ditto, but \TT{JMP} if the second popped is \\
     & less-than/less-than-or-equal-to the first popped.
 \\\hline
-\TT{JMPGT/JMPGEQ}
+\ttkey{JMPGT}/\ttkey{JMPGEQ}
     & Ditto, but \TT{JMP} if the second popped is \\
     & greater-than/greater-than-or-equal-to the first popped.
 \\\hline
-\TT{BEG}/\TT{END}
+\ttkey{BEG}/\ttkey{END}
     & Subtract \TT{immedA} to \TT{sp} (popping the stack \TT{immedA} times). \\
     & The values popped are always trace values.
 \\\hline
-\TT{BEGL}
+\ttkey{BEGL}
     & Subtract \TT{immedA} to \TT{sp} (popping the stack \TT{immedA} times). \\
     & The values popped are always trace values.  Then \\
     & take the top \TT{immedB} values in the stack and push a copy of \\
     & them all into the stack, preserving stack ordering.
 \\\hline
-\TT{ENDL}/\TT{CONT}
+\ttkey{ENDL}/\ttkey{CONT}
     & First subtract \TT{immedA} to \TT{sp}
       (popping the stack \TT{immedA} times), \\
     & then take the top \TT{immedB} values in the stack and copy them \\
@@ -1162,7 +1162,7 @@ Figure~\ref{HOUSEKEEPING-INSTRUCTIONS}.
 \begin{center}
 \begin{tabular}{|l|l|}
 \hline
-\TT{BEGF}
+\ttkey{BEGF}
     & Add \TT{immedC} to the \TT{pc} (skipping \TT{immedC} instructions).
     \\[0.5ex]
     & Also used to provided data for \TT{CALL} as follows: \TT{immedB} is the \\
@@ -1170,11 +1170,11 @@ Figure~\ref{HOUSEKEEPING-INSTRUCTIONS}.
       and \TT{immedA} is the \\
     & minimum number of arguments expected.
 \\\hline
-\TT{ENDF}
+\ttkey{ENDF}
     & Same as a \TT{RET} instruction (below) with
       \TT{immedA} = \TT{immedC} = 0. 
 \\\hline
-\TT{CALLM}
+\ttkey{CALLM}
     & Push a \TT{mex::ret} value $e$ into the return stack, setting
       \TT{$e$.saved\_pc} \\
     & to point to the instruction after the \TT{CALLM}, and then
@@ -1197,12 +1197,12 @@ Figure~\ref{HOUSEKEEPING-INSTRUCTIONS}.
     \\[0.5ex]
     & Lastly add +1 to the process current \TT{pc} to skip the \TT{BEGF}.
 \\\hline
-\TT{CALLG}
+\ttkey{CALLG}
     & Same as \TT{CALLM} but also set the process's \TT{pc} member's 
                                                            \TT{module} \\
     & member from \TT{immedD} (which must convert to a \TT{mex::module}).
 \\\hline
-\TT{RET}
+\ttkey{RET}
     & Check that \TT{immedB} equals \TT{p->level}.  Then subtract
       \TT{immedA} from \\
     & \TT{sp} (popping the stack \TT{immedA} times).  The
@@ -1217,17 +1217,17 @@ Figure~\ref{HOUSEKEEPING-INSTRUCTIONS}.
     & the saved values into the stack.  Lastly restore the process \\
     & members saved in \TT{$e$.saved\_\{pc,level,fp,nargs\}}.
 \\\hline
-\TT{PUSHA}
+\ttkey{PUSHA}
     & Push the stack vector value with index \TT{fp[immedB] - immedA}. \\
     & \TT{immedA} must be 
       in the range \TT{[1,p->nargs[immedB]]}.
 \\\hline
-\TT{PUSHNARGS}
+\ttkey{PUSHNARGS}
     & Push \TT{p->nargs[immedB]} (which is a natural number)
       converted \\
     & to IEEE 64-bit floating point.
 \\\hline
-\TT{PUSHV}
+\ttkey{PUSHV}
     & Replace the top stack value \TT{V} with the value of the stack element \\
     & with index \TT{p->fp[immedB] - p->nargs[immedB] + V - 1}. \\ 
     & \TT{V} must convert to an integer in the
@@ -1248,14 +1248,14 @@ Figure~\ref{HOUSEKEEPING-INSTRUCTIONS}.
 \small
 \begin{tabular}{|l|l|}
 \hline
-\TT{SET\_TRACE}
+\ttkey{SET\_TRACE}
     & The process \TT{trace\_flags} member is set to \TT{immedA}. \\
     & This instruction is in the \TT{ALWAYS} trace class.
 \\\hline
-\TT{NOP}/\TT{TRACE}
+\ttkey{NOP}/\ttkey{TRACE}
     & Subtract \TT{immedA} to \TT{sp} (popping the stack \TT{immedA} times).
       The \\
-\TT{WARN}/\TT{ERROR}
+\ttkey{WARN}/\ttkey{ERROR}
     & values popped are always trace values.  All these instructions \\
     & but \TT{NOP} are in the \TT{ALWAYS} trace class.  All these instructions
       are \\
@@ -1263,12 +1263,12 @@ Figure~\ref{HOUSEKEEPING-INSTRUCTIONS}.
     & a `Fatal Error' message before its trace and then terminates \\
     & the process with an \TT{ERROR\_STOP} state.
 \\\hline
-\TT{TRACE\_EXCEPTS}
+\ttkey{TRACE\_EXCEPTS}
     & No operation.  When traced prints the process
       \TT{excepts\_accumulator}.  \\
     & This instruction is in the \TT{ALWAYS} trace class.
 \\\hline
-\TT{SET\_EXCEPTS}
+\ttkey{SET\_EXCEPTS}
     & The process \TT{excepts} member is set to \TT{immedA}.
 \\\hline
 \end{tabular}
