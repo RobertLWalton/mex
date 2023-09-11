@@ -634,9 +634,11 @@ QED
 
 
 During execution MEX computes \TT{fp[$L'$]} as the frame pointer
-of the most recently called function of level $L'$, and therefore
-during the execution of $F$ in the theorem, \TT{fp[$L'$]} is the
-frame pointer of $F''$ in the theorem.
+of the smallest (most recently called)
+incomplete function execution of level $L'$,
+and therefore
+during the execution of instructions in $F$, \TT{fp[$L'$]} is the
+frame pointer of $F'$.
 
 If follows that during an execution of an instruction in $F$
 the variables of $F'$ can be accessed by
@@ -644,7 +646,8 @@ the variables of $F'$ can be accessed by
 and the arguments of $F'$ can be
 accessed by \TT{PUSHA} with \TT{immedB} = $L'$
 (Figure~\ref{FUNCTION-INSTRUCTIONS}).
-The global variables can be accessed by \TT{PUSHM} or \TT{PUSHG}
+The global variables can be accessed by \TT{PUSHL} with \TT{immedB} = $0$
+or by \TT{PUSHG}
 (Figure~\ref{HOUSEKEEPING-INSTRUCTIONS}).
 
 \section{Code Vectors}
@@ -658,25 +661,31 @@ The syntactic structure of a code vector is:
 \\[0.5ex]
 \emkey{code-item} \begin{tabular}[t]{@{}rl} 
 		  ::= & {\em arithmetic-instruction} \\
-		  $|$ & {\em housekeeping-instruction} \\
+		  $|$ & {\em stack-and-flow-control-instruction} \\
 		  $|$ & {\em function-instruction} \\
+		  $|$ & {\em housekeeping-instruction} \\
 		  $|$ & {\em normal-block} \\
 		  $|$ & {\em loop-block} \\
 		  $|$ & {\em function-block} \\
 		  \end{tabular}
 \\[0.5ex]
-\emkey{arithmetic-instruction} ::=
-    instructions in Figure \ref{ARITHMETIC-INSTRUCTIONS}
-\\[0.5ex]
-\emkey{housekeeping-instruction} ::= \\
+\emkey{arithmetic-instruction} ::= \\
 \hspace*{3em}
-     instructions in Figure \ref{HOUSEKEEPING-INSTRUCTIONS}
+    instructions in Figure \itemref{ARITHMETIC-INSTRUCTIONS}
+\\[0.5ex]
+\emkey{stack-and-flow-control-instruction} ::= \\
+\hspace*{3em}
+     instructions in Figure \itemref{STACK-AND-FLOW-CONTROL-INSTRUCTIONS}
      excepting \TT{BEG}, \TT{END}, \TT{BEGL}, and \TT{ENDL}
 \\[0.5ex]
 \emkey{function-instruction} ::= \\
 \hspace*{3em}
-     instructions in Figure \ref{FUNCTION-INSTRUCTIONS}
+     instructions in Figure \itemref{FUNCTION-INSTRUCTIONS}
      excepting \TT{BEGF} and \TT{ENDF}
+\\[0.5ex]
+\emkey{housekeeping-instruction} ::= \\
+\hspace*{3em}
+     instructions in Figure \itemref{HOUSEKEEPING-INSTRUCTIONS}
 \\[0.5ex]
 \emkey{normal-block} ::= \begin{tabular}[t]{@{}l}
 			 \TT{BEG} \\
