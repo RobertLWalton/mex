@@ -1013,7 +1013,7 @@ Figure~\ref{HOUSEKEEPING-INSTRUCTIONS}.
     & first/second popped.
 \\\hline
 \ttkey{SUBI}
-    & Subtract \TT{immedD} from top value.
+    & Subtract \TT{immedD} from the top value.
 \\\hline
 \ttkey{SUBRI}
     & Replace top value by \TT{immedD} minus top value.
@@ -1087,32 +1087,28 @@ Figure~\ref{HOUSEKEEPING-INSTRUCTIONS}.
 \begin{tabular}{|l|l|}
 \hline
 \ttkey{PUSHS}
-    & Push the \TT{immedA}'th value in the stack below the top value \\
-    & into the stack (i.e., \TT{sp[- immedA - 1]},
-      so \TT{immedA} = 0 \\
-    & duplicates the top value).
+    & Read the value at \TT{sp[- immedA - 1]} and push it into the \\
+    & stack; so \TT{immedA} = 0 duplicates the top value.
 \\\hline
 \ttkey{PUSHL}
     & Push the stack vector value with index \TT{fp[immedB] + immedA}. \\
     & But if \TT{immedB == 0} and \TT{m->globals} is not \TT{min::NULL\_STUB} \\
     & for the module \TT{m} of the current program counter, push \\
-    & \TT{m->globals[immedA]} instead.
+    & \TT{m->globals[immedA]} instead.  Note \TT{fp[0] == 0}.
 \\\hline
 \ttkey{PUSHI}
     & Push \TT{immedD} into the stack.
 \\\hline
 \ttkey{PUSHG}
-    & Push into the stack the \TT{immedA}+1'st value of the \\
-    & global value stack of the module pointed at by \TT{immedD} \\
-    & (i.e., \TT{m->globals[immedA]} where \TT{m} is the module)
+    & Push \TT{m->globals[immedA]} into the stack, where \TT{m} is \\
+    & the module pointed at by \TT{immedD}
 \\\hline
 \ttkey{POPS}
-    & Pop 1 value and store it in the \TT{immedA}'th value in the stack \\
-    & below the value popped (i.e., store to \TT{sp[- immedA - 1]}, \\
-    & so \TT{immedA} = 0 discards the top value).
+    & Store the top value in the stack into \TT{sp[- immedA - 1]}, and \\
+    & then pop the stack once; so \TT{immedA} = 0 discards the top value.
 \\\hline
 \ttkey{JMP}
-    & Subtract \TT{immedA} to \TT{sp} (popping the stack \TT{immedA} times),
+    & Subtract \TT{immedA} from \TT{sp} (popping the stack \TT{immedA} times),
       then \\
     & add \TT{immedC} to the \TT{pc} (skipping \TT{immedC} instructions).
       It is \\
@@ -1131,17 +1127,19 @@ Figure~\ref{HOUSEKEEPING-INSTRUCTIONS}.
     & greater-than/greater-than-or-equal-to the first popped.
 \\\hline
 \ttkey{BEG}/\ttkey{END}
-    & Subtract \TT{immedA} to \TT{sp} (popping the stack \TT{immedA} times). \\
+    & Subtract \TT{immedA} from
+      \TT{sp} (popping the stack \TT{immedA} times). \\
     & The values popped are always trace values.
 \\\hline
 \ttkey{BEGL}
-    & Subtract \TT{immedA} to \TT{sp} (popping the stack \TT{immedA} times). \\
+    & Subtract \TT{immedA} from
+      \TT{sp} (popping the stack \TT{immedA} times). \\
     & The values popped are always trace values.  Then \\
     & take the top \TT{immedB} values in the stack and push a copy of \\
     & them all into the stack, preserving stack ordering.
 \\\hline
 \ttkey{ENDL}/\ttkey{CONT}
-    & First subtract \TT{immedA} to \TT{sp}
+    & First subtract \TT{immedA} from \TT{sp}
       (popping the stack \TT{immedA} times), \\
     & then take the top \TT{immedB} values in the stack and copy them \\
     & to the next lower \TT{immedB} values in the stack, then subtract \\
@@ -1253,8 +1251,8 @@ Figure~\ref{HOUSEKEEPING-INSTRUCTIONS}.
     & This instruction is in the \TT{ALWAYS} trace class.
 \\\hline
 \ttkey{NOP}/\ttkey{TRACE}
-    & Subtract \TT{immedA} to \TT{sp} (popping the stack \TT{immedA} times).
-      The \\
+    & Subtract \TT{immedA} from
+      \TT{sp} (popping the stack \TT{immedA} times).  The \\
 \ttkey{WARN}/\ttkey{ERROR}
     & values popped are always trace values.  All these instructions \\
     & but \TT{NOP} are in the \TT{ALWAYS} trace class.  All these instructions
