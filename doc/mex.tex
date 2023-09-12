@@ -240,7 +240,7 @@
 
 \author{Robert L. Walton}
 
-\date{September 11, 2023}
+\date{September 12, 2023}
  
 \maketitle
 
@@ -1175,14 +1175,14 @@ Figure~\ref{HOUSEKEEPING-INSTRUCTIONS}.
 \ttkey{CALLM}
     & Push a \TT{mex::ret} value $e$ into the return stack, setting
       \TT{$e$.saved\_pc} \\
-    & to point to the instruction after the \TT{CALLM}, and then
+    & to point to the \TT{CALLM} instruction, and then
       set the \TT{index} \\
     & of \TT{p->pc} to \TT{immedC}, which must reference a
       \TT{BEGF} instruction.
     \\[0.5ex]
     & Check that the \TT{CALL} \TT{immedA} value, the number of arguments \\
     & passed, is at least as great as the \TT{BEGF}
-      \TT{immedC}, the minimum \\
+      \TT{immedA}, the minimum \\
     & number of arguments expected.  Take the target 
       function's lexical \\
     & level $L$ from the \TT{BEGF} \TT{immedB} value, and save
@@ -1212,8 +1212,9 @@ Figure~\ref{HOUSEKEEPING-INSTRUCTIONS}.
     & the stack and save them.  Set \TT{sp} to
       \TT{fp[immedB] - nargs[immedB]} \\
     & (popping the current function execution stack values).   Then push \\
-    & the saved values into the stack.  Lastly restore the process \\
-    & members saved in \TT{$e$.saved\_\{pc,level,fp,nargs\}}.
+    & the saved values into the stack.  Lastly, restore the process \\
+    & members saved in \TT{$e$.saved\_\{pc,level,fp,nargs\}}, and \\
+    & increment the restored \TT{pc} by \TT{1}.
 \\\hline
 \ttkey{PUSHA}
     & Push the stack vector value with index \TT{fp[immedB] - immedA}. \\
@@ -1247,7 +1248,8 @@ Figure~\ref{HOUSEKEEPING-INSTRUCTIONS}.
 \begin{tabular}{|l|l|}
 \hline
 \ttkey{SET\_TRACE}
-    & The process \TT{trace\_flags} member is set to \TT{immedA}. \\
+    & The process \TT{trace\_flags} member is set to \TT{immedA} with its\\
+    & \TT{T\_ALWAYS} flag turned on and its \TT{T\_NEVER} flag forced off. \\
     & This instruction is in the \TT{ALWAYS} trace class.
 \\\hline
 \ttkey{NOP}/\ttkey{TRACE}
