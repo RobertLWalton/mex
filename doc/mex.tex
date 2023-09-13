@@ -240,7 +240,7 @@
 
 \author{Robert L. Walton}
 
-\date{September 12, 2023}
+\date{September 13, 2023}
  
 \maketitle
 
@@ -831,7 +831,7 @@ a return stack, and other parameters.  Specifically:
                      \TT{[mex::max\_lexical\_level+1]} \\
 \verb|min::uns32 | & \TTMKEY{trace\_depth}{in {\tt mex::process\_header}} \\
 \verb|min::uns32 | & \TTMKEY{trace\_flags}{in {\tt mex::process\_header}} \\
-\verb|int | & \TTMKEY{excepts}{in {\tt mex::process\_header}} \\
+\verb|int | & \TTMKEY{excepts\_mask}{in {\tt mex::process\_header}} \\
 \verb|int | & \TTMKEY{excepts\_accumulator}%
                          {in {\tt mex::process\_header}} \\
 \verb|bool | & \TTMKEY{optimize}{in {\tt mex::process\_header}} \\
@@ -935,7 +935,7 @@ finishes execution.  The process stops when
 When the process terminates, \TT{state} is set.  For details
 see \TT{mex::run\_process}, \pagref{MEX::RUN_PROCESS},
 
-The \TT{trace\_depth}, \TT{trace\_flags}, \TT{excepts},
+The \TT{trace\_depth}, \TT{trace\_flags}, \TT{excepts\_mask},
 \TT{excepts\_accumuator}, and \TT{optimize}
 members of a process
 are explained in Arithmetic Exceptions, \itemref{ARITHMETIC-EXCEPTIONS}
@@ -1269,7 +1269,7 @@ Figure~\ref{HOUSEKEEPING-INSTRUCTIONS}.
     & This instruction is in the \TT{ALWAYS} trace class.
 \\\hline
 \ttkey{SET\_EXCEPTS}
-    & The process \TT{excepts} member is set to \TT{immedA}.
+    & The process \TT{excepts\_mask} member is set to \TT{immedA}.
 \\\hline
 \end{tabular}
 \end{center}
@@ -1283,6 +1283,16 @@ Figure~\ref{HOUSEKEEPING-INSTRUCTIONS}.
 
 Arithmetic instructions (Figure~\ref{ARITHMETIC-INSTRUCTIONS})
 may raise the exceptions in Figure~\ref{EXCEPTIONS}.
+When an exception is raised, a flag bit associated with the
+exception is turned on the process's \TT{excepts\_\EOL accumulator}
+member.  This bit is usually never turned off, and so can be used at the
+end of an execution to determine what types of exception
+occured during the execution.
+
+In C/C++ the flag bit associated with exception \TT{XX}
+is defined as a bit mask macro \TT{FE\_XX} in \TT{fenv.h}
+(see fenv(3) in the unix manual):
+
 \begin{boxedfigure}[b!]
 \begin{center}
 \begin{tabular}{|l|l|}
@@ -1312,40 +1322,34 @@ may raise the exceptions in Figure~\ref{EXCEPTIONS}.
 \label{EXCEPTIONS}
 \end{boxedfigure}
 
-In non-optimized mode, an instruction that raises an exception prints
+Only arithmetic instructions in Figure~\itemref{ARITHMETIC-INSTRUCTIONS}
+and the \TT{PUSHV} instruction in
+Figure~\itemref{STACK-AND-FLOW-CONTROL-INSTRUCTIONS} can raise
+exceptions.
+
+In non-optimized mode, i.e.~when a process's \TT{optimize} member is \TT{false},
+an instruction that raises an exception prints
 an error message if the instruction exception is one whose bit
-is on in the process's \TT{excepts} member.
+is on in the process's \TT{excepts\_mask} member.
 This error message is always followed by a trace of the instruction
 (regardless of the process trace flag settings): see
 Instruction Tracing, \itemref{INSTRUCTION-TRACING}.
 
 In optimized mode, instructions do not print error messages
-involving exceptions.
+involving exceptions.  However exception flag bits are still
+raised in the process's \TT{excepts\_accumulator} member.
 
-In both modes, if any instruction raised an exception whose bit
-is on in the process's \TT{excepts} member, a notice message is
-printed when the process terminates.
+In both modes, when a process terminates and there is any exception
+bit on in both the process's \TT{excepts\_\EOL accumulator}
+and \TT{excepts\_mask} member, an error message is printed.
 
 \needspace{5\baselineskip}
 
 The \TT{mexas} program's (see \itemref{THE-MEXAS-PROGRAM}) initial setting of
-a process's \TT{excepts} member is:
+a process's \TT{excepts\_mask} member is:
 \begin{center}
 \TT{DIVBYZERO} ~~ \TT{INVALID} ~~ \TT{OVERFLOW}
 \end{center}
-
-The process has a register that is the logical OR of the flag bits
-of all exceptions
-raised during the process.  This is stored partly in hardware
-and partly in the process's \TT{excepts\_\EOL accumulator} member.
-When the process is not running, it is stored in the latter.  When
-a process is optimized and is running and has not been interrupted,
-it is store in the hardware register.
-
-In C/C++ the \TT{excepts} bit associated with except \TT{XX}
-is \TT{FE\_XX}, as defined as a bit mask macro in \TT{fenv.h}
-(see fenv(3) in the unix manual):
-
 
 \section{Instruction Tracing}
 \label{INSTRUCTION-TRACING}
@@ -1679,14 +1683,14 @@ at the point of the return instruction.
 \TT{SET\_EXCEPTS} & \TT{SET\_EXCEPTS:}
                     \{ \TT{*}\QMARK{}{\em except-name} \}\STAR{} \\
                 & The names of the excepts being enable in
-		  \TT{p->excepts} are listed, and those that are
+		  \TT{p->excepts\_mask} are listed, and those that are
 		  also in \TT{p->excepts\_accumulator} are starred with
 		  \TT{*}.
 \\[0.5ex]
 \TT{TRACE\_EXCEPTS} & \TT{TRACE\_EXCEPTS:}
                     \{ \TT{*}\QMARK{}{\em except-name} \}\STAR{} \\
                 & The names of the excepts in \TT{p->excepts\_accumuator}
-		  are listed, and those that are also in \TT{p->excepts}
+		  are listed, and those that are also in \TT{p->excepts\_mask}
 		  are starred with \TT{*}.
 \end{tabular}
 \end{center}
@@ -1827,7 +1831,7 @@ Note: the stack's \TT{max\_length} members are \underline{not} permitted
 to change during process execution, but see \TT{mex::\EOL run\_\EOL process}.
 
 The \TT{printer} member is set to the \TT{printer} argument.
-The \TT{trace\_flags}, \TT{excepts}, and \TT{optimize} members
+The \TT{trace\_flags}, \TT{excepts\_\EOL mask}, and \TT{optimize} members
 are set respectively from:
 \begin{indpar}\begin{tabular}{r@{}l}
 \verb|min::uns32 mex::| & \MEXKEY{run\_counter\_limit} \\
@@ -1836,7 +1840,7 @@ are set respectively from:
 \verb|min::uns32 mex::| & \MEXKEY{run\_trace\_flags} \\
                         & \verb|// Default == 1 << mex::T_ALWAYS|
 \\[0.5ex]
-\verb|int mex::| & \MEXKEY{run\_excepts} \\
+\verb|int mex::| & \MEXKEY{run\_excepts\_mask} \\
             & \verb+// Default == FE_DIVBYZERO|FE_INVALID|FE_OVERFLOW+
 \\[0.5ex]
 \verb|bool mex::| & \MEXKEY{run\_optimize} \\
@@ -1867,7 +1871,7 @@ members are set to \TT{0}.
 The \TT{state} is set to \TT{NEVER\_\EOL STARTED}.
 
 The stack sizes, \TT{counter\_limit}, \TT{trace\_flags},
-\TT{excepts}, and \TT{optimize} members are
+\TT{excepts\_mask}, and \TT{optimize} members are
 \underline{not} changed.
 
 \end{indpar}
@@ -1934,8 +1938,8 @@ set as follows to indicate cause of termination:
 \verb|mex::|\MEXKEY{EXCEPTS\_ERROR}
     & program terminated successfully \\
     & (as per \TT{MODULE\_END} or \TT{CALL\_END}) \\
-    & but with an excepts bit on in both \\
-    & \TT{p->excepts} and \TT{p->excepts\_accumulator} \\
+    & but with some excepts bit on in both \\
+    & \TT{p->excepts\_mask} and \TT{p->excepts\_accumulator} \\
 \end{tabular}
 \end{center}
 
@@ -2543,7 +2547,7 @@ trace class.
 
 \ttkey{SET\_EXCEPTS} {\em except-name}\STAR{}
 \begin{indpar}
-At run-time set the process \TT{excepts} parameter so as
+At run-time set the process \TT{excepts\_mask} parameter so as
 to have a flag for each named except.
 At assembly-time,
 this instruction does nothing.
@@ -2593,7 +2597,7 @@ appear in its arguments.  The syntax is:
                                            trace class] \\
     \ttkey{-tcnormal}			& [assemble with normal trace class] \\
     \ttkey{-tc:}{\em tc-list}		& [run tracing listed trace classes] \\
-    \ttkey{-ex:}{\em ex-list}		& [run with listed excepts] \\
+    \ttkey{-ex:}{\em ex-list}		& [run with given excepts\_mask] \\
     \ttkey{-oon}			& [run with optimize on] \\
     \ttkey{-ooff}			& [run with optimize off] \\
     \ttkey{-counter} $L$		& [set instruction counter limit] \\
@@ -2660,7 +2664,7 @@ Details are:
 		      Default is \TT{-tc:NONE}.
 \\[0.5ex]
 \TT{-ex:}{\em ex-list}
-		    & Sets the process \TT{excepts} at the start of mex
+		    & Sets the process \TT{excepts\_mask} at the start of mex
 		      program execution.
 		      Default is \TT{-ex:DIVBYZERO,INVALID,OVERFLOW}.
 \\[0.5ex]

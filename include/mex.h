@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Sep  3 06:49:47 EDT 2023
+// Date:	Wed Sep 13 02:44:09 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -231,7 +231,7 @@ extern min::uns32 run_stack_limit;
 extern min::uns32 run_return_stack_limit;
 extern min::uns32 run_counter_limit;
 extern min::uns32 run_trace_flags;
-extern int run_excepts;
+extern int run_excepts_mask;
 extern bool run_optimize;
 
 enum state
@@ -311,7 +311,7 @@ struct process_header
     min::uns32 nargs[mex::max_lexical_level + 1];
     min::uns32 trace_depth;
     min::uns32 trace_flags;
-    int excepts;
+    int excepts_mask;
     int excepts_accumulator;
     bool optimize;
     min::uns32 counter;

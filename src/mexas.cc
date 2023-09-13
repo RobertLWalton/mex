@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Sep  5 04:32:55 EDT 2023
+// Date:	Wed Sep 13 02:51:21 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -2362,7 +2362,7 @@ mex::module mexas::compile ( min::file file )
 	    mex::print_excepts
 	        ( process->printer,
 		  process->excepts_accumulator,
-		  process->excepts );
+		  process->excepts_mask );
 	}
 	process->printer << min::eom;
         return min::NULL_STUB;

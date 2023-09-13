@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Sep  5 04:33:17 EDT 2023
+// Date:	Wed Sep 13 02:47:38 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -150,7 +150,7 @@ void mex::print_excepts
 static bool excepts_test ( mex::process p )
 {
     int flags =
-        p->excepts & p->excepts_accumulator;
+        p->excepts_mask & p->excepts_accumulator;
     if ( flags == 0 ) return true;
     p->printer
         << min::bom
@@ -828,7 +828,7 @@ min::uns32 mex::run_stack_limit = 1 << 14;
 min::uns32 mex::run_return_stack_limit = 1 << 12;
 min::uns32 mex::run_counter_limit = 1 << 20;
 min::uns32 mex::run_trace_flags = 1 << mex::T_ALWAYS;
-int mex::run_excepts =
+int mex::run_excepts_mask =
     FE_DIVBYZERO|FE_INVALID|FE_OVERFLOW;
 bool mex::run_optimize = false;
 
@@ -1426,7 +1426,7 @@ bool mex::run_process ( mex::process p )
 	    int excepts =
 	        fetestexcept ( FE_ALL_EXCEPT );
 	    p->excepts_accumulator |= excepts;
-	    excepts &= p->excepts;
+	    excepts &= p->excepts_mask;
 
 	    if (    excepts != 0
 	         || trace_flags & (1 << trace_class) )
@@ -2134,7 +2134,7 @@ bool mex::run_process ( mex::process p )
 		    print_excepts
 		        ( p->printer,
 			  p->excepts_accumulator,
-			  p->excepts );
+			  p->excepts_mask );
 		    break;
 		}
 		case mex::SET_OPTIMIZE:
@@ -2269,7 +2269,7 @@ bool mex::run_process ( mex::process p )
 		    ~ ( 1 << mex::T_NEVER );
 	        break;
 	    case mex::SET_EXCEPTS:
-	        p->excepts = immedA;
+	        p->excepts_mask = immedA;
 	        break;
 	    case mex::SET_OPTIMIZE:
 	        p->optimize = ( immedA & 1 );
@@ -2523,7 +2523,7 @@ mex::process mex::create_process
     mex::set_pc ( p, pc );
     p->optimize = false;
     p->trace_flags = mex::run_trace_flags;
-    p->excepts = mex::run_excepts;
+    p->excepts_mask = mex::run_excepts_mask;
     p->counter_limit = mex::run_counter_limit;
 
     for ( unsigned i = 0;

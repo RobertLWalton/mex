@@ -2,7 +2,7 @@
 //
 // File:	mexas_main.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Sep  5 03:23:13 EDT 2023
+// Date:	Wed Sep 13 02:52:14 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -152,7 +152,7 @@ int main ( int argc, char * argv[] )
 		if ( * q ) ++ q;
 		p = q;
 	    }
-	    mex::run_excepts = excepts;
+	    mex::run_excepts_mask = excepts;
 	}
 
 	else if ( strcmp ( "-r", arg ) == 0 )
@@ -200,7 +200,7 @@ int main ( int argc, char * argv[] )
 			    ( process->printer,
 			      process->
 			          excepts_accumulator,
-			      process->excepts );
+			      process->excepts_mask );
 		    }
 		    printer << min::eom;
 		}
