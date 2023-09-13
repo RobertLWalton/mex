@@ -642,13 +642,13 @@ frame pointer of $F'$.
 
 If follows that during an execution of an instruction in $F$
 the variables of $F'$ can be accessed by
-\TT{PUSHL} with \TT{immedB} = $L'$ (Figure~\ref{HOUSEKEEPING-INSTRUCTIONS}),
+\TT{PUSHL} with \TT{immedB} = $L'$ (Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}),
 and the arguments of $F'$ can be
 accessed by \TT{PUSHA} with \TT{immedB} = $L'$
-(Figure~\ref{FUNCTION-INSTRUCTIONS}).
+(Figure~\itemref{FUNCTION-INSTRUCTIONS}).
 The global variables can be accessed by \TT{PUSHL} with \TT{immedB} = $0$
 or by \TT{PUSHG}
-(Figure~\ref{HOUSEKEEPING-INSTRUCTIONS}).
+(Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}).
 
 \section{Code Vectors}
 \label{CODE-VECTORS}
@@ -926,7 +926,7 @@ arguments passed to that function.  Before making changes the \TT{CALL}
 saves these values in the \TT{mex::ret} value.
 The \TT{nresults} member of \TT{mex::ret}
 is the number of function results expected by the call.
-See the \TT{CALL} instruction in Figure~\ref{FUNCTION-INSTRUCTIONS}
+See the \TT{CALL} instruction in Figure~\itemref{FUNCTION-INSTRUCTIONS}
 for specifics.
 
 The process's \TT{counter} is incremented once every time an instruction
@@ -973,23 +973,23 @@ mex::instr a_jump_instruction = {mex::JMP,mex::T_JMP,1,,10,,32};
     // 32 instructions.
 \end{verbatim}\end{indpar}
 
-The arithmetic instruction set is in Figure~\ref{ARITHMETIC-INSTRUCTIONS}.
+The arithmetic instruction set is in Figure~\itemref{ARITHMETIC-INSTRUCTIONS}.
 IEEE 64-bit floating point operations and the C \TT{math.h}
 library are used.  See Arithmetic Exceptions,
 \itemref{ARITHMETIC-EXCEPTIONS} for error
 handling.
 
 The stack and flow control instruction set is in
-Figure~\ref{STACK-AND-FLOW-CONTROL-INSTRUCTIONS}.
+Figure~\itemref{STACK-AND-FLOW-CONTROL-INSTRUCTIONS}.
 See Stacks, \itemref{STACKS}, for an overview of stack handling.
 
 The function instruction set is in
-Figure~\ref{FUNCTION-INSTRUCTIONS}.
+Figure~\itemref{FUNCTION-INSTRUCTIONS}.
 See Nested Functions, \itemref{NESTED-FUNCTIONS},
 for details concerning nested functions.
 
 The housekeeping instruction set is in
-Figure~\ref{HOUSEKEEPING-INSTRUCTIONS}.
+Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}.
 
 \pagebreak
 
@@ -1281,8 +1281,8 @@ Figure~\ref{HOUSEKEEPING-INSTRUCTIONS}.
 \section{Arithmetic Exceptions}
 \label{ARITHMETIC-EXCEPTIONS}
 
-Arithmetic instructions (Figure~\ref{ARITHMETIC-INSTRUCTIONS})
-may raise the exceptions in Figure~\ref{EXCEPTIONS}.
+Arithmetic instructions (Figure~\itemref{ARITHMETIC-INSTRUCTIONS})
+may raise the exceptions in Figure~\itemref{EXCEPTIONS}.
 When an exception is raised, a flag bit associated with the
 exception is turned on the process's \TT{excepts\_\EOL accumulator}
 member.  This bit is usually never turned off, and so can be used at the
@@ -1377,7 +1377,7 @@ change to \TT{NEVER} the trace class stored in every instruction that
 does not have the \TT{ALWAYS} class
 (see The MEXAS Program, \itemref{THE-MEXAS-PROGRAM}).
 
-The trace classes are given in Figure \ref{TRACE-CLASSES-AND-GROUPS}.
+The trace classes are given in Figure \itemref{TRACE-CLASSES-AND-GROUPS}.
 Also given there are trace groups that can be used for convenience
 to set the trace flags of a process to a pre-defined group of trace classes.
 Trace class names and trace group names are used by compiler switches
@@ -1415,14 +1415,14 @@ is \TT{mex::T\_AOP}.
     \TT{SET\_\EOL TRACE}.
 \\\hline
 \ttikey{AOP}{trace class} & Arithmetic instructions in Figure
-    \ref{ARITHMETIC-INSTRUCTIONS}.
+    \itemref{ARITHMETIC-INSTRUCTIONS}.
 \\\hline
 \ttikey{PUSH}{trace class} & All \TT{PUSH\ldots} instructions in Figures
-    \ref{STACK-AND-FLOW-CONTROL-INSTRUCTIONS} and
-    \ref{FUNCTION-INSTRUCTIONS}.
+    \itemref{STACK-AND-FLOW-CONTROL-INSTRUCTIONS} and
+    \itemref{FUNCTION-INSTRUCTIONS}.
 \\\hline
 \ttikey{POP}{trace class} & The \TT{POP} instruction in Figure
-    \ref{STACK-AND-FLOW-CONTROL-INSTRUCTIONS}.
+    \itemref{STACK-AND-FLOW-CONTROL-INSTRUCTIONS}.
 \\\hline
 \ttikey{JMP}{trace class} & The \TT{JMP} instruction.
 \\\hline
@@ -1430,7 +1430,7 @@ is \TT{mex::T\_AOP}.
 \ttikey{JMPS}{trace class} \\
 \ttikey{JMPF}{trace class}
 \end{tabular} & \TT{JMP\ldots} instructions in
-	        Figure \ref{STACK-AND-FLOW-CONTROL-INSTRUCTIONS}.
+	        Figure \itemref{STACK-AND-FLOW-CONTROL-INSTRUCTIONS}.
 		When compiled the instruction is given the \TT{JMPS}
 		class.  When executed, if the jump test succeeds
 		(jump is taken),
@@ -1561,7 +1561,7 @@ and the {\em from-variable} is the name of the top of the stack.
 As always in tracing, `\TT{*}' is used for a missing variable name.
 
 For a \TT{PUSH\ldots} or \TT{POP} instruction
-in Figure~\ref{STACK-AND-FLOW-CONTROL-INSTRUCTIONS}
+in Figure~\itemref{STACK-AND-FLOW-CONTROL-INSTRUCTIONS}
 the value of
 \TT{module->\EOL trace\_\EOL info[i]} is the MIN label
 \TT{[<} {\em from-variable} ~ {\em to-variable} \TT{>]}.
@@ -1725,7 +1725,8 @@ Note: \TT{JMP\ldots} is the only way to exit a loop (\TT{ENDL} and
 A process's \TT{trace\_depth} is maintained even when the process's
 \TT{optimize} switch is \TT{true} (only a few instructions change
 the trace depth).  Housekeeping instructions (those in
-Figure~\ref{HOUSEKEEPING-INSTRUCTIONS}) execute in the same manner regardless
+Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}) execute
+in the same manner regardless
 of the setting of \TT{optimize}, and can be traced when \TT{optimize}
 is \TT{true}.  In particular, the \TT{TRACE} instrution works regardless
 of the setting of \TT{optimize}.
@@ -2651,7 +2652,7 @@ Details are:
 \\[0.5ex]
 \TT{-tcnever}	    & Determines the trace class of an assembled instruction. \\
 \TT{-tcnormal}	    & \TT{-tcnormal} sets the trace class of the op code
-		      given by Figure~\ref{TRACE-CLASSES-AND-GROUPS}.
+		      given by Figure~\itemref{TRACE-CLASSES-AND-GROUPS}.
                       \TT{-tcnever} sets the class to \TT{NEVER} unless
 		      the normal instruction trace class is \TT{ALWAYS}.
 		      Default is \TT{-tcnormal}.
