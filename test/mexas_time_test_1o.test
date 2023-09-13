@@ -74,4 +74,4 @@ mexas_time_test_1.mex successfully compiled
 * {39:23,6,10000013} TRACE: "answer = sum i: low <= i <= high", low=1,
                             high=1000000, answer=500000500000
 Call to MAIN succeeded and executed 10.000014 million instructions
-                           in #.### cpu seconds.
+             (10.000013 million optimized) in #.### cpu seconds.

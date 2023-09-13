@@ -2,7 +2,7 @@
 //
 // File:	mexas_main.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Sep 13 02:52:14 EDT 2023
+// Date:	Wed Sep 13 04:13:54 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -46,9 +46,9 @@ int main ( int argc, char * argv[] )
 	    mexas::assemble_trace_never = true;
 
 	else if ( strcmp ( "-oon", arg ) == 0 )
-	    mex::run_optimize = false;
-	else if ( strcmp ( "-ooff", arg ) == 0 )
 	    mex::run_optimize = true;
+	else if ( strcmp ( "-ooff", arg ) == 0 )
+	    mex::run_optimize = false;
 	else if ( strcmp ( "-counter", arg ) == 0 )
 	{
 	    num = argv[i++];
@@ -213,15 +213,21 @@ int main ( int argc, char * argv[] )
 			           - start.tms_utime )
 			/ ticks_per_second;
 		    printer << min::bom
-		            << "Call to " << name
-			    << " succeeded and "
+		            << "Call to " << name << " "
 			    << min::place_indent ( 0 )
-			    << "executed "
+			    << "succeeded and"
+			       " executed "
 			    << (double) process->counter
 			       * 1e-6
 			    << " million instructions"
 			    << min::indent
-			    << "in "
+			    << "("
+			    << (double)
+			         process->
+				     optimized_counter
+			       * 1e-6
+			    << " million optimized)"
+			    << " in "
 			    << min::pfloat
 			        ( cpu_time, "%.3f" )
 			    << " cpu seconds."

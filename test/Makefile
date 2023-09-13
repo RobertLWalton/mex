@@ -2,7 +2,7 @@
 #
 # File:		Makefile
 # Author:	Bob Walton (walton@acm.org)
-# Date:		Wed Sep  6 00:27:32 EDT 2023
+# Date:		Wed Sep 13 04:24:52 EDT 2023
 #
 # The authors have placed this program in the public
 # domain; they make no warranty and accept no liability
@@ -74,7 +74,7 @@ test:		${TESTS:=.test}
 	sed \
 	    -e '/line [0-9][0-9]*:/s//line ####:/g' \
 	    -e '/lines [0-9][0-9]*-[0-9][0-9]*:/s//lines ####-####/g' \
-	    -e '/ [0-9][0-9.]* cpu seconds/s// #.### cpu seconds/g' \
+	    -e '/ [0-9][0-9.]* cpu/s// #.### cpu/g' \
             < $*.out > $*.test
 
 %.diff:	%.out
@@ -82,7 +82,7 @@ test:		${TESTS:=.test}
 	-@sed \
 	    -e '/line [0-9][0-9]*:/s//line ####:/g' \
 	    -e '/lines [0-9][0-9]*-[0-9][0-9]*:/s//lines ####-####/g' \
-	    -e '/ [0-9][0-9.]* cpu seconds/s// #.### cpu seconds/g' \
+	    -e '/ [0-9][0-9.]* cpu/s// #.### cpu/g' \
             < $*.out | diff ${DIFFOPT} $*.test -
 
 mex.o:	\
@@ -143,11 +143,11 @@ mexas_time_test_1.out: \
           -counter 20000000
 mexas_time_test_1o.out: \
     RUN = -stack 20000000 -return-stack 1000002 \
-          -counter 20000000
+          -counter 20000000 -oon
 mexas_time_test_2.out: \
     RUN = -counter 20000000
 mexas_time_test_2o.out: \
-    RUN = -counter 20000000
+    RUN = -counter 20000000 -oon
 
 mexas_compile_test_%.out:	\
 		mexas \

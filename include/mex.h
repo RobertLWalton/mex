@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Sep 13 02:44:09 EDT 2023
+// Date:	Wed Sep 13 04:08:08 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -315,6 +315,7 @@ struct process_header
     int excepts_accumulator;
     bool optimize;
     min::uns32 counter;
+    min::uns32 optimized_counter;
     min::uns32 counter_limit;
     mex::state state;
 };

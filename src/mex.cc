@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Sep 13 02:47:38 EDT 2023
+// Date:	Wed Sep 13 04:08:59 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -810,6 +810,8 @@ RET_EXIT:
     RW_UNS32 p->length = sp - spbegin;
     p->excepts_accumulator |= 
 	fetestexcept ( FE_ALL_EXCEPT );
+    p->optimized_counter += p->counter_limit - limit
+                          - p->counter;
     p->counter = p->counter_limit - limit;
     return result;
 
@@ -2521,7 +2523,7 @@ mex::process mex::create_process
     mex::printer_ref(p) = printer;
     mex::pc pc = { min::NULL_STUB, 0 };
     mex::set_pc ( p, pc );
-    p->optimize = false;
+    p->optimize = mex::run_optimize;
     p->trace_flags = mex::run_trace_flags;
     p->excepts_mask = mex::run_excepts_mask;
     p->counter_limit = mex::run_counter_limit;
@@ -2532,6 +2534,7 @@ mex::process mex::create_process
     p->level = 0;
     p->trace_depth = 0;
     p->counter = 0;
+    p->optimized_counter = 0;
     p->excepts_accumulator = 0;
     p->state = mex::NEVER_STARTED;
 
@@ -2557,6 +2560,7 @@ mex::process mex::init_process
     p->level = 0;
     p->trace_depth = 0;
     p->counter = 0;
+    p->optimized_counter = 0;
     p->excepts_accumulator = 0;
     p->state = mex::NEVER_STARTED;
 
@@ -2577,6 +2581,7 @@ mex::process mex::init_process
     p->level = 0;
     p->trace_depth = 0;
     p->counter = 0;
+    p->optimized_counter = 0;
     p->excepts_accumulator = 0;
     p->state = mex::NEVER_STARTED;
 
