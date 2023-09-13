@@ -1572,6 +1572,8 @@ in Figure~\itemref{STACK-AND-FLOW-CONTROL-INSTRUCTIONS}
 the value of
 \TT{module->\EOL trace\_\EOL info[i]} is the MIN label
 \TT{[<} {\em from-variable} ~ {\em to-variable} \TT{>]}.
+If \TT{module->\EOL trace\_\EOL info[i]} is not a 2 element MIN label,
+both {\em from-variable} and {\em to-variable} are taken to be \TT{*}.
 
 However there are two exceptions with different {\em from-variables}
 and with {\em trace\_\EOL info[i]} equal to just {\em to-variable}.
@@ -1587,6 +1589,8 @@ They are:
 where $L$ is the lexical level \\
 and $V$ is the value at the top of the stack
 \end{center}
+If \TT{module->\EOL trace\_\EOL info[i]} is not a MIN string,
+{\em to-variable} is taken to be \TT{*}.
 
 
 \subsubsection{Trace-Info Based Trace Messages}
