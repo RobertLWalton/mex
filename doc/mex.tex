@@ -1364,9 +1364,8 @@ is controlled by the \key{trace class} $C$ of the instruction
 and the \key{trace flags} $F$ of the process.  If
 \TT{$F$ \& ( 1 <{}< $C$ ) != 0} the instruction is traced.
 
-In optimized mode, instructions are \underline{not} traced.
-
-Instructions in the \ttkey{ALWAYS} trace class are always
+In optimized mode, instructions are \underline{not} traced,
+except that instructions in the \ttkey{ALWAYS} trace class are always
 traced.  These include the \TT{TRACE}, \TT{TRACE\_\EOL EXCEPTS},
 \TT{SET\_\EOL TRACE},
 \TT{WARN}, and \TT{ERROR} instructions.
@@ -1375,17 +1374,20 @@ Instructions in the \ttkey{NEVER} trace class are never
 traced.  Typically there are compiler switches that will
 change to \TT{NEVER} the trace class stored in every instruction that
 does not have the \TT{ALWAYS} class
-(see The MEXAS Program, \itemref{THE-MEXAS-PROGRAM}).
+(see The MEXAS Program \TT{-tcnever} option, page \pageref{-TCNEVER}).
 
 The trace classes are given in Figure \itemref{TRACE-CLASSES-AND-GROUPS}.
 Also given there are trace groups that can be used for convenience
-to set the trace flags of a process to a pre-defined group of trace classes.
+to set the trace flags of a process to include
+a pre-defined group of trace classes.
 Trace class names and trace group names are used by compiler switches
-which set the initial trace flags of processes, and by the
-\TT{SET\_EOL TRACE} instruction that sets the current trace flags
+which set the initial trace flags of processes
+(see The MEXAS Program \TT{-tc:\ldots} option, page \pageref{-TC:}),
+and by the
+\TT{SET\_\EOL TRACE} instruction that sets the current trace flags
 of a process.
 
-Notice that all arithmetic instruction have the same
+Notice that all arithmetic instructions have the same
 trace class, all \TT{PUSH\ldots} instructions have the same trace
 class, and all conditional \TT{JMP\ldots} instructions have the
 same two trace classes, one for a successful jump and one for
@@ -2651,13 +2653,14 @@ Details are:
 		      \itemref{ASSEMBLED-INSTRUCTION-PRINTING}.
 \\[0.5ex]
 \TT{-tcnever}	    & Determines the trace class of an assembled instruction. \\
+\label{-TCNEVER}
 \TT{-tcnormal}	    & \TT{-tcnormal} sets the trace class of the op code
 		      given by Figure~\itemref{TRACE-CLASSES-AND-GROUPS}.
                       \TT{-tcnever} sets the class to \TT{NEVER} unless
 		      the normal instruction trace class is \TT{ALWAYS}.
 		      Default is \TT{-tcnormal}.
 \\[0.5ex]
-\TT{-tc:}{\em tc-list}
+\TT{-tc:}{\em tc-list} \label{-TC:}
 		    & Sets the process \TT{trace\_flags} at the start of mex
 		      program execution.  \TT{ALWAYS} and \TT{NEVER}
 		      can\underline{not} be listed: their flags are always
