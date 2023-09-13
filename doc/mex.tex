@@ -369,7 +369,7 @@ assumes a few compilation behaviors.
 \label{STACKS}
 
 MEX is stack oriented.  A \key{stack} is a vector of
-elemets.  The end of this vector is referred to as the
+elements.  The end of this vector is referred to as the
 \ikey{top}{of stack} of the stack.  Elements may be \ikey{pushed}{into stack}
 into the stack, meaning they are added to the end of the stack vector,
 or \ikey{popped}{from stack} from the stack,
@@ -440,7 +440,7 @@ The compiler points the name
 {\tt x} at the stack location containing this value,
 but this location is read-only and cannot be changed.
 Then \TT{next x} is set to {\tt x + 1}, which is pushed into the stack.
-At this point the compiler repoints the name {\tt x} at this new
+At this point the compiler re-points the name {\tt x} at this new
 stack location.  And so forth.
 
 MEX assumes that loop blocks are implemented with next variables.
@@ -481,9 +481,9 @@ a non-loop block.
 
 MEX assumes that to implement the example loop, the compiler
 will first push copies of {\tt i} and {\tt sum} into
-the stack, and repoint {\tt i} and {\tt sum} to these
+the stack, and re-point {\tt i} and {\tt sum} to these
 copies, which will be read-only.
-Then the complier will push {\tt i} and {\tt sum}
+Then the compiler will push {\tt i} and {\tt sum}
 into the stack again, point the names {\tt next i} and
 {\tt next sum} at these values, and make them write-only.
 Then MEX will execute 5 loop iterations.  In each the
@@ -585,7 +585,7 @@ $F_2$.
 and cannot be in a complete function execution inside $E_1$ so
 the \TT{CALL\ldots} must have level $L_1$.  This \TT{CALL\ldots}
 is lexically inside $F$ by hypothesis, and the only functions visible
-to the TT{CALL\ldots} that have levels $>L$ are also inside $F$.
+to the \TT{CALL\ldots} that have levels $>L$ are also inside $F$.
 Therefore $F_2$ is lexically inside $F$.
 \end{indpar}
 
@@ -936,7 +936,7 @@ When the process terminates, \TT{state} is set.  For details
 see \TT{mex::run\_process}, \pagref{MEX::RUN_PROCESS},
 
 The \TT{trace\_depth}, \TT{trace\_flags}, \TT{excepts\_mask},
-\TT{excepts\_accumuator}, and \TT{optimize}
+\TT{excepts\_accumulator}, and \TT{optimize}
 members of a process
 are explained in Arithmetic Exceptions, \itemref{ARITHMETIC-EXCEPTIONS}
 and Instruction Tracing, \itemref{INSTRUCTION-TRACING}.
@@ -1287,11 +1287,11 @@ When an exception is raised, a flag bit associated with the
 exception is turned on the process's \TT{excepts\_\EOL accumulator}
 member.  This bit is usually never turned off, and so can be used at the
 end of an execution to determine what types of exception
-occured during the execution.
+occurred during the execution.
 
 In C/C++ the flag bit associated with exception \TT{XX}
 is defined as a bit mask macro \TT{FE\_XX} in \TT{fenv.h}
-(see fenv(3) in the unix manual):
+(see fenv(3) in the UNIX manual):
 
 \begin{boxedfigure}[b!]
 \begin{center}
@@ -1618,7 +1618,7 @@ instructions are generated just before the instruction to
 push the {\em trace-variable} values onto the stack.  The values are then
 printed from the stack if the instruction is traced.  Then
 when the instruction executes, it begins by popping these
-{\em tracek-variable} values from the stack.  This is why instructions
+{\em trace-variable} values from the stack.  This is why instructions
 like \TT{BEG} can pop the stack; it is only because the
 instruction may have to pop {\em trace-variable} values.
 
@@ -1700,7 +1700,7 @@ at the point of the return instruction.
 \\[0.5ex]
 \TT{TRACE\_EXCEPTS} & \TT{TRACE\_EXCEPTS:}
                     \{ \TT{*}\QMARK{}{\em except-name} \}\STAR{} \\
-                & The names of the excepts in \TT{p->excepts\_accumuator}
+                & The names of the excepts in \TT{p->excepts\_accumulator}
 		  are listed, and those that are also in \TT{p->excepts\_mask}
 		  are starred with \TT{*}.
 \end{tabular}
@@ -1739,7 +1739,7 @@ the trace depth).  Housekeeping instructions (those in
 Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}) execute
 in the same manner regardless
 of the setting of \TT{optimize}, and can be traced when \TT{optimize}
-is \TT{true}.  In particular, the \TT{TRACE} instrution works regardless
+is \TT{true}.  In particular, the \TT{TRACE} instruction works regardless
 of the setting of \TT{optimize}.
 
 \subsection{Fatal Errors}
@@ -1782,13 +1782,13 @@ Empty \TT{position} and \TT{trace\_info} vectors are created.
 The \TT{globals} member is set to \TT{min::NULL\_STUB} and the
 \TT{interface} member is set to \TT{min::MISSING()}.
 
-The \TT{max\_length} of the three empty vectors is intially set to:
+The \TT{max\_length} of the three empty vectors is initially set to:
 \begin{indpar}
 \verb|min::uns32 mex::|\MEXKEY{module\_length}\verb|    // Default == 1 << 12.|
 \end{indpar}
 
 Note that \TT{mex::module} and its components are read-only, so that
-to push intructions, positions, and info into the vectors the module type
+to push instructions, positions, and info into the vectors the module type
 must be converted to \TT{mex::module\_ins}.  The following inline
 functions can be used to push elements into these vectors and
 call \TT{min::acc\_write\_update} as necessary:
@@ -2044,18 +2044,18 @@ current lexeme.  An error message accompanies such replacement.
 \subsection{Lexical Level and Depth}
 \label{LEXICAL-LEVEL-AND-DEPTH}
 
-Functions are bracketted with \TT{BEGF} and \TT{ENDF}
+Functions are bracketed with \TT{BEGF} and \TT{ENDF}
 and have a \key{lexical level}.  The lexical level of a function
 that is \underline{not} inside any other function is \TT{1}.
 The lexical level of any other function $F$ is one plus the lexical
 level of the smallest function containing $F$.
 The lexical level of an instruction
 is that of the smallest function containing the instruction.
-The lexical level of instrucions
+The lexical level of instructions
 that are \underline{not} inside any function is \TT{0}.
 
 Code also contains (non-function) \skey{block}s that are
-bracketted with either \TT{BEG} and \TT{END} or with
+bracketed with either \TT{BEG} and \TT{END} or with
 \TT{BEGL} and \TT{ENDL}.  A blocks has a \key{container}
 and within the container a \key{depth}.
 A block not inside a function has the module as its container.
@@ -2067,7 +2067,7 @@ the same container is \TT{1}.  The depth of any other block $B$
 is one plus the depth of the smallest block containing $B$.
 The dept of an instruction
 is that of the smallest block containing the instruction.
-The depth of instrucions in a container
+The depth of instructions in a container
 that are \underline{not} inside any block that is in the container
 is \TT{0}.
 
@@ -2109,7 +2109,7 @@ variable stack size after argument elements are pushed into the
 variable stack by \TT{BEGF}: see \TT{BEGF}, \pagref{BEGF}.
 
 The assembler's \key{function stack} specifies the functions that
-can be called by a \TT{CALL\ldots} instruction.  \TT{BEGF} pushs
+can be called by a \TT{CALL\ldots} instruction.  \TT{BEGF} pushes
 a element with a name, lexical level, and depth, and behaves
 for the function stack like \TT{PUSH\ldots} does for the variable stack.
 \TT{END\ldots} instructions pop the function stack in the same manner as
@@ -2162,7 +2162,7 @@ when its target is found.
 \item The length $S$ of the variable stack when the jump instruction
       was encountered.
 \item The minimum $M$ of $S$ and all the variable stack lengths that have
-      occured after \TT{END} or \TT{ENDL} instructions encountered
+      occurred after \TT{END} or \TT{ENDL} instructions encountered
       since the jump instruction was encountered.
       $M\le S$.
 \end{enumerate}
@@ -2200,7 +2200,7 @@ the pending jmp list.
 \ttkey{ENDF}
 \begin{indpar}
 Search the pending jump list for elements with $L$ equal to the
-lexical level of the \TT{ENDF} and remove them as being unresolvabl,
+lexical level of the \TT{ENDF} and remove them as being unresolvable,
 and therefore in error.
 \end{indpar}
 
@@ -2215,7 +2215,7 @@ have the same stack length at its beginning and at its end.
 \subsection{MEXAS Instructions}
 \label{MEXAS-INSTRUCTIONS}
 
-In the following decription of MEXAS instruction syntax and
+In the following description of MEXAS instruction syntax and
 assembly actions:
 
 \begin{enumerate}
@@ -2245,7 +2245,7 @@ If {\em new-variable-name} is missing or `\TT{*}',
 the element just gets the name `\TT{*}'.
 
 \item A variable cannot be written if it has a lexical level less than
-that of the writting instruction, or is a function argument variable.
+that of the writing instruction, or is a function argument variable.
 \item The operands that take integer values must have values in the
 range $[0,2^{32})$ (so they will fit into \TT{immedA}, \TT{immedB},
 or \TT{immedC} instruction
@@ -2636,7 +2636,7 @@ can\underline{not} be separated by whitespace, whereas ::= indicates
 that components can and often should be separated by whitespace.
 
 A {\em mexas-operation} is effective for all subsequent
-{\em mexas-operations} until it is overriden.  E.g.,
+{\em mexas-operations} until it is overridden.  E.g.,
 \TT{-oon} will cause following all executions to be optimized
 until an \TT{-ooff} is encountered.
 
