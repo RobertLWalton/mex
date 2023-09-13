@@ -1473,11 +1473,13 @@ is \TT{mex::T\_AOP}.
 \label{TRACE-MESSAGES}
 
 Each instruction trace message begins with:
-\begin{center}
+\begin{indpar}
+\emkey{trace-header} ::= \\
+\hspace*{0.3in}
 \TT{\{}{\em line-number}\TT{:}{\em code-vector-location}%
                         \TT{,}{\em stack-length}%
                         \TT{,}{\em process-counter}\TT{\}} ~ {\em op-code}
-\end{center}
+\end{indpar}
 The {\em line-number} is the number of the \underline{last} source code
 line containing code that generated the instruction.
 The {\em code-vector-location} is the index of the instruction
@@ -1494,21 +1496,20 @@ in all cases it is based on the value of
 \TT{module->\EOL trace\_\EOL info[i]} where \TT{i} is the index of
 the instruction in its code vector.
 If \TT{module->\EOL trace\_\EOL info[i]} does not exist
-or equals \TT{min::MISSING()}, only the message beginning just
-given is produced.
+or is of an unexpected type, the message may be incomplete.
 
 \subsubsection{Arithmetic Tracing}
 \label{ARITHMETIC-TRACING}
 
 The trace message of an arithmetic instruction has the form:
 \begin{center}
-{\em op-code}\TT{:} {\em new-variable-name} \TT{=} {\em value}
+{\em trace-header}\TT{:} {\em new-variable-name} \TT{=} {\em value}
                     \TT{<=} {\em value}\QMARK{}
                     {\em operator} {\em value}
 \end{center}
 except for the \TT{POWI} instruction whose trace message has the form:
 \begin{center}
-\TT{POWI:} {\em new-variable-name} \TT{=} {\em value}
+{\em trace-header}\TT{:} {\em new-variable-name} \TT{=} {\em value}
                     \TT{<=} \TT{pow} {\em exponent} {\em value}
 \end{center}
 If {\em new-variable-name} is not given in the instruction,
@@ -1517,7 +1518,9 @@ Note that arithmetic instructions are usually not traced.
 
 For an arithmetic instruction the value of
 \TT{module->\EOL trace\_\EOL info[i]} is {\em new-variable-name}
-or \TT{*} as a MIN string.
+as a MIN string (this may be \TT{*}).
+If \TT{module->\EOL trace\_\EOL info[i]} is not a MIN string,
+\TT{*} is used as {\em new-variable-name}.
 
 \subsubsection{Jump Tracing}
 \label{JUMP-TRACING}
@@ -1525,23 +1528,25 @@ or \TT{*} as a MIN string.
 \TT{JMP\ldots} instruction trace messages have the form:
 
 \begin{center}
-{\em op-code}\TT{:} {\em jmp-target} {\tt is successful:~true}
+{\em trace-header} {\em jmp-target} \TT{is successful:~true}
                     \TT{<=} {\em value} {\em operator} {\em value}
 \end{center}
 or
 \begin{center}
-{\em op-code}\TT{:} {\em jmp-target} {\tt is UNsuccessful:~false}
+{\em trace-header} {\em jmp-target} \TT{is UNsuccessful:~false}
                     \TT{<=} {\em value} {\em operator} {\em value}
 \end{center}
 
 or for a plain unconditional \TT{JMP} instruction, just:
 \begin{center}
-\TT{JMP:} {\em jmp-target}
+{\em trace-header} {\em jmp-target}
 \end{center}
 
 For a jump instruction the value of
 \TT{module->\EOL trace\_\EOL info[i]} is {\em jmp-target}
 as a MIN string.
+If \TT{module->\EOL trace\_\EOL info[i]} is not a MIN string,
+\TT{*} is used as {\em jump-target}.
 
 \subsubsection{Push/Pop Tracing}
 \label{PUSH/POP-TRACING}

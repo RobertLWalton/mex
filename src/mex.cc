@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Sep 13 04:08:59 EDT 2023
+// Date:	Wed Sep 13 16:05:30 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1607,7 +1607,7 @@ bool mex::run_process ( mex::process p )
 		    min::MISSING_PHRASE_POSITION;
 
 		print_message_header ( p, pp )
-		    << " " << op_info->name << ": ";
+		    << " " << op_info->name;
 
 		if ( m->trace_info != min::NULL_STUB
 		     &&
@@ -1618,7 +1618,11 @@ bool mex::run_process ( mex::process p )
 		        m->trace_info[p->pc.index];
 		    if ( min::is_str ( trace_info ) )
 		        p->printer << " " << trace_info;
+		    else
+		        p->printer << " *";
 		}
+		else
+		    p->printer << " *";
 
 		if ( bad_jmp )
 		{

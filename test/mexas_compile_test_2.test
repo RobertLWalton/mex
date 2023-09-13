@@ -124,10 +124,10 @@ POP
 * {17:3,3,3} BEG
 *** {18:4,3,4} PUSHS: * <=== X = 295
 *** {19:5,4,5} PUSHS: * <=== Y = 196
-*** {20:6,5,6} JMPLT:  ITS-X is UNsuccessful: false <= 295 < 196
+*** {20:6,5,6} JMPLT ITS-X is UNsuccessful: false <= 295 < 196
 *** {21:7,3,7} PUSHS: * <=== Y = 196
 *** {22:8,4,8} POPS: Z <=== * = 196
-*** {23:9,3,9} JMP:  DONE
+*** {23:9,3,9} JMP DONE
 *** {28:12,3,10} PUSHI: UNUSED <=== 2000
 *** {29:13,4,11} END
 * {31:14,3,12} POPS: * <=== Z = 196
@@ -139,7 +139,7 @@ POP
 * {41:20,3,18} BEGL: LOOP, SUM=0, I=4
 *** {43:21,5,19} PUSHS: * <=== I = 4
 *** {44:22,6,20} PUSHS: * <=== LIMIT = 6
-*** {45:23,7,21} JMPGT:  DONE is UNsuccessful: false <= 4 > 6
+*** {45:23,7,21} JMPGT DONE is UNsuccessful: false <= 4 > 6
 *** {46:24,5,22} PUSHS: * <=== SUM = 0
 *** {47:25,6,23} PUSHS: * <=== I = 4
 *** {48:26,7,24} ADD: * = 4 <= 0 + 4
@@ -151,7 +151,7 @@ POP
 *** {54:32,5,30} ENDL: LOOP, SUM=4, I=5
 *** {43:21,5,31} PUSHS: * <=== I = 5
 *** {44:22,6,32} PUSHS: * <=== LIMIT = 6
-*** {45:23,7,33} JMPGT:  DONE is UNsuccessful: false <= 5 > 6
+*** {45:23,7,33} JMPGT DONE is UNsuccessful: false <= 5 > 6
 *** {46:24,5,34} PUSHS: * <=== SUM = 4
 *** {47:25,6,35} PUSHS: * <=== I = 5
 *** {48:26,7,36} ADD: * = 9 <= 4 + 5
@@ -163,7 +163,7 @@ POP
 *** {54:32,5,42} ENDL: LOOP, SUM=9, I=6
 *** {43:21,5,43} PUSHS: * <=== I = 6
 *** {44:22,6,44} PUSHS: * <=== LIMIT = 6
-*** {45:23,7,45} JMPGT:  DONE is UNsuccessful: false <= 6 > 6
+*** {45:23,7,45} JMPGT DONE is UNsuccessful: false <= 6 > 6
 *** {46:24,5,46} PUSHS: * <=== SUM = 9
 *** {47:25,6,47} PUSHS: * <=== I = 6
 *** {48:26,7,48} ADD: * = 15 <= 9 + 6
@@ -175,7 +175,7 @@ POP
 *** {54:32,5,54} ENDL: LOOP, SUM=15, I=7
 *** {43:21,5,55} PUSHS: * <=== I = 7
 *** {44:22,6,56} PUSHS: * <=== LIMIT = 6
-*** {45:23,7,57} JMPGT:  DONE is successful: true <= 7 > 6
+*** {45:23,7,57} JMPGT DONE is successful: true <= 7 > 6
 * {57:33,3,58} POPS: * <=== I = 7
 * {58:34,2,59} POPS: * <=== SUM = 15
 * {59:35,1,60} POPS: * <=== LIMIT = 6
