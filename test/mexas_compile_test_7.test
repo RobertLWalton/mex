@@ -46,8 +46,8 @@ DIV
 TRACE_EXCEPTS
     [29:16;3] TRACE_EXCEPTS T_ALWAYS 0 0 0 [$ MISSING $]; [$ MISSING $]
 * {13:0,0,0} TRACE_EXCEPTS:
-* {14:1,0,1} PUSHI: * <=== 1e+200
-* {15:2,1,2} PUSHI: * <=== 1e+200
+* {14:1,0,1} PUSHI: * <= 1e+200
+* {15:2,1,2} PUSHI: * <= 1e+200
 !!! ERROR: numeric overflow
 * {16:3,2,3} MUL: * = inf <= 1e+200 * 1e+200
 * {17:4,1,4} TRACE_EXCEPTS: INEXACT *OVERFLOW
@@ -55,14 +55,14 @@ TRACE_EXCEPTS
 !!! ERROR: invalid operand(s)
 * {19:6,1,6} LOG: * = nan <= log -inf
 * {20:7,1,7} TRACE_EXCEPTS: INEXACT *INVALID *OVERFLOW
-* {21:8,1,8} PUSHI: * <=== 10
-* {22:9,2,9} PUSHI: * <=== 0
+* {21:8,1,8} PUSHI: * <= 10
+* {22:9,2,9} PUSHI: * <= 0
 !!! ERROR: divide by zero
 * {23:10,3,10} DIV: * = inf <= 10 / 0
 * {24:11,2,11} TRACE_EXCEPTS: *DIVBYZERO INEXACT *INVALID *OVERFLOW
 * {25:12,2,12} SET_EXCEPTS: *INVALID
-* {26:13,2,13} PUSHI: * <=== 10
-* {27:14,3,14} PUSHI: * <=== 0
+* {26:13,2,13} PUSHI: * <= 10
+* {27:14,3,14} PUSHI: * <= 0
 * {28:15,4,15} DIV: * = inf <= 10 / 0
 * {29:16,3,16} TRACE_EXCEPTS: DIVBYZERO INEXACT *INVALID OVERFLOW
 PROCESS TERMINATION EXCEPTS ERROR(S): INVALID

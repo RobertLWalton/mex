@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Sep 13 16:05:30 EDT 2023
+// Date:	Wed Sep 13 16:21:16 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -2079,10 +2079,12 @@ bool mex::run_process ( mex::process p )
 		    {
 		        p->printer << " "
 			           << lp[1]
-				   << " <=== "
+				   << " <= "
 				   << lp[0]
 				   << " =";
 		    }
+		    else
+		        p->printer << " * <= * =";
 		    p->printer << " " << value;
 		    break;
 		}
@@ -2093,7 +2095,9 @@ bool mex::run_process ( mex::process p )
 		    if ( min::is_str ( tinfo ) )
 		        p->printer << " "
 			           << tinfo
-				   << " <===";
+				   << " <=";
+		    else
+		        p->printer << " * <=";
 		    if ( op_code == mex::PUSHNARGS )
 		        p->printer << " nargs["
 			           << immedB
@@ -2149,7 +2153,7 @@ bool mex::run_process ( mex::process p )
 		        << ": "
 		        << ( ( immedA & 1 ) ?
 			     "ON" : "OFF" )
-		        << " <=== "
+		        << " <= "
 		        << ( p->optimize ?
 			     "ON" : "OFF" );
 		    break;
