@@ -240,7 +240,7 @@
 
 \author{Robert L. Walton}
 
-\date{September 13, 2023}
+\date{September 14, 2023}
  
 \maketitle
 
@@ -778,8 +778,7 @@ The \ttikey{trace\_info}{of module} member of the \TT{module} points
 at a vector of \TT{min::gen} values such that for module \TT{m},
 \TT{m->\EOL trace\_\EOL info[i]} gives information that can be used
 to print trace messages for instruction \TT{m[i]}.  See
-Trace-Info Based Trace Messages,
-\itemref{TRACE-INFO-BASED-TRACE-MESSAGES}.
+Instruction Tracing, \itemref{INSTRUCTION-TRACING}.
 
 \section{Processes}
 \label{PROCESSES}
@@ -1556,7 +1555,7 @@ value copy instructions and their trace messages
 have the form:
 
 \begin{center}
-{\em op-code}\TT{:} {\em to-variable}
+{\em trace-header}\TT{:} {\em to-variable}
                     \TT{<=} {\em from-variable} \TT{=} {\em value}
 \end{center}
 
@@ -1593,91 +1592,84 @@ If \TT{module->\EOL trace\_\EOL info[i]} is not a MIN string,
 {\em to-variable} is taken to be \TT{*}.
 
 
-\subsubsection{Trace-Info Based Trace Messages}
-\label{TRACE-INFO-BASED-TRACE-MESSAGES}
+\subsubsection{Trace-Packet Based Trace Messages}
+\label{TRACE-PACKET-BASED-TRACE-MESSAGES}
 
-Many instructions end with a {\em trace-info} that has the syntax:
+A \key{trace packet} is a \key{trace packet message} and a list of
+\skey{trace packet variable}s.  The trace message of a trace packet
+instruction has the form:
 \begin{indpar}
-{\em trace-message} ::= {\em string}
-\\[0.5ex]
-{\em trace-info} ::= {\em trace-message} ~ {\em trace-variable}\STAR{}
+    {\em trace-header}\TT{:} ~
+    {\em trace-packet-message} ~
+    \{\TT{,} {\em trace-packet-variable}\TT{=}{\em value} \} \STAR{}
 \end{indpar}
 
-For these instructions, the {\em trace-message} is printed
-after the operation code in the trace message, followed by
-the names and values of the {\em trace-variables} named in the
-{\em trace-info}.  Its form is:
-\begin{indpar}
-{\em trace-info-message} ::=
-    {\em trace-message} ~
-    \{\TT{,} {\em trace-variable}\TT{=}{\em value} \} \STAR{}
-\end{indpar}
-
-When an instruction has a {\em trace-info}, \TT{PUSH\ldots}
-instructions are generated just before the instruction to
-push the {\em trace-variable} values onto the stack.  The values are then
-printed from the stack if the instruction is traced.  Then
-when the instruction executes, it begins by popping these
-{\em trace-variable} values from the stack.  This is why instructions
-like \TT{BEG} can pop the stack; it is only because the
-instruction may have to pop {\em trace-variable} values.
-
-For trace-info based instructions
-the value of
-\TT{module->\EOL trace\_\EOL info[i]} is the MIN label:
+For a trace packet instruction
+\TT{module->\EOL trace\_\EOL info[i]} is the MIN label
 \begin{center}
 \vspace*{-1ex}
-\TT{[<} {\em trace-message} ~ {\em trace-variable}\STAR{} \TT{>]}
+\TT{[<} {\em trace-packet-message} ~ {\em trace-packet-variable}\STAR{} \TT{>]}
+\end{center}
+If \TT{module->\EOL trace\_\EOL info[i]} is not a MIN label with at
+least one element, the just the {\em trace-header} is output.
+
+The trace packet instructions are:
+\begin{center}
+\begin{tabular}{ll}
+Standard Trace Packet Instructions: &
+    \TT{BEG} ~ \TT{END} ~ \TT{TRACE} ~ \TT{NOP} ~ \TT{WARN} ~ \TT{ERROR}
+\\[0.5ex]
+Special Trace Packet Instructions: &
+    \TT{BEGL} ~ \TT{ENDL} ~ \TT{CONT}  \\
+  & \TT{BEGF} ~ \TT{ENDF} ~ \TT{CALL\ldots} ~ \TT{RET}
+\end{tabular}
 \end{center}
 
-\subsubsection{\TT{BEGL}, \TT{ENDL}, and \TT{CONT} Trace Messages}
-\label{BEGL-ENDL-AND-CONT-TRACE-MESSAGES}
+For standard trace packet instructions, the compiler must push
+the values of the trace packet variables into the stack just
+before the instruction.  Then the instruction is traced before
+it is executed, if tracing the instruction is enabled.  Lastly
+the instruction execution pops the trace packet variable
+values from the stack, which is why instructions such as \TT{NOP} and
+\TT{TRACE}
+can pop stack values.  This trace variable pushing and popping are made
+invisible to the programmer by the compiler.
 
-The traces of the \TT{BEGL}, \TT{ENDL}, and \TT{CONT}
-instructions are like those of {\em trace-info} instructions with
-a difference.
+The special trace packet instructions do \underline{no} pushing and popping
+of trace packet variable values, and sometimes use the trace packet
+of an instruction related to them rather than a trace packet of their
+own.  Specifically:
 
-The {\em trace-message} for all these instructions is taken
-from the loop \TT{BEGL} instruction, and the {\em trace-variables}
-are the {\em nnext} loop variables in the variables stack
-when the \TT{BEGL} instruction is compiled.  When traced,
-\TT{BEGL} reads the values of these from the execution stack
-when the \TT{BEGL} is encountered.  When traced,
-\TT{CONT} and \TT{ENDL} first pop the execution stack so it
-holds only loop variables and \TT{next-\ldots} variables,
-then copies the \TT{next-\ldots} variables into the loop variables,
-and then reads the top {\em nnext} variable values and uses them
-in the trace.  These are \TT{next-\ldots} variable values, but
-at the time they are traced they equal the loop variable values,
-and so the loop variable values at the start of each iteration
-are traced, and are given the loop variable names and \underline{not}
-\TT{next-\ldots} names.
+\begin{center}
+\begin{tabular}{lp{4.0in}}
+\TT{BEGL}  & Uses its own trace packet, with the \TT{immedB} loop variable
+             values in the stack when \TT{BEGL} is executed as the trace packet 
+	     variable values.
+\\[0.5ex]
+\TT{ENDL}/\TT{CONT}  & Uses the trace packet of the associated \TT{BEGL},
+                       with the \TT{next-\ldots} variable values in the
+		       stack \underline{after} the \TT{ENDL} or \TT{CONT}
+		       has been executed as the trace packet variables.
+		       At this time these \TT{next-\ldots} variable values
+		       are a copy of the loop variable values for the next
+		       iteration.
+\\[0.5ex]
+\TT{CALL\ldots}  & Uses the trace packet of the associated \TT{BEGF},
+                   with the argument values in the stack as the trace
+		   packet variable values. 
+		   Also the {\em op-code}
+		   in the {\em trace-header} is replaced by
+		   \TT{CALL\ldots{} to BEGF}.
+\\[0.5ex]
+\TT{RET}/\TT{ENDF}  & Uses the trace packet of the associated \TT{CALL},
+                   with the return values in the stack as the trace
+		   packet variable values.
+		   Also the {\em op-code}
+		   in the {\em trace-header} is replaced by
+		   \TT{RET to CALL\ldots} or \TT{ENDL to CALL\ldots}.
+\end{tabular}
+\end{center}
 
-\subsubsection{\TT{CALL}, \TT{RET}, and \TT{ENDF} Trace Messages}
-\label{CALL-RET-AND-ENDF-TRACE-MESSAGES}
-
-The traces of the \TT{CALL\ldots}, \TT{RET}, and \TT{ENDF}
-instructions are like those of {\em trace-info} instructions with
-a difference.
-
-For \TT{CALL\ldots}, the op code in the trace is replaced by
-`\TT{CALL\ldots to BEGF}', the {\em trace-message} is taken
-from the target \TT{BEGF} (this defaults to the function name),
-and the {\em trace-variables} are the argument variables listed
-in the \TT{BEGF} instruction.  The most important thing to note
-is that the argument variable names are those used inside the
-function, and not those used at the point of the call instruction.
-
-For \TT{RET}, the op code in the trace is replaced by
-`\TT{RET to CALL\ldots}', the {\em trace-message} is taken
-from the target \TT{CALL\ldots} (this defaults to the function name),
-and the {\em trace-variables} are the result variables listed
-in the \TT{CALL\ldots} instruction.  The most important thing to
-note is that the result variable names are those used after the
-call instruction and not those used inside the function
-at the point of the return instruction.
-
-\TT{ENDF} is just like a \TT{RET} with no return values.
 
 \subsubsection{Other Instruction Trace Messages}
 \label{OTHER-INSTRUCTION-TRACE-MESSAGES}
