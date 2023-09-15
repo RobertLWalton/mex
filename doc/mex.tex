@@ -240,7 +240,7 @@
 
 \author{Robert L. Walton}
 
-\date{September 14, 2023}
+\date{September 15, 2023}
  
 \maketitle
 
@@ -1611,7 +1611,7 @@ For a trace packet instruction
 \TT{[<} {\em trace-packet-message} ~ {\em trace-packet-variable}\STAR{} \TT{>]}
 \end{center}
 If \TT{module->\EOL trace\_\EOL info[i]} is not a MIN label with at
-least one element, the just the {\em trace-header} is output.
+least one element, then just the {\em trace-header} is output.
 
 The trace packet instructions are:
 \begin{center}
@@ -1666,9 +1666,18 @@ own.  Specifically:
 		   packet variable values.
 		   Also the {\em op-code}
 		   in the {\em trace-header} is replaced by
-		   \TT{RET to CALL\ldots} or \TT{ENDL to CALL\ldots}.
+		   \TT{RET to CALL\ldots} or \TT{ENDF to CALL\ldots}.
 \end{tabular}
 \end{center}
+
+Note: The compiler should make the trace packet variables of a \TT{BEGL}
+match the names actually used in source code to refer to the loop
+variables, and similarly for \TT{BEGF} and arguments and \TT{CALL\ldots}
+and return values.
+But MEX knows nothing of names used in source code.
+To see how MEXAS handles this look at MEXAS Instructions,
+\itemref{MEXAS-INSTRUCTIONS}.
+
 
 
 \subsubsection{Other Instruction Trace Messages}
