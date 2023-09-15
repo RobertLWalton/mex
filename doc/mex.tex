@@ -1687,19 +1687,19 @@ To see how MEXAS handles this look at MEXAS Instructions,
 \begin{tabular}{lp{4.5in}}
 \bf Op Code     & \bf Trace Message
 \\\hline
-\TT{SET\_TRACE} & \TT{SET\_TRACE:} {\em trace-class}\STAR{} \\
+\TT{SET\_TRACE} & {\em trace-header}\TT{:} {\em trace-class}\STAR{} \\
                 & The {\em trace-classes} being enabled are
 	          listed, but they are \underline{not}
 		  aggregated into {\em trace-class-groups}.
 \\[0.5ex]
-\TT{SET\_EXCEPTS} & \TT{SET\_EXCEPTS:}
+\TT{SET\_EXCEPTS} & {\em trace-header}\TT{:}
                     \{ \TT{*}\QMARK{}{\em except-name} \}\STAR{} \\
                 & The names of the excepts being enable in
 		  \TT{p->excepts\_mask} are listed, and those that are
 		  also in \TT{p->excepts\_accumulator} are starred with
 		  \TT{*}.
 \\[0.5ex]
-\TT{TRACE\_EXCEPTS} & \TT{TRACE\_EXCEPTS:}
+\TT{TRACE\_EXCEPTS} & {\em trace-header}\TT{:}
                     \{ \TT{*}\QMARK{}{\em except-name} \}\STAR{} \\
                 & The names of the excepts in \TT{p->excepts\_accumulator}
 		  are listed, and those that are also in \TT{p->excepts\_mask}
@@ -1736,12 +1736,7 @@ Note: \TT{JMP\ldots} is the only way to exit a loop (\TT{ENDL} and
 
 A process's \TT{trace\_depth} is maintained even when the process's
 \TT{optimize} switch is \TT{true} (only a few instructions change
-the trace depth).  Housekeeping instructions (those in
-Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}) execute
-in the same manner regardless
-of the setting of \TT{optimize}, and can be traced when \TT{optimize}
-is \TT{true}.  In particular, the \TT{TRACE} instruction works regardless
-of the setting of \TT{optimize}.
+the trace depth).
 
 \subsection{Fatal Errors}
 \label{FATAL-ERRORS}

@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Sep 13 16:21:16 EDT 2023
+// Date:	Fri Sep 15 05:02:35 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -549,6 +549,9 @@ static bool optimized_run_process ( mex::process p )
 		break;
 	    }
 
+	    if ( pc->trace_depth > p->trace_depth )
+	        goto ERROR_EXIT;
+
 	    p->trace_depth -= pc->trace_depth;
 	    sp = new_sp - (int) immedA;
 	    pc += immedC;
@@ -559,6 +562,8 @@ static bool optimized_run_process ( mex::process p )
 	    ++ p->trace_depth;
 	    goto nop;
 	case mex::END:
+	    if ( p->trace_depth == 0 )
+	        goto ERROR_EXIT;
 	    -- p->trace_depth;
 	nop:
 	case mex::NOP:
@@ -662,6 +667,8 @@ static bool optimized_run_process ( mex::process p )
 	        if ( new_pc > em->length )
 		    goto ERROR_EXIT;
 	    }
+	    if ( p->trace_depth == 0 )
+	        goto ERROR_EXIT;
 
 	    mex::set_pc ( p, ret->saved_pc );
 	    p->level = ret->saved_level;
@@ -722,6 +729,8 @@ static bool optimized_run_process ( mex::process p )
 	        if ( new_pc > em->length )
 		    goto ERROR_EXIT;
 	    }
+	    if ( p->trace_depth == 0 )
+	        goto ERROR_EXIT;
 
 	    mex::set_pc ( p, ret->saved_pc );
 	    p->level = ret->saved_level;
@@ -1580,6 +1589,15 @@ bool mex::run_process ( mex::process p )
 		}
 	    }
 
+	    if ( execute_jmp
+	         &&
+		 pc->trace_depth > p->trace_depth )
+	    {
+	        message = "trace_depth would become"
+		          " negative";
+	        goto INNER_FATAL;
+	    }
+
 	    min::uns8 jmp_trace_class = trace_class;
 	    if ( ! execute_jmp
 	         &&
@@ -1810,9 +1828,15 @@ bool mex::run_process ( mex::process p )
 		}
 		value = sp[-1];
 		break;
+	    case mex::END:
+	        if ( p->trace_depth == 0 )
+		{
+		    message = "trace depth would become"
+		              " negative";
+		    goto INNER_FATAL;
+		}
 	    case mex::BEG:
 	    case mex::NOP:
-	    case mex::END:
 	    {
 		if ( immedA > sp - spbegin )
 		    goto INNER_FATAL;
@@ -1983,6 +2007,13 @@ bool mex::run_process ( mex::process p )
 		if ( new_fp > new_sp - spbegin )
 		{
 		    message = "bad saved_fp value";
+		    goto INNER_FATAL;
+		}
+
+	        if ( p->trace_depth == 0 )
+		{
+		    message = "trace depth would become"
+		              " negative";
 		    goto INNER_FATAL;
 		}
 
@@ -2617,6 +2648,7 @@ mex::process mex::init_process
 	RW_UNS32 p->return_stack->length = 1;
 
 	p->level = 1;
+	p->trace_depth = 1;
 
 	RW_UNS32 pc.index = pc.index + 1;
 	mex::set_pc ( p, pc );
