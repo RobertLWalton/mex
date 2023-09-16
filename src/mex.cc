@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Sep 15 22:11:47 EDT 2023
+// Date:	Sat Sep 16 05:49:09 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1735,7 +1735,7 @@ bool mex::run_process ( mex::process p )
 		{
 		    message = "PUSHS immedA too large;"
 		              " variable location is"
-			      " before stack";
+			      " before stack beginning";
 		    goto INNER_FATAL;
 		}
 		if ( sp >= spend )
@@ -1764,9 +1764,10 @@ bool mex::run_process ( mex::process p )
 		}
 	        if ( immedA >= mg->globals->length  )
 		{
-		    message = "PUSHG immedA too large;"
-		              " addresses non-extant"
-			      " global";
+		    message = "PUSHG immedA equal to"
+		              " or larger than the"
+			      " number of globals in"
+			      " the module";
 		    goto INNER_FATAL;
 		}
 		if ( sp >= spend )
@@ -1786,13 +1787,16 @@ bool mex::run_process ( mex::process p )
 			          " immedB = 0 and"
 				  " current module"
 				  " globals set; immedA"
-				  " too large,"
-				  " addresses"
-				  " non-extant global";
+				  " is equal to or"
+				  " larger than the"
+				  " number of globals"
+				  " in the module";
 			goto INNER_FATAL;
 		    }
+		    value = m->globals[immedA];
 		    break;
 		}
+
 		if ( immedB > p->level )
 		{
 		    message = "PUSHL immedB larger than"
@@ -1803,17 +1807,12 @@ bool mex::run_process ( mex::process p )
 		     >= sp - spbegin )
 		{
 		    message = "PUSHL immedA too large;"
-		              " non-extant variable"
-			      " addressed";
+		              " addresses variable"
+			      " beyond the end of the"
+			      " stack";
 		    goto INNER_FATAL;
 		}
-	        if ( immedB == 0
-		     &&
-		     m->globals != min::NULL_STUB )
-		    value = m->globals[immedA];
-		else
-		    value =
-			spbegin[p->fp[immedB] + immedA];
+		value = spbegin[p->fp[immedB] + immedA];
 		break;
 	    case mex::PUSHA:
 		if ( immedB < 1 || immedB > p->level )
@@ -1852,14 +1851,15 @@ bool mex::run_process ( mex::process p )
 		if ( sp <= spbegin )
 		{
 		    message =
-		        "POP: cannot pop and empty"
+		        "POP: cannot pop an empty"
 			" stack";
 		    goto INNER_FATAL;
 		}
 	        if ( immedA >= sp - spbegin )
 		{
-		    message = "POP: immedA larger than"
-		              "stack length";
+		    message = "POP: immedA equal to"
+		              " or larger than stack"
+		              " length";
 		    goto INNER_FATAL;
 		}
 		value = sp[-1];
@@ -1901,8 +1901,10 @@ bool mex::run_process ( mex::process p )
 		              " than stack size";
 		    goto INNER_FATAL;
 		}
-	        if (   immedA + 2 * immedB
-		     > sp - spbegin )
+	        if (    2 * immedB < immedB
+		     || immedA + 2 * immedB < immedA
+		     ||   immedA + 2 * immedB
+		        > sp - spbegin )
 		{
 		    message =
 		        "ENDL/CONT: immedA + 2 * immedB"
@@ -1914,7 +1916,7 @@ bool mex::run_process ( mex::process p )
 		{
 		    message =
 		        "ENDL/CONT: immedC too large;"
-			" associated BEGL non-exant";
+			" associated BEGL non-extant";
 		    goto INNER_FATAL;
 		}
 
@@ -1968,7 +1970,7 @@ bool mex::run_process ( mex::process p )
 	        if ( immedB > mex::max_lexical_level )
 		{
 		    message = "BEGF: immedB larger than"
-		              " max_lexical level";
+		              " max_lexical_level";
 		    goto INNER_FATAL;
 		}
 		break;
@@ -2014,7 +2016,7 @@ bool mex::run_process ( mex::process p )
 		{
 		    // Not possible for ENDF.
 		    message =
-		        "RET/ENDF: immedA+immedC is"
+		        "RET: immedA+immedC is"
 			" larger than portion of stack"
 			" at current lexical level";
 		    goto INNER_FATAL;
@@ -2091,8 +2093,9 @@ bool mex::run_process ( mex::process p )
 		}
 		if ( immedC >= cm->length )
 		{
-		    message = "CALL immedC is larger"
-		              " than module length";
+		    message = "CALL immedC is equal to"
+		              " or larger than module"
+			      " length";
 		    goto INNER_FATAL;
 		}
 		const mex::instr * target =
@@ -2104,11 +2107,12 @@ bool mex::run_process ( mex::process p )
 		    goto INNER_FATAL;
 		}
 		min::uns32 level = target->immedB;
-		if ( level > p->level + 1 )
+		if (    level == 0
+		     || level > p->level + 1 )
 		{
 		    message =
-		        "BEGF immedB is larger than"
-			" CALL lexical level + 1";
+		        "BEGF immedB is 0 or larger"
+			" than CALL lexical level + 1";
 		    goto INNER_FATAL;
 		}
 		if ( immedA < target->immedA )
@@ -2533,6 +2537,33 @@ FATAL:
 	    ( q, ", IMMEDB = %u", instr->immedB );
 	q += sprintf
 	    ( q, ", IMMEDC = %u", instr->immedC );
+	if ( min::is_stub ( instr->immedD ) )
+	{
+	    mex::module im =
+	        (mex::module) instr->immedD;
+	    if ( im == min::NULL_STUB )
+	        q += sprintf
+		    ( q, ", IMMEDD = <UNKNOWN STUB>" );
+	    else if ( im->position == min::NULL_STUB
+	              ||
+	                 im->position->file
+		      == min::NULL_STUB
+		      ||
+		      ! min::is_str
+		            ( im->position->file
+			                  ->file_name )
+		    )
+	        q += sprintf
+		    ( q, ", IMMEDD = UNNAMED MODULE" );
+	    else
+	    {
+	        min::str_ptr sp =
+		    im->position->file->file_name;
+		q += sprintf
+		    ( q, ", IMMEDD = MODULE %s",
+		         ~ min::begin_ptr_of ( sp ) );
+	    }
+	}
     }
 
     p->printer << min::bol << "FATAL ERROR: "
