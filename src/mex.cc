@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat Sep 16 05:49:09 EDT 2023
+// Date:	Sat Sep 16 13:45:33 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -2384,7 +2384,6 @@ bool mex::run_process ( mex::process p )
 	    case mex::TRACE:
 	    case mex::TRACE_EXCEPTS:
 	    case mex::WARN:
-	    case mex::ERROR:
 	    {
 	        sp -= immedA;
 	        break;
@@ -2475,6 +2474,11 @@ bool mex::run_process ( mex::process p )
 		++ p->trace_depth;
 		break;
 	    }
+	    default:
+		message = "internal system error:"
+			  " unrecognized NONA"
+			  " instruction";
+		goto INNER_FATAL;
 
 	    } // end switch ( op_code )
 
@@ -2566,7 +2570,8 @@ FATAL:
 	}
     }
 
-    p->printer << min::bol << "FATAL ERROR: "
+    p->printer << min::bol
+               << "!!! FATAL PROGRAM FORMAT ERROR: "
                << min::bom
                << message
 	       << min::indent

@@ -240,7 +240,7 @@
 
 \author{Robert L. Walton}
 
-\date{September 15, 2023}
+\date{September 16, 2023}
  
 \maketitle
 
@@ -1737,35 +1737,6 @@ Note: \TT{JMP\ldots} is the only way to exit a loop (\TT{ENDL} and
 A process's \TT{trace\_depth} is maintained even when the process's
 \TT{optimize} switch is \TT{true} (only a few instructions change
 the trace depth).
-
-\subsection{Fatal Errors}
-\label{FATAL-ERRORS}
-
-\ikey{Fatal errors}{fatal error} are errors that terminate the current
-process.  A fatal error produces an error message that describes the
-error.  If a \TT{min::phrase\_position} is available for the instruction
-that had the fatal error, it will be used to specify the location
-of the error in source code.
-
-The following is a complete list of fatal errors;
-\begin{enumerate}
-\item \TT{ERROR} instruction with non-zero \TT{immedB}.
-\item A \TT{JMP\ldots} instruction comparing values
-(A) one of which is not a number or an infinity, or
-(B) both of which are infinities with the same sign.
-\item Attempting to increase stack size to above the \TT{max\_length}
-member of the process.
-\item Attempting to increase the \TT{return\_stack}
-size to above the \TT{max\_length} member of the process \TT{return\_stack}.
-\item Attempt to pop a value off an empty stack.
-\item Setting the process \TT{pc} to \TT{\{min::NULL\_STUB,$I$\}} where
-$I$ is \underline{not} \TT{0}.
-\item Attempt to decrement \TT{trace\_depth} when that is \TT{0}.
-
-\end{enumerate}
-
-Note that arithmetic exceptions (see \itemref{ARITHMETIC-EXCEPTIONS})
-are \underline{not} fatal errors.
 
 \section{MEX Functions}
 \label{MEX Functions}
