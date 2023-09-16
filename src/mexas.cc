@@ -1790,8 +1790,9 @@ mex::module mexas::compile ( min::file file )
 			      " smaller than the number"
 			      " of next-variables" );
 		    nnext = SP - mexas::stack_limit;
-			// To protect against excessively
-			// large nvars values.
+			// To protect against
+			// excessively large nvars
+			// values.
 		}
 
 		min::gen message =

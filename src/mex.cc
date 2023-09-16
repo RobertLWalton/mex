@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Sep 15 05:02:35 EDT 2023
+// Date:	Fri Sep 15 22:11:47 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1098,16 +1098,15 @@ bool mex::run_process ( mex::process p )
     const char * message;
     min::uns32 limit;
 
-    if ( m == min::NULL_STUB )
+    if ( m == min::NULL_STUB && i != 0 )
     {
-        if ( i == 0 ) return true;
 	message = "Illegal PC: no module and index > 0";
 	goto FATAL;
     }
-    if ( i >= m->length )
+    if ( i > m->length )
     {
-        if ( i == m->length ) return true;
-	message = "Illegal PC: index too large";
+	message = "Illegal PC: PC index greater than"
+	          " module length";
 	goto FATAL;
     }
     pcbegin = ~ min::begin_ptr_of ( m );
@@ -1117,7 +1116,8 @@ bool mex::run_process ( mex::process p )
     i = p->length;
     if ( i > p->max_length )
     {
-	message = "Illegal SP: too large";
+	message = "Illegal SP: too large; process"
+	          " length > process max_length";
 	goto FATAL;
     }
     spbegin = ~ min::begin_ptr_of ( p );
@@ -1206,7 +1206,8 @@ bool mex::run_process ( mex::process p )
 		    p->state = mex::MODULE_END;
 		    return excepts_test ( p );
 		}
-		message = "Illegal PC: index too large";
+		message = "Illegal PC: PC index greater"
+			  " than module length";
 		goto FATAL;
 	    }
 
@@ -1247,7 +1248,8 @@ bool mex::run_process ( mex::process p )
 	    new_sp -= 2;
 	    if ( new_sp < spbegin )
 	    {
-	        message = "illegal SP: too small";
+	        message = "illegal SP: stack to small"
+		          " for instruction";
 		goto INNER_FATAL;
 	    }
 	    arg1 = FG ( new_sp[0] );
@@ -1257,7 +1259,8 @@ bool mex::run_process ( mex::process p )
 	    new_sp -= 2;
 	    if ( new_sp < spbegin )
 	    {
-	        message = "illegal SP: too small";
+	        message = "illegal SP: stack to small"
+		          " for instruction";
 		goto INNER_FATAL;
 	    }
 	    arg1 = FG ( new_sp[1] );
@@ -1267,7 +1270,8 @@ bool mex::run_process ( mex::process p )
 	    new_sp -= 1;
 	    if ( new_sp < spbegin )
 	    {
-	        message = "illegal SP: too small";
+	        message = "illegal SP: stack to small"
+		          " for instruction";
 		goto INNER_FATAL;
 	    }
 	    arg1 = FG ( new_sp[0] );
@@ -1277,7 +1281,8 @@ bool mex::run_process ( mex::process p )
 	    new_sp -= 1;
 	    if ( new_sp < spbegin )
 	    {
-	        message = "illegal SP: too small";
+	        message = "illegal SP: stack to small"
+		          " for instruction";
 		goto INNER_FATAL;
 	    }
 	    arg1 = FG ( pc->immedD );
@@ -1287,7 +1292,8 @@ bool mex::run_process ( mex::process p )
 	    new_sp -= 1;
 	    if ( new_sp < spbegin )
 	    {
-	        message = "illegal SP: too small";
+	        message = "illegal SP: stack to small"
+		          " for instruction";
 		goto INNER_FATAL;
 	    }
 	    arg1 = FG ( new_sp[0] );
@@ -1297,7 +1303,8 @@ bool mex::run_process ( mex::process p )
 	    new_sp -= 2;
 	    if ( new_sp < spbegin )
 	    {
-	        message = "illegal SP: too small";
+	        message = "illegal SP: stack to small"
+		          " for instruction";
 		goto INNER_FATAL;
 	    }
 	    arg1 = FG ( new_sp[0] );
@@ -1409,7 +1416,9 @@ bool mex::run_process ( mex::process p )
 		min::uns32 j = pc->immedB;
 		if ( j < 1 || j > p->level )
 		{
-		    message = "invalid immedB";
+		    message = "PUSHV immedB is 0 or"
+		              " greater than current"
+			      " lexical level";
 		    goto INNER_FATAL;
 		}
 		min::float64 ff = floor ( arg1 );
@@ -1540,17 +1549,19 @@ bool mex::run_process ( mex::process p )
 
 	    if ( immedA > new_sp - spbegin )
 	    {
-	        message = "immedA too large";
+	        message = "JMP immedA is greater than"
+		          " stack size";
 	        goto INNER_FATAL;
 	    }
 	    if ( pc + immedC > pcend )
 	    {
-	        message = "immedC too large";
+	        message = "JMP immedC too large; target"
+		          " is beyond module end";
 	        goto INNER_FATAL;
 	    }
 	    if ( immedC == 0 )
 	    {
-	        message = "immedC == 0";
+	        message = "JMP immedC == 0; illegal";
 	        goto INNER_FATAL;
 	    }
 
@@ -1593,7 +1604,8 @@ bool mex::run_process ( mex::process p )
 	         &&
 		 pc->trace_depth > p->trace_depth )
 	    {
-	        message = "trace_depth would become"
+	        message = "if JMP were executed,"
+		          " trace_depth would become"
 		          " negative";
 	        goto INNER_FATAL;
 	    }
@@ -1721,7 +1733,9 @@ bool mex::run_process ( mex::process p )
 	    case mex::PUSHS:
 	        if ( immedA + 1 > sp - spbegin )
 		{
-		    message = "immedA too large";
+		    message = "PUSHS immedA too large;"
+		              " variable location is"
+			      " before stack";
 		    goto INNER_FATAL;
 		}
 		if ( sp >= spend )
@@ -1738,17 +1752,21 @@ bool mex::run_process ( mex::process p )
 	        mex::module mg = (mex::module) immedD;
 		if ( mg == min::NULL_STUB )
 		{
-		    message = "immedD is not a module";
+		    message = "PUSHG immedD is not a"
+		              " module";
 		    goto INNER_FATAL;
 		}
 		if ( mg->globals == min::NULL_STUB )
 		{
-		    message = "module has no globals";
+		    message = "PUSHG module has no"
+		              " globals";
 		    goto INNER_FATAL;
 		}
 	        if ( immedA >= mg->globals->length  )
 		{
-		    message = "immedA too large";
+		    message = "PUSHG immedA too large;"
+		              " addresses non-extant"
+			      " global";
 		    goto INNER_FATAL;
 		}
 		if ( sp >= spend )
@@ -1764,20 +1782,29 @@ bool mex::run_process ( mex::process p )
 		{
 		    if ( immedA >= m->globals->length )
 		    {
-			message = "immedA too large";
+			message = "PUSHL with"
+			          " immedB = 0 and"
+				  " current module"
+				  " globals set; immedA"
+				  " too large,"
+				  " addresses"
+				  " non-extant global";
 			goto INNER_FATAL;
 		    }
 		    break;
 		}
 		if ( immedB > p->level )
 		{
-		    message = "immedB too large";
+		    message = "PUSHL immedB larger than"
+		              " current lexical level";
 		    goto INNER_FATAL;
 		}
 		if (    p->fp[immedB] + immedA
 		     >= sp - spbegin )
 		{
-		    message = "immedA too large";
+		    message = "PUSHL immedA too large;"
+		              " non-extant variable"
+			      " addressed";
 		    goto INNER_FATAL;
 		}
 	        if ( immedB == 0
@@ -1791,13 +1818,17 @@ bool mex::run_process ( mex::process p )
 	    case mex::PUSHA:
 		if ( immedB < 1 || immedB > p->level )
 		{
-		    message = "invalid immedB";
+		    message = "PUSHA: invalid immedB; 0"
+		              " or greater than current"
+			      " lexical level";
 		    goto INNER_FATAL;
 		}
 		if (    immedA < 1
 		     || immedA > p->nargs[immedB] )
 		{
-		    message = "immedA out of range";
+		    message = "PUSHA immedA out of"
+		              " range; addresses"
+			      " non-extant argument";
 		    goto INNER_FATAL;
 		}
 		value = spbegin
@@ -1806,7 +1837,10 @@ bool mex::run_process ( mex::process p )
 	    case mex::PUSHNARGS:
 		if ( immedB < 1 || immedB > p->level )
 		{
-		    message = "invalid immedB";
+		    message = "PUSHNARGS: invalid"
+		              " immedB; 0 or greater"
+			      " than current lexical"
+			      " level";
 		    goto INNER_FATAL;
 		}
 		if ( sp >= spend )
@@ -1818,12 +1852,14 @@ bool mex::run_process ( mex::process p )
 		if ( sp <= spbegin )
 		{
 		    message =
-		        "stack empty for pop";
+		        "POP: cannot pop and empty"
+			" stack";
 		    goto INNER_FATAL;
 		}
 	        if ( immedA >= sp - spbegin )
 		{
-		    message = "immedA too large";
+		    message = "POP: immedA larger than"
+		              "stack length";
 		    goto INNER_FATAL;
 		}
 		value = sp[-1];
@@ -1831,8 +1867,10 @@ bool mex::run_process ( mex::process p )
 	    case mex::END:
 	        if ( p->trace_depth == 0 )
 		{
-		    message = "trace depth would become"
-		              " negative";
+		    message = "END: trace depth would"
+		              " become negative if"
+			      " instruction was"
+			      " executed";
 		    goto INNER_FATAL;
 		}
 	    case mex::BEG:
@@ -1843,14 +1881,12 @@ bool mex::run_process ( mex::process p )
 		break;
 	    }
 	    case mex::BEGL:
-	        if ( immedA + immedB < immedA )
+	        if ( immedA + immedB < immedA
+		     ||
+	             immedA + immedB > sp - spbegin )
 		{
-		    message = "immedA+immedB too large";
-		    goto INNER_FATAL;
-		}
-	        if ( immedA + immedB > sp - spbegin )
-		{
-		    message = "immedA+immedB too large";
+		    message = "BEGL: immedA+immedB"
+		              " larger than stack size";
 		    goto INNER_FATAL;
 		}
 		if ( sp + immedB > spend + immedA )
@@ -1861,20 +1897,24 @@ bool mex::run_process ( mex::process p )
 	    {
 	        if ( immedA > sp - spbegin )
 		{
-		    message = "immedA too large";
+		    message = "ENDL/CONT: immedA larger"
+		              " than stack size";
 		    goto INNER_FATAL;
 		}
 	        if (   immedA + 2 * immedB
 		     > sp - spbegin )
 		{
 		    message =
-		        "immedA + 2 * immedB too large";
+		        "ENDL/CONT: immedA + 2 * immedB"
+			" larger than stack size";
 		    goto INNER_FATAL;
 		}
 		min::uns32 location = pc - pcbegin;
 	        if ( immedC + 1 > location )
 		{
-		    message = "immedC too large";
+		    message =
+		        "ENDL/CONT: immedC too large;"
+			" associated BEGL non-exant";
 		    goto INNER_FATAL;
 		}
 
@@ -1906,24 +1946,29 @@ bool mex::run_process ( mex::process p )
 	    case mex::ERROR:
 		if ( immedA > sp - spbegin )
 		{
-		    message = "immedA too large";
+		    message =
+		        "immedA larger than stack size";
 		    goto INNER_FATAL;
 		}
 	        break;
 	    case mex::BEGF:
 	        if ( immedC > pcend - pc )
 		{
-		    message = "immedC too large";
+		    message = "BEGF: immedC too large;"
+		              " target address beyond"
+			      " module length";
 		    goto INNER_FATAL;
 		}
-		if ( immedB > p->level + 1 )
+		if (    immedB != p->level + 1 )
 		{
-		    message = "immedB too large";
+		    message = "BEGF: immedB != current"
+		              " lexical level + 1"; 
 		    goto INNER_FATAL;
 		}
 	        if ( immedB > mex::max_lexical_level )
 		{
-		    message = "immedB too large";
+		    message = "BEGF: immedB larger than"
+		              " max_lexical level";
 		    goto INNER_FATAL;
 		}
 		break;
@@ -1934,14 +1979,15 @@ bool mex::run_process ( mex::process p )
 	    {
 		if ( immedB != p->level )
 		{
-		    message = "immedB != current"
-		              " lexical level";
+		    message = "RET/ENDF: immedB !="
+		              " current lexical level";
 		    goto INNER_FATAL;
 		}
 		min::uns32 rp = p->return_stack->length;
 		if ( rp == 0 )
 		{
-		    message = "return stack is empty";
+		    message = "RET/ENDF: return stack"
+		              " is empty";
 		    goto INNER_FATAL;
 		}
 		-- rp;
@@ -1951,9 +1997,9 @@ bool mex::run_process ( mex::process p )
 		{
 		    message =
 		        ( op_code == mex::ENDF ?
-			  "return stack nresults is"
-			  " not zero" :
-			  "immedC != return stack"
+			  "ENDF: return stack nresults"
+			  " is not zero" :
+			  "RET: immedC != return stack"
 		              " nresults" );
 		    goto INNER_FATAL;
 		}
@@ -1968,7 +2014,9 @@ bool mex::run_process ( mex::process p )
 		{
 		    // Not possible for ENDF.
 		    message =
-		        "immedA + immedC is too large";
+		        "RET/ENDF: immedA+immedC is"
+			" larger than portion of stack"
+			" at current lexical level";
 		    goto INNER_FATAL;
 		}
 		mex::module em = ret->saved_pc.module;
@@ -1980,7 +2028,10 @@ bool mex::run_process ( mex::process p )
 		{
 		    if ( new_pc != 0 )
 		    {
-			message = "bad saved_pc value";
+			message = "RET/ENDF: Illegal"
+			          " saved_pc:"
+			          " no module and"
+				  " index > 0";
 			goto INNER_FATAL;
 		    }
 		    tinfo  = min::MISSING();
@@ -1989,7 +2040,10 @@ bool mex::run_process ( mex::process p )
 		{
 		    if ( new_pc > em->length )
 		    {
-			message = "bad saved_pc value";
+			message = "RET/ENDF: Illegal"
+			          " saved_pc:"
+			          " index greater than"
+	                          " module length";
 			goto INNER_FATAL;
 		    }
 
@@ -2006,14 +2060,17 @@ bool mex::run_process ( mex::process p )
 		min::uns32 new_fp = ret->saved_fp;
 		if ( new_fp > new_sp - spbegin )
 		{
-		    message = "bad saved_fp value";
+		    message = "RET/ENDF: saved_fp"
+		              " larger than stack size";
 		    goto INNER_FATAL;
 		}
 
 	        if ( p->trace_depth == 0 )
 		{
-		    message = "trace depth would become"
-		              " negative";
+		    message = "RET/ENDF: trace depth"
+		              " would become negative"
+			      " if instruction were"
+			      " executed";
 		    goto INNER_FATAL;
 		}
 
@@ -2028,12 +2085,14 @@ bool mex::run_process ( mex::process p )
 		      m );
 		if ( cm == min::NULL_STUB )
 		{
-		    message = "immedD is not a module";
+		    message = "CALL immedD is not a"
+		              " module";
 		    goto INNER_FATAL;
 		}
 		if ( immedC >= cm->length )
 		{
-		    message = "immedC is too large";
+		    message = "CALL immedC is larger"
+		              " than module length";
 		    goto INNER_FATAL;
 		}
 		const mex::instr * target =
@@ -2041,20 +2100,23 @@ bool mex::run_process ( mex::process p )
 		if ( target->op_code != mex::BEGF )
 		{
 		    message =
-		        "transfer target is not a BEGF";
+		        "CALL target is not a BEGF";
 		    goto INNER_FATAL;
 		}
 		min::uns32 level = target->immedB;
 		if ( level > p->level + 1 )
 		{
 		    message =
-		        "BEGF immedB is too large";
+		        "BEGF immedB is larger than"
+			" CALL lexical level + 1";
 		    goto INNER_FATAL;
 		}
 		if ( immedA < target->immedA )
 		{
 		    message =
-		        "immedA < BEGF immedA";
+		        "CALL immedA < BEGF immedA;"
+			" too few arguments"
+			" provided by CALL";
 		    goto INNER_FATAL;
 		}
 		min::uns32 rp = p->return_stack->length;
