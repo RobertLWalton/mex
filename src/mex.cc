@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat Sep 16 13:45:33 EDT 2023
+// Date:	Sun Sep 17 04:13:09 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -2650,6 +2650,10 @@ mex::module mex::create_module ( min::file f )
 mex::process mex::create_process
 	( min::printer printer )
 {
+    MIN_ASSERT ( printer != min::NULL_STUB,
+    		 "mex::create_process printer"
+		 " argument is NULL_STUB" );
+
     mex::process p =
         (mex::process) ::process_vec_type.new_stub
 	    ( mex::run_stack_limit );

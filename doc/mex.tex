@@ -837,6 +837,8 @@ a return stack, and other parameters.  Specifically:
                          {in {\tt mex::process\_header}} \\
 \verb|bool | & \TTMKEY{optimize}{in {\tt mex::process\_header}} \\
 \verb|min::uns32 | & \TTMKEY{counter}{in {\tt mex::process\_header}} \\
+\verb|min::uns32 | & \TTMKEY{optimized\_counter}%
+                         {in {\tt mex::process\_header}} \\
 \verb|min::uns32 | & \TTMKEY{counter\_limit}{in {\tt mex::process\_header}} \\
 \verb|mex::state | & \TTMKEY{state}%
                                    {in {\tt mex::process\_header}} \\
@@ -932,7 +934,11 @@ for specifics.
 
 The process's \TT{counter} is incremented once every time an instruction
 finishes execution.  The process stops when
-\TT{counter >= counter\_\EOL limit}. 
+\TT{counter >= counter\_\EOL limit}.   The \TT{optimized\_counter}
+is incremented (along with the \TT{counter})
+for every instruction executed in optimize mode;
+it has no limit and is for information purposes only.
+
 When the process terminates, \TT{state} is set.  For details
 see \TT{mex::run\_process}, \pagref{MEX::RUN_PROCESS},
 
@@ -1785,7 +1791,9 @@ Default printer for \TT{create\_process}.  Initially \TT{min::NULL\_STUB}.
 {\tt mex::process mex::}\MEXKEY{create\_process} \\
 \hspace*{10em}\verb|( min::printer printer = mex::default_printer )|
 \begin{indpar}
-A \TT{mex::process} is created and returned.
+A \TT{mex::process} is created and returned.  The \TT{printer} argument
+must \underline{not} be \TT{min::\EOL NULL\_\EOL STUB}.
+
 The process \TT{length} member (stack size) is set to \TT{0}
 and its \TT{max\_length} member (maximum stack size) is set to the
 value of the global variable:
@@ -1804,7 +1812,8 @@ Note: the stack's \TT{max\_length} members are \underline{not} permitted
 to change during process execution, but see \TT{mex::\EOL run\_\EOL process}.
 
 The \TT{printer} member is set to the \TT{printer} argument.
-The \TT{trace\_flags}, \TT{excepts\_\EOL mask}, and \TT{optimize} members
+The \TT{counter\_\EOL limit}, \TT{trace\_\EOL flags},
+\TT{excepts\_\EOL mask}, and \TT{optimize} members
 are set respectively from:
 \begin{indpar}\begin{tabular}{r@{}l}
 \verb|min::uns32 mex::| & \MEXKEY{run\_counter\_limit} \\
@@ -1822,7 +1831,7 @@ are set respectively from:
 
 The \TT{pc} member is set to \TT{\{min::NULL\_STUB,0\}}.
 The \TT{fp[\ldots]}, \TT{nargs[\ldots]}, \TT{level}, \TT{trace\_\EOL depth},
-\TT{counter}, and \TT{excepts\_\EOL accumulator}
+\TT{counter}, \TT{optimized\_\EOL counter}, and \TT{excepts\_\EOL accumulator}
 members are set to \TT{0}.
 The \TT{state} is set to \TT{NEVER\_\EOL STARTED}.
 
@@ -1839,8 +1848,8 @@ Return the process.
 The \TT{pc} member is set to \TT{\{m,0\}}.
 
 The \TT{fp[\ldots]}, \TT{nargs[\ldots]}, \TT{level}, \TT{trace\_\EOL depth},
-\TT{counter}, and \TT{excepts\_\EOL accumula\-tor}
-members are set to \TT{0}.
+\TT{counter}, \TT{optimized\_\EOL counter}, and
+\TT{excepts\_\EOL accumula\-tor} members are set to \TT{0}.
 The \TT{state} is set to \TT{NEVER\_\EOL STARTED}.
 
 The stack sizes, \TT{counter\_limit}, \TT{trace\_flags},
@@ -1889,11 +1898,11 @@ set as follows to indicate cause of termination:
 \multicolumn{2}{c}{\bf But Do NOT print An Error Message}
 \\[1ex]
 \verb|mex::|\MEXKEY{COUNTER\_LIMIT\_STOP}
-    & \TT{p->counter >= p->limit} \\
+    & \TT{p->counter > p->limit} \\
 \verb|mex::|\MEXKEY{STACK\_LIMIT\_STOP}
-    & \TT{p->length >= p->max\_length} \\
+    & \TT{p->length > p->max\_length} \\
 \verb|mex::|\MEXKEY{RETURN\_STACK\_LIMIT\_STOP}
-    & \TT{p->return\_stack->length >=} \\
+    & \TT{p->return\_stack->length >} \\
     & \TT{p->return\_stack->max\_length}
 \\[1ex]
 \multicolumn{2}{c}{\bf States That Return \TT{false}} \\
@@ -1918,10 +1927,17 @@ set as follows to indicate cause of termination:
 
 Notes:
 \begin{enumerate}
+\item For cases where \TT{false} is returned by \TT{mex::run\_process},
+the process stops \underline{before} executing the instruction which
+would violate the condition (except for \TT{mex::\EOL EXCEPTS\_\EOL ERROR}).
+Thus the process will stop before executing an instruction that would
+violate one of the limits, trigger a programming format error, etc.
+The \TT{ERROR} instruction stops the process with the program counter
+pointing at the \TT{ERROR} instruction.
 \item \label{LIMIT-STOP-NOTE}
 On \TT{\ldots\_LIMIT\_STOP}, you can increase the limit
 and call \TT{run\_process} again to continue execution.
-For stacks you must resize the stack.
+For stacks you must resize the stack (as per \TT{min::\EOL resize}).
 \item You can use \TT{init\_process ( m )} followed by \TT{run\_process}
 to run the code of \TT{m}.  Then after \TT{MODULE\_END},
 you can add to the end of \TT{m}
