@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Sep  3 05:04:35 EDT 2023
+// Date:	Sat Sep 16 21:43:56 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -53,19 +53,11 @@ inline void push_instr
         instr.trace_class = mex::T_NEVER;
 
     mex::module_ins m = mexas::output_module;
-    min::push(m) = instr;
-    min::unprotected::acc_write_update
-	( m, instr.immedD );
-
-    min::phrase_position_vec_insptr ppins =
-        (min::phrase_position_vec_insptr) m->position;
-    min::push(ppins) = pp;
-
-    min::packed_vec_insptr<min::gen> trace_info_ins =
-        (min::packed_vec_insptr<min::gen>)
-	m->trace_info;
-    min::push(trace_info_ins) = trace_info;
+    mex::push_instr ( m, instr );
+    mex::push_position ( m, pp );
+    mex::push_trace_info ( m, trace_info );
 }
+
 void push_push_instr
         ( min::gen new_name, min::gen name,
 	  const min::phrase_position & pp =

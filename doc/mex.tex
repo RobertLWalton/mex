@@ -743,9 +743,11 @@ The interface to a MEX module and its code vector is:
 \verb|}                                  | \\
 \end{tabular}
 
-\verb|typedef min::packed_vec_insptr<mex::instr,mex::module_header>| \\
+\verb|typedef min::packed_vec_ptr<mex::instr,mex::module_header>| \\
 \hspace*{3em}\verb|mex::|\MEXKEY{module}
-
+\\[0.5ex]
+\verb|typedef min::packed_vec_insptr<mex::instr,mex::module_header>| \\
+\hspace*{3em}\verb|mex::|\MEXKEY{module\_ins}
 \end{indpar}
 
 The \TT{module} vector is the module's code vector.
@@ -1761,21 +1763,13 @@ functions can be used to push elements into these vectors and
 call \TT{min::acc\_write\_update} as necessary:
 \begin{indpar}
 {\tt void mex::}\MEXKEY{push\_instr} \\
-\hspace*{2em}
-    \begin{tabular}[t]{@{}l@{}}
-    \verb|( mex::module_ins m, mex::op_code op_code,| \\
-    \verb|                     min::uns8 trace_flags = 0,| \\
-    \verb|                     min::uns16 immedA = 0,| \\
-    \verb|                     min::uns16 immedB = 0,| \\
-    \verb|                     min::uns16 immedC = 0,| \\
-    \verb|                     min::gen   immedD = min::MISSING() )| \\
-    \end{tabular}
+\hspace*{2em}\verb|( mex::module_ins m, const mex::instr & instr )|
 \\[0.5ex]
-{\tt void mex::}\MEXKEY{push\_position}
-    \verb|( mex::module, min::phrase_position pp )|
+{\tt void mex::}\MEXKEY{push\_position} \\
+\hspace*{2em}\verb|( mex::module m, const min::phrase_position & pp )|
 \\[0.5ex]
-{\tt void mex::}\MEXKEY{push\_trace\_info}
-    \verb|( mex::module, min::gen info )|
+{\tt void mex::}\MEXKEY{push\_trace\_info} \\
+\hspace*{2em}\verb|( mex::module, min::gen info )|
 \end{indpar}
 
 These functions will increase the \TT{max\_length} of the vectors
