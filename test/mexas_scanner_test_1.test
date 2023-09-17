@@ -26,3 +26,15 @@ lines ####-####
 line5 a continued line: \ // with a comment
     this is the continuation
     line5 a continued "line:" this is the continuation
+WARNING: line ####: string does not have string-ending quote; quote added
+line6 a line with an 'unterminated string
+lines ####-####
+
+line6 a line with an 'unterminated string
+    line6 a line with an "'" "unterminated string"
+ERROR: line ####: illegal character found in line; changed to `#'
+line7 a //--comment with an illegal character <SOH> or two <FF>
+lines ####-####
+
+line7 a //--comment with an illegal character <SOH> or two <FF>
+    line7 a

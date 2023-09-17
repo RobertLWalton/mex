@@ -9,3 +9,7 @@ line4 with a // comment
 
 line5 a continued line: \ // with a comment
     this is the continuation
+
+line6 a line with an 'unterminated string
+
+line7 a //--comment with an illegal character  or two 

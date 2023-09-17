@@ -1958,7 +1958,7 @@ advanced MEX compilers.
 \label{MEXAS-SYNTAX}
 
 MEXAS programs are written in ASCII.  Control characters other
-than whitespace, and non-ASCII characters, are illegal and are
+than whitespace, and non-ASCII bytes, are illegal and are
 replaced by `\#'.
 
 A MEXAS program consists of statements which are instructions
@@ -1966,14 +1966,17 @@ or declarations, each encoded as a sequence of lexemes.
 
 If a lexeme begins with `\ttkey{//}', it and the rest of the
 line are a \key{comment} and are ignored (except for detecting
-illegal characters).  Blank lines are ignored.
+illegal characters).  A line containing only a comment is a
+\key{comment line}.  Blank lines have no effect.
 
-If the last lexeme on a line is `\ttkey{\textbackslash}', the statement
+If the last lexeme on a line is `\ttkey{\textbackslash}',
+the current statement
 is \key{continued} on the next line (the `\TT{\textbackslash}' is
 discarded).
 
-A \key{statement} is a sequence of lines beginning with a non-blank
-line and ending with a non-blank, non-comment line that is
+A \key{statement} is a sequence of lines beginning with the first
+line after the previous statement (or the first line of a file)
+and ending with a non-blank, non-comment line that is
 \underline{not} continued.  Statements are either instructions or
 declarations.
 
@@ -1982,12 +1985,15 @@ of all the instructions taken together
 is that of a code vector: see Code Vectors,
 \itemref{CODE-VECTORS}.
 
-Declarations define jump instruction targets and instruction
-trace flags.
+Declarations define jump instruction targets or print assembly
+information.
 
-When `\key{::=}' is used in a syntax equation, the
+When `\ttkey{::=}' is used in a syntax equation, the
 items of the equation are lexemes and \underline{not}
 characters.
+When `\ttkey{:::=}' is used, the
+items of the equation are characters and \underline{not}
+lexemes.
 
 \subsection{Lexemes}
 
@@ -2012,11 +2018,11 @@ All lexemes must be on a single line: they cannot be continued to the
 next line.  Strings not terminated by an end of line are automatically
 terminated with an error message.
 
-The comment beginning lexeme (\TT{//}) and the continuation
+A comment beginning lexeme (\TT{//\ldots}) and a continuation
 lexeme (\TT{\textbackslash}) must be lexemes surrounded by whitespace.
 
 Illegal characters are replaced by \TT{\#} and become part of the
-current lexeme.  An error message accompanies such replacement.
+current lexeme or comment.  An error message accompanies such replacement.
 
 \subsection{Lexical Level and Depth}
 \label{LEXICAL-LEVEL-AND-DEPTH}
