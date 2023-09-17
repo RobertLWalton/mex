@@ -2039,7 +2039,7 @@ that are \underline{not} inside any function is \TT{0}.
 
 Code also contains (non-function) \skey{block}s that are
 bracketed with either \TT{BEG} and \TT{END} or with
-\TT{BEGL} and \TT{ENDL}.  A blocks has a \key{container}
+\TT{BEGL} and \TT{ENDL}.  A block has a \key{container}
 and within the container a \key{depth}.
 A block not inside a function has the module as its container.
 The container of a block inside a function is the smallest
@@ -2048,7 +2048,7 @@ function containing the block.
 The depth of a block that is not inside any other block with
 the same container is \TT{1}.  The depth of any other block $B$
 is one plus the depth of the smallest block containing $B$.
-The dept of an instruction
+The depth of an instruction
 is that of the smallest block containing the instruction.
 The depth of instructions in a container
 that are \underline{not} inside any block that is in the container
@@ -2075,10 +2075,13 @@ but when the \TT{END} instruction is assembled, it pops
 from the end of the variable stack all elements with
 the same lexical level and depth as the \TT{END} instruction.
 \TT{BEGL} and \TT{ENDL} behave similarly, except that
-\TT{BEGL} pushes next variables (see Next Variables and Loops,
-\itemref{NEXT-VARIABLES-AND-LOOPS}) into the variable stack.
+\TT{BEGL} pushes next variables into the variable stack
+(these have depth one less
+than that of the \TT{BEGL} and \TT{ENDL}: see Next Variables and Loops,
+\itemref{NEXT-VARIABLES-AND-LOOPS}).
 \TT{BEGF} and \TT{ENDF} behave similarly except that \TT{BEGF}
-pushes arguments into the variable stack.
+pushes arguments into the variable stack (these have the same
+lexical level and depth as the \TT{BEGF} and \TT{ENDF}).
 
 Two instructions that treat the variable stack very differently
 from a process stack are \TT{CALL\ldots} and \TT{JMP}.  \TT{CALL\ldots}
