@@ -240,7 +240,7 @@
 
 \author{Robert L. Walton}
 
-\date{September 16, 2023}
+\date{September 18, 2023}
  
 \maketitle
 
@@ -2145,8 +2145,8 @@ when its target is found.
 \item The {\em jmp-target} name.
 \item The lexical level $L$ of the jump instruction.
 \item The maximum depth $D$ allowed for the target.
-\item The length $S$ of the variable stack when the jump instruction
-      was encountered.
+\item The length $S$ of the variable stack just after the jump instruction
+      pops variable elements from the stack.
 \item The minimum $M$ of $S$ and all the variable stack lengths that have
       occurred after \TT{END} or \TT{ENDL} instructions encountered
       since the jump instruction was encountered.
@@ -2190,12 +2190,65 @@ lexical level of the \TT{ENDF} and remove them as being unresolvable,
 and therefore in error.
 \end{indpar}
 
-{\bf Stack Jump Rule}: When a jump list element is resolved, its $M$
+{\bf Jump Stack Rule}: When a jump list element is resolved, its $M$
 must equal the length of the stack when the resolving \TT{LABEL}
-is resolved.
+is encountered.
 
-In other words, the code jumped over by a \TT{JMP\ldots} must
-have the same stack length at its beginning and at its end.
+The following illustrate this rule when the jump does \underline{not}
+reduce depth and $M$ = the variables stack length just after the
+\TT{JMP\ldots} is compiled:
+
+Example 1:
+\begin{indpar}\begin{verbatim}
+// Program to calculate minimum ( X, Y ) in stack.
+//
+// Stack length is S
+PUSH X
+PUSH Y
+// Stack length is S + 2
+JMPLT ITS-X    // M = S
+// Stack length is S
+PUSH Y
+// Stack length is S + 1
+JMP DONE       // M = S + 1
+// Stack length is S + 1
+LABEL ITS-X    // JMPLT ITS-X *illegal*, M == S != S + 1
+PUSH X
+// Stack length is S + 2
+LABEL DONE     // JMP DONE *illegal*, M == S + 1 != S + 2
+// Stack length is S + 2
+\end{verbatim}\end{indpar}
+
+Example 2:
+\begin{indpar}\begin{verbatim}
+// Program to calculate minimum ( X, Y ) in stack.
+//
+// Stack length is S
+PUSH 0 Z
+// Stack length is S + 1
+BEG
+    // Stack length is S + 1
+    PUSH X
+    PUSH Y
+    // Stack length is S + 3
+    JMPLT ITS-X    // M = S + 1
+    // Stack length is S + 1
+    PUSH Y
+    // Stack length is S + 2
+    POP Z
+    // Stack length is S + 1
+    JMP DONE       // M = S + 1
+    // Stack length is S + 1
+    LABEL ITS-X    // JMPLT ITS-X legal, M == S + 1 == S + 1
+    PUSH X
+    // Stack length is S + 2
+    POP Z
+    // Stack length is S + 1
+    LABEL DONE    // JMP DONE legal, M == S + 1 == S + 1
+END
+// Stack length is S + 1
+\end{verbatim}\end{indpar}
+
 
 
 \subsection{MEXAS Instructions}
