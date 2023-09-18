@@ -2282,7 +2282,8 @@ as that of an argument of a function (see \TT{BEGF}).  Note that the
 in the loop.
 
 If {\em new-variable-name} is missing or `\TT{*}',
-the element just gets the name `\TT{*}'.
+the element just gets the name `\TT{*}' to indicate that the
+element has no name.
 
 \item A variable cannot be written if it has a lexical level less than
 that of the writing instruction, or is a function argument variable,
@@ -2322,9 +2323,8 @@ action of the instruction is specified in that figure.
 
 At assembly-time the same number of elements are popped from the variable stack
 as are popped from the process stack during run-time.
-Then one element is pushed to the variable stack.
-If {\em new-variable-name} is given, it becomes
-the name of the pushed element; otherwise the element has no name.
+Then one element is pushed to the variable stack with
+{\em new-variable-name} as its name.
 \end{indpar}
 
 \ttkey{POWI} ~ {\em exponent} ~
@@ -2336,9 +2336,8 @@ Here {\em exponent} is stored in the instruction's \TT{immedA}
 member and must be an integer in the range $[0,2^{32})$.
 
 At assembly-time pops one element from the variable stack
-Then one element is pushed to the variable stack.
-If {\em new-variable-name} is given, it becomes
-the name of the pushed element; otherwise the element has no name.
+Then one element is pushed to the variable stack with
+{\em new-variable-name} as its name.
 \end{indpar}
 
 \ttkey{PUSHM} ~ {\em variable-name} ~
@@ -2347,8 +2346,7 @@ the name of the pushed element; otherwise the element has no name.
 At run-time, pushes into the process stack a copy of the named
 lexical level 0 variable.
 At assembly time, pushes into the variable stack an
-element with the {\em new-variable-name} if given, or 
-with no name otherwise.
+element with {\em new-variable-name} as its name.
 
 The variable stack search for {\em variable-name} is restricted to
 elements with the lexical level \TT{0}.
@@ -2360,8 +2358,7 @@ elements with the lexical level \TT{0}.
 At run-time, pushes into the process stack a copy of the named
 global variable in the named module.
 At assembly time, pushes into the variable stack an
-element with the {\em new-variable-name} if given, or 
-with no name otherwise.
+element with {\em new-variable-name} as its name.
 
 The variable stack searched for {\em variable-name} is the variable
 stack of the previously assembled module named, as it is at the
@@ -2375,8 +2372,7 @@ of the module are present in this stack).
 At run-time, pushes into the process stack a copy of the variable
 named in the variable stack or global variable vector.
 At assembly time, pushes into the variable stack an
-element with the {\em new-variable-name} if given, or
-with no name otherwise.
+element with {\em new-variable-name} as its name.
 
 The search for {\em variable-name} begins with the entire variable
 stack and proceeds through the variable stacks of previously assembled modules
@@ -2390,8 +2386,7 @@ or \TT{PUSHA}, depending on the location of the variable.
 At run-time, pushes into the process stack a copy of
 the {\em number}\pagnote{NUMBER}.
 At assembly time, pushes into the variable stack an element
-with the given {\em new-variable-name}, if given, or
-with no name otherwise.
+element with {\em new-variable-name} as its name.
 \end{indpar}
 
 \ttkey{POP} ~ {\em variable-name}\QMARK{}
@@ -2435,7 +2430,7 @@ and then add an element to the pending jump list
 Note that
 the pending jump list element
 $S$ value is the length of the variable stack \underline{after}
-the two elements were popped.
+the two elements are popped.
 \end{indpar}
 
 \ttkey{BEG} ~ {\em trace-packet}\QMARK{}
@@ -2463,15 +2458,20 @@ At run-time this instruction's action is as described in
 Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS} with \TT{immedB} equal
 to {\em nnext}.
 
-At assembly-time, this instruction first increments the depth,
-and then pushes {\em nnext} variable
-stack elements.  For each of these, its name is derived from
-the name of the {\em nnext}'th predecessor in the variable
-stack by adding the prefix `\TT{next-}.'
+At assembly-time, this instruction first checks that the
+top {\em nnext} variable stack elements have the current lexical level
+and depth,
+then pushes {\em nnext} variable stack elements with current lexical
+level and depth
+and with names derived from their {\em nnext}'th predecessor
+in the stack by adding the prefix `\TT{next-}.' to the predecessor's
+name.  Then this instruction increments the current instruction depth.
 
 Thus for example, if the top two stack elements have names
 \TT{X} and \TT{Y} and {\em nnext} is \TT{2}, the two elements
-pushed would have names \TT{next-X} and \TT{next-Y}.
+pushed would have names \TT{next-X} and \TT{next-Y}, and
+all 4 stack elements would have depth one less than the depth
+of instructions inside the \TT{BEGL/ENDL} block.
 \end{indpar}
 
 \ttkey{ENDL}
@@ -2493,8 +2493,11 @@ this instruction does nothing.
 \begin{indpar}
 At run-time this instruction's actions are as described in
 Figure~\itemref{FUNCTION-INSTRUCTIONS}.  At assembly-time,
-this instruction pushes an element with the {\em function-name}
-into the function stack and pushes one element with each
+this instruction first pushes an element with the {\em function-name}
+into the function stack.
+Then this instruction increments the current lexical level
+and sets the current depth to zero.
+Lastly this instruction pushes one element with each
 of the {\em variable-names} into the variable stack (they
 represent the arguments to the function).
 The number of {\em variable-names} can be less than,
@@ -2512,7 +2515,9 @@ instruction.  This is used to implement \TT{PUSHA}.
 At run-time this instruction's actions are as described in
 Figure~\itemref{FUNCTION-INSTRUCTIONS}.  At assembly-time,
 it pops from the variable and function stacks all elements with the
-same lexical level as the \TT{ENDF} instruction.
+same lexical level as the \TT{ENDF} instruction, and then restores
+the current lexical level and depth to what they were before
+the associated \TT{BEGF} instruction.
 \end{indpar}
 
 \ttkey{CALLM} ~ {\em function-name} ~ {\em nargs} ~
@@ -2568,7 +2573,7 @@ Figure~\itemref{FUNCTION-INSTRUCTIONS} with \TT{immedB} set
 to the lexical level specified by {\em level} (see \pagref{LEVEL}).
 At assembly-time,
 this instruction pushes into the variable stack an element
-with the given {\em new-variable-name}.
+with {\em new-variable-name} as its name.
 \end{indpar}
 
 \ttkey{PUSHV} ~ {\em level}\QMARK{} ~ {\em new-variable-name}\QMARK{}
@@ -2577,8 +2582,9 @@ At run-time this instruction's actions are as described in
 Figure~\itemref{FUNCTION-INSTRUCTIONS} with \TT{immedB} set
 to the lexical level specified by {\em level} (see \pagref{LEVEL}).
 
-At assembly-time, this instruction changes the name of the top
-variable stack element to {\em new-variable-name}.
+At assembly-time, this instruction first pops an element from the
+variable stack, and then pushes into the variable stack an element
+with {\em new-variable-name} as its name.
 \end{indpar}
 
 \ttkey{SET\_TRACE} ~ \{ {\em trace-class} $|$ {\em trace-class-group} \}\STAR{}

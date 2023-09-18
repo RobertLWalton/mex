@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Sep 13 02:51:21 EDT 2023
+// Date:	Mon Sep 18 06:27:05 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -611,24 +611,27 @@ void mexas::begx ( mex::instr & instr,
 	//
 	for ( min::uns32 i = 0; i < nvars; ++ i )
 	{
-	    min::locatable_gen name;
-	    if ( nvars > SP - mexas::stack_limit )
-	        name = mexas::star;
-            else
-	    {
-	        name = (   mexas::variables
-		         + ( SP - nvars ) )->name;
-		if ( name != mexas::star )
-		{
-		    min::str_ptr sp ( name );
-		    min::unsptr len =
-		        min::strlen ( sp );
-		    char buffer[len+10];
-		    std::strcpy ( buffer, "next-" );
-		    min::strcpy ( buffer + 5, sp );
-		    name = min::new_str_gen ( buffer );
-		}
-	    }
+	    // See variable checking in BEGL code that
+	    // calls begx.
+	    //
+	    MIN_ASSERT
+	        ( nvars <= SP - mexas::stack_limit,
+		  "BEGL: mexas::stack_limit violation"
+		);
+	    min::locatable_gen name
+	        ( (   mexas::variables
+		    + ( SP - nvars ) )->name );
+	    MIN_ASSERT
+	        ( name != mexas::star,
+		  "BEGL: variable name is *" );
+
+	    min::str_ptr sp ( name );
+	    min::unsptr len = min::strlen ( sp );
+	    char buffer[len+10];
+	    std::strcpy ( buffer, "next-" );
+	    min::strcpy ( buffer + 5, sp );
+	    name = min::new_str_gen ( buffer );
+
 	    mexas::push_variable
 	        ( mexas::variables, name,
 		  L, mexas::depth[L] );
@@ -1800,13 +1803,39 @@ mex::module mexas::compile ( min::file file )
 		if ( message == min::NONE() )
 		    message = ::loop;
 
+		for ( min::uns32 i = 1;
+		      i <= nnext; ++ i )
+		{
+		    mexas::variable_element * ve =
+		        ~ (   mexas::variables
+		            + ( SP - i ) );
+		    if ( ve->level != L
+		         ||
+			 ve->depth != mexas::depth[L]
+			 ||
+			 ve->name == mexas::star )
+		    {
+		        nnext = i - 1;
+			mexas::compile_error
+			    ( pp, "BEGL: not enough"
+			          " named variables"
+				  " of current lexical"
+				  " level and depth"
+				  " in the stack;"
+				  " nnext reduced to",
+				  min::puns
+				      ( nnext, "%u" ) );
+			break;
+		    }
+		}
+
 		min::gen labbuf[nnext+1];
 		labbuf[0] = message;
 		for ( min::uns32 i = 1;
 		      i <= nnext; ++ i )
 		    labbuf[nnext+1-i] =
-		        (   mexas::variables
-		          + ( SP - i ) )->name;
+			(   mexas::variables
+			  + ( SP - i ) )->name;
 
 		min::locatable_gen trace_info
 		    ( min::new_lab_gen
