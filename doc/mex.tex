@@ -2277,14 +2277,16 @@ that names an element being pushed to the variables stack.
 The {\em new-variable-name}
 must \underline{not} be the same as the name of any variable of
 less lexical level or depth than the instruction, or the same name
-as that of an argument of a function (see \TT{BEGF}), or the same name as a
-\TT{next-} variable of a loop (see \TT{BEGL}).
+as that of an argument of a function (see \TT{BEGF}).  Note that the
+\TT{next-} variables of a loop have depth one less than the instructions
+in the loop.
 
 If {\em new-variable-name} is missing or `\TT{*}',
 the element just gets the name `\TT{*}'.
 
 \item A variable cannot be written if it has a lexical level less than
-that of the writing instruction, or is a function argument variable.
+that of the writing instruction, or is a function argument variable,
+or has depth equal to the writing instruction.
 \item The operands that take integer values must have values in the
 range $[0,2^{32})$ (so they will fit into \TT{immedA}, \TT{immedB},
 or \TT{immedC} instruction
@@ -2297,16 +2299,22 @@ If the argument is a positive integer, it is the specified lexical level
 (and must be in range).  If the argument is a negative integer -$i$,
 the specified lexical level is $L-i$ (and must be in range).
 \item Some instructions have a {\em trace-message} argument
-and some have {\em trace-info} arguments, where:
+and some have {\em trace-packet} arguments, where:
 \begin{indpar}
 \emkey{trace-message} ::= {\em string}
 \\[0.5ex]
-\emkey{trace-info} ::= {\em trace-message} {\em trace-variable}\STAR{}
+\emkey{trace-packet} ::= {\em trace-message} {\em trace-variable}\STAR{}
 \end{indpar}
-See Instruction Tracing\pagnote{INSTRUCTION-TRACING} for details.
+These specify the {\em trace-info} for the instructions:
+see Trace-Packet Based Trace Messages,
+\itemref{TRACE-PACKET-BASED-TRACE-MESSAGES}.
 \end{enumerate}
 
-{\em aop} {\em new-variable-name}\QMARK{}
+\needspace{15\baselineskip}
+
+Given the above notes, the instruction descriptions are:
+
+{\em aop} ~ {\em new-variable-name}\QMARK{}
 \begin{indpar}
 Here {\em aop} is any arithmetic operation code from
 Figure~\itemref{ARITHMETIC-INSTRUCTIONS}, and the run-time
@@ -2319,7 +2327,7 @@ If {\em new-variable-name} is given, it becomes
 the name of the pushed element; otherwise the element has no name.
 \end{indpar}
 
-\ttkey{POWI} {\em exponent}
+\ttkey{POWI} ~ {\em exponent} ~
               {\em new-variable-name}\QMARK{}
 \begin{indpar}
 At run time, performs as indicated in
@@ -2333,7 +2341,7 @@ If {\em new-variable-name} is given, it becomes
 the name of the pushed element; otherwise the element has no name.
 \end{indpar}
 
-\ttkey{PUSHM} {\em variable-name}
+\ttkey{PUSHM} ~ {\em variable-name} ~
               {\em new-variable-name}\QMARK{}
 \begin{indpar}
 At run-time, pushes into the process stack a copy of the named
@@ -2346,7 +2354,7 @@ The variable stack search for {\em variable-name} is restricted to
 elements with the lexical level \TT{0}.
 \end{indpar}
 
-\ttkey{PUSHG} {\em module-name} {\em variable-name}
+\ttkey{PUSHG} ~ {\em module-name} ~ {\em variable-name} ~
               {\em new-variable-name}\QMARK{}
 \begin{indpar}
 At run-time, pushes into the process stack a copy of the named
@@ -2361,7 +2369,7 @@ end of the compilation of that module (only level 0 variables
 of the module are present in this stack).
 \end{indpar}
 
-\ttkey{PUSH} {\em variable-name}
+\ttkey{PUSH} ~ {\em variable-name} ~
              {\em new-variable-name}\QMARK{}
 \begin{indpar}
 At run-time, pushes into the process stack a copy of the variable
@@ -2377,7 +2385,7 @@ to the runtime instruction \TT{PUSHS}, \TT{PUSHL}, \TT{PUSHG},
 or \TT{PUSHA}, depending on the location of the variable.
 \end{indpar}
 
-\ttkey{PUSHI} {\em number} {\em new-variable-name}\QMARK{}
+\ttkey{PUSHI} ~ {\em number} ~ {\em new-variable-name}\QMARK{}
 \begin{indpar}
 At run-time, pushes into the process stack a copy of
 the {\em number}\pagnote{NUMBER}.
@@ -2386,7 +2394,7 @@ with the given {\em new-variable-name}, if given, or
 with no name otherwise.
 \end{indpar}
 
-\ttkey{POP} {\em variable-name}\QMARK{}
+\ttkey{POP} ~ {\em variable-name}\QMARK{}
 \begin{indpar}
 At run-time, pops the process stack and stores the value popped
 into the variable named in the variable stack.  Or if the
@@ -2406,7 +2414,7 @@ variables that are arguments, or at a different lexical level,
 or in a different module.
 \end{indpar}
 
-\ttkey{JMP} {\em jmp-target}
+\ttkey{JMP} ~ {\em jmp-target}
 \begin{indpar}
 At run-time this instruction's actions are as described in
 Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}.  At assembly-time,
@@ -2414,7 +2422,7 @@ this instruction adds an element to the pending jump
 list (see JMP Targets, \itemref{JMP-TARGETS}).
 \end{indpar}
 
-\ttkey{JMP\ldots} {\em jmp-target}
+\ttkey{JMP\ldots} ~ {\em jmp-target}
 \begin{indpar}
 Here \ldots~denotes one of \TT{EQ}, \TT{NE}, etc.
 
@@ -2430,14 +2438,14 @@ $S$ value is the length of the variable stack \underline{after}
 the two elements were popped.
 \end{indpar}
 
-\ttkey{BEG} {\em trace-info}\QMARK{}
+\ttkey{BEG} ~ {\em trace-packet}\QMARK{}
 \begin{indpar}
 At run-time this instruction's actions are as described in
 Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}.  At assembly-time,
 \TT{BEG} just increments the depth.
 \end{indpar}
 
-\ttkey{END} {\em trace-info}\QMARK{}
+\ttkey{END} ~ {\em trace-packet}\QMARK{}
 \begin{indpar}
 At run-time this instruction's actions are as described in
 Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}.  At assembly-time,
@@ -2447,7 +2455,7 @@ decrements the depth, then updates the jump list
 (see JMP Targets, \itemref{JMP-TARGETS}).
 \end{indpar}
 
-\ttkey{BEGL} {\em nnext} {\em trace-message}\QMARK{}
+\ttkey{BEGL} ~ {\em nnext} ~ {\em trace-message}\QMARK{}
 \begin{indpar}
 Here {\em nnext} is the number of next variables
 (see Next Variables and Loops, \itemref{NEXT-VARIABLES-AND-LOOPS}).
@@ -2480,7 +2488,7 @@ Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}.  At assembly-time,
 this instruction does nothing.
 \end{indpar}
 
-\ttkey{BEGF}\label{BEGF} {\em function-name} {\em variable-name}\STAR{}
+\ttkey{BEGF}\label{BEGF} ~ {\em function-name} ~ {\em variable-name}\STAR{} ~
 	{\em trace-message}\QMARK{}
 \begin{indpar}
 At run-time this instruction's actions are as described in
@@ -2499,7 +2507,7 @@ where $L$ is the lexical level of the \TT{BEGF}
 instruction.  This is used to implement \TT{PUSHA}.
 \end{indpar}
 
-\ttkey{ENDF} {\em trace-message}\QMARK{}
+\ttkey{ENDF} ~ {\em trace-message}\QMARK{}
 \begin{indpar}
 At run-time this instruction's actions are as described in
 Figure~\itemref{FUNCTION-INSTRUCTIONS}.  At assembly-time,
@@ -2507,8 +2515,8 @@ it pops from the variable and function stacks all elements with the
 same lexical level as the \TT{ENDF} instruction.
 \end{indpar}
 
-\ttkey{CALLM} {\em function-name} {\em nargs} {\em variable-name}\STAR{}
-	{\em trace-message}\QMARK{}
+\ttkey{CALLM} ~ {\em function-name} ~ {\em nargs} ~
+        {\em variable-name}\STAR{} ~ {\em trace-message}\QMARK{}
 \begin{indpar}
 At run-time this instruction's actions are as described in
 Figure~\itemref{FUNCTION-INSTRUCTIONS}.  At assembly-time,
@@ -2521,8 +2529,8 @@ the number of actual results.
 The {\em function-name} is searched for in the function stack.
 \end{indpar}
 
-\ttkey{CALLG} {\em module-name} {\em function-name}
-              {\em nargs} {\em variable-name}\STAR{}
+\ttkey{CALLG} ~ {\em module-name} ~ {\em function-name} ~
+              {\em nargs} ~ {\em variable-name}\STAR{} ~
 	      {\em trace-message}\QMARK{}
 \begin{indpar}
 At run-time this instruction's actions are as described in
@@ -2535,8 +2543,8 @@ end of the compilation of that module (only level 1 functions
 of the module are present in this stack).
 \end{indpar}
 
-\ttkey{CALL} {\em function-name}
-             {\em nargs} {\em variable-name}\STAR{}
+\ttkey{CALL} ~ {\em function-name} ~
+             {\em nargs} ~ {\em variable-name}\STAR{} ~
 	      {\em trace-message}\QMARK{}
 \begin{indpar}
 This instruction searches for the {\em function-name} first in the function
@@ -2545,7 +2553,7 @@ modules in the order in which they were assembled.  It then
 assembles to \TT{CALLM} or \TT{CALLG}.
 \end{indpar}
 
-\ttkey{RET} {\em nresults} {\em trace-message}\QMARK{}
+\ttkey{RET} ~ {\em nresults} ~ {\em trace-message}\QMARK{}
 \begin{indpar}
 At run-time this instruction's actions are as described in
 Figure~\itemref{FUNCTION-INSTRUCTIONS}.  At assembly-time,
@@ -2553,7 +2561,7 @@ this instruction pops {\em nresults} elements from the
 variables stack.
 \end{indpar}
 
-\ttkey{PUSHNARGS} {\em level}\QMARK{} {\em new-variable-name}\QMARK{}
+\ttkey{PUSHNARGS} ~ {\em level}\QMARK{} ~ {\em new-variable-name}\QMARK{}
 \begin{indpar}
 At run-time this instruction's actions are as described in
 Figure~\itemref{FUNCTION-INSTRUCTIONS} with \TT{immedB} set
@@ -2563,7 +2571,7 @@ this instruction pushes into the variable stack an element
 with the given {\em new-variable-name}.
 \end{indpar}
 
-\ttkey{PUSHV} {\em level}\QMARK{} {\em new-variable-name}\QMARK{}
+\ttkey{PUSHV} ~ {\em level}\QMARK{} ~ {\em new-variable-name}\QMARK{}
 \begin{indpar}
 At run-time this instruction's actions are as described in
 Figure~\itemref{FUNCTION-INSTRUCTIONS} with \TT{immedB} set
@@ -2573,7 +2581,7 @@ At assembly-time, this instruction changes the name of the top
 variable stack element to {\em new-variable-name}.
 \end{indpar}
 
-\ttkey{SET\_TRACE} \{ {\em trace-class} $|$ {\em trace-class-group} \}\STAR{}
+\ttkey{SET\_TRACE} ~ \{ {\em trace-class} $|$ {\em trace-class-group} \}\STAR{}
 \begin{indpar}
 At run-time set the process \TT{trace\_flags} parameter so as
 to have a flag for each {\em trace-class} given, or each trace class
@@ -2585,7 +2593,8 @@ At assembly-time,
 this instruction does nothing.
 \end{indpar}
 
-\ttkey{NOP}/\ttkey{TRACE}/\ttkey{WARN}/\ttkey{ERROR} {\em trace-info}\QMARK{}
+\ttkey{NOP}/\ttkey{TRACE}/\ttkey{WARN}/\ttkey{ERROR} ~
+    {\em trace-packet}\QMARK{}
 \begin{indpar}
 At run-time these instructions do nothing, except that the \TT{ERROR}
 instruction terminates the process
@@ -2596,7 +2605,7 @@ All these instructions except \TT{NOP} are in the \TT{ALWAYS}
 trace class.
 \end{indpar}
 
-\ttkey{SET\_EXCEPTS} {\em except-name}\STAR{}
+\ttkey{SET\_EXCEPTS} ~ {\em except-name}\STAR{}
 \begin{indpar}
 At run-time set the process \TT{excepts\_mask} parameter so as
 to have a flag for each named except.
@@ -2616,7 +2625,7 @@ this instruction does nothing.
 \subsection{MEXAS Declarations}
 \label{MEXAS-DECLARATIONS}
 
-\ttkey{LABEL} {\em jmp-target}
+\ttkey{LABEL} ~ {\em jmp-target}
 \begin{indpar}
 See \pagref{LABEL}.
 \end{indpar}
@@ -2635,7 +2644,7 @@ The \key{MEXAS program} executes {\em mexas-operations} that
 appear in its arguments.  The syntax is:
 
 \begin{indpar}
-\emkey{MEXAS-command} ::= \ttkey{mexas} {\em mexas-operation}\STAR{}
+\emkey{MEXAS-command} ::= \ttkey{mexas} ~ {\em mexas-operation}\STAR{}
 \\[0.5ex]
 \emkey{mexas-operation} ::=
     \begin{tabular}[t]{l@{~~~~~}l}
