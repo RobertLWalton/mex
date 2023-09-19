@@ -2664,8 +2664,8 @@ appear in its arguments.  The syntax is:
     \ttkey{-tcnormal}			& [assemble with normal trace class] \\
     \ttkey{-tc:}{\em tc-list}		& [run tracing listed trace classes] \\
     \ttkey{-ex:}{\em ex-list}		& [run with given excepts\_mask] \\
-    \ttkey{-oon}			& [run with optimize on] \\
-    \ttkey{-ooff}			& [run with optimize off] \\
+    \ttkey{-o:on}			& [run with optimize on] \\
+    \ttkey{-o:off}			& [run with optimize off] \\
     \ttkey{-counter} $L$		& [set instruction counter limit] \\
     \ttkey{-stack} $L$		        & [set stack size] \\
     \ttkey{-return-stack} $L$	        & [set return stack size] \\
@@ -2691,8 +2691,8 @@ that components can and often should be separated by whitespace.
 
 A {\em mexas-operation} is effective for all subsequent
 {\em mexas-operations} until it is overridden.  E.g.,
-\TT{-oon} will cause following all executions to be optimized
-until an \TT{-ooff} is encountered.
+\TT{-o:on} will cause following all executions to be optimized
+until an \TT{-o:off} is encountered.
 
 Details are:
 \begin{center}
@@ -2736,11 +2736,11 @@ Details are:
 		      Default is \TT{-ex:DIVBYZERO,INVALID,OVERFLOW}.
 \\[0.5ex]
 \begin{tabular}[t]{@{}l@{}}
-\TT{-ooff} \\
-\TT{-oon} \\
+\TT{-o:off} \\
+\TT{-o:on} \\
 \end{tabular}	    & Sets the process \TT{optimize} flag \TT{on} or \TT{off}
                       at the start of mex program execution.
-		      Default is \TT{-ooff}.
+		      Default is \TT{-o:off}.
 \\[0.5ex]
 \TT{-counter} $L$   & Sets the process \TT{counter\_limit} to integer $L$.
 \\[0.5ex]

@@ -2,7 +2,7 @@
 #
 # File:		Makefile
 # Author:	Bob Walton (walton@acm.org)
-# Date:		Wed Sep 13 04:24:52 EDT 2023
+# Date:		Mon Sep 18 20:58:24 EDT 2023
 #
 # The authors have placed this program in the public
 # domain; they make no warranty and accept no liability
@@ -143,11 +143,11 @@ mexas_time_test_1.out: \
           -counter 20000000
 mexas_time_test_1o.out: \
     RUN = -stack 20000000 -return-stack 1000002 \
-          -counter 20000000 -oon
+          -counter 20000000 -o:on
 mexas_time_test_2.out: \
     RUN = -counter 20000000
 mexas_time_test_2o.out: \
-    RUN = -counter 20000000 -oon
+    RUN = -counter 20000000 -o:on
 
 mexas_compile_test_%.out:	\
 		mexas \
