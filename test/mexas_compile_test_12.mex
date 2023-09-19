@@ -1,0 +1,29 @@
+// MEXAS Compile Test 12 Input
+//
+// File:	mexas_compile_test_12.mex
+// Author:	Bob Walton (walton@acm.org)
+// Date:	Mon Sep 18 21:11:59 EDT 2023
+//
+// The authors have placed this program in the public
+// domain; they make no warranty and accept no liability
+// for this program.
+// MEXAS Time Test
+
+// Fatal JMP... Test
+//
+PUSHI +inf X
+PUSHI +inf Y
+PUSHI 0 Z
+BEG
+    PUSH X
+    PUSH Y
+    JMPLT ITS-X  // Illegal data JMP...
+    PUSH Y
+    POP Z
+    JMP DONE
+    LABEL ITS-X
+    PUSH X
+    POP Z
+    LABEL DONE
+    PUSHI 2000 UNUSED
+END

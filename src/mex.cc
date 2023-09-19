@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Sep 17 04:13:09 EDT 2023
+// Date:	Mon Sep 18 21:44:05 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1877,7 +1877,12 @@ bool mex::run_process ( mex::process p )
 	    case mex::NOP:
 	    {
 		if ( immedA > sp - spbegin )
+		{
+		    message = "BEG/NOP/END: immedA"
+                              " larger than stack"
+			      " length";
 		    goto INNER_FATAL;
+		}
 		break;
 	    }
 	    case mex::BEGL:

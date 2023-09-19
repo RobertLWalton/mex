@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Sep 18 06:27:05 EDT 2023
+// Date:	Tue Sep 19 03:33:07 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -61,8 +61,7 @@ enum op_code
     POP,
     CALL,
     LABEL,
-    INSTRUCTION_TRACE,
-    DEFAULT_TRACE,
+    TEST_INSTRUCTION,
     STACKS,
     NUMBER_OF_OP_CODES
 };
@@ -74,10 +73,8 @@ static mex::op_info op_infos[] =
     { ::POP, mex::NONA, 0, "POP" },
     { ::CALL, mex::NONA, 0, "CALL" },
     { ::LABEL, mex::NONA, 0, "LABEL" },
-    { ::INSTRUCTION_TRACE, mex::NONA,
-                           0, "INSTRUCTION_TRACE" },
-    { ::DEFAULT_TRACE, mex::NONA,
-                            0, "DEFAULT_TRACE" },
+    { ::TEST_INSTRUCTION, mex::NONA,
+                           0, "TEST_INSTRUCTION" },
     { ::STACKS, mex::NONA, 0, "STACKS" }
 };
 
@@ -1637,12 +1634,6 @@ mex::module mexas::compile ( min::file file )
 	    }
 	    case ::LABEL:
 	    {
-		if ( mexas::assemble_print_switch
-		     ==
-		     mexas::PRINT_WITH_SOURCE )
-		    min::print_phrase_lines
-			( mexas::input_file->printer,
-			  mexas::input_file, pp );
 
 		min::gen target =
 		    mexas::get_name ( index );
@@ -1655,6 +1646,14 @@ mex::module mexas::compile ( min::file file )
 			      " ignored" );
 		    continue;
 		}
+
+		if ( mexas::assemble_print_switch
+		     ==
+		     mexas::PRINT_WITH_SOURCE )
+		    min::print_phrase_lines
+			( mexas::input_file->printer,
+			  mexas::input_file, pp );
+
 		mexas::jump_list_resolve
 		    ( mexas::jumps, target );
 		continue;
@@ -1665,8 +1664,10 @@ mex::module mexas::compile ( min::file file )
 		     ==
 		     mexas::NO_PRINT )
 		    continue;
+
 		min::printer printer =
 		    mexas::input_file->printer;
+
 		if ( mexas::assemble_print_switch
 		     ==
 		     mexas::PRINT_WITH_SOURCE )
@@ -1748,6 +1749,62 @@ mex::module mexas::compile ( min::file file )
 
 		printer << min::eom;
 		continue;
+	    }
+	    case ::TEST_INSTRUCTION:
+	    {
+	        min::gen op_code =
+		    mexas::get_name ( index );
+		if ( op_code == min::NONE() )
+		{
+		    mexas::compile_error
+			( pp, "no op_code;"
+			      " statement ignored" );
+		    continue;
+		}
+
+		op_code = min::get
+		    ( mexas::op_code_table, op_code );
+		if ( op_code == min::NONE()
+		     ||
+		        min::direct_float_of ( op_code )
+		     >= mex::NUMBER_OF_OP_CODES )
+		{
+		    mexas::compile_error
+			( pp, "undefined operation code;"
+			      " statement ignored" );
+		    continue;
+		}
+		instr.op_code =
+		    (min::uns32) min::int_of ( op_code );
+
+	        min::gen trace_class =
+		    mexas::get_name ( index );
+		if ( trace_class == min::NONE() )
+		{
+		    mexas::push_instr ( instr, pp );
+		    break;
+		}
+		trace_class = min::get
+		    ( mexas::trace_flag_table,
+		      trace_class );
+		if ( trace_class != min::NONE() )
+		{
+		    min::float64 f =
+			min::direct_float_of
+			    ( trace_class );
+		    instr.trace_class = (min::uns32) f;
+		}
+		else
+		{
+		    mexas::compile_error
+			( pp, "unrecognized trace"
+			      " flag; "
+			      " statement ignored" );
+		    continue;
+		}
+
+		mexas::push_instr ( instr, pp );
+		break;
 	    }
 	    case mex::BEG:
 	    {

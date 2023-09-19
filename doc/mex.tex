@@ -240,7 +240,7 @@
 
 \author{Robert L. Walton}
 
-\date{September 18, 2023}
+\date{September 19, 2023}
  
 \maketitle
 
@@ -752,12 +752,12 @@ The interface to a MEX module and its code vector is:
 
 The \TT{module} vector is the module's code vector.
 
-The \ttikey{name}{of module} member of the \TT{module} is derived
+The \ttmkey{name}{of module} member of the \TT{module} is derived
 from the module's file name by removing any \TT{.mex} extension.
 If the module is input from the standard input, and not a file,
 the \TT{name} is \TT{min::MISSING()}.
 
-The \ttikey{position}{of module} member of the \TT{module} gives a
+The \ttmkey{position}{of module} member of the \TT{module} gives a
 \TT{min::\EOL phrase\_\EOL position} for every \TT{mex::instr}
 element of the \TT{module} vector, and also gives the
 \TT{position->\EOL file->\EOL file\_\EOL name} of the source
@@ -767,16 +767,16 @@ of instruction \TT{m[i]} is \TT{m->position[i]}.
 This information can be used to
 print trace and error messages.
 
-The \ttikey{globals}{of module} member of the \TT{module}
+The \ttmkey{globals}{of module} member of the \TT{module}
 is a copy of the stack created by executing the module code
 (initializing the module).
 This stack contains values of global variables exported by the module.
 
-The \ttikey{interface}{of module} member of the \TT{module} points
+The \ttmkey{interface}{of module} member of the \TT{module} points
 at the module's interface.  MEX does not itself specify or use
 the interface -- this is up to the compiler.
 
-The \ttikey{trace\_info}{of module} member of the \TT{module} points
+The \ttmkey{trace\_info}{of module} member of the \TT{module} points
 at a vector of \TT{min::gen} values such that for module \TT{m},
 \TT{m->\EOL trace\_\EOL info[i]} gives information that can be used
 to print trace messages for instruction \TT{m[i]}.  See
@@ -1278,6 +1278,10 @@ Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}.
 \ttkey{SET\_EXCEPTS}
     & The process \TT{excepts\_mask} member is set to \TT{immedA}.
 \\\hline
+\ttkey{SET\_OPTIMIZE}
+    & The process \TT{optimize} member is set to the low order bit
+      of \TT{immedA}.
+\\\hline
 \end{tabular}
 \end{center}
 \vspace*{-3ex}
@@ -1416,28 +1420,28 @@ is \TT{mex::T\_AOP}.
 \\[2ex]
 \begin{tabular}{|l|p{5in}|}
 \hline
-\ttikey{NEVER}{trace class} & Instruction is never traced.
+\ttmkey{NEVER}{trace class} & Instruction is never traced.
 \\\hline
-\ttikey{ALWAYS}{trace class} & Instruction is always traced.
+\ttmkey{ALWAYS}{trace class} & Instruction is always traced.
     The following instructions have this trace class:
     \TT{ERROR}, \TT{WARN}, \TT{TRACE}, \TT{TRACE\_\EOL EXCEPTS},
     \TT{SET\_\EOL TRACE}.
 \\\hline
-\ttikey{AOP}{trace class} & Arithmetic instructions in Figure
+\ttmkey{AOP}{trace class} & Arithmetic instructions in Figure
     \itemref{ARITHMETIC-INSTRUCTIONS}.
 \\\hline
-\ttikey{PUSH}{trace class} & All \TT{PUSH\ldots} instructions in Figures
+\ttmkey{PUSH}{trace class} & All \TT{PUSH\ldots} instructions in Figures
     \itemref{STACK-AND-FLOW-CONTROL-INSTRUCTIONS} and
     \itemref{FUNCTION-INSTRUCTIONS}.
 \\\hline
-\ttikey{POP}{trace class} & The \TT{POP} instruction in Figure
+\ttmkey{POP}{trace class} & The \TT{POP} instruction in Figure
     \itemref{STACK-AND-FLOW-CONTROL-INSTRUCTIONS}.
 \\\hline
-\ttikey{JMP}{trace class} & The \TT{JMP} instruction.
+\ttmkey{JMP}{trace class} & The \TT{JMP} instruction.
 \\\hline
 \begin{tabular}[t]{@{}l@{}}
-\ttikey{JMPS}{trace class} \\
-\ttikey{JMPF}{trace class}
+\ttmkey{JMPS}{trace class} \\
+\ttmkey{JMPF}{trace class}
 \end{tabular} & \TT{JMP\ldots} instructions in
 	        Figure \itemref{STACK-AND-FLOW-CONTROL-INSTRUCTIONS}.
 		When compiled the instruction is given the \TT{JMPS}
@@ -1448,7 +1452,7 @@ is \TT{mex::T\_AOP}.
 		the effective trace class is changed
 		to \TT{JMPF}.
 \\\hline
-\ttikey{XXX}{trace class} & Instruction with operation code \TT{XXX},
+\ttmkey{XXX}{trace class} & Instruction with operation code \TT{XXX},
                             for instructions not mentioned above
 			    (e.g., for \TT{NOP}, \TT{BEG}, etc.,
 			    but \underline{not} for \TT{ADD},
@@ -1695,19 +1699,28 @@ To see how MEXAS handles this look at MEXAS Instructions,
 \begin{tabular}{lp{4.5in}}
 \bf Op Code     & \bf Trace Message
 \\\hline
-\TT{SET\_TRACE} & {\em trace-header}\TT{:} {\em trace-class}\STAR{} \\
+\ttmkey{SET\_TRACE}{trace message}
+		& {\em trace-header}\TT{:} {\em trace-class}\STAR{} \\
                 & The {\em trace-classes} being enabled are
 	          listed, but they are \underline{not}
 		  aggregated into {\em trace-class-groups}.
 \\[0.5ex]
-\TT{SET\_EXCEPTS} & {\em trace-header}\TT{:}
+\ttmkey{SET\_EXCEPTS}{trace message}
+		& {\em trace-header}\TT{:}
                     \{ \TT{*}\QMARK{}{\em except-name} \}\STAR{} \\
                 & The names of the excepts being enable in
 		  \TT{p->excepts\_mask} are listed, and those that are
 		  also in \TT{p->excepts\_accumulator} are starred with
 		  \TT{*}.
 \\[0.5ex]
-\TT{TRACE\_EXCEPTS} & {\em trace-header}\TT{:}
+\ttmkey{SET\_OPTIMIZE}{trace message}
+		& {\em trace-header}\TT{:}
+                    {\em new-value} \TT{<=} {\em old-value} \\
+                & The new and old values are listed as indicated.
+		  The values are denoted as \TT{ON} or \TT{OFF}.
+\\[0.5ex]
+\ttmkey{TRACE\_EXCEPTS}{trace message}
+		& {\em trace-header}\TT{:}
                     \{ \TT{*}\QMARK{}{\em except-name} \}\STAR{} \\
                 & The names of the excepts in \TT{p->excepts\_accumulator}
 		  are listed, and those that are also in \TT{p->excepts\_mask}
@@ -2619,6 +2632,13 @@ At assembly-time,
 this instruction does nothing.
 \end{indpar}
 
+\ttkey{SET\_OPTIMIZE} ~ \{ \TT{ON} $|$ \TT{OFF} \}
+\begin{indpar}
+At run-time set the process \TT{optimize} parameter on or off.
+At assembly-time,
+this instruction does nothing.
+\end{indpar}
+
 \ttkey{TRACE\_EXCEPTS}
 \begin{indpar}
 At run-time, this instruction is just traced as specified
@@ -2640,6 +2660,25 @@ See \pagref{LABEL}.
 \begin{indpar}
 Prints the names in the assembly time variables and functions stacks.
 Used mostly for testing the assembler.
+\end{indpar}
+
+\ttkey{TEST\_INSTRUCTION} ~
+    \begin{tabular}[t]{@{}l@{}}
+    {\em op-code} ~ {\em trace-class} ~ {\em trace-depth} ~
+                 \TT{\textbackslash} \\
+    {\em immedA} ~ {\em immedB} ~ {\em immedC} ~ {\em immedD} \\
+    \end{tabular}
+\begin{indpar}
+Outputs an instruction with the given fields, and does nothing
+else at assembly time.  Used for testing \TT{FORMAT\_ERROR},
+since otherwise such errors are (seem to be, should be) impossible
+because of assembler checks.
+
+The {\em op-code} and {\em trace-class} are names.
+{\em immedD} may be a number or module name.
+The other fields are integers.
+
+Fields may be omitted from the end of the instruction.
 \end{indpar}
 
 

@@ -1,0 +1,56 @@
+// MEXAS Compile Test 12 Input
+//
+// File:        mexas_compile_test_12.mex
+// Author:      Bob Walton (walton@acm.org)
+// Date:        Mon Sep 18 21:11:59 EDT 2023
+//
+// The authors have placed this program in the public
+// domain; they make no warranty and accept no liability
+// for this program.
+// MEXAS Time Test
+
+// Fatal JMP... Test
+//
+PUSHI +inf X
+    [14:0;1] PUSHI T_PUSH 0 0 0 inf; X
+PUSHI +inf Y
+    [15:1;2] PUSHI T_PUSH 0 0 0 inf; Y
+PUSHI 0 Z
+    [16:2;3] PUSHI T_PUSH 0 0 0 0; Z
+BEG
+    [17:3;3] BEG T_BEG 0 0 0 [$ MISSING $]; [$ MISSING $]
+    PUSH X
+    [18:4;4] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< X * >]
+    PUSH Y
+    [19:5;5] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< Y * >]
+    JMPLT ITS-X  // Illegal data JMP...
+    [20:6;3] JMPLT T_JMPS 0 0 0 [$ MISSING $]; ITS-X
+    PUSH Y
+    [21:7;4] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< Y * >]
+    POP Z
+    [22:8;3] POPS T_POP 1 0 0 [$ MISSING $]; [< * Z >]
+    JMP DONE
+    [23:9;3] JMP T_JMP 0 0 0 [$ MISSING $]; DONE
+    LABEL ITS-X
+    [20:6;3] JMPLT T_JMPS 0 0 4 [$ MISSING $]; ITS-X
+    PUSH X
+    [25:10;4] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< X * >]
+    POP Z
+    [26:11;3] POPS T_POP 1 0 0 [$ MISSING $]; [< * Z >]
+    LABEL DONE
+    [23:9;3] JMP T_JMP 0 0 3 [$ MISSING $]; DONE
+    PUSHI 2000 UNUSED
+    [28:12;4] PUSHI T_PUSH 0 0 0 2000; UNUSED
+END
+    [29:13;3] END T_END 1 0 0 [$ MISSING $]; [$ MISSING $]
+* {14:0,0,0} PUSHI: X <= inf
+* {15:1,1,1} PUSHI: Y <= inf
+* {16:2,2,2} PUSHI: Z <= 0
+* {17:3,3,3} BEG
+*** {18:4,3,4} PUSHS: * <= X = inf
+*** {19:5,4,5} PUSHS: * <= Y = inf
+!!! FATAL ERROR:  invalid operands to a conditional jump instruction
+*** {20:6,5,6} JMPLT ITS-X with invalid operand(s)
+ERROR: module initialization process did not terminate normally at
+       module end: invalid operand to JMP instruction
+exiting due to compile errors
