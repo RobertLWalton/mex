@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Sep 19 03:33:07 EDT 2023
+// Date:	Wed Sep 20 05:58:57 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -49,6 +49,7 @@ min::locatable_gen mexas::V;
 min::locatable_gen mexas::F;
 
 min::locatable_gen mexas::op_code_table;
+min::locatable_gen mexas::trace_class_table;
 min::locatable_gen mexas::trace_flag_table;
 min::locatable_gen mexas::except_flag_table;
 
@@ -128,9 +129,34 @@ static struct trace_group
               (1<<mex::T_ENDL) }
     };
 
+static void init_trace_class_table ( void )
+{
+    min::uns32 n = mex::NUMBER_OF_TRACE_CLASSES
+                 + 20;
+    mexas::trace_class_table = min::new_obj_gen
+        ( 10 * n, 4 * n, 1 * n );
+
+    min::obj_vec_insptr vp ( mexas::trace_class_table );
+    min::attr_insptr ap ( vp );
+
+    min::locatable_gen tmp;
+    mex::trace_class_info * p = mex::trace_class_infos;
+    mex::trace_class_info * endp =
+        p + mex::NUMBER_OF_TRACE_CLASSES;
+    while  ( p < endp )
+    {
+        tmp = min::new_str_gen ( p->name );
+	min::locate ( ap, tmp );
+	tmp = min::new_num_gen ( p->trace_class );
+	min::set ( ap, tmp );
+	++ p;
+    }
+}
+
 static void init_trace_flag_table ( void )
 {
     min::uns32 n = mex::NUMBER_OF_TRACE_CLASSES
+                 + NUMBER_OF_TRACE_GROUPS
                  + 20;
     mexas::trace_flag_table = min::new_obj_gen
         ( 10 * n, 4 * n, 1 * n );
@@ -282,6 +308,7 @@ static void initialize ( void )
     ::loop = min::new_str_gen ( "LOOP" );
 
     ::init_op_code_table();
+    ::init_trace_class_table();
     ::init_trace_flag_table();
     ::init_except_flag_table();
 
@@ -963,7 +990,7 @@ bool mexas::check_parameter
     {
 	mexas::compile_error
 	    ( pp, "bad ", min::pnop, pname, min::pnop,
-	          " parameter; instruction ignored" );
+	          " parameter; statement ignored" );
 	return false;
     }
 
@@ -989,7 +1016,7 @@ bool mexas::check_parameter
     mexas::compile_error
 	( pp, pname, min::pnop,
 	      " parameter out of range;"
-	      " instruction ignored" );
+	      " statement ignored" );
     return false;
 }
 
@@ -1785,22 +1812,91 @@ mex::module mexas::compile ( min::file file )
 		    break;
 		}
 		trace_class = min::get
-		    ( mexas::trace_flag_table,
+		    ( mexas::trace_class_table,
 		      trace_class );
 		if ( trace_class != min::NONE() )
 		{
 		    min::float64 f =
 			min::direct_float_of
 			    ( trace_class );
-		    instr.trace_class = (min::uns32) f;
+		    instr.trace_class = (min::uns8) f;
 		}
 		else
 		{
 		    mexas::compile_error
 			( pp, "unrecognized trace"
-			      " flag; "
+			      " class; "
 			      " statement ignored" );
 		    continue;
+		}
+	        min::gen trace_depth =
+		    mexas::get_num ( index );
+		if ( trace_depth == min::NONE() )
+		{
+		    mexas::push_instr ( instr, pp );
+		    break;
+		}
+		min::uns32 depth;
+		if ( !  mexas::check_parameter
+		            ( depth, trace_depth,
+			      pp, "trace_depth" ) )
+		    continue;
+		if ( depth >= 265 )
+		{
+		    mexas::compile_error
+			( pp, "trace_depth too large;"
+			      " statement ignored" );
+		    continue;
+		}
+		instr.trace_depth = (min::uns8) depth;
+
+	        min::gen immedA =
+		    mexas::get_num ( index );
+		if ( immedA == min::NONE() )
+		{
+		    mexas::push_instr ( instr, pp );
+		    break;
+		}
+		if ( !  mexas::check_parameter
+		            ( instr.immedA, immedA,
+			      pp, "immedA" ) )
+		    continue;
+
+	        min::gen immedB =
+		    mexas::get_num ( index );
+		if ( immedB == min::NONE() )
+		{
+		    mexas::push_instr ( instr, pp );
+		    break;
+		}
+		if ( !  mexas::check_parameter
+		            ( instr.immedB, immedB,
+			      pp, "immedB" ) )
+		    continue;
+
+	        min::gen immedC =
+		    mexas::get_num ( index );
+		if ( immedC == min::NONE() )
+		{
+		    mexas::push_instr ( instr, pp );
+		    break;
+		}
+		if ( !  mexas::check_parameter
+		            ( instr.immedC, immedC,
+			      pp, "immedC" ) )
+		    continue;
+
+	        instr.immedD = mexas::get_num ( index );
+		if ( instr.immedD == min::NONE() )
+		{
+		    instr.immedD =
+		        mexas::get_name ( index );
+		    if ( instr.immedD == min::NONE() )
+		    {
+			mexas::push_instr ( instr, pp );
+			break;
+		    }
+		    // TBD
 		}
 
 		mexas::push_instr ( instr, pp );

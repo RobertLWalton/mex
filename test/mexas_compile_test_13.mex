@@ -2,7 +2,7 @@
 //
 // File:	mexas_compile_test_13.mex
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Sep 18 21:35:16 EDT 2023
+// Date:	Wed Sep 20 06:23:58 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -12,4 +12,5 @@
 // Empty stack test
 //
 PUSHI 100 X
-TEST_INSTRUCTION ADD
+TEST_INSTRUCTION ADD AOP 5 \
+     1 2 3 2.53  // Only ADD is relevant

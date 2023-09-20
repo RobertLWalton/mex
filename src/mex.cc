@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Sep 18 21:44:05 EDT 2023
+// Date:	Wed Sep 20 07:11:58 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -2520,8 +2520,9 @@ bool mex::run_process ( mex::process p )
 FATAL:
     p->state = mex::FORMAT_ERROR;
     char fatal_buffer[100];
-    char instr_buffer[400];
-    char * q = instr_buffer;
+    char instr_buffer_1[1000];
+    char instr_buffer_2[1000] = { 0 };
+    char * q = instr_buffer_1;
     q += sprintf ( q, "OP CODE = " );
     if ( p->pc.module == min::NULL_STUB
          ||
@@ -2541,7 +2542,14 @@ FATAL:
 	    q += sprintf
 	        ( q, "%u (TOO LARGE)", op_code );
 	q += sprintf
-	    ( q, ", IMMEDA = %u", instr->immedA );
+	    ( q, ", TRACE CLASS = %u",
+	         instr->trace_class );
+	q += sprintf
+	    ( q, ", TRACE DEPTH = %u,",
+	         instr->trace_depth );
+	q = instr_buffer_2;
+	q += sprintf
+	    ( q, "IMMEDA = %u", instr->immedA );
 	q += sprintf
 	    ( q, ", IMMEDB = %u", instr->immedB );
 	q += sprintf
@@ -2573,6 +2581,11 @@ FATAL:
 		         ~ min::begin_ptr_of ( sp ) );
 	    }
 	}
+	else
+	    q += sprintf
+		( q, ", IMMEDD = %.15g",
+		     MUP::direct_float_of
+		         ( instr->immedD ) );
     }
 
     p->printer << min::bol
@@ -2604,8 +2617,10 @@ FATAL:
 		                p->pc.module->length ),
 		      fatal_buffer ) )
 	       << min::indent
-	       << instr_buffer
-	       << min::indent
+	       << instr_buffer_1;
+    if ( instr_buffer_2[0] != 0 )
+	p->printer << min::indent << instr_buffer_2;
+    p->printer << min::indent
 	       << "STACK POINTER = " << p->length
 	       << ", PROCESS MAX_LENGTH = "
 	       << p->max_length
