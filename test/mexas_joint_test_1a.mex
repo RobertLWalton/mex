@@ -1,0 +1,27 @@
+// MEXAS Joint Test 1a Input
+//
+// File:	mexas_joint_test_1a.mex
+// Author:	Bob Walton (walton@acm.org)
+// Date:	Thu Sep 21 02:51:45 EDT 2023
+//
+// The authors have placed this program in the public
+// domain; they make no warranty and accept no liability
+// for this program.
+
+// MIN ( ARG1, ARG2 )
+//
+BEGF MIN ARG1 ARG2
+    STACKS
+    PUSH ARG1
+    PUSH ARG2
+    JMPLT ITS-ARG1
+    PUSH ARG2
+    RET 1
+    LABEL ITS-ARG1
+    PUSH ARG1
+    RET 1
+ENDF
+
+PUSHI 23 X
+PUSHI 157 Y
+PUSHI -58 Z

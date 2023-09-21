@@ -2,7 +2,7 @@
 #
 # File:		Makefile
 # Author:	Bob Walton (walton@acm.org)
-# Date:		Mon Sep 18 21:35:36 EDT 2023
+# Date:		Thu Sep 21 02:59:40 EDT 2023
 #
 # The authors have placed this program in the public
 # domain; they make no warranty and accept no liability
@@ -41,6 +41,8 @@ TESTS = mexas_scanner_test_1 \
         mexas_compile_test_11 \
         mexas_compile_test_12 \
         mexas_compile_test_13 \
+        mexas_compile_test_14 \
+        mexas_joint_test_1 \
         mexas_time_test_1 \
         mexas_time_test_1o \
         mexas_time_test_2 \
@@ -151,6 +153,10 @@ mexas_time_test_2.out: \
 mexas_time_test_2o.out: \
     RUN = -counter 20000000 -o:on
 
+# Tell make mexas_compile_test_14.mex exists when
+# in fact it does not.
+mexas_compile_test_14.mex:
+
 mexas_compile_test_%.out:	\
 		mexas \
 		mexas_compile_test_%.mex \
@@ -159,6 +165,15 @@ mexas_compile_test_%.out:	\
 	-${RUNENV} mexas ${TRACE} \
 	    mexas_compile_test_$*.mex \
 	    > mexas_compile_test_$*.out
+
+mexas_joint_test_%.out:	\
+		mexas \
+		mexas_joint_test_%*.mex \
+		Makefile
+	rm -f mexas_joint_test_$*.out
+	-${RUNENV} mexas ${TRACE} \
+	    mexas_joint_test_$*{a,b}.mex \
+	    > mexas_joint_test_$*.out
 
 mexas_time_test_%.out:	\
 		mexas \

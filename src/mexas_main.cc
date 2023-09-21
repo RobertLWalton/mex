@@ -2,7 +2,7 @@
 //
 // File:	mexas_main.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Sep 18 20:57:40 EDT 2023
+// Date:	Thu Sep 21 07:05:57 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -270,8 +270,13 @@ int main ( int argc, char * argv[] )
 	    min::locatable_var<min::file> file;
 	    min::init_printer
 	        ( file, mex::default_printer );
-	    min::init_input_named_file
-	        ( file, file_name );
+	    if ( ! min::init_input_named_file
+	               ( file, file_name ) )
+	    {
+	        mex::default_printer
+		    << min::error_message;
+		return 1;
+	    }
 	    bool result = mexas::compile ( file );
 	    if ( ! result )
 	    {
