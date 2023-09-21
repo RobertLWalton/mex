@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Sep 20 05:58:57 EDT 2023
+// Date:	Wed Sep 20 22:22:40 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -447,6 +447,23 @@ min::uns32 mexas::global_search
 	return (min::uns32) min::int_of ( result );
     }
     return mexas::NOT_FOUND;
+}
+
+// Find a module given an module_name.  Searches most
+// recently compiled first.  Returns the module, or
+// NULL_STUB if none found.
+//
+static mex::module module_search
+	( min::gen module_name )
+{
+    for ( min::uns32 i = mexas::modules->length;
+          0 < i; )
+    {
+	-- i;
+        if ( mexas::modules[i]->name == module_name )
+	    return mexas::modules[i];
+    }
+    return min::NULL_STUB;
 }
 
 void mexas::make_module_interface ( void )
@@ -1896,7 +1913,22 @@ mex::module mexas::compile ( min::file file )
 			mexas::push_instr ( instr, pp );
 			break;
 		    }
-		    // TBD
+		    mex::module m = ::module_search
+		        ( instr.immedD );
+		    if ( m == min::NULL_STUB )
+		    {
+			mexas::compile_error
+			    ( pp, "",
+			          min::pgen
+				      ( instr.immedD ),
+			          " does not name a"
+				  " module;"
+				  " statement ignored"
+			    );
+			continue;
+		    }
+		    instr.immedD =
+		        min::new_stub_gen ( m );
 		}
 
 		mexas::push_instr ( instr, pp );
@@ -2551,7 +2583,13 @@ mex::module mexas::compile ( min::file file )
         return min::NULL_STUB;
     }
 
-    // TBD: make globals.
+    min::packed_vec_insptr<min::gen> g =
+        (min::packed_vec_insptr<min::gen>)
+	min::gen_packed_vec_type.new_stub
+	    ( process->length );
+    mex::globals_ref ( m ) = g;
+    for ( min::uns32 i = 0; i < process->length; ++ i )
+        min::push(g) = process[i];
 
     min::push ( mexas::modules ) = m;
 
