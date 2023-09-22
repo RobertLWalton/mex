@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Sep 20 22:22:40 EDT 2023
+// Date:	Fri Sep 22 02:20:57 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -2551,10 +2551,11 @@ mex::module mexas::compile ( min::file file )
 	     &&
 	     std::strcmp ( ".mex", p + len - 4 ) == 0 )
 	    mex::name_ref(m) =
-	        min::new_str_gen ( p, len - 1 );
+	        min::new_str_gen ( p, len - 4 );
 	else
 	    mex::name_ref(m) =
 	        mexas::input_file->file_name;
+
     }
 
     mexas::make_module_interface();

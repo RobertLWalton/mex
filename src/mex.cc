@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Sep 20 07:11:58 EDT 2023
+// Date:	Fri Sep 22 02:24:28 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -2175,7 +2175,9 @@ bool mex::run_process ( mex::process p )
 		{
 		    p->printer << ":";
 		    min::lab_ptr lp ( tinfo );
-		    if ( lp != min::NULL_STUB
+		    if ( op_code != mex::PUSHG
+		         &&
+			 lp != min::NULL_STUB
 		         &&
 			 min::lablen ( lp ) == 2 )
 		    {
@@ -2183,6 +2185,20 @@ bool mex::run_process ( mex::process p )
 			           << lp[1]
 				   << " <= "
 				   << lp[0]
+				   << " =";
+		    }
+		    else if ( op_code == mex::PUSHG
+		              &&
+		              lp != min::NULL_STUB
+		              &&
+			      min::lablen ( lp ) == 3 )
+		    {
+		        p->printer << " "
+			           << lp[2]
+				   << " <= "
+				   << lp[0]
+				   << " in "
+				   << lp[1]
 				   << " =";
 		    }
 		    else

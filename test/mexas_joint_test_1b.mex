@@ -1,0 +1,25 @@
+// MEXAS Joint Test 1b Input
+//
+// File:	mexas_joint_test_1b.mex
+// Author:	Bob Walton (walton@acm.org)
+// Date:	Fri Sep 22 01:44:26 EDT 2023
+//
+// The authors have placed this program in the public
+// domain; they make no warranty and accept no liability
+// for this program.
+
+PUSH X
+PUSH Y
+CALLG mexas_joint_test_1a MIN 2 R
+TRACE 'R = MIN(X,Y)' X Y R
+
+PUSH Y
+PUSH Z
+CALL MIN 2 R
+TRACE 'R = MIN(Y,Z)' Y Z R
+
+PUSH Z
+PUSH X
+CALL MIN 2 R
+TRACE 'R = MIN(Z,X)' Z X R
+

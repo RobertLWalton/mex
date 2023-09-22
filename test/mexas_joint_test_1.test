@@ -1,0 +1,144 @@
+// MEXAS Joint Test 1a Input
+//
+// File:        mexas_joint_test_1a.mex
+// Author:      Bob Walton (walton@acm.org)
+// Date:        Thu Sep 21 02:51:45 EDT 2023
+//
+// The authors have placed this program in the public
+// domain; they make no warranty and accept no liability
+// for this program.
+
+// MIN ( ARG1, ARG2 )
+//
+BEGF MIN ARG1 ARG2
+    [13:0;2] BEGF T_BEGF 2 1 0 [$ MISSING $]; [< MIN ARG1 ARG2 >]
+    STACKS: VARIABLES: ARG2 ARG1
+            FUNCTIONS: | MIN
+    PUSH ARG1
+    [15:1;3] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< ARG1 * >]
+    PUSH ARG2
+    [16:2;4] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< ARG2 * >]
+    JMPLT ITS-ARG1
+    [17:3;2] JMPLT T_JMPS 0 0 0 [$ MISSING $]; ITS-ARG1
+    PUSH ARG2
+    [18:4;3] PUSHS T_PUSH 0 0 0 [$ MISSING $]; [< ARG2 * >]
+    RET 1
+    [19:5;2] RET T_RET 0 1 1 [$ MISSING $]; [$ MISSING $]
+    LABEL ITS-ARG1
+    [17:3;2] JMPLT T_JMPS 0 0 3 [$ MISSING $]; ITS-ARG1
+    PUSH ARG1
+    [21:6;3] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< ARG1 * >]
+    RET 1
+    [22:7;2] RET T_RET 0 1 1 [$ MISSING $]; [$ MISSING $]
+ENDF
+    [13:0;2] BEGF T_BEGF 2 1 9 [$ MISSING $]; [< MIN ARG1 ARG2 >]
+    [23:8;0] ENDF T_ENDF 0 1 0 [$ MISSING $]; [$ MISSING $]
+
+PUSHI 23 X
+    [25:9;1] PUSHI T_PUSH 0 0 0 23; X
+PUSHI 157 Y
+    [26:10;2] PUSHI T_PUSH 0 0 0 157; Y
+PUSHI -58 Z
+    [27:11;3] PUSHI T_PUSH 0 0 0 -58; Z
+* {13:0,0,0} BEGF
+* {25:9,0,1} PUSHI: X <= 23
+* {26:10,1,2} PUSHI: Y <= 157
+* {27:11,2,3} PUSHI: Z <= -58
+mexas_joint_test_1a.mex successfully compiled
+// MEXAS Joint Test 1b Input
+//
+// File:        mexas_joint_test_1b.mex
+// Author:      Bob Walton (walton@acm.org)
+// Date:        Fri Sep 22 01:44:26 EDT 2023
+//
+// The authors have placed this program in the public
+// domain; they make no warranty and accept no liability
+// for this program.
+
+PUSH X
+    [11:0;1] PUSHG T_PUSH 0 0 0 PACKED_VEC; [< X mexas_joint_test_1a
+             * >]
+PUSH Y
+    [12:1;2] PUSHG T_PUSH 1 0 0 PACKED_VEC; [< Y mexas_joint_test_1a
+             * >]
+CALLG mexas_joint_test_1a MIN 2 R
+    [13:2;1] CALLG T_CALLG 2 1 0 PACKED_VEC; [< MIN R >]
+    [14:3;1] PUSHG T_PUSH 0 0 0 PACKED_VEC; [< X mexas_joint_test_1a
+             * >]
+    [14:4;1] PUSHG T_PUSH 1 0 0 PACKED_VEC; [< Y mexas_joint_test_1a
+             * >]
+    [14:5;1] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< R * >]
+TRACE 'R = MIN(X,Y)' X Y R
+    [14:6;1] TRACE T_ALWAYS 3 0 0 [$ MISSING $]; [< "R = MIN(X,Y)" X Y
+             R >]
+
+PUSH Y
+    [16:7;2] PUSHG T_PUSH 1 0 0 PACKED_VEC; [< Y mexas_joint_test_1a
+             * >]
+PUSH Z
+    [17:8;3] PUSHG T_PUSH 2 0 0 PACKED_VEC; [< Z mexas_joint_test_1a
+             * >]
+CALL MIN 2 R
+    [18:9;2] CALLG T_CALLG 2 1 0 PACKED_VEC; [< MIN R >]
+    [19:10;2] PUSHG T_PUSH 1 0 0 PACKED_VEC; [< Y mexas_joint_test_1a
+              * >]
+    [19:11;2] PUSHG T_PUSH 2 0 0 PACKED_VEC; [< Z mexas_joint_test_1a
+              * >]
+    [19:12;2] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< R * >]
+TRACE 'R = MIN(Y,Z)' Y Z R
+    [19:13;2] TRACE T_ALWAYS 3 0 0 [$ MISSING $]; [< "R = MIN(Y,Z)" Y Z
+              R >]
+
+PUSH Z
+    [21:14;3] PUSHG T_PUSH 2 0 0 PACKED_VEC; [< Z mexas_joint_test_1a
+              * >]
+PUSH X
+    [22:15;4] PUSHG T_PUSH 0 0 0 PACKED_VEC; [< X mexas_joint_test_1a
+              * >]
+CALL MIN 2 R
+    [23:16;3] CALLG T_CALLG 2 1 0 PACKED_VEC; [< MIN R >]
+    [24:17;3] PUSHG T_PUSH 2 0 0 PACKED_VEC; [< Z mexas_joint_test_1a
+              * >]
+    [24:18;3] PUSHG T_PUSH 0 0 0 PACKED_VEC; [< X mexas_joint_test_1a
+              * >]
+    [24:19;3] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< R * >]
+TRACE 'R = MIN(Z,X)' Z X R
+    [24:20;3] TRACE T_ALWAYS 3 0 0 [$ MISSING $]; [< "R = MIN(Z,X)" Z X
+              R >]
+* {11:0,0,0} PUSHG: * <= X in mexas_joint_test_1a = 23
+* {12:1,1,1} PUSHG: * <= Y in mexas_joint_test_1a = 157
+* {13:2,2,2} CALLG to BEGF: MIN, ARG1=23, ARG2=157
+*** {15:1,2,3} PUSHS: * <= ARG1 = 23
+*** {16:2,3,4} PUSHS: * <= ARG2 = 157
+*** {17:3,4,5} JMPLT ITS-ARG1 is successful: true <= 23 < 157
+*** {21:6,2,6} PUSHS: * <= ARG1 = 23
+*** {22:7,3,7} RET to CALLG: MIN, R=23
+* {14:3,1,8} PUSHG: * <= X in mexas_joint_test_1a = 23
+* {14:4,2,9} PUSHG: * <= Y in mexas_joint_test_1a = 157
+* {14:5,3,10} PUSHS: * <= R = 23
+* {14:6,4,11} TRACE: "R = MIN(X,Y)", X=23, Y=157, R=23
+* {16:7,1,12} PUSHG: * <= Y in mexas_joint_test_1a = 157
+* {17:8,2,13} PUSHG: * <= Z in mexas_joint_test_1a = -58
+* {18:9,3,14} CALLG to BEGF: MIN, ARG1=157, ARG2=-58
+*** {15:1,3,15} PUSHS: * <= ARG1 = 157
+*** {16:2,4,16} PUSHS: * <= ARG2 = -58
+*** {17:3,5,17} JMPLT ITS-ARG1 is UNsuccessful: false <= 157 < -58
+*** {18:4,3,18} PUSHS: * <= ARG2 = -58
+*** {19:5,4,19} RET to CALLG: MIN, R=-58
+* {19:10,2,20} PUSHG: * <= Y in mexas_joint_test_1a = 157
+* {19:11,3,21} PUSHG: * <= Z in mexas_joint_test_1a = -58
+* {19:12,4,22} PUSHS: * <= R = -58
+* {19:13,5,23} TRACE: "R = MIN(Y,Z)", Y=157, Z=-58, R=-58
+* {21:14,2,24} PUSHG: * <= Z in mexas_joint_test_1a = -58
+* {22:15,3,25} PUSHG: * <= X in mexas_joint_test_1a = 23
+* {23:16,4,26} CALLG to BEGF: MIN, ARG1=-58, ARG2=23
+*** {15:1,4,27} PUSHS: * <= ARG1 = -58
+*** {16:2,5,28} PUSHS: * <= ARG2 = 23
+*** {17:3,6,29} JMPLT ITS-ARG1 is successful: true <= -58 < 23
+*** {21:6,4,30} PUSHS: * <= ARG1 = -58
+*** {22:7,5,31} RET to CALLG: MIN, R=-58
+* {24:17,3,32} PUSHG: * <= Z in mexas_joint_test_1a = -58
+* {24:18,4,33} PUSHG: * <= X in mexas_joint_test_1a = 23
+* {24:19,5,34} PUSHS: * <= R = -58
+* {24:20,6,35} TRACE: "R = MIN(Z,X)", Z=-58, X=23, R=-58
+mexas_joint_test_1b.mex successfully compiled
