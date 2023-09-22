@@ -2,7 +2,7 @@
 #
 # File:		Makefile
 # Author:	Bob Walton (walton@acm.org)
-# Date:		Fri Sep 22 06:09:58 EDT 2023
+# Date:		Fri Sep 22 13:18:39 EDT 2023
 #
 # The authors have placed this program in the public
 # domain; they make no warranty and accept no liability
@@ -154,9 +154,13 @@ mexas_time_test_2.out: \
 mexas_time_test_2o.out: \
     RUN = -counter 20000000 -o:on
 
-# Tell make mexas_compile_test_14.mex exists when
-# in fact it does not.
-mexas_compile_test_14.mex:
+# mexas_compile_test_14.mex does not exist.
+#
+mexas_compile_test_14.out:
+	rm -f mexas_compile_test_14.out
+	-${RUNENV} mexas ${TRACE} \
+	    mexas_compile_test_14.mex \
+	    > mexas_compile_test_14.out
 
 mexas_compile_test_%.out:	\
 		mexas \
