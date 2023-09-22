@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Sep 22 02:20:57 EDT 2023
+// Date:	Fri Sep 22 07:22:28 EDT 2023
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1446,7 +1446,7 @@ mex::module mexas::compile ( min::file file )
 	        min::gen mod_name;
 		if ( op_code == mex::PUSHG )
 		{
-		    min::gen mod_name =
+		    mod_name =
 			mexas::get_name ( index );
 		    if ( mod_name == min::NONE() )
 		        mod_name = mexas::get_star

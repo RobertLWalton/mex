@@ -1,0 +1,21 @@
+// MEXAS Joint Test 2c Input
+//
+// File:	mexas_joint_test_2c.mex
+// Author:	Bob Walton (walton@acm.org)
+// Date:	Fri Sep 22 06:11:19 EDT 2023
+//
+// The authors have placed this program in the public
+// domain; they make no warranty and accept no liability
+// for this program.
+
+
+PUSHG mexas_joint_test_2a X
+PUSHG mexas_joint_test_2b Y
+CALLG mexas_joint_test_2a SELECT 2 R // Select X
+TRACE 'R = SELECT(X,Y) RETURNS X'
+
+PUSHG mexas_joint_test_2b X
+PUSHG mexas_joint_test_2a Y
+CALLG mexas_joint_test_2b SELECT 2 R // Select Y
+TRACE 'R = SELECT(X,Y) RETURNS Y'
+

@@ -1,0 +1,21 @@
+// MEXAS Joint Test 2a Input
+//
+// File:	mexas_joint_test_2a.mex
+// Author:	Bob Walton (walton@acm.org)
+// Date:	Fri Sep 22 06:11:19 EDT 2023
+//
+// The authors have placed this program in the public
+// domain; they make no warranty and accept no liability
+// for this program.
+
+// SELECT ( ARG1, ARG2 ) = ARG1
+//
+BEGF SELECT ARG1 ARG2
+    PUSH ARG1
+    RET 1
+ENDF
+
+PUSHI 115 X
+PUSHI 190 Y
+PUSHI -183 Z
+

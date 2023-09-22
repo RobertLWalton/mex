@@ -1,0 +1,113 @@
+// MEXAS Joint Test 2a Input
+//
+// File:        mexas_joint_test_2a.mex
+// Author:      Bob Walton (walton@acm.org)
+// Date:        Fri Sep 22 06:11:19 EDT 2023
+//
+// The authors have placed this program in the public
+// domain; they make no warranty and accept no liability
+// for this program.
+
+// SELECT ( ARG1, ARG2 ) = ARG1
+//
+BEGF SELECT ARG1 ARG2
+    [13:0;2] BEGF T_BEGF 2 1 0 [$ MISSING $]; [< SELECT ARG1 ARG2 >]
+    PUSH ARG1
+    [14:1;3] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< ARG1 * >]
+    RET 1
+    [15:2;2] RET T_RET 0 1 1 [$ MISSING $]; [$ MISSING $]
+ENDF
+    [13:0;2] BEGF T_BEGF 2 1 4 [$ MISSING $]; [< SELECT ARG1 ARG2 >]
+    [16:3;0] ENDF T_ENDF 0 1 0 [$ MISSING $]; [$ MISSING $]
+
+PUSHI 115 X
+    [18:4;1] PUSHI T_PUSH 0 0 0 115; X
+PUSHI 190 Y
+    [19:5;2] PUSHI T_PUSH 0 0 0 190; Y
+PUSHI -183 Z
+    [20:6;3] PUSHI T_PUSH 0 0 0 -183; Z
+* {13:0,0,0} BEGF
+* {18:4,0,1} PUSHI: X <= 115
+* {19:5,1,2} PUSHI: Y <= 190
+* {20:6,2,3} PUSHI: Z <= -183
+mexas_joint_test_2a.mex successfully compiled
+// MEXAS Joint Test 2b Input
+//
+// File:        mexas_joint_test_2b.mex
+// Author:      Bob Walton (walton@acm.org)
+// Date:        Fri Sep 22 06:11:19 EDT 2023
+//
+// The authors have placed this program in the public
+// domain; they make no warranty and accept no liability
+// for this program.
+
+// SELECT ( ARG1, ARG2 ) = ARG2
+//
+BEGF SELECT ARG1 ARG2
+    [13:0;2] BEGF T_BEGF 2 1 0 [$ MISSING $]; [< SELECT ARG1 ARG2 >]
+    PUSH ARG2
+    [14:1;3] PUSHS T_PUSH 0 0 0 [$ MISSING $]; [< ARG2 * >]
+    RET 1
+    [15:2;2] RET T_RET 0 1 1 [$ MISSING $]; [$ MISSING $]
+ENDF
+    [13:0;2] BEGF T_BEGF 2 1 4 [$ MISSING $]; [< SELECT ARG1 ARG2 >]
+    [16:3;0] ENDF T_ENDF 0 1 0 [$ MISSING $]; [$ MISSING $]
+
+PUSHI 295 X
+    [18:4;1] PUSHI T_PUSH 0 0 0 295; X
+PUSHI 287 Y
+    [19:5;2] PUSHI T_PUSH 0 0 0 287; Y
+PUSHI -243 Z
+    [20:6;3] PUSHI T_PUSH 0 0 0 -243; Z
+* {13:0,0,0} BEGF
+* {18:4,0,1} PUSHI: X <= 295
+* {19:5,1,2} PUSHI: Y <= 287
+* {20:6,2,3} PUSHI: Z <= -243
+mexas_joint_test_2b.mex successfully compiled
+// MEXAS Joint Test 2c Input
+//
+// File:        mexas_joint_test_2c.mex
+// Author:      Bob Walton (walton@acm.org)
+// Date:        Fri Sep 22 06:11:19 EDT 2023
+//
+// The authors have placed this program in the public
+// domain; they make no warranty and accept no liability
+// for this program.
+
+
+PUSHG mexas_joint_test_2a X
+    [12:0;1] PUSHG T_PUSH 0 0 0 PACKED_VEC; [< * mexas_joint_test_2a
+             X >]
+PUSHG mexas_joint_test_2b Y
+    [13:1;2] PUSHG T_PUSH 1 0 0 PACKED_VEC; [< * mexas_joint_test_2b
+             Y >]
+CALLG mexas_joint_test_2a SELECT 2 R // Select X
+    [14:2;1] CALLG T_CALLG 2 1 0 PACKED_VEC; [< SELECT R >]
+TRACE 'R = SELECT(X,Y) RETURNS X'
+    [15:3;1] TRACE T_ALWAYS 0 0 0 [$ MISSING $]; [<
+             "R = SELECT(X,Y) RETURNS X" >]
+
+PUSHG mexas_joint_test_2b X
+    [17:4;2] PUSHG T_PUSH 0 0 0 PACKED_VEC; [< * mexas_joint_test_2b
+             X >]
+PUSHG mexas_joint_test_2a Y
+    [18:5;3] PUSHG T_PUSH 1 0 0 PACKED_VEC; [< * mexas_joint_test_2a
+             Y >]
+CALLG mexas_joint_test_2b SELECT 2 R // Select Y
+    [19:6;2] CALLG T_CALLG 2 1 0 PACKED_VEC; [< SELECT R >]
+TRACE 'R = SELECT(X,Y) RETURNS Y'
+    [20:7;2] TRACE T_ALWAYS 0 0 0 [$ MISSING $]; [<
+             "R = SELECT(X,Y) RETURNS Y" >]
+* {12:0,0,0} PUSHG: X <= * in mexas_joint_test_2a = 115
+* {13:1,1,1} PUSHG: Y <= * in mexas_joint_test_2b = 287
+* {14:2,2,2} CALLG to BEGF: SELECT, ARG1=115, ARG2=287
+*** {14:1,2,3} PUSHS: * <= ARG1 = 115
+*** {15:2,3,4} RET to CALLG: SELECT, R=115
+* {15:3,1,5} TRACE: "R = SELECT(X,Y) RETURNS X"
+* {17:4,1,6} PUSHG: X <= * in mexas_joint_test_2b = 295
+* {18:5,2,7} PUSHG: Y <= * in mexas_joint_test_2a = 190
+* {19:6,3,8} CALLG to BEGF: SELECT, ARG1=295, ARG2=190
+*** {14:1,3,9} PUSHS: * <= ARG2 = 190
+*** {15:2,4,10} RET to CALLG: SELECT, R=190
+* {20:7,2,11} TRACE: "R = SELECT(X,Y) RETURNS Y"
+mexas_joint_test_2c.mex successfully compiled
