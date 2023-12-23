@@ -2,7 +2,7 @@
 #
 # File:		Makefile
 # Author:	Bob Walton (walton@acm.org)
-# Date:		Fri Sep 22 13:18:39 EDT 2023
+# Date:		Sat Dec 23 03:21:16 EST 2023
 #
 # The authors have placed this program in the public
 # domain; they make no warranty and accept no liability
@@ -132,7 +132,7 @@ mexas_scanner_test_%.out:	\
 		mexas_scanner_test_%.in \
 		Makefile
 	rm -f mexas_scanner_test_$*.out
-	${RUNENV} mexas_scanner_test \
+	${RUNENV} ./mexas_scanner_test \
 	    < mexas_scanner_test_$*.in \
 	    > mexas_scanner_test_$*.out
 
@@ -158,7 +158,7 @@ mexas_time_test_2o.out: \
 #
 mexas_compile_test_14.out:
 	rm -f mexas_compile_test_14.out
-	-${RUNENV} mexas ${TRACE} \
+	-${RUNENV} ./mexas ${TRACE} \
 	    mexas_compile_test_14.mex \
 	    > mexas_compile_test_14.out
 
@@ -167,7 +167,7 @@ mexas_compile_test_%.out:	\
 		mexas_compile_test_%.mex \
 		Makefile
 	rm -f mexas_compile_test_$*.out
-	-${RUNENV} mexas ${TRACE} \
+	-${RUNENV} ./mexas ${TRACE} \
 	    mexas_compile_test_$*.mex \
 	    > mexas_compile_test_$*.out
 
@@ -176,7 +176,7 @@ mexas_joint_test_%.out:	\
 		mexas_joint_test_%*.mex \
 		Makefile
 	rm -f mexas_joint_test_$*.out
-	-${RUNENV} mexas ${TRACE} \
+	-${RUNENV} ./mexas ${TRACE} \
 	    mexas_joint_test_$*[abc].mex \
 	    > mexas_joint_test_$*.out
 
@@ -185,7 +185,7 @@ mexas_time_test_%.out:	\
 		mexas_time_test_%.mex \
 		Makefile
 	rm -f mexas_time_test_$*.out
-	${RUNENV} mexas -pasource \
+	${RUNENV} ./mexas -pasource \
 	    mexas_time_test_$*.mex \
 	    ${RUN} -r MAIN \
 	    > mexas_time_test_$*.out
@@ -195,7 +195,7 @@ mexas_time_test_%o.out:	\
 		mexas_time_test_%.mex \
 		Makefile
 	rm -f mexas_time_test_$*o.out
-	${RUNENV} mexas -pasource \
+	${RUNENV} ./mexas -pasource \
 	    mexas_time_test_$*.mex \
 	    ${RUN} -r MAIN \
 	    > mexas_time_test_$*o.out
