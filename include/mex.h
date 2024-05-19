@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat Sep 16 21:47:32 EDT 2023
+// Date:	Sat May 18 22:14:14 EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -288,15 +288,8 @@ struct pc
 {
     const mex::module module;
     min::uns32 index;
-    mex::pc & operator = ( const mex::pc pc )
-    {
-        // Implicit = is not defined because 
-        // module is const.
-        //
-        * (mex::module *) & this->module = pc.module;
-        this->index = pc.index;
-	return * this;
-    }
+    pc ( mex::module module, min::uns32 index ) :
+        module ( module ), index ( index ) {}
 };
 template<typename S>
 min::uns32 DISP ( const mex::pc S::* d )
@@ -307,7 +300,7 @@ min::uns32 DISP ( const mex::pc S::* d )
 
 struct ret
 {
-    const mex::pc saved_pc;
+    mex::pc saved_pc;
     min::uns32 saved_level;
     min::uns32 saved_fp;
     min::uns32 saved_nargs;
@@ -322,7 +315,7 @@ struct process_header
     const min::uns32 length;
     const min::uns32 max_length;
     min::printer printer;
-    const mex::pc pc;
+    mex::pc pc;
     mex::return_stack return_stack;
     min::uns32 level;
     min::uns32 fp[mex::max_lexical_level + 1];
@@ -350,7 +343,8 @@ inline min::gen * process_push
 }
 inline void set_pc ( mex::process p, mex::pc pc )
 {
-    * (mex::pc *) & p->pc = pc;
+    * (mex::module *) & p->pc.module = pc.module;
+    p->pc.index = pc.index;
     if ( pc.module != min::NULL_STUB )
         min::unprotected::acc_write_update
 	    ( p, pc.module );
@@ -358,7 +352,8 @@ inline void set_pc ( mex::process p, mex::pc pc )
 inline void set_saved_pc
     ( mex::process p, mex::ret * ret, mex::pc pc )
 {
-    * (mex::pc *) & ret->saved_pc = pc;
+    * (mex::module *) & ret->saved_pc.module = pc.module;
+    ret->saved_pc.index = pc.index;
     min::unprotected::acc_write_update
 	( p->return_stack, pc.module );
 }

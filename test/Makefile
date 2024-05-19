@@ -2,7 +2,7 @@
 #
 # File:		Makefile
 # Author:	Bob Walton (walton@acm.org)
-# Date:		Sat Dec 23 03:21:16 EST 2023
+# Date:		Sat May 18 21:33:14 EDT 2024
 #
 # The authors have placed this program in the public
 # domain; they make no warranty and accept no liability
@@ -15,7 +15,8 @@ MIN = ~/min
 # The following turns on MIN debugging.
 #
 GFLAGS = -DMIN_PROTECT=1
-WFLAGS = -Wall -Wno-char-subscripts
+WFLAGS = -Wall -Wextra -Wno-unused-parameter \
+         -Wno-char-subscripts
 
 .SUFFIXES:
 .SUFFIXES: .out .test .diff
