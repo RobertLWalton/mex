@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Sep 22 07:22:28 EDT 2023
+// Date:	Sun May 19 03:07:16 EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -69,14 +69,14 @@ enum op_code
 
 static mex::op_info op_infos[] =
 {
-    { ::PUSHM, mex::NONA, 0, "PUSHM" },
-    { ::PUSH, mex::NONA, 0, "PUSH" },
-    { ::POP, mex::NONA, 0, "POP" },
-    { ::CALL, mex::NONA, 0, "CALL" },
-    { ::LABEL, mex::NONA, 0, "LABEL" },
+    { ::PUSHM, mex::NONA, 0, "PUSHM", NULL },
+    { ::PUSH, mex::NONA, 0, "PUSH", NULL },
+    { ::POP, mex::NONA, 0, "POP", NULL },
+    { ::CALL, mex::NONA, 0, "CALL", NULL },
+    { ::LABEL, mex::NONA, 0, "LABEL", NULL },
     { ::TEST_INSTRUCTION, mex::NONA,
-                           0, "TEST_INSTRUCTION" },
-    { ::STACKS, mex::NONA, 0, "STACKS" }
+                          0, "TEST_INSTRUCTION", NULL },
+    { ::STACKS, mex::NONA, 0, "STACKS", NULL }
 };
 
 static void init_op_code_table ( void )
@@ -1276,9 +1276,13 @@ mex::module mexas::compile ( min::file file )
     min::pop ( mexas::jumps,
                mexas::jumps->length );
     mexas::jump_element e =
-        { min::MISSING(), 0, 0, 0, 0, 0, 0 };
-    min::push ( jumps ) = e;  // Free head.
-    min::push ( jumps ) = e;  // Active head.
+        { min::MISSING(), 0, 0, 0, 0, 0, 0, 0 };
+    ::memcpy ( (void *) & ~ min::push ( jumps ),
+               (void *) & e, sizeof ( e ) );
+	// Free head.
+    ::memcpy ( (void *) & ~ min::push ( jumps ),
+               (void *) & e, sizeof ( e ) );
+	// Active head.
 
     L = 0;
     mexas::depth[0] = 0;
@@ -1337,7 +1341,6 @@ mex::module mexas::compile ( min::file file )
 
 	case mex::A2I:
 	case mex::A2RI:
-	{
 	    instr.immedD = mexas::get_num ( index );
 	    if ( instr.immedD == min::NONE() )
 	    {
@@ -1346,8 +1349,7 @@ mex::module mexas::compile ( min::file file )
 		          " zero assumed" );
 		instr.immedD == min::new_num_gen ( 0 );
 	    }
-	    // Fall through
-	}
+	    /* FALLTHRU */
 	case mex::A1:
 	    if ( SP < mexas::stack_limit + 1 )
 	        goto STACK_TOO_SHORT;
@@ -1429,7 +1431,8 @@ mex::module mexas::compile ( min::file file )
 		      depth[L],
 		      depth[L],
 		      SP,
-		      SP };
+		      SP,
+		      0 };
 		mexas::push_jump ( mexas::jumps, je );
 	    }
 	    mexas::push_instr ( instr, pp, target );
@@ -1773,8 +1776,8 @@ mex::module mexas::compile ( min::file file )
 		      0 < i; )
 		{
 		    -- i;
-		    mexas::function_element f =
-		        functions[i];
+		    mexas::function_element f
+			( functions[i] );
 		    while ( f.level < level )
 		    {
 		        printer << "| ";
@@ -1814,12 +1817,14 @@ mex::module mexas::compile ( min::file file )
 		     >= mex::NUMBER_OF_OP_CODES )
 		{
 		    mexas::compile_error
-			( pp, "undefined operation code;"
-			      " statement ignored" );
+			( pp,
+                          "undefined operation code;"
+			  " statement ignored" );
 		    continue;
 		}
 		instr.op_code =
-		    (min::uns32) min::int_of ( op_code );
+		    (min::uns32)
+		    min::int_of ( op_code );
 
 	        min::gen trace_class =
 		    mexas::get_name ( index );

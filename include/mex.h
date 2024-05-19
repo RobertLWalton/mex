@@ -352,7 +352,8 @@ inline void set_pc ( mex::process p, mex::pc pc )
 inline void set_saved_pc
     ( mex::process p, mex::ret * ret, mex::pc pc )
 {
-    * (mex::module *) & ret->saved_pc.module = pc.module;
+    * (mex::module *) & ret->saved_pc.module =
+	pc.module;
     ret->saved_pc.index = pc.index;
     min::unprotected::acc_write_update
 	( p->return_stack, pc.module );
