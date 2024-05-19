@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun May 19 03:07:16 EDT 2024
+// Date:	Sun May 19 12:53:58 EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -75,7 +75,7 @@ static mex::op_info op_infos[] =
     { ::CALL, mex::NONA, 0, "CALL", NULL },
     { ::LABEL, mex::NONA, 0, "LABEL", NULL },
     { ::TEST_INSTRUCTION, mex::NONA,
-                          0, "TEST_INSTRUCTION", NULL },
+      0, "TEST_INSTRUCTION", NULL },
     { ::STACKS, mex::NONA, 0, "STACKS", NULL }
 };
 
@@ -1277,12 +1277,8 @@ mex::module mexas::compile ( min::file file )
                mexas::jumps->length );
     mexas::jump_element e =
         { min::MISSING(), 0, 0, 0, 0, 0, 0, 0 };
-    ::memcpy ( (void *) & ~ min::push ( jumps ),
-               (void *) & e, sizeof ( e ) );
-	// Free head.
-    ::memcpy ( (void *) & ~ min::push ( jumps ),
-               (void *) & e, sizeof ( e ) );
-	// Active head.
+    min::push ( jumps ) = e;  // Free head.
+    min::push ( jumps ) = e;  // Active head.
 
     L = 0;
     mexas::depth[0] = 0;
@@ -1776,8 +1772,8 @@ mex::module mexas::compile ( min::file file )
 		      0 < i; )
 		{
 		    -- i;
-		    mexas::function_element f
-			( functions[i] );
+		    mexas::function_element f =
+		        functions[i];
 		    while ( f.level < level )
 		    {
 		        printer << "| ";
@@ -1817,14 +1813,12 @@ mex::module mexas::compile ( min::file file )
 		     >= mex::NUMBER_OF_OP_CODES )
 		{
 		    mexas::compile_error
-			( pp,
-                          "undefined operation code;"
-			  " statement ignored" );
+			( pp, "undefined operation code;"
+			      " statement ignored" );
 		    continue;
 		}
 		instr.op_code =
-		    (min::uns32)
-		    min::int_of ( op_code );
+		    (min::uns32) min::int_of ( op_code );
 
 	        min::gen trace_class =
 		    mexas::get_name ( index );

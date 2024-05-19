@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat May 18 22:13:55 EDT 2024
+// Date:	Sun May 19 12:19:24 EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -784,8 +784,8 @@ static bool optimized_run_process ( mex::process p )
 	    mex::ret * ret =
 	        ~ min::begin_ptr_of ( p->return_stack )
 		+ rp;
-	    mex::pc new_pc
-		( m, (min::uns32) ( pc - pcbegin ) );
+	    mex::pc new_pc =
+	        { m, (min::uns32) ( pc - pcbegin ) };
 	    mex::set_saved_pc ( p, ret, new_pc );
 	    ret->saved_level = p->level;
 	    ret->saved_fp = p->fp[level];
@@ -796,8 +796,8 @@ static bool optimized_run_process ( mex::process p )
 	    ret->nresults = pc->immedB;
 	    RW_UNS32 p->return_stack->length = rp + 1;
 
-	    mex::pc next_pc ( cm, immedC );
-	    mex::set_pc ( p, next_pc );
+	    new_pc = { cm, immedC };
+	    mex::set_pc ( p, new_pc );
 	    m = cm;
 	    pcbegin = ~ min::begin_ptr_of ( m );
 	    pc = pcbegin + immedC;
@@ -2473,9 +2473,9 @@ bool mex::run_process ( mex::process p )
 		          ( p->return_stack )
 		    + rp;
 
-		mex::pc new_pc
-		    ( m, (min::uns32)
-			 ( pc - pcbegin ) );
+		mex::pc new_pc =
+		    { m, (min::uns32)
+			 ( pc - pcbegin ) };
 		mex::set_saved_pc ( p, ret, new_pc );
 		ret->saved_level = p->level;
 		ret->saved_fp = p->fp[level];
@@ -2487,8 +2487,8 @@ bool mex::run_process ( mex::process p )
 		RW_UNS32 p->return_stack->length =
 		    rp + 1;
 
-		mex::pc next_pc ( cm, immedC );
-		mex::set_pc ( p, next_pc );
+		new_pc = { cm, immedC };
+		mex::set_pc ( p, new_pc );
 
 		m = cm;
 		pcbegin = ~ min::begin_ptr_of ( m );
@@ -2799,7 +2799,7 @@ mex::process mex::init_process
 ERROR_EXIT:
     {   // Set p->pc illegal and return NULL_STUB.
 
-        mex::pc pc ( min::NULL_STUB,1 );
+        pc = { min::NULL_STUB,1 };
 	set_pc ( p, pc );
 	return min::NULL_STUB;
     }

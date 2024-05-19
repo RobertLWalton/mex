@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun May 19 04:47:38 EDT 2024
+// Date:	Sun May 19 12:53:18 EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -145,13 +145,25 @@ struct variable_element
     const min::gen name;  // mexas::star if none.
     min::uns32 level, depth;
     variable_element
+	    ( const variable_element & e ) :
+	name ( e.name ), level ( e.level ),
+        depth ( e.depth ) {}
+    variable_element
 	    ( min::gen name, min::uns32 level,
                              min::uns32 depth ) :
 	name ( name ), level ( level ),
         depth ( depth ) {}
-    variable_element ( const variable_element & e ) :
-	name ( e.name ), level ( e.level ),
-        depth ( e.depth ) {}
+    variable_element & operator =
+	    ( const variable_element & e )
+    {
+        // Implicit operator = not defined because
+	// of const members.
+	//
+        * (min::gen *) & this->name = e.name;
+	this->level = e.level;
+	this->depth = e.depth;
+	return * this;
+    }
 };
 typedef min::packed_vec_insptr<mexas::variable_element>
     variable_stack;
@@ -161,9 +173,8 @@ inline void push_variable
 	( mexas::variable_stack s, min::gen name,
 	  min::uns32 level, min::uns32 depth )
 {
-    mexas::variable_element e ( name, level, depth );
-    ::memcpy ( (void *) & ~ min::push(s), (void *) & e,
-               sizeof ( e ) );
+    mexas::variable_element e = { name, level, depth };
+    min::push(s) = e;
     min::unprotected::acc_write_update ( s, name );
 }
 
@@ -175,14 +186,27 @@ struct function_element
     min::uns32 level, depth;
     min::uns32 index;  // of BEGF in code vector
     function_element
-	    ( min::gen name, min::uns32 level,
-                             min::uns32 depth,
-			     min::uns32 index ) :
-	name ( name ), level ( level ),
-        depth ( depth ), index ( index ) {}
-    function_element ( const function_element & f ) :
+	    ( const function_element & f ) :
 	name ( f.name ), level ( f.level ),
         depth ( f.depth ), index ( f.index ) {}
+    function_element
+	    ( min::gen name, min::uns32 level,
+                             min::uns32 depth,
+                             min::uns32 index ) :
+	name ( name ), level ( level ),
+        depth ( depth ), index ( index ) {}
+    function_element & operator =
+	    ( const function_element & e )
+    {
+        // Implicit operator = not defined because
+	// of const members.
+	//
+        * (min::gen *) & this->name = e.name;
+	this->level = e.level;
+	this->depth = e.depth;
+	this->index = e.index;
+	return * this;
+    }
 };
 typedef min::packed_vec_insptr<mexas::function_element>
     function_stack;
@@ -193,10 +217,9 @@ inline void push_function
 	  min::uns32 level, min::uns32 depth,
 	  min::uns32 index )
 {
-    mexas::function_element e
-        ( name, level, depth, index );
-    ::memcpy ( (void *) & ~ min::push(s), (void *) & e,
-               sizeof ( e ) );
+    mexas::function_element e =
+        { name, level, depth, index };
+    min::push(s) = e;
     min::unprotected::acc_write_update ( s, name );
 }
 
@@ -267,6 +290,50 @@ struct jump_element
     min::uns8 lexical_level, depth, maximum_depth;
     min::uns32 stack_length, stack_minimum;
     min::uns32 next;
+    jump_element
+	    ( const jump_element & j ) :
+	target_name ( j.target_name ),
+	jmp_location ( j.jmp_location ),
+	lexical_level ( j.lexical_level ),
+        depth ( j.depth ),
+        maximum_depth ( j.maximum_depth ),
+        stack_length ( j.stack_length ),
+        stack_minimum ( j.stack_minimum ),
+	next ( j.next ) {}
+    jump_element
+	    ( min::gen target_name,
+	      min::uns32 jmp_location,
+	      min::uns32 lexical_level,
+              min::uns32 depth,
+              min::uns32 maximum_depth,
+              min::uns32 stack_length,
+              min::uns32 stack_minimum,
+              min::uns32 next ) :
+	target_name ( target_name ),
+	jmp_location ( jmp_location ),
+	lexical_level ( lexical_level ),
+        depth ( depth ),
+        maximum_depth ( maximum_depth ),
+        stack_length ( stack_length ),
+        stack_minimum ( stack_minimum ),
+	next ( next ) {}
+    jump_element & operator =
+	    ( const jump_element & e )
+    {
+        // Implicit operator = not defined because
+	// of const members.
+	//
+        * (min::gen *) & this->target_name =
+	      e.target_name;
+	this->jmp_location = e.jmp_location;
+	this->lexical_level = e.lexical_level;
+	this->depth = e.depth;
+	this->maximum_depth = e.maximum_depth;
+	this->stack_length = e.stack_length;
+	this->stack_minimum = e.stack_minimum;
+	this->next = e.next;
+	return * this;
+    }
 };
 typedef min::packed_vec_insptr<mexas::jump_element>
     jump_list;
@@ -292,15 +359,13 @@ inline void push_jump
     if ( next == 0 )
     {
         next = lst->length;
-	::memcpy ( (void *) & ~ min::push(lst),
-                   (void *) & e, sizeof ( e ) );
+	min::push(lst) = e;
     }
     else
     {
 	mexas::jump_element * ep = ~ ( lst + next );
 	free->next = ep->next;
-	::memcpy ( (void *) ep,
-                   (void *) & e, sizeof ( e ) );
+        * ep = e;
     }
     (lst + next)->next = active->next;
     active->next = next;

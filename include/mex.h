@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat May 18 22:14:14 EDT 2024
+// Date:	Sun May 19 12:19:02 EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -288,8 +288,19 @@ struct pc
 {
     const mex::module module;
     min::uns32 index;
-    pc ( mex::module module, min::uns32 index ) :
-        module ( module ), index ( index ) {}
+    pc ( const mex::pc & pc ) :
+	module ( pc.module ), index ( pc.index ) {}
+    pc ( const mex::module module, min::uns32 index ) :
+	module ( module ), index ( index ) {}
+    mex::pc & operator = ( const mex::pc pc )
+    {
+        // Implicit = is not defined because 
+        // module is const.
+        //
+        * (mex::module *) & this->module = pc.module;
+        this->index = pc.index;
+	return * this;
+    }
 };
 template<typename S>
 min::uns32 DISP ( const mex::pc S::* d )
@@ -300,7 +311,7 @@ min::uns32 DISP ( const mex::pc S::* d )
 
 struct ret
 {
-    mex::pc saved_pc;
+    const mex::pc saved_pc;
     min::uns32 saved_level;
     min::uns32 saved_fp;
     min::uns32 saved_nargs;
@@ -315,7 +326,7 @@ struct process_header
     const min::uns32 length;
     const min::uns32 max_length;
     min::printer printer;
-    mex::pc pc;
+    const mex::pc pc;
     mex::return_stack return_stack;
     min::uns32 level;
     min::uns32 fp[mex::max_lexical_level + 1];
@@ -343,8 +354,7 @@ inline min::gen * process_push
 }
 inline void set_pc ( mex::process p, mex::pc pc )
 {
-    * (mex::module *) & p->pc.module = pc.module;
-    p->pc.index = pc.index;
+    * (mex::pc *) & p->pc = pc;
     if ( pc.module != min::NULL_STUB )
         min::unprotected::acc_write_update
 	    ( p, pc.module );
@@ -352,9 +362,7 @@ inline void set_pc ( mex::process p, mex::pc pc )
 inline void set_saved_pc
     ( mex::process p, mex::ret * ret, mex::pc pc )
 {
-    * (mex::module *) & ret->saved_pc.module =
-	pc.module;
-    ret->saved_pc.index = pc.index;
+    * (mex::pc *) & ret->saved_pc = pc;
     min::unprotected::acc_write_update
 	( p->return_stack, pc.module );
 }
