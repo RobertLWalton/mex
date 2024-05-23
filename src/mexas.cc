@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu May 23 04:08:27 EDT 2024
+// Date:	Thu May 23 05:23:28 EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -34,9 +34,9 @@ bool mexcom::trace_never = false;
 min::uns32 mexcom::error_count;
 min::uns32 mexcom::warning_count;
 
-min::locatable_var<min::file> mexas::input_file;
+min::locatable_var<min::file> mexcom::input_file;
 min::locatable_var<mex::module_ins>
-    mexas::output_module;
+    mexcom::output_module;
 
 min::uns8 mexas::lexical_level;
 min::uns8 mexas::depth[mex::max_lexical_level+1];
@@ -135,7 +135,8 @@ static void init_trace_class_table ( void )
     mexcom::trace_class_table = min::new_obj_gen
         ( 10 * n, 4 * n, 1 * n );
 
-    min::obj_vec_insptr vp ( mexcom::trace_class_table );
+    min::obj_vec_insptr vp
+        ( mexcom::trace_class_table );
     min::attr_insptr ap ( vp );
 
     min::locatable_gen tmp;
@@ -214,7 +215,8 @@ static void init_except_flag_table ( void )
     mexcom::except_flag_table = min::new_obj_gen
         ( 10 * n, 4 * n, 1 * n );
 
-    min::obj_vec_insptr vp ( mexcom::except_flag_table );
+    min::obj_vec_insptr vp
+        ( mexcom::except_flag_table );
     min::attr_insptr ap ( vp );
 
     min::locatable_gen tmp;
@@ -357,13 +359,13 @@ static void print_error_or_warning
 	  const min::op & message8,
 	  const char * message9 )
 {
-    min::printer printer = mexas::input_file->printer;
+    min::printer printer = mexcom::input_file->printer;
     printer << min::bol << min::bom
             << type << ": " << min::place_indent ( 0 );
     if ( pp )
         printer << "in "
 		<< min::pline_numbers
-		       ( mexas::input_file, pp )
+		       ( mexcom::input_file, pp )
 	        << ": ";
     printer << message1 << message2 << message3
             << message4 << message5 << message6
@@ -373,7 +375,7 @@ static void print_error_or_warning
 
     if ( pp )
 	min::print_phrase_lines
-	    ( printer, mexas::input_file, pp );
+	    ( printer, mexcom::input_file, pp );
 }
 
 void mexas::compile_error
@@ -514,7 +516,8 @@ void mexas::make_module_interface ( void )
 	min::set ( interface, label, index );
     }
 
-    mex::interface_ref ( output_module ) = interface;
+    mex::interface_ref ( mexcom::output_module ) =
+        interface;
 }
 
 unsigned mexas::jump_list_delete
@@ -523,7 +526,7 @@ unsigned mexas::jump_list_delete
     min::ptr<mexas::jump_element> free = jlist + 0;
     min::ptr<mexas::jump_element> previous = jlist + 1;
 
-    mex::module_ins m = mexas::output_module;
+    mex::module_ins m = mexcom::output_module;
 
     unsigned count = 0;
     while ( min::uns32 n = previous->next )
@@ -576,7 +579,7 @@ unsigned mexas::jump_list_resolve
     min::ptr<mexas::jump_element> free = jlist + 0;
     min::ptr<mexas::jump_element> previous = jlist + 1;
 
-    mex::module_ins m = mexas::output_module;
+    mex::module_ins m = mexcom::output_module;
     unsigned count = 0;
     while ( min::uns32 n = previous->next )
     {
@@ -611,8 +614,10 @@ unsigned mexas::jump_list_resolve
 			      - next->jmp_location;
 		instr->trace_depth = depth_diff;
 
-		mexas::trace_instr
-		    ( next->jmp_location, true );
+		mexcom::trace_instr
+		    ( next->jmp_location,
+		      mexas::variables->length,
+		      true );
 	    }
 
 	    previous->next = next->next;
@@ -636,7 +641,7 @@ void mexas::begx ( mex::instr & instr,
 	  mexas::variables->length + nvars,
 	  mexas::functions->length,
 	  nvars,
-	  mexas::output_module->length };
+	  mexcom::output_module->length };
 
     if ( instr.op_code == mex::BEGF )
     {
@@ -781,10 +786,13 @@ unsigned mexas::endx ( mex::instr & instr,
     if ( instr.op_code == mex::ENDF )
     {
 	min::ptr<mex::instr> ip =
-	    mexas::output_module + e.begin_location;
-        ip->immedC = mexas::output_module->length + 1
+	    mexcom::output_module + e.begin_location;
+        ip->immedC = mexcom::output_module->length + 1
 	           - e.begin_location;
-	trace_instr ( e.begin_location, true );
+	mexcom::trace_instr
+	    ( e.begin_location,
+	      mexas::variables->length,
+	      true );
 	instr.immedB = L;
 	mexas::jump_list_delete ( mexas::jumps );
 	min::pop ( mexas::variables,
@@ -797,7 +805,7 @@ unsigned mexas::endx ( mex::instr & instr,
 	instr.immedA = mexas::variables->length
 	             - e.stack_limit + tvars;
 	instr.immedB = e.nvars;
-        instr.immedC = mexas::output_module->length
+        instr.immedC = mexcom::output_module->length
 	             - e.begin_location - 1;
 	-- mexas::depth[L];
 	min::pop ( mexas::variables,
@@ -849,19 +857,21 @@ void mexas::cont ( mex::instr & instr,
     instr.immedA = mexas::variables->length
 		 - bp->stack_limit + tvars;
     instr.immedB = bp->nvars;
-    instr.immedC = mexas::output_module->length
+    instr.immedC = mexcom::output_module->length
 		 - bp->begin_location - 1;
 
     mexas::push_instr ( instr, pp, trace_info );
 }
 
-void mexas::trace_instr
-	( min::uns32 location, bool no_source )
+void mexcom::trace_instr
+	( min::uns32 location,
+	  min::uns32 stack_length,
+	  bool no_source )
 {
     mexcom::print print = mexcom::print_switch;
     min::printer printer =
-	mexas::input_file->printer;
-    mex::module m = mexas::output_module;
+	mexcom::input_file->printer;
+    mex::module m = mexcom::output_module;
 
     if ( print == mexcom::NO_PRINT )
 	return;
@@ -871,14 +881,14 @@ void mexas::trace_instr
          &&
 	 ! no_source )
 	min::print_phrase_lines
-	    ( printer, mexas::input_file, pp );
+	    ( printer, mexcom::input_file, pp );
 
     mex::instr instr = m[location];
     printer
         << min::bol << min::bom <<"    "
 	<< "[" << pp.end.line
 	<< ":" << location
-	<< ";" << variables->length
+	<< ";" << stack_length
 	<< "] "
 	<< min::place_indent ( 0 )
 	<< mex::op_infos[instr.op_code].name
@@ -999,8 +1009,9 @@ min::uns32 mexas::get_trace_info
 		              min::MISSING() };
 	    mexas::push_instr ( instr, pp );
 	}
-	mexas::trace_instr
-	    ( mexas::output_module->length - 1,
+	mexcom::trace_instr
+	    ( mexcom::output_module->length - 1,
+	      mexas::variables->length,
 	      true );
     }
     return len - 1;
@@ -1057,13 +1068,13 @@ static void scan_error
         ( const char * message,
 	  const char * header = "ERROR" )
 {
-    mexas::input_file->printer
+    mexcom::input_file->printer
         << min::bol << min::bom << header << ": "
 	<< min::place_indent ( 0 )
 	<< "line " << mexas::last_line_number + 1
 	<< ": " << message << min::eom;
-    print_line ( mexas::input_file->printer,
-                 mexas::input_file,
+    print_line ( mexcom::input_file->printer,
+                 mexcom::input_file,
 		 mexas::last_line_number );
 }
 
@@ -1078,7 +1089,7 @@ bool mexas::next_statement ( void )
     min::pop ( mexas::statement,
                mexas::statement->length );
     min::packed_vec_ptr<char> buffer =
-        mexas::input_file->buffer;
+        mexcom::input_file->buffer;
 
     bool statement_started = false;
         // A statement is started by any non-blank line.
@@ -1091,21 +1102,21 @@ bool mexas::next_statement ( void )
 
 	if ( ! statement_started )
 	    mexas::first_line_number =
-	        mexas::input_file->next_line_number;
+	        mexcom::input_file->next_line_number;
 	mexas::last_line_number =
-	    mexas::input_file->next_line_number;
+	    mexcom::input_file->next_line_number;
 	min::uns32 begin_offset =
-	    min::next_line ( mexas::input_file );
+	    min::next_line ( mexcom::input_file );
 	min::uns32 end_offset =
-	    mexas::input_file->next_offset - 1;
+	    mexcom::input_file->next_offset - 1;
 	    // Do not include NUL character.
 	if ( begin_offset == min::NO_LINE )
 	{
 	    begin_offset = min::remaining_offset
-		( mexas::input_file );
+		( mexcom::input_file );
 	    end_offset = begin_offset
 	               + min::remaining_length
-			     ( mexas::input_file );
+			     ( mexcom::input_file );
 	    if ( begin_offset == end_offset )	
 	    {
 	        // EOF
@@ -1118,7 +1129,7 @@ bool mexas::next_statement ( void )
 		return statement->length != 0;
 	    }
 	    else min::skip_remaining
-	             ( mexas::input_file );
+	             ( mexcom::input_file );
 	}
 
 	statement_started = true;
@@ -1297,11 +1308,11 @@ mex::module mexas::compile ( min::file file )
     mexas::lp[0] = 0;
     mexas::fp[0] = 0;
 
-    mexas::input_file = file;
+    mexcom::input_file = file;
 
-    mexas::output_module = (mex::module_ins)
+    mexcom::output_module = (mex::module_ins)
         mex::create_module ( file );
-    mex::module_ins m = mexas::output_module;
+    mex::module_ins m = mexcom::output_module;
 
     while ( next_statement() )
     {
@@ -1706,8 +1717,8 @@ mex::module mexas::compile ( min::file file )
 		     ==
 		     mexcom::PRINT_WITH_SOURCE )
 		    min::print_phrase_lines
-			( mexas::input_file->printer,
-			  mexas::input_file, pp );
+			( mexcom::input_file->printer,
+			  mexcom::input_file, pp );
 
 		mexas::jump_list_resolve
 		    ( mexas::jumps, target );
@@ -1721,7 +1732,7 @@ mex::module mexas::compile ( min::file file )
 		    continue;
 
 		min::printer printer =
-		    mexas::input_file->printer;
+		    mexcom::input_file->printer;
 
 		if ( mexcom::print_switch
 		     ==
@@ -1733,7 +1744,7 @@ mex::module mexas::compile ( min::file file )
 		         > spp.begin.line )
 			min::print_phrase_lines
 			    ( printer,
-			      mexas::input_file,
+			      mexcom::input_file,
 			      spp );
 		}
 
@@ -1825,12 +1836,14 @@ mex::module mexas::compile ( min::file file )
 		     >= mex::NUMBER_OF_OP_CODES )
 		{
 		    mexas::compile_error
-			( pp, "undefined operation code;"
-			      " statement ignored" );
+			( pp, "undefined operation"
+			      " code; statement"
+			      " ignored" );
 		    continue;
 		}
 		instr.op_code =
-		    (min::uns32) min::int_of ( op_code );
+		    (min::uns32)
+		    min::int_of ( op_code );
 
 	        min::gen trace_class =
 		    mexas::get_name ( index );
@@ -2106,11 +2119,14 @@ mex::module mexas::compile ( min::file file )
 		     ==
 		     mexcom::PRINT_WITH_SOURCE )
 		    min::print_phrase_lines
-			( mexas::input_file->printer,
-			  mexas::input_file, pp );
+			( mexcom::input_file->printer,
+			  mexcom::input_file, pp );
 		mexas::endx
 		    ( instr, 0, min::MISSING(), pp );
-		trace_instr ( m->length - 1, true );
+		mexcom::trace_instr
+		    ( m->length - 1,
+	              mexas::variables->length,
+		      true );
 		continue;
 	    }
 	    case mex::RET:
@@ -2495,7 +2511,7 @@ mex::module mexas::compile ( min::file file )
 	    if ( index < mexas::statement->length )
 	    {
 		min::printer printer =
-		    mexas::input_file->printer;
+		    mexcom::input_file->printer;
 		min::phrase_position pp =
 		    m->position[m->length - 1];
 		printer << min::bom << "ERROR: "
@@ -2527,17 +2543,20 @@ mex::module mexas::compile ( min::file file )
 		}
 		printer << min::indent
 		        << min::pline_numbers
-			       ( mexas::input_file, pp )
+			   ( mexcom::input_file, pp )
 			<< ":" << min::eom;
 
 		min::print_phrase_lines
-		    ( printer, mexas::input_file, pp );
+		    ( printer, mexcom::input_file, pp );
 
 		++ mexcom::error_count;
 
 		no_source = true;
 	    }
-	    trace_instr ( m->length - 1, no_source );
+	    mexcom::trace_instr
+		( m->length - 1,
+		  mexas::variables->length,
+		  no_source );
 	    continue;
 	}
 
@@ -2548,13 +2567,13 @@ mex::module mexas::compile ( min::file file )
     if ( mexcom::error_count > 0 )
         return min::NULL_STUB;
 
-    if (    mexas::input_file->file_name
+    if (    mexcom::input_file->file_name
          == min::MISSING() )
         mex::name_ref(m) = min::MISSING();
     else
     {
         min::str_ptr sp
-	    ( mexas::input_file->file_name );
+	    ( mexcom::input_file->file_name );
 	const char * p =
 	    min::unprotected::str_of ( sp );
 	min::uns32 len = std::strlen ( p );
@@ -2565,7 +2584,7 @@ mex::module mexas::compile ( min::file file )
 	        min::new_str_gen ( p, len - 4 );
 	else
 	    mex::name_ref(m) =
-	        mexas::input_file->file_name;
+	        mexcom::input_file->file_name;
 
     }
 

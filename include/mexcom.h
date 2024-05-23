@@ -2,7 +2,7 @@
 //
 // File:	mexcom.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu May 23 03:51:22 EDT 2024
+// Date:	Thu May 23 05:22:13 EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -96,6 +96,7 @@ enum print
 };
 extern mexcom::print print_switch;
 void trace_instr ( min::uns32 location,
+		   min::uns32 stack_length,
                    bool no_source = false );
 
 } // end mexcom namespace

@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu May 23 04:26:14 EDT 2024
+// Date:	Thu May 23 04:43:30 EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -53,7 +53,7 @@ inline void push_instr
 	 instr.trace_class != mex::T_ALWAYS )
         instr.trace_class = mex::T_NEVER;
 
-    mex::module_ins m = mexas::output_module;
+    mex::module_ins m = mexcom::output_module;
     mex::push_instr ( m, instr );
     mex::push_position ( m, pp );
     mex::push_trace_info ( m, trace_info );

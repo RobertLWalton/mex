@@ -2,7 +2,7 @@
 //
 // File:	mexas_scanner_test.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Aug 27 00:57:56 EDT 2023
+// Date:	Thu May 23 04:38:57 EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -17,9 +17,9 @@ int main ( int argc, char * argv[] )
     min::init_ostream
         ( mex::default_printer, std::cout );
     min::init_printer
-        ( mexas::input_file, mex::default_printer );
+        ( mexcom::input_file, mex::default_printer );
     min::init_input_stream
-        ( mexas::input_file, std::cin );
+        ( mexcom::input_file, std::cin );
     mex::default_printer << min::ascii;
 
     while ( mexas::next_statement() )
@@ -31,12 +31,12 @@ int main ( int argc, char * argv[] )
 	mex::default_printer
 	    << min::bol
 	    << min::pline_numbers
-	           ( mexas::input_file, pp )
+	           ( mexcom::input_file, pp )
 	    << ":" << min::eol;
 
 	min::print_phrase_lines
 	    ( mex::default_printer,
-	      mexas::input_file, pp );
+	      mexcom::input_file, pp );
         mex::default_printer << min::bom << "    "
 	                     << min::place_indent ( 0 );
 	for ( min::uns32 i = 0;
