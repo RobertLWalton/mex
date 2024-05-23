@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu May 23 12:52:07 EDT 2024
+// Date:	Thu May 23 15:39:48 EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -669,36 +669,7 @@ void mexas::begx ( mex::instr & instr,
     else if ( instr.op_code == mex::BEGL )
     {
 	e.end_op_code = mex::ENDL;
-
-	// Push next- vars before incrementing depth.
-	//
-	for ( min::uns32 i = 0; i < nvars; ++ i )
-	{
-	    // See variable checking in BEGL code that
-	    // calls begx.
-	    //
-	    MIN_ASSERT
-	        ( nvars <= SP - mexas::stack_limit,
-		  "BEGL: mexas::stack_limit violation"
-		);
-	    min::locatable_gen name
-	        ( (   mexas::variables
-		    + ( SP - nvars ) )->name );
-	    MIN_ASSERT
-	        ( name != mexas::star,
-		  "BEGL: variable name is *" );
-
-	    min::str_ptr sp ( name );
-	    min::unsptr len = min::strlen ( sp );
-	    char buffer[len+10];
-	    std::strcpy ( buffer, "next-" );
-	    min::strcpy ( buffer + 5, sp );
-	    name = min::new_str_gen ( buffer );
-
-	    mexas::push_variable
-	        ( mexas::variables, name,
-		  L, mexstack::depth[L] );
-	}
+	e.stack_limit= mexas::variables->length;
 
         ++ mexstack::depth[L];
 	instr.immedA = tvars;
@@ -2068,6 +2039,35 @@ mex::module mexas::compile ( min::file file )
 		min::locatable_gen trace_info
 		    ( min::new_lab_gen
 		          ( labbuf, nnext + 1 ) );
+
+		for ( min::uns32 i = 0;
+		      i < nnext; ++ i )
+		{
+		    MIN_ASSERT
+			(    nnext
+			  <= SP - mexas::stack_limit,
+			  "BEGL: mexas::stack_limit"
+			  " violation"
+			);
+		    min::locatable_gen name
+			( (   mexas::variables
+			    + ( SP - nnext ) )->name );
+		    MIN_ASSERT
+			( name != mexas::star,
+			  "BEGL: variable name is *" );
+
+		    min::str_ptr sp ( name );
+		    min::unsptr len =
+		        min::strlen ( sp );
+		    char buffer[len+10];
+		    std::strcpy ( buffer, "next-" );
+		    min::strcpy ( buffer + 5, sp );
+		    name = min::new_str_gen ( buffer );
+
+		    mexas::push_variable
+			( mexas::variables, name,
+			  L, mexstack::depth[L] );
+		}
 		mexas::begx
 		    ( instr, nnext, 0, trace_info, pp );
 		break;
