@@ -2,7 +2,7 @@
 //
 // File:	mexstack.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun May 19 12:53:18 EDT 2024
+// Date:	Thu May 23 13:56:31 EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -40,9 +40,9 @@ void push_push_instr
 extern min::uns8 lexical_level;
 extern min::uns8 depth[mex::max_lexical_level+1];
 
-extern min::uns8 var_stack_length;
-extern min::uns8 func_stack_length;
-extern min::uns8 func_var_stack_length;
+extern min::uns32 var_stack_length;
+extern min::uns32 func_stack_length;
+extern min::uns32 func_var_stack_length;
 
 extern min::uns32 lp[mex::max_lexical_level+1];
 extern min::uns32 fp[mex::max_lexical_level+1];
@@ -103,8 +103,8 @@ struct jump_element
 	lexical_level ( lexical_level ),
         depth ( depth ),
         maximum_depth ( maximum_depth ),
-        stack_length ( var_stack_length ),
-        stack_minimum ( var_stack_minimum ),
+        var_stack_length ( var_stack_length ),
+        var_stack_minimum ( var_stack_minimum ),
 	next ( next ) {}
     jump_element & operator =
 	    ( const jump_element & e )
@@ -112,7 +112,7 @@ struct jump_element
         // Implicit operator = not defined because
 	// of const members.
 	//
-	new jump_element ( this ) ( e );
+	new ( this ) jump_element ( e );
 	return * this;
     }
 };

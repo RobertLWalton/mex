@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu May 23 04:43:30 EDT 2024
+// Date:	Thu May 23 13:05:38 EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -24,6 +24,7 @@
 
 # include <mex.h>
 # include <mexcom.h>
+# include <mexstack.h>
 # include <cctype>
 
 
