@@ -2,7 +2,7 @@
 //
 // File:	mexas_main.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Sep 21 07:05:57 EDT 2023
+// Date:	Thu May 23 04:19:41 EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -31,19 +31,17 @@ int main ( int argc, char * argv[] )
 	const char * num;
 	char * q;
 	if ( strcmp ( "-pa", arg ) == 0 )
-	    mexas::assemble_print_switch =
-	        mexas::PRINT;
+	    mexcom::print_switch = mexcom::PRINT;
 	else if ( strcmp ( "-pasource", arg ) == 0 )
-	    mexas::assemble_print_switch =
-	        mexas::PRINT_WITH_SOURCE;
+	    mexcom::print_switch =
+	        mexcom::PRINT_WITH_SOURCE;
 	else if ( strcmp ( "-paoff", arg ) == 0 )
-	    mexas::assemble_print_switch =
-	        mexas::NO_PRINT;
+	    mexcom::print_switch = mexcom::NO_PRINT;
 
 	else if ( strcmp ( "-tcnormal", arg ) == 0 )
-	    mexas::assemble_trace_never = false;
+	    mexcom::trace_never = false;
 	else if ( strcmp ( "-tcnever", arg ) == 0 )
-	    mexas::assemble_trace_never = true;
+	    mexcom::trace_never = true;
 
 	else if ( strcmp ( "-o:on", arg ) == 0 )
 	    mex::run_optimize = true;
@@ -94,7 +92,7 @@ int main ( int argc, char * argv[] )
 		    tmp1 = min::new_str_gen
 		        ( p, q - p );
 		    tmp2 = min::get
-		        ( mexas::trace_flag_table,
+		        ( mexcom::trace_flag_table,
 			  tmp1 );
 		    if ( tmp2 != min::NONE() )
 		    {
@@ -131,7 +129,7 @@ int main ( int argc, char * argv[] )
 		    tmp1 = min::new_str_gen
 		        ( p, q - p );
 		    tmp2 = min::get
-		        ( mexas::except_flag_table,
+		        ( mexcom::except_flag_table,
 			  tmp1 );
 		    if ( tmp2 != min::NONE() )
 		    {

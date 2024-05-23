@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun May 19 12:53:58 EDT 2024
+// Date:	Thu May 23 04:08:27 EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -28,12 +28,11 @@
 
 # define MUP min::unprotected
 
-mexas::assemble_print mexas::assemble_print_switch =
-    mexas::NO_PRINT;
-bool mexas::assemble_trace_never = false;
+mexcom::print mexcom::print_switch = mexcom::NO_PRINT;
+bool mexcom::trace_never = false;
 
-min::uns32 mexas::error_count;
-min::uns32 mexas::warning_count;
+min::uns32 mexcom::error_count;
+min::uns32 mexcom::warning_count;
 
 min::locatable_var<min::file> mexas::input_file;
 min::locatable_var<mex::module_ins>
@@ -48,10 +47,37 @@ min::locatable_gen mexas::star;
 min::locatable_gen mexas::V;
 min::locatable_gen mexas::F;
 
-min::locatable_gen mexas::op_code_table;
-min::locatable_gen mexas::trace_class_table;
-min::locatable_gen mexas::trace_flag_table;
-min::locatable_gen mexas::except_flag_table;
+min::locatable_gen mexcom::op_code_table;
+min::locatable_gen mexcom::trace_class_table;
+min::locatable_gen mexcom::trace_flag_table;
+min::locatable_gen mexcom::except_flag_table;
+
+void mexcom::init_op_code_table ( void )
+{
+    if ( min::is_obj ( mexcom::op_code_table ) )
+        return;
+
+    mexcom::op_code_table = min::new_obj_gen
+        ( 10 * mex::NUMBER_OF_OP_CODES,
+	   4 * mex::NUMBER_OF_OP_CODES,
+	   1 * mex::NUMBER_OF_OP_CODES );
+
+    min::obj_vec_insptr vp ( mexcom::op_code_table );
+    min::attr_insptr ap ( vp );
+
+    min::locatable_gen tmp;
+    mex::op_info * p = mex::op_infos;
+    mex::op_info * endp = p + mex::NUMBER_OF_OP_CODES;
+    while  ( p < endp )
+    {
+        tmp = min::new_str_gen ( p->name );
+        min::attr_push(vp) = tmp;
+	min::locate ( ap, tmp );
+	tmp = min::new_num_gen ( p->op_code );
+	min::set ( ap, tmp );
+	++ p;
+    }
+}
 
 enum op_code
     // Extends mex::op_code to include pseudo-ops and
@@ -67,31 +93,30 @@ enum op_code
     NUMBER_OF_OP_CODES
 };
 
-static mex::op_info op_infos[] =
-{
-    { ::PUSHM, mex::NONA, 0, "PUSHM", NULL },
-    { ::PUSH, mex::NONA, 0, "PUSH", NULL },
-    { ::POP, mex::NONA, 0, "POP", NULL },
-    { ::CALL, mex::NONA, 0, "CALL", NULL },
-    { ::LABEL, mex::NONA, 0, "LABEL", NULL },
-    { ::TEST_INSTRUCTION, mex::NONA,
-      0, "TEST_INSTRUCTION", NULL },
-    { ::STACKS, mex::NONA, 0, "STACKS", NULL }
-};
+static struct extended_op
+  { const char * name; ::op_code op_code; }
+    extended_ops[] = {
+    { "PUSHM", ::PUSHM },
+    { "PUSH", ::PUSH },
+    { "POP", ::POP },
+    { "CALL", ::CALL },
+    { "LABEL", ::LABEL },
+    { "TEST_INSTRUCTION", ::TEST_INSTRUCTION },
+    { "STACKS", ::STACKS }
+    };
 
 static void init_op_code_table ( void )
 {
-    mexas::op_code_table = min::new_obj_gen
-        ( 10 * mex::NUMBER_OF_OP_CODES,
-	   4 * mex::NUMBER_OF_OP_CODES,
-	   1 * mex::NUMBER_OF_OP_CODES );
+    mexcom::init_op_code_table();
 
-    min::obj_vec_insptr vp ( mexas::op_code_table );
+    min::obj_vec_insptr vp ( mexcom::op_code_table );
     min::attr_insptr ap ( vp );
 
+    extended_op * p = ::extended_ops;
+    extended_op * endp =
+        p + (   ::NUMBER_OF_OP_CODES
+	      - mex::NUMBER_OF_OP_CODES );
     min::locatable_gen tmp;
-    mex::op_info * p = mex::op_infos;
-    mex::op_info * endp = p + mex::NUMBER_OF_OP_CODES;
     while  ( p < endp )
     {
         tmp = min::new_str_gen ( p->name );
@@ -101,15 +126,27 @@ static void init_op_code_table ( void )
 	min::set ( ap, tmp );
 	++ p;
     }
-    p = ::op_infos;
-    endp = p + (   ::NUMBER_OF_OP_CODES
-	         - mex::NUMBER_OF_OP_CODES );
+}
+
+static void init_trace_class_table ( void )
+{
+    min::uns32 n = mex::NUMBER_OF_TRACE_CLASSES
+                 + 20;
+    mexcom::trace_class_table = min::new_obj_gen
+        ( 10 * n, 4 * n, 1 * n );
+
+    min::obj_vec_insptr vp ( mexcom::trace_class_table );
+    min::attr_insptr ap ( vp );
+
+    min::locatable_gen tmp;
+    mex::trace_class_info * p = mex::trace_class_infos;
+    mex::trace_class_info * endp =
+        p + mex::NUMBER_OF_TRACE_CLASSES;
     while  ( p < endp )
     {
         tmp = min::new_str_gen ( p->name );
-        min::attr_push(vp) = tmp;
 	min::locate ( ap, tmp );
-	tmp = min::new_num_gen ( p->op_code );
+	tmp = min::new_num_gen ( p->trace_class );
 	min::set ( ap, tmp );
 	++ p;
     }
@@ -129,39 +166,15 @@ static struct trace_group
               (1<<mex::T_ENDL) }
     };
 
-static void init_trace_class_table ( void )
-{
-    min::uns32 n = mex::NUMBER_OF_TRACE_CLASSES
-                 + 20;
-    mexas::trace_class_table = min::new_obj_gen
-        ( 10 * n, 4 * n, 1 * n );
-
-    min::obj_vec_insptr vp ( mexas::trace_class_table );
-    min::attr_insptr ap ( vp );
-
-    min::locatable_gen tmp;
-    mex::trace_class_info * p = mex::trace_class_infos;
-    mex::trace_class_info * endp =
-        p + mex::NUMBER_OF_TRACE_CLASSES;
-    while  ( p < endp )
-    {
-        tmp = min::new_str_gen ( p->name );
-	min::locate ( ap, tmp );
-	tmp = min::new_num_gen ( p->trace_class );
-	min::set ( ap, tmp );
-	++ p;
-    }
-}
-
 static void init_trace_flag_table ( void )
 {
     min::uns32 n = mex::NUMBER_OF_TRACE_CLASSES
                  + NUMBER_OF_TRACE_GROUPS
                  + 20;
-    mexas::trace_flag_table = min::new_obj_gen
+    mexcom::trace_flag_table = min::new_obj_gen
         ( 10 * n, 4 * n, 1 * n );
 
-    min::obj_vec_insptr vp ( mexas::trace_flag_table );
+    min::obj_vec_insptr vp ( mexcom::trace_flag_table );
     min::attr_insptr ap ( vp );
 
     min::locatable_gen tmp;
@@ -198,10 +211,10 @@ static void init_trace_flag_table ( void )
 static void init_except_flag_table ( void )
 {
     min::uns32 n = mex::NUMBER_OF_EXCEPTS + 20;
-    mexas::except_flag_table = min::new_obj_gen
+    mexcom::except_flag_table = min::new_obj_gen
         ( 10 * n, 4 * n, 1 * n );
 
-    min::obj_vec_insptr vp ( mexas::except_flag_table );
+    min::obj_vec_insptr vp ( mexcom::except_flag_table );
     min::attr_insptr ap ( vp );
 
     min::locatable_gen tmp;
@@ -380,7 +393,7 @@ void mexas::compile_error
 	      message1, message2, message3,
 	      message4, message5, message6,
 	      message7, message8, message9 );
-    ++ mexas::error_count;
+    ++ mexcom::error_count;
 }
 
 void mexas::compile_warn
@@ -400,7 +413,7 @@ void mexas::compile_warn
 	      message1, message2, message3,
 	      message4, message5, message6,
 	      message7, message8, message9 );
-    ++ mexas::warning_count;
+    ++ mexcom::warning_count;
 }
 
 bool mexas::check_new_name
@@ -747,7 +760,7 @@ unsigned mexas::endx ( mex::instr & instr,
 	    if ( instr.op_code != end_op_code )
 	    {
 	        min::obj_vec_ptr vp =
-		    mexas::op_code_table;
+		    mexcom::op_code_table;
 		mexas::compile_error
 		    ( pp, "inserting ",
 			  min::pgen
@@ -845,17 +858,16 @@ void mexas::cont ( mex::instr & instr,
 void mexas::trace_instr
 	( min::uns32 location, bool no_source )
 {
-    mexas::assemble_print print =
-        mexas::assemble_print_switch;
+    mexcom::print print = mexcom::print_switch;
     min::printer printer =
 	mexas::input_file->printer;
     mex::module m = mexas::output_module;
 
-    if ( print == mexas::NO_PRINT )
+    if ( print == mexcom::NO_PRINT )
 	return;
 
     min::phrase_position pp = m->position[location];
-    if ( print == mexas::PRINT_WITH_SOURCE
+    if ( print == mexcom::PRINT_WITH_SOURCE
          &&
 	 ! no_source )
 	min::print_phrase_lines
@@ -1263,8 +1275,8 @@ bool mexas::next_statement ( void )
 
 mex::module mexas::compile ( min::file file )
 {
-    mexas::error_count = 0;
-    mexas::warning_count = 0;
+    mexcom::error_count = 0;
+    mexcom::warning_count = 0;
 
     min::pop ( mexas::variables,
                mexas::variables->length );
@@ -1302,7 +1314,7 @@ mex::module mexas::compile ( min::file file )
 	    // statement[index] is next lexeme
 
         min::gen v = min::get
-	    ( mexas::op_code_table,
+	    ( mexcom::op_code_table,
 	      mexas::statement[0] );
 	if ( v == min::NONE() )
 	{
@@ -1690,9 +1702,9 @@ mex::module mexas::compile ( min::file file )
 		    continue;
 		}
 
-		if ( mexas::assemble_print_switch
+		if ( mexcom::print_switch
 		     ==
-		     mexas::PRINT_WITH_SOURCE )
+		     mexcom::PRINT_WITH_SOURCE )
 		    min::print_phrase_lines
 			( mexas::input_file->printer,
 			  mexas::input_file, pp );
@@ -1703,17 +1715,17 @@ mex::module mexas::compile ( min::file file )
 	    }
 	    case ::STACKS:
 	    {
-		if ( mexas::assemble_print_switch
+		if ( mexcom::print_switch
 		     ==
-		     mexas::NO_PRINT )
+		     mexcom::NO_PRINT )
 		    continue;
 
 		min::printer printer =
 		    mexas::input_file->printer;
 
-		if ( mexas::assemble_print_switch
+		if ( mexcom::print_switch
 		     ==
-		     mexas::PRINT_WITH_SOURCE )
+		     mexcom::PRINT_WITH_SOURCE )
 		{
 		    min::phrase_position spp = pp;
 		    -- spp.end.line;
@@ -1806,7 +1818,7 @@ mex::module mexas::compile ( min::file file )
 		}
 
 		op_code = min::get
-		    ( mexas::op_code_table, op_code );
+		    ( mexcom::op_code_table, op_code );
 		if ( op_code == min::NONE()
 		     ||
 		        min::direct_float_of ( op_code )
@@ -1828,7 +1840,7 @@ mex::module mexas::compile ( min::file file )
 		    break;
 		}
 		trace_class = min::get
-		    ( mexas::trace_class_table,
+		    ( mexcom::trace_class_table,
 		      trace_class );
 		if ( trace_class != min::NONE() )
 		{
@@ -2090,9 +2102,9 @@ mex::module mexas::compile ( min::file file )
 	    }
 	    case mex::ENDF:
 	    {
-		if ( mexas::assemble_print_switch
+		if ( mexcom::print_switch
 		     ==
-		     mexas::PRINT_WITH_SOURCE )
+		     mexcom::PRINT_WITH_SOURCE )
 		    min::print_phrase_lines
 			( mexas::input_file->printer,
 			  mexas::input_file, pp );
@@ -2353,7 +2365,7 @@ mex::module mexas::compile ( min::file file )
 		{
 		    min::gen fname = statement[first+i];
 		    min::gen fbit = min::get
-		        ( mexas::trace_flag_table,
+		        ( mexcom::trace_flag_table,
 			  fname );
 		    if ( fbit != min::NONE() )
 		    {
@@ -2388,7 +2400,7 @@ mex::module mexas::compile ( min::file file )
 		{
 		    min::gen fname = statement[first+i];
 		    min::gen fbit = min::get
-		        ( mexas::except_flag_table,
+		        ( mexcom::except_flag_table,
 			  fname );
 		    if ( fbit != min::NONE() )
 		    {
@@ -2521,7 +2533,7 @@ mex::module mexas::compile ( min::file file )
 		min::print_phrase_lines
 		    ( printer, mexas::input_file, pp );
 
-		++ mexas::error_count;
+		++ mexcom::error_count;
 
 		no_source = true;
 	    }
@@ -2533,7 +2545,7 @@ mex::module mexas::compile ( min::file file )
 
     mexas::jump_list_delete ( mexas::jumps );
 
-    if ( mexas::error_count > 0 )
+    if ( mexcom::error_count > 0 )
         return min::NULL_STUB;
 
     if (    mexas::input_file->file_name

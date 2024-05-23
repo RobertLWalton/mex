@@ -2,7 +2,7 @@
 //
 // File:	mexcom.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed May 22 04:35:34 EDT 2024
+// Date:	Thu May 23 03:51:22 EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -43,6 +43,8 @@ extern min::locatable_gen except_flag_table;
 
 // Support Functions
 // ------- ---------
+
+void init_op_code_table ( void );
 
 extern bool trace_never;
 inline void push_instr

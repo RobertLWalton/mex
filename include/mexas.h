@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun May 19 12:53:18 EDT 2024
+// Date:	Thu May 23 04:26:14 EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -23,6 +23,7 @@
 # define MEXAS_H
 
 # include <mex.h>
+# include <mexcom.h>
 # include <cctype>
 
 
@@ -47,7 +48,7 @@ inline void push_instr
 	      min::MISSING_PHRASE_POSITION,
 	  min::gen trace_info = min::MISSING() )
 {
-    if ( mexas::assemble_trace_never
+    if ( mexcom::trace_never
          &&
 	 instr.trace_class != mex::T_ALWAYS )
         instr.trace_class = mex::T_NEVER;
