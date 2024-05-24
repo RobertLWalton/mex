@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri May 24 04:11:27 EDT 2024
+// Date:	Fri May 24 04:25:07 EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -771,9 +771,6 @@ unsigned mexas::endx ( mex::instr & instr,
     }
 
     mexas::block_element e = min::pop ( mexas::blocks );
-    min::pop ( mexas::functions,
-                 mexas::functions->length
-	       - e.function_stack );
     mexstack::func_stack_length = e.function_stack;
  
     if ( instr.op_code == mex::ENDF )
@@ -788,9 +785,6 @@ unsigned mexas::endx ( mex::instr & instr,
 	      true );
 	instr.immedB = L;
 	mexas::jump_list_delete ( mexas::jumps );
-	min::pop ( mexas::variables,
-	             mexstack::var_stack_length
-		   - e.stack_limit + e.nvars );
 	mexstack::var_stack_length =
 		e.stack_limit - e.nvars;
 	-- L;
@@ -803,9 +797,6 @@ unsigned mexas::endx ( mex::instr & instr,
         instr.immedC = mexcom::output_module->length
 	             - e.begin_location - 1;
 	-- mexstack::depth[L];
-	min::pop ( mexas::variables,
-	             mexstack::var_stack_length
-		   - e.stack_limit + e.nvars );
 	mexstack::var_stack_length =
 		e.stack_limit - e.nvars;
 	mexas::jump_list_update ( mexas::jumps );
@@ -815,13 +806,11 @@ unsigned mexas::endx ( mex::instr & instr,
 	instr.immedA = mexstack::var_stack_length
 	             - e.stack_limit + tvars;
 	-- mexstack::depth[L];
-	min::pop ( mexas::variables,
-	             mexstack::var_stack_length
-		   - e.stack_limit );
 	mexstack::var_stack_length =
 		e.stack_limit;
 	mexas::jump_list_update ( mexas::jumps );
     }
+    mexstack::pop_stacks();
 
     min::uns32 len = mexas::blocks->length;
     mexas::stack_limit =
