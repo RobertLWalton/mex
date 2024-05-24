@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri May 24 15:18:54 EDT 2024
+// Date:	Fri May 24 15:45:46 EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -289,7 +289,7 @@ static min::packed_vec<mexstack::block_element>
 min::locatable_var<mexstack::block_stack>
     mexstack::blocks;
 
-min::uns32 mexas::stack_limit;
+min::uns32 mexstack::stack_limit;
 
 static min::uns32 module_stack_element_stub_disp[] =
 {
@@ -399,7 +399,7 @@ static void print_error_or_warning
 	    ( printer, mexcom::input_file, pp );
 }
 
-void mexas::compile_error
+void mexcom::compile_error
 	( const min::phrase_position & pp,
 	  const char * message1,
 	  const min::op & message2,
@@ -419,7 +419,7 @@ void mexas::compile_error
     ++ mexcom::error_count;
 }
 
-void mexas::compile_warn
+void mexcom::compile_warn
 	( const min::phrase_position & pp,
 	  const char * message1,
 	  const min::op & message2,
@@ -444,11 +444,12 @@ bool mexas::check_new_name
 {
     if ( name == mexas::star ) return true;
 
-    if (    mexas::search ( name, mexas::stack_limit )
+    if (    mexas::search
+                ( name, mexstack::stack_limit )
          == mexas::NOT_FOUND )
         return true;
 
-    mexas::compile_error
+    mexcom::compile_error
 	( pp,
 	  "new variable with name ",
 	  min::pgen ( name ),
@@ -559,7 +560,7 @@ unsigned mexstack::jump_list_delete
 	if (   next->lexical_level
 	     < mexstack::lexical_level )
 	    break;
-	mexas::compile_error
+	mexcom::compile_error
 	    ( m->position[next->jmp_location],
 	      "jump target undefined: ",
 	      min::pgen ( next->target_name ),
@@ -624,12 +625,12 @@ unsigned mexstack::jump_list_resolve
 	    min::phrase_position pp =
 		m->position[next->jmp_location];
 	    if ( SP > next->var_stack_minimum )
-		mexas::compile_error
+		mexcom::compile_error
 		    ( pp, "code jumped over pushes"
 		          " values into the stack;"
 			  " JMP unresolved" );
 	    else if ( SP < next->var_stack_minimum )
-		mexas::compile_error
+		mexcom::compile_error
 		    ( pp, "code jumped over pops"
 		          " values from the stack;"
 			  " JMP unresolved" );
@@ -660,7 +661,7 @@ unsigned mexstack::jump_list_resolve
     return count;
 }
 
-void mexas::begx ( mex::instr & instr,
+void mexstack::begx ( mex::instr & instr,
 		   min::uns32 nvars, min::uns32 tvars,
 	           min::gen trace_info,
                    const min::phrase_position & pp )
@@ -668,7 +669,7 @@ void mexas::begx ( mex::instr & instr,
     mexstack::block_element e =
         { instr.op_code, 0,
 	  mexstack::var_stack_length + nvars,
-	  mexas::functions->length, 0,
+	  mexstack::func_stack_length, 0,
 	  nvars,
 	  mexcom::output_module->length };
 
@@ -710,21 +711,21 @@ void mexas::begx ( mex::instr & instr,
     }
     else
         MIN_ABORT
-	    ( "bad instr.op_code to mexas::begx" );
+	    ( "bad instr.op_code to mexstack::begx" );
 
     min::push ( mexstack::blocks ) = e;
-    mexas::stack_limit = e.stack_limit;
-    mexas::push_instr ( instr, pp, trace_info );
+    mexstack::stack_limit = e.stack_limit;
+    mexcom::push_instr ( instr, pp, trace_info );
 }
 
-unsigned mexas::endx ( mex::instr & instr,
+unsigned mexstack::endx ( mex::instr & instr,
 		       min::uns32 tvars,
 	               min::gen trace_info,
                        const min::phrase_position & pp )
 {
     if ( mexstack::blocks->length == 0 )
     {
-	mexas::compile_error
+	mexcom::compile_error
 	    ( pp, "there is no block to end here" );
 	return 0;
     }
@@ -754,7 +755,7 @@ unsigned mexas::endx ( mex::instr & instr,
 	}
 	if ( ! match_found )
 	{
-	    mexas::compile_error
+	    mexcom::compile_error
 		( pp, "there is no block to end here" );
 	    return 0;
 	}
@@ -768,13 +769,13 @@ unsigned mexas::endx ( mex::instr & instr,
 	    {
 	        min::obj_vec_ptr vp =
 		    mexcom::op_code_table;
-		mexas::compile_error
+		mexcom::compile_error
 		    ( pp, "inserting ",
 			  min::pgen
 			      ( vp[instr.op_code] ),
 			  " before here" );
 	    }
-	    mexas::endx ( instr, pp, trace_info );
+	    mexstack::endx ( instr, pp, trace_info );
 	    ++ count;
 	} while ( instr.op_code != end_op_code );
 	return count;
@@ -827,10 +828,10 @@ unsigned mexas::endx ( mex::instr & instr,
     mexstack::pop_stacks();
 
     min::uns32 len = mexstack::blocks->length;
-    mexas::stack_limit =
+    mexstack::stack_limit =
         ( len == 0 ? 0 : 
 	  (mexstack::blocks+(len-1))->stack_limit );
-    mexas::push_instr ( instr, pp, trace_info );
+    mexcom::push_instr ( instr, pp, trace_info );
 
     MIN_REQUIRE ( mexas::variables->length
                   == mexstack::var_stack_length );
@@ -840,14 +841,14 @@ unsigned mexas::endx ( mex::instr & instr,
     return 0;
 }
 
-void mexas::cont ( mex::instr & instr,
+void mexstack::cont ( mex::instr & instr,
 		   min::uns32 tvars,
 	           min::gen trace_info,
                    const min::phrase_position & pp )
 {
     if ( mexstack::blocks->length == 0 )
     {
-	mexas::compile_error
+	mexcom::compile_error
 	    ( pp, "not in a BEGL ... ENDL block;"
 	          " instruction ignored" );
 	return;
@@ -857,7 +858,7 @@ void mexas::cont ( mex::instr & instr,
 	+ ( mexstack::blocks->length - 1 );
     if ( bp->begin_op_code != mex::BEGL )
     {
-	mexas::compile_error
+	mexcom::compile_error
 	    ( pp, "not in a BEGL ... ENDL block;"
 	          " instruction ignored" );
 	return;
@@ -869,7 +870,7 @@ void mexas::cont ( mex::instr & instr,
     instr.immedC = mexcom::output_module->length
 		 - bp->begin_location - 1;
 
-    mexas::push_instr ( instr, pp, trace_info );
+    mexcom::push_instr ( instr, pp, trace_info );
 }
 
 void mexcom::trace_instr
@@ -951,7 +952,7 @@ void mexstack::push_push_instr
 	instr.immedA = mexstack::fp[k] - index;
 	instr.immedB = k;
     }
-    mexas::push_instr ( instr, pp, trace_info );
+    mexcom::push_instr ( instr, pp, trace_info );
 }
 
 void mexas::push_push_instr
@@ -988,7 +989,7 @@ void mexas::push_push_instr
     }
     else
     {
-	mexas::compile_error
+	mexcom::compile_error
 	    ( pp, "variable named ",
 		  min::pgen ( name ),
 		  " not defined; instruction"
@@ -998,7 +999,7 @@ void mexas::push_push_instr
 	instr.trace_class = mex::T_PUSH;
 	trace_info = min::MISSING();
     }
-    mexas::push_instr ( instr, pp, trace_info );
+    mexcom::push_instr ( instr, pp, trace_info );
 }
 
 min::uns32 mexas::get_trace_info
@@ -1023,14 +1024,14 @@ min::uns32 mexas::get_trace_info
 	}
 	else
 	{
-	    mexas::compile_error
+	    mexcom::compile_error
 		( pp, "not a name: ",
 		      min::pgen ( n ),
 		      "; PUSHI missing value output" );
 	    mex::instr instr =
 		{ mex::PUSHI, 0, 0, 0, 0, 0, 0,
 		              min::MISSING() };
-	    mexas::push_instr ( instr, pp );
+	    mexcom::push_instr ( instr, pp );
 	}
 	mexcom::trace_instr
 	    ( mexcom::output_module->length - 1,
@@ -1051,7 +1052,7 @@ bool mexas::check_parameter
 	 ||
 	 nf != (min::int64) nf )
     {
-	mexas::compile_error
+	mexcom::compile_error
 	    ( pp, "bad ", min::pnop, pname, min::pnop,
 	          " parameter; statement ignored" );
 	return false;
@@ -1076,7 +1077,7 @@ bool mexas::check_parameter
 	return true;
     }
 
-    mexas::compile_error
+    mexcom::compile_error
 	( pp, pname, min::pnop,
 	      " parameter out of range;"
 	      " statement ignored" );
@@ -1320,7 +1321,7 @@ mex::module mexas::compile ( min::file file )
     mexstack::func_stack_length = 0;
     min::pop ( mexstack::blocks,
                mexstack::blocks->length );
-    mexas::stack_limit = 0;
+    mexstack::stack_limit = 0;
     min::pop ( mexstack::jumps,
                mexstack::jumps->length );
     mexstack::jump_element e =
@@ -1354,7 +1355,7 @@ mex::module mexas::compile ( min::file file )
 	      mexas::statement[0] );
 	if ( v == min::NONE() )
 	{
-	    mexas::compile_error
+	    mexcom::compile_error
 	        ( pp, "undefined operation code"
 		      " or declaration name;"
 		      " statement ignored" );
@@ -1378,7 +1379,7 @@ mex::module mexas::compile ( min::file file )
 	    goto NON_ARITHMETIC;
 	case mex::A2:
 	case mex::A2R:
-	    if ( SP < mexas::stack_limit + 2 )
+	    if ( SP < mexstack::stack_limit + 2 )
 	        goto STACK_TOO_SHORT;
 	    min::pop ( variables, 2 );
 	    mexstack::var_stack_length -= 2;
@@ -1389,14 +1390,14 @@ mex::module mexas::compile ( min::file file )
 	    instr.immedD = mexas::get_num ( index );
 	    if ( instr.immedD == min::NONE() )
 	    {
-		mexas::compile_error
+		mexcom::compile_error
 		    ( pp, "no immediate value given;"
 		          " zero assumed" );
 		instr.immedD == min::new_num_gen ( 0 );
 	    }
 	    /* FALLTHRU */
 	case mex::A1:
-	    if ( SP < mexas::stack_limit + 1 )
+	    if ( SP < mexstack::stack_limit + 1 )
 	        goto STACK_TOO_SHORT;
 	    if ( op_code == mex::PUSHV )
 	        goto NON_ARITHMETIC;
@@ -1407,7 +1408,7 @@ mex::module mexas::compile ( min::file file )
 	        min::gen en = mexas::get_num ( index );
 		if ( en == min::NONE() )
 		{
-		    mexas::compile_error
+		    mexcom::compile_error
 			( pp, "no exponent parameter;"
 			      " instruction ignored" );
 		    continue;
@@ -1422,7 +1423,7 @@ mex::module mexas::compile ( min::file file )
 	    goto ARITHMETIC;
 
 	case mex::J2:
-	    if ( SP < mexas::stack_limit + 2 )
+	    if ( SP < mexstack::stack_limit + 2 )
 	        goto STACK_TOO_SHORT;
 	    min::pop ( variables, 2 );
 	    mexstack::var_stack_length -= 2;
@@ -1433,7 +1434,7 @@ mex::module mexas::compile ( min::file file )
 
 	STACK_TOO_SHORT:
 	{
-	    mexas::compile_error
+	    mexcom::compile_error
 	        ( pp, "portion of stack in the current"
 		      " block is too little to pop"
 		      " required arguments; instruction"
@@ -1453,7 +1454,7 @@ mex::module mexas::compile ( min::file file )
 	    mexas::push_variable
 	        ( mexas::variables, name,
 	          L, mexstack::depth[L] );
-	    mexas::push_instr ( instr, pp, name );
+	    mexcom::push_instr ( instr, pp, name );
 	    goto TRACE;
 	}
 	JUMP:
@@ -1461,7 +1462,7 @@ mex::module mexas::compile ( min::file file )
 	    min::gen target = mexas::get_name ( index );
 	    if ( target == min::NONE() )
 	    {
-		mexas::compile_error
+		mexcom::compile_error
 		    ( pp, "jmp... does not have a "
 		          " jmp-target that is a name"
 			  " instruction will fail" );
@@ -1483,7 +1484,7 @@ mex::module mexas::compile ( min::file file )
 		mexstack::push_jump
 		    ( mexstack::jumps, je );
 	    }
-	    mexas::push_instr ( instr, pp, target );
+	    mexcom::push_instr ( instr, pp, target );
 	    goto TRACE;
 	}
 	NON_ARITHMETIC:
@@ -1504,7 +1505,7 @@ mex::module mexas::compile ( min::file file )
 			    ( index );
 		    if ( mod_name == min::NONE() )
 		    {
-			mexas::compile_error
+			mexcom::compile_error
 			    ( pp, "no module name:"
 				  " instruction"
 				  " ignored" );
@@ -1515,7 +1516,7 @@ mex::module mexas::compile ( min::file file )
 		    mexas::get_name ( index );
 		if ( name == min::NONE() )
 		{
-		    mexas::compile_error
+		    mexcom::compile_error
 			( pp, "no variable name:"
 			      " instruction ignored" );
 		    continue;
@@ -1541,13 +1542,14 @@ mex::module mexas::compile ( min::file file )
 		case ::PUSHM:
 		{
 		    min::uns32 limit =
-			( L == 0 ? mexas::stack_limit :
-				   mexstack::lp[1] );
+			( L == 0 ?
+			  mexstack::stack_limit :
+			  mexstack::lp[1] );
 		    min::uns32 j =
 		        search ( name, limit );
 		    if ( j == mexas::NOT_FOUND )
 		    {
-			mexas::compile_error
+			mexcom::compile_error
 			    ( pp, "variable named ",
 				  min::pgen ( name ),
 				  " not globally"
@@ -1566,7 +1568,7 @@ mex::module mexas::compile ( min::file file )
 		    min::locatable_gen trace_info
 			( min::new_lab_gen
 			      ( labbuf, 2 ) );
-		    mexas::push_instr
+		    mexcom::push_instr
 			( instr, pp, trace_info );
 		    break;
 		}
@@ -1579,7 +1581,7 @@ mex::module mexas::compile ( min::file file )
 			      mexas::V, name );
 		    if ( index == mexas::NOT_FOUND )
 		    {
-			mexas::compile_error
+			mexcom::compile_error
 			    ( pp, "variable named ",
 				  min::pgen ( name ),
 				  " in module named ",
@@ -1600,7 +1602,7 @@ mex::module mexas::compile ( min::file file )
 		    min::locatable_gen trace_info
 			( min::new_lab_gen
 			      ( labbuf, 3 ) );
-		    mexas::push_instr
+		    mexcom::push_instr
 			( instr, pp, trace_info );
 
 		    break;
@@ -1617,7 +1619,7 @@ mex::module mexas::compile ( min::file file )
 	        min::gen D = mexas::get_num ( index );
 		if ( D == min::NONE() )
 		{
-		    mexas::compile_error
+		    mexcom::compile_error
 			( pp, "no number to push:"
 			      " instruction ignored" );
 		    continue;
@@ -1634,7 +1636,7 @@ mex::module mexas::compile ( min::file file )
 		if ( new_name == min::NONE() )
 		    new_name = mexas::star;
 
-		mexas::push_instr
+		mexcom::push_instr
 		    ( instr, pp, new_name );
 		mexas::push_variable
 		    ( mexas::variables, new_name,
@@ -1654,7 +1656,7 @@ mex::module mexas::compile ( min::file file )
 		    min::uns32 j = search ( name, SP );
 		    if ( j == mexas::NOT_FOUND )
 		    {
-			mexas::compile_error
+			mexcom::compile_error
 			    ( pp, "variable named ",
 				  min::pgen ( name ),
 				  " not defined within"
@@ -1666,7 +1668,7 @@ mex::module mexas::compile ( min::file file )
 		        ~ ( mexas::variables + j );
 		    if ( ve->level < L )
 		    {
-			mexas::compile_error
+			mexcom::compile_error
 			    ( pp, "variable named ",
 				  min::pgen ( name ),
 				  " is of lower than"
@@ -1680,7 +1682,7 @@ mex::module mexas::compile ( min::file file )
 		    }
 		    if ( j < mexstack::fp[L] )
 		    {
-			mexas::compile_error
+			mexcom::compile_error
 			    ( pp, "variable named ",
 				  min::pgen ( name ),
 				  " is an argument to"
@@ -1695,7 +1697,7 @@ mex::module mexas::compile ( min::file file )
 		    if (    ve->depth
 		         == mexstack::depth[L] )
 		    {
-			mexas::compile_error
+			mexcom::compile_error
 			    ( pp, "variable named ",
 				  min::pgen ( name ),
 				  " has the same depth"
@@ -1724,7 +1726,7 @@ mex::module mexas::compile ( min::file file )
 		min::locatable_gen trace_info
 		    ( min::new_lab_gen ( labbuf, 2 ) );
 
-		mexas::push_instr
+		mexcom::push_instr
 		    ( instr, pp, trace_info );
 		min::pop ( mexas::variables );
 	        mexstack::var_stack_length -= 1;
@@ -1737,7 +1739,7 @@ mex::module mexas::compile ( min::file file )
 		    mexas::get_name ( index );
 		if ( target == min::NONE() )
 		{
-		    mexas::compile_error
+		    mexcom::compile_error
 			( pp, "label does not have a "
 			      " jmp-target that is a"
 			      " name; declaraton"
@@ -1855,7 +1857,7 @@ mex::module mexas::compile ( min::file file )
 		    mexas::get_name ( index );
 		if ( op_code == min::NONE() )
 		{
-		    mexas::compile_error
+		    mexcom::compile_error
 			( pp, "no op_code;"
 			      " statement ignored" );
 		    continue;
@@ -1868,7 +1870,7 @@ mex::module mexas::compile ( min::file file )
 		        min::direct_float_of ( op_code )
 		     >= mex::NUMBER_OF_OP_CODES )
 		{
-		    mexas::compile_error
+		    mexcom::compile_error
 			( pp, "undefined operation"
 			      " code; statement"
 			      " ignored" );
@@ -1882,7 +1884,7 @@ mex::module mexas::compile ( min::file file )
 		    mexas::get_name ( index );
 		if ( trace_class == min::NONE() )
 		{
-		    mexas::push_instr ( instr, pp );
+		    mexcom::push_instr ( instr, pp );
 		    break;
 		}
 		trace_class = min::get
@@ -1897,7 +1899,7 @@ mex::module mexas::compile ( min::file file )
 		}
 		else
 		{
-		    mexas::compile_error
+		    mexcom::compile_error
 			( pp, "unrecognized trace"
 			      " class; "
 			      " statement ignored" );
@@ -1907,7 +1909,7 @@ mex::module mexas::compile ( min::file file )
 		    mexas::get_num ( index );
 		if ( trace_depth == min::NONE() )
 		{
-		    mexas::push_instr ( instr, pp );
+		    mexcom::push_instr ( instr, pp );
 		    break;
 		}
 		min::uns32 depth;
@@ -1917,7 +1919,7 @@ mex::module mexas::compile ( min::file file )
 		    continue;
 		if ( depth >= 265 )
 		{
-		    mexas::compile_error
+		    mexcom::compile_error
 			( pp, "trace_depth too large;"
 			      " statement ignored" );
 		    continue;
@@ -1928,7 +1930,7 @@ mex::module mexas::compile ( min::file file )
 		    mexas::get_num ( index );
 		if ( immedA == min::NONE() )
 		{
-		    mexas::push_instr ( instr, pp );
+		    mexcom::push_instr ( instr, pp );
 		    break;
 		}
 		if ( !  mexas::check_parameter
@@ -1940,7 +1942,7 @@ mex::module mexas::compile ( min::file file )
 		    mexas::get_num ( index );
 		if ( immedB == min::NONE() )
 		{
-		    mexas::push_instr ( instr, pp );
+		    mexcom::push_instr ( instr, pp );
 		    break;
 		}
 		if ( !  mexas::check_parameter
@@ -1952,7 +1954,7 @@ mex::module mexas::compile ( min::file file )
 		    mexas::get_num ( index );
 		if ( immedC == min::NONE() )
 		{
-		    mexas::push_instr ( instr, pp );
+		    mexcom::push_instr ( instr, pp );
 		    break;
 		}
 		if ( !  mexas::check_parameter
@@ -1967,14 +1969,15 @@ mex::module mexas::compile ( min::file file )
 		        mexas::get_name ( index );
 		    if ( instr.immedD == min::NONE() )
 		    {
-			mexas::push_instr ( instr, pp );
+			mexcom::push_instr
+			    ( instr, pp );
 			break;
 		    }
 		    mex::module m = ::module_search
 		        ( instr.immedD );
 		    if ( m == min::NULL_STUB )
 		    {
-			mexas::compile_error
+			mexcom::compile_error
 			    ( pp, "",
 			          min::pgen
 				      ( instr.immedD ),
@@ -1988,7 +1991,7 @@ mex::module mexas::compile ( min::file file )
 		        min::new_stub_gen ( m );
 		}
 
-		mexas::push_instr ( instr, pp );
+		mexcom::push_instr ( instr, pp );
 		break;
 	    }
 	    case mex::BEG:
@@ -1997,7 +2000,7 @@ mex::module mexas::compile ( min::file file )
 	        min::uns32 tvars =
 		    mexas::get_trace_info
 			( trace_info, index, pp );
-		mexas::begx
+		mexstack::begx
 		    ( instr, 0, tvars, trace_info, pp );
 		break;
 	    }
@@ -2007,7 +2010,7 @@ mex::module mexas::compile ( min::file file )
 	        min::uns32 tvars =
 		    mexas::get_trace_info
 			( trace_info, index, pp );
-		mexas::endx
+		mexstack::endx
 		    ( instr, tvars, trace_info, pp );
 		break;
 	    }
@@ -2016,7 +2019,7 @@ mex::module mexas::compile ( min::file file )
 	        min::gen nn = mexas::get_num ( index );
 		if ( nn == min::NONE() )
 		{
-		    mexas::compile_error
+		    mexcom::compile_error
 			( pp, "no nnext parameter;"
 			      " instruction ignored" );
 		    continue;
@@ -2027,14 +2030,15 @@ mex::module mexas::compile ( min::file file )
 			      pp, "nnext" ) )
 		    continue;
 
-		if ( nnext > SP - mexas::stack_limit )
+		if (   nnext
+		     > SP - mexstack::stack_limit )
 		{
-		    mexas::compile_error
+		    mexcom::compile_error
 			( pp, "portion of stack in the"
 			      " containing block is"
 			      " smaller than the number"
 			      " of next-variables" );
-		    nnext = SP - mexas::stack_limit;
+		    nnext = SP - mexstack::stack_limit;
 			// To protect against
 			// excessively large nvars
 			// values.
@@ -2058,7 +2062,7 @@ mex::module mexas::compile ( min::file file )
 			 ve->name == mexas::star )
 		    {
 		        nnext = i - 1;
-			mexas::compile_error
+			mexcom::compile_error
 			    ( pp, "BEGL: not enough"
 			          " named variables"
 				  " of current lexical"
@@ -2088,8 +2092,8 @@ mex::module mexas::compile ( min::file file )
 		{
 		    MIN_ASSERT
 			(    nnext
-			  <= SP - mexas::stack_limit,
-			  "BEGL: mexas::stack_limit"
+			  <= SP - mexstack::stack_limit,
+			  "BEGL: mexstack::stack_limit"
 			  " violation"
 			);
 		    min::locatable_gen name
@@ -2111,19 +2115,19 @@ mex::module mexas::compile ( min::file file )
 			( mexas::variables, name,
 			  L, mexstack::depth[L] );
 		}
-		mexas::begx
+		mexstack::begx
 		    ( instr, nnext, 0, trace_info, pp );
 		break;
 	    }
 	    case mex::ENDL:
 	    {
-		mexas::endx
+		mexstack::endx
 		    ( instr, 0, min::MISSING(), pp );
 		break;
 	    }
 	    case mex::CONT:
 	    {
-		mexas::cont
+		mexstack::cont
 		    ( instr, 0, min::MISSING(), pp );
 		break;
 	    }
@@ -2133,7 +2137,7 @@ mex::module mexas::compile ( min::file file )
 		    mexas::get_name ( index );
 		if ( function_name == min::NONE() )
 		{
-		    mexas::compile_error
+		    mexcom::compile_error
 			( pp, "BEGF has no function"
 			      " name; instruction"
 			      " ignored" );
@@ -2164,7 +2168,7 @@ mex::module mexas::compile ( min::file file )
 		      L, mexstack::depth[L],
 		      m->length );
 
-		mexas::begx
+		mexstack::begx
 		    ( instr, nargs, 0,
 		      trace_info, pp );
 		for ( min::uns32 i = 0; i < nargs;
@@ -2183,7 +2187,7 @@ mex::module mexas::compile ( min::file file )
 		    min::print_phrase_lines
 			( mexcom::input_file->printer,
 			  mexcom::input_file, pp );
-		mexas::endx
+		mexstack::endx
 		    ( instr, 0, min::MISSING(), pp );
 		mexcom::trace_instr
 		    ( m->length - 1,
@@ -2195,7 +2199,7 @@ mex::module mexas::compile ( min::file file )
 	    {
 	        if ( L == 0 )
 		{
-		    mexas::compile_error
+		    mexcom::compile_error
 			( pp, "RET not in a function;"
 			      " instruction ignored" );
 		    continue;
@@ -2203,7 +2207,7 @@ mex::module mexas::compile ( min::file file )
 		min::gen nn = mexas::get_num ( index );
 		if ( nn == min::NONE() )
 		{
-		    mexas::compile_error
+		    mexcom::compile_error
 			( pp, "no nresults parameter;"
 			      " instruction ignored" );
 		    continue;
@@ -2215,7 +2219,7 @@ mex::module mexas::compile ( min::file file )
 		    continue;
 		instr.immedB = L;
 		instr.immedC = nresults;
-		mexas::push_instr ( instr, pp );
+		mexcom::push_instr ( instr, pp );
 		min::pop ( mexas::variables, nresults );
 	        mexstack::var_stack_length -= nresults;
 		break;
@@ -2238,7 +2242,7 @@ mex::module mexas::compile ( min::file file )
 			    mexas::get_star ( index );
 		    if ( mod_name == min::NONE() )
 		    {
-			mexas::compile_error
+			mexcom::compile_error
 			    ( pp, "no module name for"
 			          " CALLG;"
 				  " instruction"
@@ -2249,7 +2253,7 @@ mex::module mexas::compile ( min::file file )
 		        mexas::get_name ( index );
 		    if ( function_name == min::NONE() )
 		    {
-			mexas::compile_error
+			mexcom::compile_error
 			    ( pp, "no function name for"
 			          " CALLG;"
 				  " instruction"
@@ -2262,7 +2266,7 @@ mex::module mexas::compile ( min::file file )
 		    if (    begf_location
 		         == mexas::NOT_FOUND )
 		    {
-			mexas::compile_error
+			mexcom::compile_error
 			    ( pp, "function ",
 			          min::pgen
 				      ( function_name ),
@@ -2283,7 +2287,7 @@ mex::module mexas::compile ( min::file file )
 		        mexas::get_name ( index );
 		    if ( function_name == min::NONE() )
 		    {
-			mexas::compile_error
+			mexcom::compile_error
 			    ( pp, "no function name for"
 			          " CALL/CALLM;"
 				  " instruction"
@@ -2330,7 +2334,7 @@ mex::module mexas::compile ( min::file file )
 		    if (    begf_location
 		         == mexas::NOT_FOUND )
 		    {
-			mexas::compile_error
+			mexcom::compile_error
 			    ( pp, "function ",
 			          min::pgen
 				      ( function_name ),
@@ -2343,7 +2347,7 @@ mex::module mexas::compile ( min::file file )
 
 		if ( begf_location >= cm->length )
 		{
-		    mexas::compile_error
+		    mexcom::compile_error
 			( pp, "bad function_element;"
 			      " begf_location >="
 			      " cm->length;"
@@ -2354,7 +2358,7 @@ mex::module mexas::compile ( min::file file )
 		    cm + begf_location;
 		if ( ip->op_code != mex::BEGF )
 		{
-		    mexas::compile_error
+		    mexcom::compile_error
 			( pp, "bad function_element;"
 			      " does not point at"
 			      " BEGF;"
@@ -2365,7 +2369,7 @@ mex::module mexas::compile ( min::file file )
 	        min::gen na = mexas::get_num ( index );
 		if ( na == min::NONE() )
 		{
-		    mexas::compile_error
+		    mexcom::compile_error
 			( pp, "no nargs parameter;"
 			      " instruction ignored" );
 		    continue;
@@ -2378,7 +2382,7 @@ mex::module mexas::compile ( min::file file )
 
 		if ( ip->immedA > nargs )
 		{
-		    mexas::compile_error
+		    mexcom::compile_error
 			( pp, "BEGF expects ",
 			      min::puns
 			         ( ip->immedA,
@@ -2418,7 +2422,7 @@ mex::module mexas::compile ( min::file file )
 		instr.immedA = nargs;
 		instr.immedB = nresults;
 		instr.immedC = begf_location;
-		mexas::push_instr
+		mexcom::push_instr
 		    ( instr, pp, trace_info );
 
 		min::pop ( mexas::variables, nargs );
@@ -2455,7 +2459,7 @@ mex::module mexas::compile ( min::file file )
 			flags |= (min::uns32) f;
 		    }
 		    else
-			mexas::compile_error
+			mexcom::compile_error
 			    ( pp, "Unrecognized trace"
 			          " flag: ",
 				  min::pgen ( fname ),
@@ -2463,7 +2467,7 @@ mex::module mexas::compile ( min::file file )
 		}
 		instr.immedA = flags;
 
-		mexas::push_instr ( instr, pp );
+		mexcom::push_instr ( instr, pp );
 		break;
 	    }
 	    case mex::SET_EXCEPTS:
@@ -2490,7 +2494,7 @@ mex::module mexas::compile ( min::file file )
 			flags |= (min::uns32) f;
 		    }
 		    else
-			mexas::compile_error
+			mexcom::compile_error
 			    ( pp, "Unrecognized except"
 			          " flag: ",
 				  min::pgen ( fname ),
@@ -2498,7 +2502,7 @@ mex::module mexas::compile ( min::file file )
 		}
 		instr.immedA = flags;
 
-		mexas::push_instr ( instr, pp );
+		mexcom::push_instr ( instr, pp );
 		break;
 	    }
 	    case mex::SET_OPTIMIZE:
@@ -2510,13 +2514,13 @@ mex::module mexas::compile ( min::file file )
 		else if ( param == ::off )
 		    instr.immedA = 0;
 		else
-		    mexas::compile_error
+		    mexcom::compile_error
 		        ( pp, "SET_OPTIMIZE requires"
 			      " `ON' or `OFF'"
 			      " parameter; `OFF'"
 			      " assumed" );
 
-		mexas::push_instr ( instr, pp );
+		mexcom::push_instr ( instr, pp );
 		break;
 	    }
 	    case mex::NOP:
@@ -2529,7 +2533,7 @@ mex::module mexas::compile ( min::file file )
 		    mexas::get_trace_info
 			( trace_info, index, pp );
 		instr.immedA = tvars;
-		mexas::push_instr
+		mexcom::push_instr
 		    ( instr, pp, trace_info );
 		break;
 	    }
@@ -2556,7 +2560,7 @@ mex::module mexas::compile ( min::file file )
 		if ( new_name == min::NONE() )
 		    new_name = mexas::star;
 
-		mexas::push_instr
+		mexcom::push_instr
 		    ( instr, pp, new_name );
 
 		mexas::push_variable
@@ -2566,7 +2570,7 @@ mex::module mexas::compile ( min::file file )
 	    }
 
 	    default:
-		mexas::push_instr ( instr, pp );
+		mexcom::push_instr ( instr, pp );
 	    }
 	}
 	TRACE:
