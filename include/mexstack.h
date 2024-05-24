@@ -2,7 +2,7 @@
 //
 // File:	mexstack.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu May 23 13:56:31 EDT 2024
+// Date:	Fri May 24 03:53:55 EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -43,6 +43,7 @@ extern min::uns8 depth[mex::max_lexical_level+1];
 extern min::uns32 var_stack_length;
 extern min::uns32 func_stack_length;
 extern min::uns32 func_var_stack_length;
+void pop_stacks ( void );
 
 extern min::uns32 lp[mex::max_lexical_level+1];
 extern min::uns32 fp[mex::max_lexical_level+1];

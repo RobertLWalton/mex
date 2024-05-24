@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu May 23 15:39:48 EDT 2024
+// Date:	Fri May 24 03:52:46 EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -41,6 +41,23 @@ min::locatable_var<mex::module_ins>
 min::uns32 mexstack::var_stack_length = 0;
 min::uns32 mexstack::func_stack_length = 0;
 min::uns32 mexstack::func_var_stack_length = 0;
+void mexstack::pop_stacks ( void )
+{
+    MIN_REQUIRE (    mexas::variables->length
+                  >= mexstack::var_stack_length );
+    min::pop ( mexas::variables,
+    	         mexas::variables->length
+	       - mexstack::var_stack_length );
+
+    MIN_REQUIRE
+        ( mexstack::func_var_stack_length == 0 );
+
+    MIN_REQUIRE (    mexas::functions->length
+                  >= mexstack::func_stack_length );
+    min::pop ( mexas::functions,
+    	         mexas::functions->length
+	       - mexstack::func_stack_length );
+}
 
 min::uns8 mexstack::lexical_level;
 min::uns8 mexstack::depth[mex::max_lexical_level+1];
@@ -757,6 +774,7 @@ unsigned mexas::endx ( mex::instr & instr,
     min::pop ( mexas::functions,
                  mexas::functions->length
 	       - e.function_stack );
+    mexstack::func_stack_length = e.function_stack;
  
     if ( instr.op_code == mex::ENDF )
     {
@@ -773,6 +791,8 @@ unsigned mexas::endx ( mex::instr & instr,
 	min::pop ( mexas::variables,
 	           variables->length - e.stack_limit
 		                     + e.nvars );
+	mexstack::var_stack_length =
+		e.stack_limit - e.nvars;
 	-- L;
     }
     else if ( instr.op_code == mex::ENDL )
@@ -786,6 +806,8 @@ unsigned mexas::endx ( mex::instr & instr,
 	min::pop ( mexas::variables,
 	           variables->length - e.stack_limit
 		                     + e.nvars );
+	mexstack::var_stack_length =
+		e.stack_limit - e.nvars;
 	mexas::jump_list_update ( mexas::jumps );
     }
     else // if mex::END
@@ -795,6 +817,8 @@ unsigned mexas::endx ( mex::instr & instr,
 	-- mexstack::depth[L];
 	min::pop ( mexas::variables,
 	           variables->length - e.stack_limit );
+	mexstack::var_stack_length =
+		e.stack_limit;
 	mexas::jump_list_update ( mexas::jumps );
     }
 
@@ -803,6 +827,11 @@ unsigned mexas::endx ( mex::instr & instr,
         ( len == 0 ? 0 : 
 	  (mexas::blocks+(len-1))->stack_limit );
     mexas::push_instr ( instr, pp, trace_info );
+
+    MIN_REQUIRE ( mexas::variables->length
+                  == mexstack::var_stack_length );
+    MIN_REQUIRE ( mexas::functions->length
+                  == mexstack::func_stack_length );
 
     return 0;
 }
@@ -1280,8 +1309,10 @@ mex::module mexas::compile ( min::file file )
 
     min::pop ( mexas::variables,
                mexas::variables->length );
+    mexstack::var_stack_length = 0;
     min::pop ( mexas::functions,
                mexas::functions->length );
+    mexstack::func_stack_length = 0;
     min::pop ( mexas::blocks,
                mexas::blocks->length );
     mexas::stack_limit = 0;
@@ -1345,6 +1376,7 @@ mex::module mexas::compile ( min::file file )
 	    if ( SP < mexas::stack_limit + 2 )
 	        goto STACK_TOO_SHORT;
 	    min::pop ( variables, 2 );
+	    mexstack::var_stack_length -= 2;
 	    goto ARITHMETIC;
 
 	case mex::A2I:
@@ -1381,12 +1413,14 @@ mex::module mexas::compile ( min::file file )
 		    continue;
 	    }
 	    min::pop ( variables );
+	    mexstack::var_stack_length -= 1;
 	    goto ARITHMETIC;
 
 	case mex::J2:
 	    if ( SP < mexas::stack_limit + 2 )
 	        goto STACK_TOO_SHORT;
 	    min::pop ( variables, 2 );
+	    mexstack::var_stack_length -= 2;
 	    // Fall through.
 	case mex::J:
 	    goto JUMP;
@@ -1686,6 +1720,7 @@ mex::module mexas::compile ( min::file file )
 		mexas::push_instr
 		    ( instr, pp, trace_info );
 		min::pop ( mexas::variables );
+	        mexstack::var_stack_length -= 1;
 		break;
 	    }
 	    case ::LABEL:
@@ -2174,6 +2209,7 @@ mex::module mexas::compile ( min::file file )
 		instr.immedC = nresults;
 		mexas::push_instr ( instr, pp );
 		min::pop ( mexas::variables, nresults );
+	        mexstack::var_stack_length -= nresults;
 		break;
 	    }
 	    case ::CALL:
@@ -2378,6 +2414,7 @@ mex::module mexas::compile ( min::file file )
 		    ( instr, pp, trace_info );
 
 		min::pop ( mexas::variables, nargs );
+	        mexstack::var_stack_length -= nargs;
 		for ( min::uns32 i = 0; i < nresults;
 		                        ++ i )
 		    mexas::push_variable
