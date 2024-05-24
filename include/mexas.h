@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri May 24 03:53:16 EDT 2024
+// Date:	Fri May 24 16:00:37 EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -32,33 +32,6 @@
 // ----
 
 namespace mexas {
-
-extern min::locatable_var<min::file> input_file;
-extern min::locatable_var<mex::module_ins>
-    output_module;
-
-// The following pushes an instruction into the module
-// code vector.
-//
-extern bool assemble_trace_never;
-    // Forces the trace_class of the instruction to be
-    // T_NEVER unless that trace_class is T_ALWAYS.
-inline void push_instr
-        ( mex::instr & instr,
-	  const min::phrase_position & pp =
-	      min::MISSING_PHRASE_POSITION,
-	  min::gen trace_info = min::MISSING() )
-{
-    if ( mexcom::trace_never
-         &&
-	 instr.trace_class != mex::T_ALWAYS )
-        instr.trace_class = mex::T_NEVER;
-
-    mex::module_ins m = mexcom::output_module;
-    mex::push_instr ( m, instr );
-    mex::push_position ( m, pp );
-    mex::push_trace_info ( m, trace_info );
-}
 
 void push_push_instr
         ( min::gen new_name, min::gen name,
@@ -92,53 +65,12 @@ void push_push_instr
     // the current PUSH, as these are not recorded in
     // the variables stack.
 
-extern min::uns8 lexical_level;
-    // Current lexical_level.
-extern min::uns8 depth[mex::max_lexical_level+1];
-    // depth[L] is the current depth of lexical level
-    // L.
-
-extern min::uns32 lp[mex::max_lexical_level+1];
-extern min::uns32 fp[mex::max_lexical_level+1];
-    // lp[L] is stack pointer when lexical level begun.
-    // fp[L] is frame pointer when lexical level begun.
-    // fp[L] - lp[L] is number of arguments.
-
-extern min::uns32 error_count;
-extern min::uns32 warning_count;
-
 extern min::locatable_gen star;
     // new_str_gen ( "*" );
 extern min::locatable_gen single_quote;
     // new_str_gen ( "'" );
 extern min::locatable_gen double_quote;
     // new_str_gen ( "\"" );
-
-extern min::locatable_gen op_code_table;
-    // For op_code OP < ::NUMBER_OF_OP_CODES:
-    //   op_code_table[OP] == new_str_gen ( "OP" )
-    // and
-    //   get ( op_code_table, new_str_gen ( "OP" ) )
-    //          == new_num_gen ( OP )
-
-extern min::locatable_gen trace_class_table;
-    // For trace_class T_XX < ::NUMBER_OF_TRACE_CLASSES:
-    //   get ( trace_class_table, new_str_gen ( "XX" ) )
-    //          == new_num_gen ( T_XX )
-
-extern min::locatable_gen trace_flag_table;
-    // For trace_class T_XX < ::NUMBER_OF_TRACE_CLASSES:
-    //   get ( trace_flag_table, new_str_gen ( "XX" ) )
-    //          == new_num_gen ( 1<<T_XX )
-    // For trace group GG := XX1 XX2 ...:
-    //   get ( trace_flag_table, new_str_gen ( "GG" ) )
-    //          == bitwise OR of
-    //                (1<<T_XX1), (1<<T_XX2), ...
-
-extern min::locatable_gen except_flag_table;
-    // For except named "XX" with mask M:
-    //   get ( except_flag_table, new_str_gen ( "XX" ) )
-    //          == new_num_gen ( M )
 
 // Variable Stack
 //
@@ -227,155 +159,6 @@ inline void push_function
     ++ mexstack::func_stack_length;
 }
 
-// Block Stack
-//
-struct block_element
-{
-    min::uns8 begin_op_code;
-    min::uns8 end_op_code;
-    min::uns32 stack_limit;
-    min::uns32 function_stack;
-    min::uns32 nvars;
-    min::uns32 begin_location;
-};
-typedef min::packed_vec_insptr<mexas::block_element>
-    block_stack;
-extern min::locatable_var<mexas::block_stack>
-    blocks;
-    // BEG... instructions push an element into this
-    // stack.  Begin_op_code is the BEG... op code and
-    // end_op_code is the corresponding END... op code.
-    //
-    // Begin_location is the location of the BEG...
-    // instruction and is used allow backward jump and
-    // error messages.
-    //
-    // Stack_limit is the stack bounary below which
-    //   (1) variable elements cannot be popped by
-    //       instructions that do not decrease depth or
-    //       lexical level
-    //   (2) variable elements cannot be hidden by
-    //       elements above the limit
-    //
-    // Nvars is the number of stack elements holding
-    // arguments to a function (BEGF) or next-variables
-    // for a loop (BEGL).  Nvars is 0 for BEG.  Upon
-    // encountering the BEG...  the stack pointer is at
-    // stack_limit - nvars.
-
-extern min::uns32 stack_limit;
-    // This is a cache of the stack_limit of the top
-    // element of the block stack.  If the block stack
-    // is empty, this is 0.
-
-// Module Stack
-//
-typedef min::packed_vec_insptr<mex::module>
-    module_stack;
-extern min::locatable_var<mexas::module_stack>
-    modules;
-    // After module is assembled it is pushed into this
-    // stack, which is therefore a list of modules
-    // in the order they were assembled: most recent
-    // on top.
-
-// Jump List
-//
-struct jump_element
-{
-    // When a JMP... instruction is pushed to the end of
-    // the code vector, it has immedC == 0, which will
-    // trigger a run-time error if the JMP... is
-    // executed.  Thus unresolved JMP... instructions 
-    // will trigger fatal run-time error.
-    //
-    const min::gen target_name;
-    min::uns32 jmp_location;
-    min::uns8 lexical_level, depth, maximum_depth;
-    min::uns32 stack_length, stack_minimum;
-    min::uns32 next;
-    jump_element
-	    ( const jump_element & j ) :
-	target_name ( j.target_name ),
-	jmp_location ( j.jmp_location ),
-	lexical_level ( j.lexical_level ),
-        depth ( j.depth ),
-        maximum_depth ( j.maximum_depth ),
-        stack_length ( j.stack_length ),
-        stack_minimum ( j.stack_minimum ),
-	next ( j.next ) {}
-    jump_element
-	    ( min::gen target_name,
-	      min::uns32 jmp_location,
-	      min::uns32 lexical_level,
-              min::uns32 depth,
-              min::uns32 maximum_depth,
-              min::uns32 stack_length,
-              min::uns32 stack_minimum,
-              min::uns32 next ) :
-	target_name ( target_name ),
-	jmp_location ( jmp_location ),
-	lexical_level ( lexical_level ),
-        depth ( depth ),
-        maximum_depth ( maximum_depth ),
-        stack_length ( stack_length ),
-        stack_minimum ( stack_minimum ),
-	next ( next ) {}
-    jump_element & operator =
-	    ( const jump_element & e )
-    {
-        // Implicit operator = not defined because
-	// of const members.
-	//
-        * (min::gen *) & this->target_name =
-	      e.target_name;
-	this->jmp_location = e.jmp_location;
-	this->lexical_level = e.lexical_level;
-	this->depth = e.depth;
-	this->maximum_depth = e.maximum_depth;
-	this->stack_length = e.stack_length;
-	this->stack_minimum = e.stack_minimum;
-	this->next = e.next;
-	return * this;
-    }
-};
-typedef min::packed_vec_insptr<mexas::jump_element>
-    jump_list;
-extern min::locatable_var<mexas::jump_list>
-    jumps;
-    // The jump list is a singly linked list in the
-    // jump_list vector, with jump_list[0] being a
-    // dummy element that is head of the free list,
-    // and jump_list[1] being a dummy element that is
-    // head of the active list.  When elements are
-    // added they are added to the start, so the
-    // list order is newest-first.
-
-// Push jump_element to head of active list.
-//
-inline void push_jump
-	( mexas::jump_list lst,
-	  const mexas::jump_element & e )
-{
-    mexas::jump_element * free = ~ ( lst + 0 );
-    mexas::jump_element * active = free + 1;
-    min::uns32 next = free->next;
-    if ( next == 0 )
-    {
-        next = lst->length;
-	min::push(lst) = e;
-    }
-    else
-    {
-	mexas::jump_element * ep = ~ ( lst + next );
-	free->next = ep->next;
-        * ep = e;
-    }
-    (lst + next)->next = active->next;
-    active->next = next;
-    min::unprotected::acc_write_update
-        ( lst, e.target_name );
-}
 
 // Main Functions
 // ---- ---------
@@ -391,38 +174,6 @@ mex::module compile ( min::file file );
 
 // Support Functions
 // ------- ---------
-
-// Print error message.  If pp != min::MISSING_PHRASE_
-// POSITION, print source lines after error message.
-// Increment mexas::error_count.  Printer used is
-// mexas::input_file->printer.
-//
-void compile_error
-	( const min::phrase_position & pp,
-	  const char * message1,
-	  const min::op & message2 = min::pnop,
-	  const char * message3 = "",
-	  const min::op & message4 = min::pnop,
-	  const char * message5 = "",
-	  const min::op & message6 = min::pnop,
-	  const char * message7 = "",
-	  const min::op & message8 = min::pnop,
-	  const char * message9 = "" );
-
-// Ditto but its a warning message and mexas::warning_
-// count is incremented.
-//
-void compile_warn
-	( const min::phrase_position & pp,
-	  const char * message1,
-	  const min::op & message2 = min::pnop,
-	  const char * message3 = "",
-	  const min::op & message4 = min::pnop,
-	  const char * message5 = "",
-	  const min::op & message6 = min::pnop,
-	  const char * message7 = "",
-	  const min::op & message8 = min::pnop,
-	  const char * message9 = "" );
 
 typedef min::packed_vec_insptr<min::gen>
     statement_lexemes;
@@ -594,167 +345,6 @@ bool check_parameter
     // If an error message is output, it ends with
     // `instruction ignored'.  So if false is returned,
     // the instruction should be ignored.
-
-enum assemble_print
-{
-    NO_PRINT,
-    PRINT,
-    PRINT_WITH_SOURCE
-};
-extern mexas::assemble_print assemble_print_switch;
-void trace_instr ( min::uns32 location,
-                   bool no_source = false );
-    // Print trace of instruction at mexas::ouput_
-    // _module[location], as per assemble_print_switch
-    // except do not print source lines if no_source
-    // is true.
-
-unsigned jump_list_delete
-	( mexas::jump_list jlist );
-    // Go through jlist and delete all jump_elements
-    // that have lexical level equal to mexas::
-    // lexical_level.  This is to be called just BEFORE
-    // mexas::lexical_level is decremented, or at the
-    // end of compilation.
-    //
-    // If this is done, the jump_elements in jlist
-    // will be sorted in lexical level order, highest
-    // first.  This is assumed by this function.
-    //
-    // For each element deleted, call compile_error
-    // indicating that the jump target was undefined
-    // and referencing the jump instruction involved.
-    //
-    // Return the number of elements deleted.
-
-unsigned jump_list_update
-	( mexas::jump_list jlist );
-    // Let L be the value of mexas::lexical_level.
-    //
-    // Go through jlist and for all jump_elements je of
-    // lexical level equal to L, perform:
-    //
-    //     je.maximum_depth =
-    //         min ( je.maximum_depth,
-    //               mexas::depth[L] )
-    //     je.stack_minimum =
-    //         min ( je.stack_minimum,
-    //               variables->length );
-    //
-    // This function should be called just AFTER 
-    // mexas::depth[L] has been decremented and
-    // variables->length has been reduced.
-    //
-    // Assumes that the elements of jlist are sorted by
-    // lexical level, highest first, and L is equal to
-    // or higher than the lexical level of the first
-    // element on jlist.
-    //
-    // Return the number of elements of the given
-    // lexical level (counted even if they are not
-    // modified).
-    
-
-unsigned jump_list_resolve
-	( mexas::jump_list jlist,
-	  min::gen target_name );
-    // Go through jlist and resolve all jump_elements
-    // that have the current lexical level, a depth
-    // not greater than their maximum_depth, and a
-    // target_name equal to the argument.  Resolved
-    // elements are removed from jlist.  The number
-    // of resolved elements is returned.
-
-void begx ( mex::instr & instr,
-	    min::uns32 nvars, min::uns32 tvars,
-	    min::gen trace_info = min::MISSING(),
-            const min::phrase_position & pp =
-	       min::MISSING_PHRASE_POSITION );
-    // Push a block stack entry for BEG, BEGL, or BEGF
-    // respectively, according to instr.op_code,
-    // and execute mexas::push_instr on the arguments.
-    // This function sets all the necessary instr
-    // members except op_code and trace_class.  These
-    // other members must be initialized to 0 or
-    // min::MISSING().
-    //
-    // Nvars equals nnext for BEGL, the number of
-    // variables listed as arguments for BEGF, and must
-    // be 0 for BEG.
-    //
-    // Tvars is the number of trace variables in the
-    // run-time stack.  Trace variables should NOT be
-    // recorded in the assembler's variables stack.
-    //
-    // BEG and BEGL increment depth[L] for the current
-    // lexical level L.  BEGF increments L.
-    //
-    // BEGL takes the top nvars elements of the
-    // variables stack and pushes them in order into the
-    // variables stack giving the copy of any variable
-    // with name N (not equal *) the name `next-N'.
-    //
-    // BEGF increments mexas::lexical level to be L,
-    // sets depth[L] to 0, sets lp[L] = variables->
-    // length and fp[L] = lp[L] + instr.immedC.
-    //
-    // **** In addition to the BEGF op_code, the initial
-    // instr value must specify the nargs parameter in
-    // instr.immedA.  Immediately AFTER a call to this
-    // function, BEGF must push instr.immedA variables
-    // stack elements.
-
-unsigned endx ( mex::instr & instr,
-	        min::uns32 tvars,
-	        min::gen trace_info = min::MISSING(),
-                const min::phrase_position & pp =
-	            min::MISSING_PHRASE_POSITION );
-    // If instr.op_code matches the op_code of the top
-    // block stack entry (e.g., ENDL matches BEGL), pop
-    // the top block stack entry, adjusting the BEG...
-    // instruction associated with that entry and the
-    // END... instr argument, and execute mexas::push_
-    // instr on the arguments.
-    //
-    // This function sets all the necessary instr
-    // members except op_code and trace_class.  These
-    // other members must be initialized to 0 or
-    // min::MISSING().
-    //
-    // Tvars is the number of trace variables in the
-    // run-time stack.  Trace variables should NOT be
-    // recorded in the assembler's variables stack.
-    //
-    // END and ENDL decrement depth[L] for the current
-    // lexical level L.  ENDF decrements L.
-    //
-    // If instr.op_code does not match the top of the
-    // stack, and if it does match a block stack entry,
-    // iteratively change instr.op_code to match the
-    // top of the stack and execute the previous para-
-    // graph, until a block stack entry matching the
-    // original instr.op_code is popped.  Note that END
-    // and ENDL can only match block stack entries with
-    // the current lexical level.  Issue an error
-    // message in this case.  The trace_class of all
-    // instructions pushed will be those of T_PUSH.
-    //
-    // Return the number of block stack entries popped.
-    // Normally this will be 1.
-    //
-    // If instr.op_code does not match ANY block stack
-    // entries, just issue an error message and return
-    // 0.  No instructions are pushed.
-
-void cont ( mex::instr & instr,
-	    min::uns32 tvars,
-	    min::gen trace_info = min::MISSING(),
-            const min::phrase_position & pp =
-	        min::MISSING_PHRASE_POSITION );
-    // Similar to endx but only handles the CONT
-    // instruction.  Does NOT pop the block stack or
-    // decrease depth.  Does require the top of the
-    // block stack to be a BEGL entry.
 
 const min::uns32 NOT_FOUND = 0xFFFFFFFF;
     // Returned by search functions when not found.
