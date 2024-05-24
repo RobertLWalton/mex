@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri May 24 11:52:38 EDT 2024
+// Date:	Fri May 24 12:20:03 EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -282,12 +282,12 @@ static min::packed_vec<mexas::function_element>
 min::locatable_var<mexas::function_stack>
     mexas::functions;
 
-static min::packed_vec<mexas::block_element>
+static min::packed_vec<mexstack::block_element>
      block_stack_vec_type
          ( "block_stack_vec_type" );
 
-min::locatable_var<mexas::block_stack>
-    mexas::blocks;
+min::locatable_var<mexstack::block_stack>
+    mexstack::blocks;
 
 min::uns32 mexas::stack_limit;
 
@@ -352,7 +352,7 @@ static void initialize ( void )
 	::variable_stack_vec_type.new_stub ( 1000 );
     mexas::functions =
 	::function_stack_vec_type.new_stub ( 100 );
-    mexas::blocks =
+    mexstack::blocks =
 	::block_stack_vec_type.new_stub ( 100 );
     mexas::modules =
 	::module_stack_vec_type.new_stub ( 500 );
@@ -665,10 +665,10 @@ void mexas::begx ( mex::instr & instr,
 	           min::gen trace_info,
                    const min::phrase_position & pp )
 {
-    mexas::block_element e =
+    mexstack::block_element e =
         { instr.op_code, 0,
 	  mexstack::var_stack_length + nvars,
-	  mexas::functions->length,
+	  mexas::functions->length, 0,
 	  nvars,
 	  mexcom::output_module->length };
 
@@ -712,7 +712,7 @@ void mexas::begx ( mex::instr & instr,
         MIN_ABORT
 	    ( "bad instr.op_code to mexas::begx" );
 
-    min::push ( mexas::blocks ) = e;
+    min::push ( mexstack::blocks ) = e;
     mexas::stack_limit = e.stack_limit;
     mexas::push_instr ( instr, pp, trace_info );
 }
@@ -722,14 +722,15 @@ unsigned mexas::endx ( mex::instr & instr,
 	               min::gen trace_info,
                        const min::phrase_position & pp )
 {
-    if ( mexas::blocks->length == 0 )
+    if ( mexstack::blocks->length == 0 )
     {
 	mexas::compile_error
 	    ( pp, "there is no block to end here" );
 	return 0;
     }
-    min::ptr<mexas::block_element> bp =
-        mexas::blocks + ( mexas::blocks->length - 1 );
+    min::ptr<mexstack::block_element> bp =
+          mexstack::blocks
+	+ ( mexstack::blocks->length - 1 );
     if ( bp->end_op_code != instr.op_code )
     {
         // Check that ending other blocks will
@@ -737,10 +738,11 @@ unsigned mexas::endx ( mex::instr & instr,
 	//
 	bool match_found = false;
 	for ( int i = 2;
-	      i <= (int) mexas::blocks->length; ++ i )
+	      i <= (int) mexstack::blocks->length;
+	      ++ i )
 	{
-	    bp = mexas::blocks
-	       + ( mexas::blocks->length - i );
+	    bp = mexstack::blocks
+	       + ( mexstack::blocks->length - i );
 	    min::uns8 end_op_code = bp->end_op_code;
 	    if ( end_op_code == instr.op_code )
 	    {
@@ -759,8 +761,8 @@ unsigned mexas::endx ( mex::instr & instr,
 	min::uns8 end_op_code = instr.op_code;
 	unsigned count = 0;
 	do {
-	    bp = mexas::blocks
-	       + ( mexas::blocks->length - 1 );
+	    bp = mexstack::blocks
+	       + ( mexstack::blocks->length - 1 );
 	    instr.op_code = bp->end_op_code;
 	    if ( instr.op_code != end_op_code )
 	    {
@@ -778,8 +780,12 @@ unsigned mexas::endx ( mex::instr & instr,
 	return count;
     }
 
-    mexas::block_element e = min::pop ( mexas::blocks );
-    mexstack::func_stack_length = e.function_stack;
+    mexstack::block_element e =
+        min::pop ( mexstack::blocks );
+    mexstack::func_stack_length =
+        e.func_stack_length;
+    mexstack::func_var_stack_length =
+        e.func_var_stack_length;
  
     if ( instr.op_code == mex::ENDF )
     {
@@ -820,10 +826,10 @@ unsigned mexas::endx ( mex::instr & instr,
     }
     mexstack::pop_stacks();
 
-    min::uns32 len = mexas::blocks->length;
+    min::uns32 len = mexstack::blocks->length;
     mexas::stack_limit =
         ( len == 0 ? 0 : 
-	  (mexas::blocks+(len-1))->stack_limit );
+	  (mexstack::blocks+(len-1))->stack_limit );
     mexas::push_instr ( instr, pp, trace_info );
 
     MIN_REQUIRE ( mexas::variables->length
@@ -839,15 +845,16 @@ void mexas::cont ( mex::instr & instr,
 	           min::gen trace_info,
                    const min::phrase_position & pp )
 {
-    if ( mexas::blocks->length == 0 )
+    if ( mexstack::blocks->length == 0 )
     {
 	mexas::compile_error
 	    ( pp, "not in a BEGL ... ENDL block;"
 	          " instruction ignored" );
 	return;
     }
-    min::ptr<mexas::block_element> bp =
-        mexas::blocks + ( mexas::blocks->length - 1 );
+    min::ptr<mexstack::block_element> bp =
+          mexstack::blocks
+	+ ( mexstack::blocks->length - 1 );
     if ( bp->begin_op_code != mex::BEGL )
     {
 	mexas::compile_error
@@ -1311,8 +1318,8 @@ mex::module mexas::compile ( min::file file )
     min::pop ( mexas::functions,
                mexas::functions->length );
     mexstack::func_stack_length = 0;
-    min::pop ( mexas::blocks,
-               mexas::blocks->length );
+    min::pop ( mexstack::blocks,
+               mexstack::blocks->length );
     mexas::stack_limit = 0;
     min::pop ( mexstack::jumps,
                mexstack::jumps->length );
