@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri May 24 03:52:46 EDT 2024
+// Date:	Fri May 24 04:11:27 EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -24,7 +24,7 @@
 # include <cfenv>
 
 # define L mexstack::lexical_level
-# define SP mexas::variables->length
+# define SP mexstack::var_stack_length
 
 # define MUP min::unprotected
 
@@ -637,7 +637,7 @@ unsigned mexas::jump_list_resolve
 
 		mexcom::trace_instr
 		    ( next->jmp_location,
-		      mexas::variables->length,
+		      mexstack::var_stack_length,
 		      true );
 	    }
 
@@ -659,7 +659,7 @@ void mexas::begx ( mex::instr & instr,
 {
     mexas::block_element e =
         { instr.op_code, 0,
-	  mexas::variables->length + nvars,
+	  mexstack::var_stack_length + nvars,
 	  mexas::functions->length,
 	  nvars,
 	  mexcom::output_module->length };
@@ -677,7 +677,7 @@ void mexas::begx ( mex::instr & instr,
 
 	++ L;
 	mexstack::depth[L] = 0;
-	mexstack::lp[L] = mexas::variables->length;
+	mexstack::lp[L] = mexstack::var_stack_length;
 	mexstack::fp[L] = mexstack::lp[L] + nvars;
 
 	instr.immedA = nvars;
@@ -686,7 +686,7 @@ void mexas::begx ( mex::instr & instr,
     else if ( instr.op_code == mex::BEGL )
     {
 	e.end_op_code = mex::ENDL;
-	e.stack_limit= mexas::variables->length;
+	e.stack_limit= mexstack::var_stack_length;
 
         ++ mexstack::depth[L];
 	instr.immedA = tvars;
@@ -784,39 +784,40 @@ unsigned mexas::endx ( mex::instr & instr,
 	           - e.begin_location;
 	mexcom::trace_instr
 	    ( e.begin_location,
-	      mexas::variables->length,
+	      mexstack::var_stack_length,
 	      true );
 	instr.immedB = L;
 	mexas::jump_list_delete ( mexas::jumps );
 	min::pop ( mexas::variables,
-	           variables->length - e.stack_limit
-		                     + e.nvars );
+	             mexstack::var_stack_length
+		   - e.stack_limit + e.nvars );
 	mexstack::var_stack_length =
 		e.stack_limit - e.nvars;
 	-- L;
     }
     else if ( instr.op_code == mex::ENDL )
     {
-	instr.immedA = mexas::variables->length
+	instr.immedA = mexstack::var_stack_length
 	             - e.stack_limit + tvars;
 	instr.immedB = e.nvars;
         instr.immedC = mexcom::output_module->length
 	             - e.begin_location - 1;
 	-- mexstack::depth[L];
 	min::pop ( mexas::variables,
-	           variables->length - e.stack_limit
-		                     + e.nvars );
+	             mexstack::var_stack_length
+		   - e.stack_limit + e.nvars );
 	mexstack::var_stack_length =
 		e.stack_limit - e.nvars;
 	mexas::jump_list_update ( mexas::jumps );
     }
     else // if mex::END
     {
-	instr.immedA = mexas::variables->length
+	instr.immedA = mexstack::var_stack_length
 	             - e.stack_limit + tvars;
 	-- mexstack::depth[L];
 	min::pop ( mexas::variables,
-	           variables->length - e.stack_limit );
+	             mexstack::var_stack_length
+		   - e.stack_limit );
 	mexstack::var_stack_length =
 		e.stack_limit;
 	mexas::jump_list_update ( mexas::jumps );
@@ -858,7 +859,7 @@ void mexas::cont ( mex::instr & instr,
 	return;
     }
 
-    instr.immedA = mexas::variables->length
+    instr.immedA = mexstack::var_stack_length
 		 - bp->stack_limit + tvars;
     instr.immedB = bp->nvars;
     instr.immedC = mexcom::output_module->length
@@ -1029,7 +1030,7 @@ min::uns32 mexas::get_trace_info
 	}
 	mexcom::trace_instr
 	    ( mexcom::output_module->length - 1,
-	      mexas::variables->length,
+	      mexstack::var_stack_length,
 	      true );
     }
     return len - 1;
@@ -1711,7 +1712,8 @@ mex::module mexas::compile ( min::file file )
 		min::gen old_name =
 		    ( mexas::variables
 		      +
-		      ( mexas::variables->length - 1 ) )
+		      ( mexstack::var_stack_length
+		        - 1 ) )
 		    ->name;
 		min::gen labbuf[2] = { old_name, name };
 		min::locatable_gen trace_info
@@ -1782,7 +1784,8 @@ mex::module mexas::compile ( min::file file )
 		        << min::place_indent ( 0 );
 		min::uns32 level = L;
 		min::uns32 depth = mexstack::depth[L];
-		for ( min::uns32 i = variables->length;
+		for ( min::uns32 i =
+		          mexstack::var_stack_length;
 		      0 < i; )
 		{
 		    -- i;
@@ -2179,7 +2182,7 @@ mex::module mexas::compile ( min::file file )
 		    ( instr, 0, min::MISSING(), pp );
 		mexcom::trace_instr
 		    ( m->length - 1,
-	              mexas::variables->length,
+	              mexstack::var_stack_length,
 		      true );
 		continue;
 	    }
@@ -2611,7 +2614,7 @@ mex::module mexas::compile ( min::file file )
 	    }
 	    mexcom::trace_instr
 		( m->length - 1,
-		  mexas::variables->length,
+		  mexstack::var_stack_length,
 		  no_source );
 	    continue;
 	}
