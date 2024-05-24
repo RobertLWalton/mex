@@ -2,7 +2,7 @@
 //
 // File:	mexcom.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu May 23 05:22:13 EDT 2024
+// Date:	Fri May 24 15:23:12 EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -39,6 +39,11 @@ extern min::locatable_gen op_code_table;
 extern min::locatable_gen trace_class_table;
 extern min::locatable_gen trace_flag_table;
 extern min::locatable_gen except_flag_table;
+
+typedef min::packed_vec_insptr<mex::module>
+    module_stack;
+extern min::locatable_var<mexcom::module_stack>
+    modules;
 
 
 // Support Functions

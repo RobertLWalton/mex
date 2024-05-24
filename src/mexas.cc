@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri May 24 12:20:03 EDT 2024
+// Date:	Fri May 24 15:18:54 EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -302,8 +302,8 @@ static min::packed_vec<mex::module>
 	   NULL,
 	   ::module_stack_element_stub_disp );
 
-min::locatable_var<mexas::module_stack>
-    mexas::modules;
+min::locatable_var<mexcom::module_stack>
+    mexcom::modules;
 
 static min::uns32 jump_element_gen_disp[] =
 {
@@ -354,7 +354,7 @@ static void initialize ( void )
 	::function_stack_vec_type.new_stub ( 100 );
     mexstack::blocks =
 	::block_stack_vec_type.new_stub ( 100 );
-    mexas::modules =
+    mexcom::modules =
 	::module_stack_vec_type.new_stub ( 500 );
     mexstack::jumps =
 	::jump_list_vec_type.new_stub ( 500 );
@@ -465,11 +465,11 @@ min::uns32 mexas::global_search
     min::locatable_gen label
         ( min::new_lab_gen ( labbuf, 2 ) );
 
-    for ( min::uns32 i = mexas::modules->length;
+    for ( min::uns32 i = mexcom::modules->length;
           0 < i; )
     {
 	-- i;
-        m = mexas::modules[i];
+        m = mexcom::modules[i];
 	if ( m->name != module_name
 	     &&
 	     mexas::star != module_name )
@@ -492,12 +492,12 @@ min::uns32 mexas::global_search
 static mex::module module_search
 	( min::gen module_name )
 {
-    for ( min::uns32 i = mexas::modules->length;
+    for ( min::uns32 i = mexcom::modules->length;
           0 < i; )
     {
 	-- i;
-        if ( mexas::modules[i]->name == module_name )
-	    return mexas::modules[i];
+        if ( mexcom::modules[i]->name == module_name )
+	    return mexcom::modules[i];
     }
     return min::NULL_STUB;
 }
@@ -2686,7 +2686,7 @@ mex::module mexas::compile ( min::file file )
     for ( min::uns32 i = 0; i < process->length; ++ i )
         min::push(g) = process[i];
 
-    min::push ( mexas::modules ) = m;
+    min::push ( mexcom::modules ) = m;
 
     return m;
 }
