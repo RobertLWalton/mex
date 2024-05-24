@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri May 24 04:25:07 EDT 2024
+// Date:	Fri May 24 11:52:38 EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -307,17 +307,17 @@ min::locatable_var<mexas::module_stack>
 
 static min::uns32 jump_element_gen_disp[] =
 {
-    min::DISP ( & mexas::jump_element::target_name ),
+    min::DISP ( & mexstack::jump_element::target_name ),
     min::DISP_END
 };
 
-static min::packed_vec<mexas::jump_element>
+static min::packed_vec<mexstack::jump_element>
      jump_list_vec_type
          ( "jump_list_vec_type",
 	   ::jump_element_gen_disp );
 
-min::locatable_var<mexas::jump_list>
-    mexas::jumps;
+min::locatable_var<mexstack::jump_list>
+    mexstack::jumps;
 
 min::locatable_var<mexas::statement_lexemes>
     mexas::statement;
@@ -356,7 +356,7 @@ static void initialize ( void )
 	::block_stack_vec_type.new_stub ( 100 );
     mexas::modules =
 	::module_stack_vec_type.new_stub ( 500 );
-    mexas::jumps =
+    mexstack::jumps =
 	::jump_list_vec_type.new_stub ( 500 );
     mexas::statement =
 	min::gen_packed_vec_type.new_stub ( 500 );
@@ -541,18 +541,21 @@ void mexas::make_module_interface ( void )
         interface;
 }
 
-unsigned mexas::jump_list_delete
-	( mexas::jump_list jlist )
+unsigned mexstack::jump_list_delete
+	( mexstack::jump_list jlist )
 {
-    min::ptr<mexas::jump_element> free = jlist + 0;
-    min::ptr<mexas::jump_element> previous = jlist + 1;
+    min::ptr<mexstack::jump_element> free =
+        jlist + 0;
+    min::ptr<mexstack::jump_element> previous =
+        jlist + 1;
 
     mex::module_ins m = mexcom::output_module;
 
     unsigned count = 0;
     while ( min::uns32 n = previous->next )
     {
-        min::ptr<mexas::jump_element> next = jlist + n;
+        min::ptr<mexstack::jump_element> next =
+	    jlist + n;
 	if (   next->lexical_level
 	     < mexstack::lexical_level )
 	    break;
@@ -572,39 +575,44 @@ unsigned mexas::jump_list_delete
     return count;
 }
 
-unsigned mexas::jump_list_update
-	( mexas::jump_list jlist )
+unsigned mexstack::jump_list_update
+	( mexstack::jump_list jlist )
 {
-    min::ptr<mexas::jump_element> previous = jlist + 1;
+    min::ptr<mexstack::jump_element> previous =
+        jlist + 1;
 
     unsigned count = 0;
     while ( min::uns32 n = previous->next )
     {
-        min::ptr<mexas::jump_element> next = jlist + n;
+        min::ptr<mexstack::jump_element> next =
+	    jlist + n;
 	if ( next->lexical_level < L )
 	    break;
 	if ( next->maximum_depth > mexstack::depth[L] )
 	    next->maximum_depth = mexstack::depth[L];
-	if ( next->stack_minimum > SP )
-	    next->stack_minimum = SP;
+	if ( next->var_stack_minimum > SP )
+	    next->var_stack_minimum = SP;
 	previous = next;
 	++ count;
     }
     return count;
 }
 
-unsigned mexas::jump_list_resolve
-	( mexas::jump_list jlist,
+unsigned mexstack::jump_list_resolve
+	( mexstack::jump_list jlist,
 	  min::gen target_name )
 {
-    min::ptr<mexas::jump_element> free = jlist + 0;
-    min::ptr<mexas::jump_element> previous = jlist + 1;
+    min::ptr<mexstack::jump_element> free =
+        jlist + 0;
+    min::ptr<mexstack::jump_element> previous =
+        jlist + 1;
 
     mex::module_ins m = mexcom::output_module;
     unsigned count = 0;
     while ( min::uns32 n = previous->next )
     {
-        min::ptr<mexas::jump_element> next = jlist + n;
+        min::ptr<mexstack::jump_element> next = 
+	    jlist + n;
 	if ( next->lexical_level < L )
 	    break;
 	if ( target_name == next->target_name
@@ -615,12 +623,12 @@ unsigned mexas::jump_list_resolve
 	        next->depth - mexstack::depth[L];
 	    min::phrase_position pp =
 		m->position[next->jmp_location];
-	    if ( SP > next->stack_minimum )
+	    if ( SP > next->var_stack_minimum )
 		mexas::compile_error
 		    ( pp, "code jumped over pushes"
 		          " values into the stack;"
 			  " JMP unresolved" );
-	    else if ( SP < next->stack_minimum )
+	    else if ( SP < next->var_stack_minimum )
 		mexas::compile_error
 		    ( pp, "code jumped over pops"
 		          " values from the stack;"
@@ -629,8 +637,8 @@ unsigned mexas::jump_list_resolve
 	    {
 		min::ptr<mex::instr> instr =
 		    m + next->jmp_location;
-		instr->immedA = next->stack_length
-			      - next->stack_minimum;
+		instr->immedA = next->var_stack_length
+			      - next->var_stack_minimum;
 		instr->immedC = m->length
 			      - next->jmp_location;
 		instr->trace_depth = depth_diff;
@@ -784,7 +792,7 @@ unsigned mexas::endx ( mex::instr & instr,
 	      mexstack::var_stack_length,
 	      true );
 	instr.immedB = L;
-	mexas::jump_list_delete ( mexas::jumps );
+	mexstack::jump_list_delete ( mexstack::jumps );
 	mexstack::var_stack_length =
 		e.stack_limit - e.nvars;
 	-- L;
@@ -799,7 +807,7 @@ unsigned mexas::endx ( mex::instr & instr,
 	-- mexstack::depth[L];
 	mexstack::var_stack_length =
 		e.stack_limit - e.nvars;
-	mexas::jump_list_update ( mexas::jumps );
+	mexstack::jump_list_update ( mexstack::jumps );
     }
     else // if mex::END
     {
@@ -808,7 +816,7 @@ unsigned mexas::endx ( mex::instr & instr,
 	-- mexstack::depth[L];
 	mexstack::var_stack_length =
 		e.stack_limit;
-	mexas::jump_list_update ( mexas::jumps );
+	mexstack::jump_list_update ( mexstack::jumps );
     }
     mexstack::pop_stacks();
 
@@ -1306,12 +1314,12 @@ mex::module mexas::compile ( min::file file )
     min::pop ( mexas::blocks,
                mexas::blocks->length );
     mexas::stack_limit = 0;
-    min::pop ( mexas::jumps,
-               mexas::jumps->length );
-    mexas::jump_element e =
+    min::pop ( mexstack::jumps,
+               mexstack::jumps->length );
+    mexstack::jump_element e =
         { min::MISSING(), 0, 0, 0, 0, 0, 0, 0 };
-    min::push ( jumps ) = e;  // Free head.
-    min::push ( jumps ) = e;  // Active head.
+    min::push ( mexstack::jumps ) = e;  // Free head.
+    min::push ( mexstack::jumps ) = e;  // Active head.
 
     L = 0;
     mexstack::depth[0] = 0;
@@ -1456,7 +1464,7 @@ mex::module mexas::compile ( min::file file )
 	    }
 	    else
 	    {
-		mexas::jump_element je =
+		mexstack::jump_element je =
 		    { target,
 		      m->length,
 		      L,
@@ -1465,7 +1473,8 @@ mex::module mexas::compile ( min::file file )
 		      SP,
 		      SP,
 		      0 };
-		mexas::push_jump ( mexas::jumps, je );
+		mexstack::push_jump
+		    ( mexstack::jumps, je );
 	    }
 	    mexas::push_instr ( instr, pp, target );
 	    goto TRACE;
@@ -1736,8 +1745,8 @@ mex::module mexas::compile ( min::file file )
 			( mexcom::input_file->printer,
 			  mexcom::input_file, pp );
 
-		mexas::jump_list_resolve
-		    ( mexas::jumps, target );
+		mexstack::jump_list_resolve
+		    ( mexstack::jumps, target );
 		continue;
 	    }
 	    case ::STACKS:
@@ -2610,7 +2619,7 @@ mex::module mexas::compile ( min::file file )
 
     }
 
-    mexas::jump_list_delete ( mexas::jumps );
+    mexstack::jump_list_delete ( mexstack::jumps );
 
     if ( mexcom::error_count > 0 )
         return min::NULL_STUB;
