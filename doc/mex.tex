@@ -2033,6 +2033,24 @@ If {\tt mexcom::\EOL trace\_\EOL never} is {\tt true} and
 {\tt instr.trace\_class} to equal {\tt mex::T\_NEVER}.
 \end{indpar}
 
+\verb|min::locatable_gen mexcom::| \MEXCOMKEY{op\_code\_table}
+\begin{indpar}
+For {\tt op\_code OP < mex::NUMBER\_OF\_OP\_CODES}
+with name {\tt "OP"}:\\
+\hspace*{3em}{\tt op\_code\_table[OP] == new\_str\_gen ( "OP" )} \\
+and \\
+\hspace*{3em}{\tt ~~~min::get ( op\_code\_table, new\_str\_gen ( "OP" ) )} \\
+\hspace*{3em}{\tt == new\_num\_gen ( OP )}
+\end{indpar}
+
+\verb|min::locatable_gen mexcom::| \MEXCOMKEY{trace\_class\_table}
+\begin{indpar}
+For {\tt trace\_class} {\tt T\_XX < mex::NUMBER\_OF\_TRACE\_CLASSES}
+with name {\tt "XX"}:\\
+\hspace*{3em}{\tt ~~~min::get ( trace\_class\_table, new\_str\_gen ( "XX" ) )}
+\\
+\hspace*{3em}{\tt == new\_num\_gen ( T\_XX )}
+\end{indpar}
 
 
 \subsection{MEX Stack Compiler Component}
