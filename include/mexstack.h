@@ -2,7 +2,7 @@
 //
 // File:	mexstack.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri May 24 03:53:55 EDT 2024
+// Date:	Fri May 24 21:58:44 EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -21,7 +21,7 @@
 # ifndef MEXSTACK_H
 # define MEXSTACK_H
 
-# include <mex.h>
+# include <mexcom.h>
 
 
 // Data
@@ -67,11 +67,6 @@ extern min::locatable_var<mexstack::block_stack>
     blocks;
 
 extern min::uns32 stack_limit;
-
-typedef min::packed_vec_insptr<mex::module>
-    module_stack;
-extern min::locatable_var<mexstack::module_stack>
-    modules;
 
 struct jump_element
 {
