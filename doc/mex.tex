@@ -226,6 +226,8 @@
            {\TT{#1}\ttindex{mex::#2}\ttindex{#2}}
 \newcommand{\MEXMKEY}[2]%
            {\TT{#1}\ttmindex{mex::#1}{#2}\ttmindex{#1}{#2}}
+\newcommand{\MEXCOMKEY}[1]%
+	   {\TT{#1}\ttindex{mexcom::#1}\ttindex{#1}}
 
 \newcommand{\REL}{$\,^R$}
 \newcommand{\COMPACT}{$\,^C$}
@@ -240,7 +242,7 @@
 
 \author{Robert L. Walton}
 
-\date{September 19, 2023}
+\date{May 25, 2024}
  
 \maketitle
 
@@ -1957,6 +1959,84 @@ you can add to the end of \TT{m}
 and call \TT{run\_process} again to continue the execution of the code
 of \TT{m} (i.e., execute the added code).
 \end{enumerate}
+
+\section{MEX Compiler Components}
+\label{MEX-COMPILER-COMPONENTS}
+
+Compilers that compile into MEX have some structure in common,
+and the MEX has two compiler components, each with data and
+functions that can be shared among all these compilers.
+
+\subsection{MEX Basic Compiler Component}
+\label{MEX-BASIC-COMPILER-COMPONENT}
+
+The MEX basic compiler component provides a function to push an
+instruction into a module, compiler error and
+warning printing and counting functions, an instruction trace printing
+functions, and various data structures such as a stack of all the
+modules compiled and information tables for op codes, trace classes,
+trace flags, and except flags.
+
+The MEX basic compiler component is in the following:
+
+\begin{indpar}
+\begin{tabular}{l}
+{\tt namespace} \ttkey{mexcom}
+\\
+{\tt \ldots/mex/include/}\ttkey{mexcom.h}
+\\
+{\tt \ldots/mex/src/}\ttkey{mexcom.cc}
+\end{tabular}
+\end{indpar}
+
+\subsubsection{MEX Compiler Context Data}
+\label{MEX-COMPILER-CONTEXT-DATA}
+
+\begin{tabular}{@{}r@{~~~}l}
+\verb|min::locatable_var<mex::module_ins> mexcom::|
+	& \MEXCOMKEY{output\_module} \\
+\verb|min::locatable_var<min::file> mexcom::|
+	& \MEXCOMKEY{input\_file}
+\end{tabular}
+
+\begin{indpar}
+These must be set by the compiler to
+the {\tt mex::module} currently being compiled and
+its input file.
+\end{indpar}
+
+\begin{tabular}{@{}r@{~~~}l}
+\verb|typedef min::packed_vec_insptr<mex::module> mexcom:|
+	& \MEXCOMKEY{module\_stack} \\
+\verb|min::locatable_var<mexcom::module_stack> mexcom:|
+	& \MEXCOMKEY{modules}
+\end{tabular}
+\begin{indpar}
+{\tt Mexcom::modules}
+is the list of modules completely compiled so far, organized as
+a stack, most recent topmost.  When the compiler finishes compiling
+a module, it should execute: \\
+\hspace*{3em}{\tt min::push(mexcom::modules) = mexcom::output\_module}
+\end{indpar}
+
+\verb|bool mexcom::| \MEXCOMKEY{trace\_never} \verb|= false| \\
+\verb|inline void mexcom::| \MEXCOMKEY{push\_instr} \\
+\verb|        ( mex::instr & instr,| \\
+\verb|          const min::phrase_position & pp =| \\
+\verb|              min::MISSING_PHRASE_POSITION,| \\
+\verb|          min::gen trace_info = min::MISSING() )|
+\begin{indpar}
+Push the given parts of an instruction into the corresponding
+{\tt mexcom::\EOL output\_\EOL module} stacks.
+If {\tt mexcom::\EOL trace\_\EOL never} is {\tt true} and
+{\tt instr.trace\_class != mex::T\_ALWAYS}, first modify
+{\tt instr.trace\_class} to equal {\tt mex::T\_NEVER}.
+\end{indpar}
+
+
+
+\subsection{MEX Stack Compiler Component}
+\label{MEX-STACK-COMPILER-COMPONENT}
 
 \section{MEXAS Language}
 \label{MEXAS Language}
