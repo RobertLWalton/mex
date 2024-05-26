@@ -242,7 +242,7 @@
 
 \author{Robert L. Walton}
 
-\date{May 25, 2024}
+\date{May 26, 2024}
  
 \maketitle
 
@@ -2075,6 +2075,62 @@ Push the given parts of an instruction into the corresponding
 If {\tt mexcom::\EOL trace\_\EOL never} is {\tt true} and
 {\tt instr.trace\_class != mex::T\_ALWAYS}, first modify
 {\tt instr.trace\_class} to equal {\tt mex::T\_NEVER}.
+\end{indpar}
+
+\verb|enum mexcome::| \MEXCOMKEY{print} \\
+\verb|{| \\
+\verb|    mexcom::| \MEXCOMKEY{NO\_PRINT}, \\
+\verb|    mexcom::| \MEXCOMKEY{PRINT}, \\
+\verb|    mexcom::| \MEXCOMKEY{PRINT\_WITH\_SOURCE} \\
+\verb|}| \\
+\verb|mexcom::print mexcom::| \MEXCOMKEY{print\_switch}
+    \verb|= mexcom::NO_PRINT| \\
+\verb|void mexcom::| \MEXCOMKEY{trace\_instr} \\
+\verb|        ( min::uns32 location,| \\
+\verb|          min::uns32 stack_length,| \\
+\verb|          bool no_source = false )|
+\begin{indpar}
+Print trace of instruction at {\tt mexcom::output\_module[location]},
+as per {\tt mexcom::\EOL print\_switch}, except do not print source lines if
+{\tt no\_source} is {\tt true}.
+Printing is done using {\tt mexcom::\EOL input\_\EOL file} and
+{\tt mexcom::\EOL input\_\EOL file->\EOL printer}.
+The format is as in Section~\ref{TRACE-MESSAGES}.
+{\tt Stack\_\EOL length} is used in the {\em trace-header} and
+is usually set to {\tt mexstack::var\_stack\_length}.
+\end{indpar}
+
+\verb|min::uns32 mexcom::| \MEXCOMKEY{error\_count} \\
+\verb|min::uns32 mexcom::| \MEXCOMKEY{warning\_count} \\
+\verb|void mexcom::| \MEXCOMKEY{compile\_error} \\
+\verb|        ( const min::phrase_position & pp,| \\
+\verb|          const char * message1,| \\
+\verb|          const min::op & message2 = min::pnop,| \\
+\verb|          const char * message3    = "",| \\
+\verb|          const min::op & message4 = min::pnop,| \\
+\verb|          const char * message5,   = ""| \\
+\verb|          const min::op & message6 = min::pnop,| \\
+\verb|          const char * message7,   = ""| \\
+\verb|          const min::op & message8 = min::pnop,| \\
+\verb|          const char * message9,   = "" )| \\
+\verb|void mexcom::| \MEXCOMKEY{compile\_warn} \\
+\verb|        ( const min::phrase_position & pp,| \\
+\verb|          const char * message1,| \\
+\verb|          const min::op & message2 = min::pnop,| \\
+\verb|          const char * message3    = "",| \\
+\verb|          const min::op & message4 = min::pnop,| \\
+\verb|          const char * message5,   = ""| \\
+\verb|          const min::op & message6 = min::pnop,| \\
+\verb|          const char * message7,   = ""| \\
+\verb|          const min::op & message8 = min::pnop,| \\
+\verb|          const char * message9,   = "" )|
+\begin{indpar}
+Print error message (or warning message).  Increment
+{\tt mexcom::error\_count} (or increment {\tt mexcom::\EOL warning\_count}).
+If {\tt pp != min::\EOL MISSING\_\EOL PHRASE\_\EOL POSITION},
+print source lines after error message.  Printing is done using
+{\tt mexcom::\EOL input\_\EOL file} and
+{\tt mexcom::\EOL input\_\EOL file->\EOL printer}.
 \end{indpar}
 
 
