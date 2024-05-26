@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri May 24 22:00:01 EDT 2024
+// Date:	Sat May 25 22:00:17 EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1798,7 +1798,7 @@ mex::module mexas::compile ( min::file file )
 		{
 		    min::gen fname = statement[first+i];
 		    min::gen fbit = min::get
-		        ( mexcom::except_flag_table,
+		        ( mexcom::except_mask_table,
 			  fname );
 		    if ( fbit != min::NONE() )
 		    {

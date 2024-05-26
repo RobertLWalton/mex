@@ -2,7 +2,7 @@
 //
 // File:	mexcom.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri May 24 16:53:43 EDT 2024
+// Date:	Sat May 25 21:59:21 EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -32,7 +32,7 @@ min::locatable_var<mex::module_ins>
 min::locatable_gen mexcom::op_code_table;
 min::locatable_gen mexcom::trace_class_table;
 min::locatable_gen mexcom::trace_flag_table;
-min::locatable_gen mexcom::except_flag_table;
+min::locatable_gen mexcom::except_mask_table;
 
 void mexcom::init_op_code_table ( void )
 {
@@ -142,14 +142,14 @@ static void init_trace_flag_table ( void )
     }
 }
 
-static void init_except_flag_table ( void )
+static void init_except_mask_table ( void )
 {
     min::uns32 n = mex::NUMBER_OF_EXCEPTS + 20;
-    mexcom::except_flag_table = min::new_obj_gen
+    mexcom::except_mask_table = min::new_obj_gen
         ( 10 * n, 4 * n, 1 * n );
 
     min::obj_vec_insptr vp
-        ( mexcom::except_flag_table );
+        ( mexcom::except_mask_table );
     min::attr_insptr ap ( vp );
 
     min::locatable_gen tmp;
@@ -185,7 +185,7 @@ static void initialize ( void )
     mexcom::init_op_code_table();
     ::init_trace_class_table();
     ::init_trace_flag_table();
-    ::init_except_flag_table();
+    ::init_except_mask_table();
 
     mexcom::modules =
 	::module_stack_vec_type.new_stub ( 500 );

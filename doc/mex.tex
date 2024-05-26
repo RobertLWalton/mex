@@ -1975,7 +1975,7 @@ instruction into a module, compiler error and
 warning printing and counting functions, an instruction trace printing
 functions, and various data structures such as a stack of all the
 modules compiled and information tables for op codes, trace classes,
-trace flags, and except flags.
+trace flags, and except masks.
 
 The MEX basic compiler component is in the following:
 
@@ -1989,8 +1989,8 @@ The MEX basic compiler component is in the following:
 \end{tabular}
 \end{indpar}
 
-\subsubsection{MEX Compiler Context Data}
-\label{MEX-COMPILER-CONTEXT-DATA}
+\subsubsection{MEX Basic Compiler Data}
+\label{MEX-BASIC-COMPILER-DATA}
 
 \begin{tabular}{@{}r@{~~~}l}
 \verb|min::locatable_var<mex::module_ins> mexcom::|
@@ -2019,20 +2019,6 @@ a module, it should execute: \\
 \hspace*{3em}{\tt min::push(mexcom::modules) = mexcom::output\_module}
 \end{indpar}
 
-\verb|bool mexcom::| \MEXCOMKEY{trace\_never} \verb|= false| \\
-\verb|inline void mexcom::| \MEXCOMKEY{push\_instr} \\
-\verb|        ( mex::instr & instr,| \\
-\verb|          const min::phrase_position & pp =| \\
-\verb|              min::MISSING_PHRASE_POSITION,| \\
-\verb|          min::gen trace_info = min::MISSING() )|
-\begin{indpar}
-Push the given parts of an instruction into the corresponding
-{\tt mexcom::\EOL output\_\EOL module} stacks.
-If {\tt mexcom::\EOL trace\_\EOL never} is {\tt true} and
-{\tt instr.trace\_class != mex::T\_ALWAYS}, first modify
-{\tt instr.trace\_class} to equal {\tt mex::T\_NEVER}.
-\end{indpar}
-
 \verb|min::locatable_gen mexcom::| \MEXCOMKEY{op\_code\_table}
 \begin{indpar}
 For {\tt op\_code OP < mex::NUMBER\_OF\_OP\_CODES}
@@ -2050,6 +2036,45 @@ with name {\tt "XX"}:\\
 \hspace*{3em}{\tt ~~~min::get ( trace\_class\_table, new\_str\_gen ( "XX" ) )}
 \\
 \hspace*{3em}{\tt == new\_num\_gen ( T\_XX )}
+\end{indpar}
+
+\verb|min::locatable_gen mexcom::| \MEXCOMKEY{trace\_flag\_table}
+\begin{indpar}
+For {\tt trace\_class} {\tt T\_XX < mex::NUMBER\_OF\_TRACE\_CLASSES}
+with name {\tt "XX"}:\\
+\hspace*{3em}{\tt ~~~min::get ( trace\_class\_table, new\_str\_gen ( "XX" ) )}
+\\
+\hspace*{3em}{\tt == new\_num\_gen ( 1 <{}< T\_XX )} \\
+For trace group {\tt GG := GG1, GG2, ...}
+with name {\tt "GG"}:\\
+\hspace*{3em}{\tt ~~~min::get ( trace\_group\_table, new\_str\_gen ( "GG" ) )}
+\\
+\hspace*{3em}{\tt == new\_num\_gen ( (1 <{}< T\_GG1) $|$ (1 <{}< T\_GG2) $|$ ... )}
+\end{indpar}
+
+\verb|min::locatable_gen mexcom::| \MEXCOMKEY{except\_mask\_table}
+\begin{indpar}
+For except named {\tt "XX"} with mask {\tt M = 1 <{}< FE\_XX}: \\
+\hspace*{3em}{\tt ~~~min::get ( except\_mask\_table, new\_str\_gen ( "XX" ) )}
+\\
+\hspace*{3em}{\tt == new\_num\_gen ( M )}
+\end{indpar}
+
+\subsubsection{MEX Basic Compiler Functions}
+\label{MEX-BASIC-COMPILER-FUNCTIONS}
+
+\verb|bool mexcom::| \MEXCOMKEY{trace\_never} \verb|= false| \\
+\verb|inline void mexcom::| \MEXCOMKEY{push\_instr} \\
+\verb|        ( mex::instr & instr,| \\
+\verb|          const min::phrase_position & pp =| \\
+\verb|              min::MISSING_PHRASE_POSITION,| \\
+\verb|          min::gen trace_info = min::MISSING() )|
+\begin{indpar}
+Push the given parts of an instruction into the corresponding
+{\tt mexcom::\EOL output\_\EOL module} stacks.
+If {\tt mexcom::\EOL trace\_\EOL never} is {\tt true} and
+{\tt instr.trace\_class != mex::T\_ALWAYS}, first modify
+{\tt instr.trace\_class} to equal {\tt mex::T\_NEVER}.
 \end{indpar}
 
 
