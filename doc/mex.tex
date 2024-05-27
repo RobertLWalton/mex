@@ -545,7 +545,7 @@ execution of an instruction $I$, the level of $E_I$ is the
 level of $I$.
 
 \begin{indpar}
-{\bf Lemma 1}~~~An execution of a \TT{CALL\ldots} instruction of
+{\bf Lemma 1}\label{LEMMA-1}~~~An execution of a \TT{CALL\ldots} instruction of
 level $L$ must call a function of level $L'\leq L+1$.
 \end{indpar}
 \begin{indpar}
@@ -2164,18 +2164,28 @@ each process stack block consists of all the variables allocated
 by a code block (or in the case of function arguments, allocated for
 a function code block by code that calls the function).
 
-Each function block is assigned a (lexical) \key{level}.  A function block
-not inside any other function block gets level 1.  Otherwise a function
-block gets the level of its smallest containing function block plus 1.
-Instructions and non-function blocks are given the level of their
-smallest containing function block.  Instructions and non-function blocks
-outside any function block are given level 0.
+Each function block is assigned a (lexical) \key{level}.
+The entire code of a module is treated as a virtual function block
+of level 0.  Other function blocks are assigned the level of their
+smallest containing function block plus 1.  Thus
+a function block not inside any other non-virtual function block
+(but inside the virtual module function block) is assigned level 1.
+
+Each block is also assigned a depth.  Function blocks are assigned depth
+0, and the virtual function block of all module code is assigned depth 0.
+Non-function blocks are assigned the depth
+of their smallest containing block (function or non-function) plus 1.
+
+Instructions are assigned the level and depth of their smallest containing
+block.
+
 
 An upward function call is a call from a {\tt CALL\ldots} instruction in
 a level $L$ function block to a level $L'\leq L$ function block.
 A downward function call is a call from a {\tt CALL\ldots} instruction
-in a level $L$ function block to a level $L'=L+1$ function block.
-The compiler maintains a varible stack that is in 1-1 correspondence
+in a level $L$ function block to a level $L'=L+1$ function block
+(calls to levels $>L+1$ are not possible -- see Lemma 1, \pagref{LEMMA-1}).
+The compiler maintains a variable stack that is in 1-1 correspondence
 with the process stack as long as there are no upward calls.
 
 A MEX compiler maintains a \key{variable stack} that approximates the process
