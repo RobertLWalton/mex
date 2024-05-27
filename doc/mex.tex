@@ -502,6 +502,20 @@ in the stack.
 \subsection{Nested Functions}
 \label{NESTED-FUNCTIONS}
 
+MEX assumes that any compiler compiling into MEX code follows the
+rules of lexical scoping.  For our purposes these are as follows.
+The compiler maintains a stack of visible variables and a separate
+stack of visible functions.  When the compiler outputs a {\tt PUSH\ldots}
+instruction that creates a variable, it pushes the name of the variable
+into the stack of visible variables.  When the compiler outputs a {\tt BEGF}
+instruction that creates a function, it pushes the name of the function
+into the stack of visible functions.  Instructions output by the compiler
+that read a variable value can only read visible variables, and 
+instructions that call a function can only call visible functions.
+When a block end instruction ({\tt ENDF}, {\tt ENDL}, or {\tt END}) is
+output, the visible variables and visible functions stacks are popped to
+remove all variables and function defined within the block just ended.
+
 The \key{lexical level}\label{LEXICAL-LEVEL}
 of a function is defined as follows.
 
