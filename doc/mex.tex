@@ -242,7 +242,7 @@
 
 \author{Robert L. Walton}
 
-\date{May 26, 2024}
+\date{May 27, 2024}
  
 \maketitle
 
@@ -381,9 +381,10 @@ end of the stack vector. The length of the stack is referred to as the
 the stack, unless the stack is empty and its vector length is zero.
 
 The word `stack' without qualification refers to the main
-processing stack, which is a stack of \TT{min::gen} values.
+\key{process stack}\label{PROCESS-STACK},
+which is a stack of \TT{min::gen} variable values.
 MEX supports the programming paradigm
-in which variables in the stack are read-only, unless
+in which variables in this stack are read-only, unless
 they are being assigned values by a block of code.  Using this paradigm
 variables to be assigned by a block are pushed into the stack
 by the compiler and made write-only.  Then the block is executed
@@ -2141,6 +2142,32 @@ print source lines after error message.  Printing is done using
 
 \subsection{MEX Stack Compiler Component}
 \label{MEX-STACK-COMPILER-COMPONENT}
+
+MEX code is organized into blocks: {\tt BEGF/ENDF} \skey{function block}s,
+{\tt BEGL/ENDL} \skey{loop block}s, and {\tt BEG/END} \skey{ordinary block}s.
+The MEX process stack\pagnote{PROCESS-STACK} is also block organized:
+each process stack block consists of all the variables allocated
+by a code block (or in the case of function arguments, allocated for
+a function code block by code that calls the function).
+
+Each function block is assigned a (lexical) \key{level}.  A function block
+not inside any other function block gets level 1.  Otherwise a function
+block gets the level of its smallest containing function block plus 1.
+Instructions and non-function blocks are given the level of their
+smallest containing function block.  Instructions and non-function blocks
+outside any function block are given level 0.
+
+An upward function call is a call from a {\tt CALL\ldots} instruction in
+a level $L$ function block to a level $L'\leq L$ function block.
+A downward function call is a call from a {\tt CALL\ldots} instruction
+in a level $L$ function block to a level $L'=L+1$ function block.
+The compiler maintains a varible stack that is in 1-1 correspondence
+with the process stack as long as there are no upward calls.
+
+A MEX compiler maintains a \key{variable stack} that approximates the process
+stack.  If there are no upward calls 
+
+TBD
 
 \section{MEXAS Language}
 \label{MEXAS Language}
