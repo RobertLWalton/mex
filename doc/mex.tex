@@ -419,8 +419,7 @@ a copy of the final execution stack.
 Backward jumps are only allowed at the end of a loop blocks.
 These pop the values pushed into the stack by the loop block.
 Forward jumps are the only means of exiting a loop block.  These
-pop all values pushed into the stack by code between the jump
-and the target of the jump.
+pop all values pushed into the stack by blocks that are exited.
 
 There are special considerations involving the stack if the
 compiler allows functions to be nested inside other functions.
@@ -483,7 +482,7 @@ a non-loop block.
 
 MEX assumes that to implement the example loop, the compiler
 will first push copies of {\tt i} and {\tt sum} into
-the stack, and re-point {\tt i} and {\tt sum} to these
+the stack, and re-point the names {\tt i} and {\tt sum} to these
 copies, which will be read-only.
 Then the compiler will push {\tt i} and {\tt sum}
 into the stack again, point the names {\tt next i} and
@@ -502,7 +501,7 @@ in the stack.
 \subsection{Nested Functions}
 \label{NESTED-FUNCTIONS}
 
-The \key{lexical nesting level}\label{LEXICAL-NESTING-LEVEL}
+The \key{lexical level}\label{LEXICAL-LEVEL}
 of a function is defined as follows.
 
 If the function $F$ is not inside any other function, $F$ has
@@ -512,9 +511,10 @@ If the function $F$ is inside a function and $F'$ is the smallest
 function containing $F$, and if $F'$ has level $L'$, then $F$
 has level $L=L'+1$.
 
-If $F$ is a function lexically inside another function $F'$, then $F$ can
-reference the variables that $F'$ can reference when $F$ is
-defined.  To locate these variables, knowing the frame pointer for the
+If $F$ is a function lexically inside another function $F'$, then instructions
+in $F$ can reference the variables of $F'$ that could be referenced by
+an instruction located where $F$ is defined.
+To locate these variables, knowing the frame pointer for the
 execution of $F'$ is sufficient.  The frame pointer is defined as the
 stack pointer that points just after the last argument to $F'$,
 or equivalently, the stack
@@ -530,7 +530,7 @@ execution of an instruction $I$, the level of $E_I$ is the
 level of $I$.
 
 \begin{indpar}
-{\bf Lemma}~~~An execution of a \TT{CALL\ldots} instruction of
+{\bf Lemma 1}~~~An execution of a \TT{CALL\ldots} instruction of
 level $L$ must call a function of level $L'\leq L+1$.
 \end{indpar}
 \begin{indpar}
@@ -561,7 +561,7 @@ as per the description of \TT{CALLM} and \TT{RET} in
 Figure~\itemref{FUNCTION-INSTRUCTIONS}).
 
 \begin{indpar}
-{\bf Corollary 1 of Lemma}~~~Within $E$
+{\bf Corollary 1 of Lemma 1}~~~Within $E$
 let $E_1$ and $E_2$ be incomplete function
 executions of lexical levels
 $L_1$ and $L_2$.  Let $E_2$ immediately follow $E_1$ in the size
@@ -570,29 +570,12 @@ ordering.  Then $L_2\leq L_1+1$.
 \begin{indpar}
 {\bf Proof}: The \TT{CALL\ldots} to start $E_2$ must be in $E_1$
 and cannot be in a complete function execution inside $E_1$ so
-the \TT{CALL\ldots} must have level $L_1$.  QED
+the \TT{CALL\ldots} must have level $L_1$.  The corollary follows
+from this and Lemma 1. QED
 \end{indpar}
 
 \begin{indpar}
-{\bf Corollary 2 of Lemma}~~~Within $E$
-let $E_1$ and $E_2$ be incomplete function
-executions of functions $F_1$ and $F_2$ which have levels $L_1$ and $L_2$
-and let  $E_2$ immediately follow $E_1$ in the size
-ordering.  If further there is a function $F$ of level $L$ that lexically
-contains $F_1$, and if $L_1\geq L$ and $L_2>L$, then $F$ lexically contains
-$F_2$.
-\end{indpar}
-\begin{indpar}
-{\bf Proof}: The \TT{CALL\ldots} to start $E_2$ must be in $E_1$
-and cannot be in a complete function execution inside $E_1$ so
-the \TT{CALL\ldots} must have level $L_1$.  This \TT{CALL\ldots}
-is lexically inside $F$ by hypothesis, and the only functions visible
-to the \TT{CALL\ldots} that have levels $>L$ are also inside $F$.
-Therefore $F_2$ is lexically inside $F$.
-\end{indpar}
-
-\begin{indpar}
-{\bf Corollary 3 of Lemma}~~~Within $E$
+{\bf Corollary 2 of Lemma 1}~~~Within $E$
 let $E_1$ and $E_2$ be incomplete function
 executions of lexical levels
 $L_1$ and $L_2$, let $E_2\subset E_1$, and let $L_2>L'>L_1$.
@@ -607,9 +590,28 @@ so no level can be skipped over.  QED.
 \end{indpar}
 
 \begin{indpar}
-{\bf Theorem}~~~If $F'$ is a function of level $L'$ that lexically
+{\bf Lemma 2}~~~Within $E$
+let $E_1$ and $E_2$ be incomplete function
+executions of functions $F_1$ and $F_2$ which have levels $L_1$ and $L_2$
+and let  $E_2$ immediately follow $E_1$ in the size
+ordering.  If further there is a function $F$ of level $L$ that lexically
+contains $F_1$ ($F=F_1$ is allowed), and if $L_2>L$, then $F$ lexically contains
+$F_2$.
+\end{indpar}
+\begin{indpar}
+{\bf Proof}: The \TT{CALL\ldots} to start $E_2$ must be in $E_1$
+and cannot be in a complete function execution inside $E_1$ so
+the \TT{CALL\ldots} must be an instruction of $F_1$.  This \TT{CALL\ldots}
+is therefore lexically inside $F$ by hypothesis, and the only functions visible
+to the \TT{CALL\ldots} that have levels $>L$ are also inside $F$.
+Therefore $F_2$ is lexically inside $F$.
+\end{indpar}
+
+\begin{indpar}
+{\bf Theorem}~~~If $F'$ is the unique function of level $L' < L$ that lexically
 contains function $F$ of level $L$,
-then during the execution of instructions in $F$
+then during the execution of instructions in $F$ (and not in any other
+function defined inside $F$),
 there is a smallest incomplete execution of $F'$ that is also
 the smallest incomplete function execution of level $L'$.
 \end{indpar}
@@ -620,16 +622,18 @@ it is in the smallest incomplete function execution, and this has level $L$.
 The largest incomplete function execution
 must have level $1$ and the last incomplete function execution has level
 $L$, and by hypothesis $1\leq L'<L$,
-so by Corollary 3 there is an incomplete function execution of level $L'$
+so by Corollary 2 there is an incomplete function execution of level $L'$
 and hence a smallest one $E'$.  Let $F''$ be its function.  Then all the
 incomplete function executions between $E'$ and the end of the sequence
-must have lexical level $>L'$, for otherwise applying Corollary 3 again
+must have lexical level $>L'$, for otherwise applying Corollary 2 again
 there would be a smaller incomplete function execution of level $L'$.
 
-Then by applying Corollary 2 recursively to successive incomplete function
+Then by applying Lemma 2 recursively to successive incomplete function
 executions after $E'$, we deduce that all are executions of functions
-lexically inside $F''$, and therefore $F''$ is the unique function of
-level $L'$ containing $F$, and therefore $F''=F'$.
+lexically inside $F''$, and therefore $F''$ is a function of
+level $L'$ lexically containing $F$ (which is the function of the
+last incomplete execution).  As the function of level $L'$
+that lexically contains $F$ is unique, $F''=F'$.
 
 QED
 \end{indpar}
@@ -648,7 +652,8 @@ the variables of $F'$ can be accessed by
 and the arguments of $F'$ can be
 accessed by \TT{PUSHA} with \TT{immedB} = $L'$
 (Figure~\itemref{FUNCTION-INSTRUCTIONS}).
-The global variables can be accessed by \TT{PUSHL} with \TT{immedB} = $0$
+If we set \TT{fp[0] = 0},
+the global variables can be accessed by \TT{PUSHL} with \TT{immedB} = $0$
 or by \TT{PUSHG}
 (Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}).
 
@@ -1173,7 +1178,7 @@ Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}.
     & Add \TT{immedC} to the \TT{pc} (skipping \TT{immedC} instructions).
     \\[0.5ex]
     & Also used to provided data for \TT{CALL} as follows: \TT{immedB} is the \\
-    & target function's lexical nesting level (\pagref{LEXICAL-NESTING-LEVEL}),
+    & target function's lexical nesting level (\pagref{LEXICAL-LEVEL}),
       and \TT{immedA} is the \\
     & minimum number of arguments expected.
 \\\hline
