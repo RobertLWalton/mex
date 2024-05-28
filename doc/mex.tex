@@ -242,7 +242,7 @@
 
 \author{Robert L. Walton}
 
-\date{May 27, 2024}
+\date{May 28, 2024}
  
 \maketitle
 
@@ -2179,17 +2179,65 @@ of their smallest containing block (function or non-function) plus 1.
 Instructions are assigned the level and depth of their smallest containing
 block.
 
+MEX and {\tt mexstack} assume that the compiler
+maintains a variable stack, a function stack, and a function variable stack
+(a \key{function variable} is a function with no arguments whose name
+behaves like a variable name).
+When the compiler outputs a {\tt PUSH\ldots}
+instruction that creates a variable, it pushes the name of the variable
+into the variable stack.  When the compiler outputs a {\tt BEGF}
+instruction that creates a function, it pushes the name of the function
+into the function stack if the function has arguments, and into the
+function variable stack if the function has no arguments.
+The stack elements are assigned the level and depth
+of the instructions output to create them.
+When the block end instruction ({\tt ENDF}, {\tt ENDL}, or {\tt END}) for
+this level and depth is output, the elements with this level and depth
+are popped from their stacks.
+
+The compiler actually implements the stacks as symbol tables optimized
+for looking up names.  These tables are stacks only in the sense that
+elements can be deleted in the reverse order to that which they were added.
+The compiler may also combine these tables, so variables and functions
+are all in one table.  However for variables it is important for the
+compiler to assign to each variable an index specifying its position
+in the conceptual variable stack.  When a variable is added to the table,
+it is assigned as its index the number of variables in the table before
+it is added.
 
 An upward function call is a call from a {\tt CALL\ldots} instruction in
 a level $L$ function block to a level $L'\leq L$ function block.
-A downward function call is a call from a {\tt CALL\ldots} instruction
-in a level $L$ function block to a level $L'=L+1$ function block
-(calls to levels $>L+1$ are not possible -- see Lemma 1, \pagref{LEMMA-1}).
-The compiler maintains a variable stack that is in 1-1 correspondence
-with the process stack as long as there are no upward calls.
+In the \underline{absence} of upward function calls,
+the compiler's variable stack
+is in 1-1 correspondence with the process stack, and the index of a
+variable is both the index of the variable in the compiler variable stack
+and the index of the variable's value in the run-time process stack.
 
-A MEX compiler maintains a \key{variable stack} that approximates the process
-stack.  If there are no upward calls 
+For stack management the compiler and the {\tt mexstack} component
+communicate through the following variables and functions:
+
+\begin{tabular}{@{}r@{~~~}l}
+\verb|min::uns32 mexcom::| & \MEXCOMKEY{var\_stack\_length} \\
+\verb|min::uns32 mexcom::| & \MEXCOMKEY{func\_stack\_length} \\
+\verb|min::uns32 mexcom::| & \MEXCOMKEY{func\_var\_stack\_length} \\
+\verb|void mexcom::| & \MEXCOMKEY{pop\_stacks} {\tt ( void )}
+\end{tabular}
+
+\begin{indpar}
+These are the lengths of the three compiler stacks: variable, function,
+and function variable.  Or alternatively they are the number of
+variable, function, and function variable elements in the compiler
+symbol table.
+
+These are mostly maintained by the compiler and read by {\tt mexstack}
+component code.  However, {\tt mexstack} code may \underline{decrease}
+(or leave untouched) the values in these variables and then,
+\underline{before} returning control to the compiler, call the
+{\tt pop\_stacks} function which is provided by the compiler and which
+will remove elements from the stacks until the stack lengths match
+the values in the above variables.
+\end{indpar}
+
 
 TBD
 
