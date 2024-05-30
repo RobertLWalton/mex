@@ -228,6 +228,8 @@
            {\TT{#1}\ttmindex{mex::#1}{#2}\ttmindex{#1}{#2}}
 \newcommand{\MEXCOMKEY}[1]%
 	   {\TT{#1}\ttindex{mexcom::#1}\ttindex{#1}}
+\newcommand{\MEXSTACKKEY}[1]%
+	   {\TT{#1}\ttindex{mexstack::#1}\ttindex{#1}}
 
 \newcommand{\REL}{$\,^R$}
 \newcommand{\COMPACT}{$\,^C$}
@@ -242,7 +244,7 @@
 
 \author{Robert L. Walton}
 
-\date{May 28, 2024}
+\date{May 30, 2024}
  
 \maketitle
 
@@ -2205,22 +2207,17 @@ in the conceptual variable stack.  When a variable is added to the table,
 it is assigned as its index the number of variables in the table before
 it is added.
 
-An upward function call is a call from a {\tt CALL\ldots} instruction in
-a level $L$ function block to a level $L'\leq L$ function block.
-In the \underline{absence} of upward function calls,
-the compiler's variable stack
-is in 1-1 correspondence with the process stack, and the index of a
-variable is both the index of the variable in the compiler variable stack
-and the index of the variable's value in the run-time process stack.
+\subsubsection{MEX Stack Component Data}
+\label{MEX-STACK-COMPONENT-DATA}
 
 For stack management the compiler and the {\tt mexstack} component
 communicate through the following variables and functions:
 
 \begin{tabular}{@{}r@{~~~}l}
-\verb|min::uns32 mexcom::| & \MEXCOMKEY{var\_stack\_length} \\
-\verb|min::uns32 mexcom::| & \MEXCOMKEY{func\_stack\_length} \\
-\verb|min::uns32 mexcom::| & \MEXCOMKEY{func\_var\_stack\_length} \\
-\verb|void mexcom::| & \MEXCOMKEY{pop\_stacks} {\tt ( void )}
+\verb|min::uns32 mexstack::| & \MEXSTACKKEY{var\_stack\_length} \\
+\verb|min::uns32 mexstack::| & \MEXSTACKKEY{func\_stack\_length} \\
+\verb|min::uns32 mexstack::| & \MEXSTACKKEY{func\_var\_stack\_length} \\
+\verb|void mexstack::| & \MEXSTACKKEY{pop\_stacks} {\tt ( void )}
 \end{tabular}
 
 \begin{indpar}
@@ -2236,8 +2233,109 @@ component code.  However, {\tt mexstack} code may \underline{decrease}
 {\tt pop\_stacks} function which is provided by the compiler and which
 will remove elements from the stacks until the stack lengths match
 the values in the above variables.
+
+The {\tt mexstack::init} function (see below) zeros these variables.
 \end{indpar}
 
+The {\tt mexstack} component also maintains the following:
+
+\begin{tabular}{@{}l@{~~~}l}
+\verb|min::uns8 mexstack::| & \MEXSTACKKEY{lexical\_level} \\
+\verb|min::uns8 mexstack::| &
+    \MEXSTACKKEY{depth}\verb|[mex::max_lexical_level+1]| \\
+\verb|min::uns32 mexstack::| &
+    \MEXSTACKKEY{lp}\verb|[mex::max_lexical_level+1]| \\
+\verb|min::uns32 mexstack::| &
+    \MEXSTACKKEY{fp}\verb|[mex::max_lexical_level+1]| \\
+\end{tabular}
+\begin{indpar}
+{\tt Lexical\_level} is the current lexical level, i.e., the lexical
+level of the next instruction to be output by the compiler.
+{\tt Depth[$L$]} is the current depth of level $L\leq${lexical\_level}.
+
+{\tt Lp[$L$]} is the index of the first variable of level $L$ in the
+variable stack, or more specifically, for all $i<${\tt lp[$L$]},
+the variable with index $i$ has level $<L$.
+
+{\tt Fp[$L$]} is the index of the frame pointer in the variable
+stack of the function of level $L$ currently being compiled.  More
+specifically, {\tt fp[$L$] = lp[$L$]} plus the number of arguments
+to this function.
+
+Recall that level $0$ is the module code outside all functions,
+so {\tt lp[0] = fp[0] = 0}.
+
+The {\tt mexstack::init} function (see below) zeros these variables.
+\end{indpar}
+
+The following function uses the {\tt mexstack} data described above:
+
+\verb|void mexstack:| \MEXSTACKKEY{push\_push\_instr} \\
+\verb|    ( min::gen new_name, min::gen old_name,| \\
+\verb|      min::ins32 index,| \\
+\verb|      const min::phrase_position & pp =| \\
+\verb|          min::MISSING_PHRASE_POSITION,| \\
+\verb|          offset = 0 )|
+\begin{indpar}
+This function creates a {\tt PUSH\ldots} instruction that pushes
+into the process stack\pagnote{PROCESS-STACK}
+the value of the variable referenced by the variable stack entry
+with the given {\tt index}, and executes {\tt mex::push\_instr}
+to push that instruction into the {\tt mexcom::output\_module}
+code vector.
+
+More specifically, the created instruction is always given
+trace class {\tt mex::T\_PUSH}, phrase position {\tt pp},
+trace info equal to a label whose components are {\tt old\_name}
+and {\tt new\_name} in that order, and the following:
+
+If {\tt index >= lp[L]}: \\
+\hspace*{3em}\verb|op_code = mex::PUSHS, immedA = SP - 1 - index + offset|
+
+If for {\tt K<L},~~~{\tt fp[$K$] <= index < lp[$K$+1]}: \\
+\hspace*{3em}\verb|op_code = mex::PUSHL, immedA = index - fp[K], immedB = K|
+
+If for {\tt K<L},~~~{\tt lp[$K$] <= index < fp[$K$]}: \\
+\hspace*{3em}\verb|op_code = mex::PUSHA, immedA = fp[K] - index, immedB = K|
+
+where \\
+\hspace*{3em}\verb|L = mexstack::lexical_level| \\
+\hspace*{3em}\verb|SP = mexstack::var_stack_length|
+\end{indpar}
+
+\verb|void mexstack:| \MEXSTACKKEY{init} \verb|( void )|
+\begin{indpar}
+This function initializes {\tt mexstack} component data at the beginning
+of the compilation of a module.  Specifically this function zeros:
+\begin{indpar}\begin{verbatim}
+mexstack::var_stack_length
+mexstack::func_stack_length
+mexstack::func_var_stack_length
+mexstack::lexical_level
+mexstack::depth[0]
+mexstack::lp[0]
+mexstack::fp[0]
+\end{verbatim}\end{indpar}
+
+It also empties and re-initializes
+the block and jump stacks described in subsequent sections.
+\end{indpar}
+
+
+TBD
+
+An upward function call is a call from a {\tt CALL\ldots} instruction in
+a level $L$ function block to a level $L'\leq L$ function block.
+In the \underline{absence} of upward function calls,
+the compiler's variable stack
+is in 1-1 correspondence with the process stack, and the index of a
+variable is both the index of the variable in the compiler variable stack
+and the index of the variable's value in the run-time process stack.
+
+
+To output a {\tt BEG\ldots}, {\tt END\ldots}, or {\tt CONT} instruction,
+the compiler should call one of the functions below.  These functions
+maintain the following data:
 
 TBD
 
