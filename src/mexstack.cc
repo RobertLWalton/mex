@@ -2,7 +2,7 @@
 //
 // File:	mexstack.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri May 24 21:45:28 EDT 2024
+// Date:	Thu May 30 09:37:45 EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -398,7 +398,7 @@ void mexstack::push_push_instr
         ( min::gen new_name, min::gen name,
 	  min::uns32 index,
 	  const min::phrase_position & pp,
-	  min::uns32 offset )
+	  min::uns32 sp_offset )
 {
     mex::instr instr =
 	{ 0, 0, 0, 0, 0, 0, 0, min::MISSING() };
@@ -412,7 +412,7 @@ void mexstack::push_push_instr
     {
 	instr.op_code = mex::PUSHS;
 	instr.trace_class = mex::T_PUSH;
-	instr.immedA = SP - index - 1 + offset;
+	instr.immedA = SP + sp_offset - index - 1;
     }
     else if ( index >= mexstack::fp[k] )
     {

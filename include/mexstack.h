@@ -2,7 +2,7 @@
 //
 // File:	mexstack.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri May 24 21:58:44 EDT 2024
+// Date:	Thu May 30 09:38:48 EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -35,7 +35,7 @@ void push_push_instr
 	  min::uns32 index,
 	  const min::phrase_position & pp =
 	      min::MISSING_PHRASE_POSITION,
-	  min::uns32 offset = 0 );
+	  min::uns32 sp_offset = 0 );
 
 extern min::uns8 lexical_level;
 extern min::uns8 depth[mex::max_lexical_level+1];
