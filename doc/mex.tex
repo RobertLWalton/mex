@@ -1632,7 +1632,8 @@ If \TT{module->\EOL trace\_\EOL info[i]} is not a MIN string,
 \label{TRACE-PACKET-BASED-TRACE-MESSAGES}
 
 A \key{trace packet} is a \key{trace packet message} and a list of
-\skey{trace packet variable}s.  The trace message of a trace packet
+\skey{trace packet variable}s.\label{TRACE-PACKET-VARIABLE}
+The trace message of a trace packet
 instruction has the form:
 \begin{indpar}
     {\em trace-header}\TT{:} ~
@@ -2207,6 +2208,10 @@ in the conceptual variable stack.  When a variable is added to the table,
 it is assigned as its index the number of variables in the table before
 it is added.
 
+Note that trace values (values of
+trace packet variables\pagnote{TRACE-PACKET-VARIABLE}) in the process
+stack are not recorded in the compiler variables stack.
+
 \subsubsection{MEX Stack Component Data}
 \label{MEX-STACK-COMPONENT-DATA}
 
@@ -2275,7 +2280,7 @@ The following function uses the {\tt mexstack} data described above:
 \verb|      min::ins32 index,| \\
 \verb|      const min::phrase_position & pp =| \\
 \verb|          min::MISSING_PHRASE_POSITION,| \\
-\verb|          offset = 0 )|
+\verb|          sp_offset = 0 )|
 \begin{indpar}
 This function creates a {\tt PUSH\ldots} instruction that pushes
 into the process stack\pagnote{PROCESS-STACK}
@@ -2290,7 +2295,7 @@ trace info equal to a label whose components are {\tt old\_name}
 and {\tt new\_name} in that order, and the following:
 
 If {\tt index >= lp[L]}: \\
-\hspace*{3em}\verb|op_code = mex::PUSHS, immedA = SP - 1 - index + offset|
+\hspace*{3em}\verb|op_code = mex::PUSHS, immedA = SP + sp_offset - 1 - index|
 
 If for {\tt K<L},~~~{\tt fp[$K$] <= index < lp[$K$+1]}: \\
 \hspace*{3em}\verb|op_code = mex::PUSHL, immedA = index - fp[K], immedB = K|
@@ -2300,7 +2305,10 @@ If for {\tt K<L},~~~{\tt lp[$K$] <= index < fp[$K$]}: \\
 
 where \\
 \hspace*{3em}\verb|L = mexstack::lexical_level| \\
-\hspace*{3em}\verb|SP = mexstack::var_stack_length|
+\hspace*{3em}\verb|SP = mexstack::var_stack_length| \\
+\hspace*{3em}({\tt sp\_offset} corrects {\tt SP} when pushing trace values
+							      because \\
+\hspace*{3em}~trace values a not recorded in the compiler variable stack)
 \end{indpar}
 
 \verb|void mexstack:| \MEXSTACKKEY{init} \verb|( void )|
@@ -2321,6 +2329,50 @@ It also empties and re-initializes
 the block and jump stacks described in subsequent sections.
 \end{indpar}
 
+\subsubsection{MEX Stack Component Block Management}
+\label{MEX-STACK-COMPONENT-BLOCK-MANAGEMENT}
+
+{\tt BEG\ldots}, {\tt END\ldots}, or {\tt CONT} instructions make
+adjustments to the process value stack and process return stack,
+and the sizes of these adjustments must be encoded in the instructions.
+This encoding is done by {\tt mexstack} functions described below.
+To output a {\tt BEG\ldots}, {\tt END\ldots}, or {\tt CONT} instruction,
+the compiler must call one of these functions.
+
+\verb|void mexstack:| \MEXSTACKKEY{begx} \\
+\verb|    ( mex::instr & instr,| \\
+\verb|      min::uns32 nvars, min::uns32 tvars,| \\
+\verb|      min::gen trace_info = min::MISSING(),| \\
+\verb|      const min::phrase_position & pp =| \\
+\verb|          min::MISSING_PHRASE_POSITION )|
+\\[0.5ex]
+\verb|void mexstack:| \MEXSTACKKEY{endx} \\
+\verb|    ( mex::instr & instr,| \\
+\verb|      min::uns32 tvars,| \\
+\verb|      min::gen trace_info = min::MISSING(),| \\
+\verb|      const min::phrase_position & pp =| \\
+\verb|          min::MISSING_PHRASE_POSITION )|
+\\[0.5ex]
+\verb|void mexstack:| \MEXSTACKKEY{cont} \\
+\verb|    ( mex::instr & instr,| \\
+\verb|      min::uns32 tvars,| \\
+\verb|      min::gen trace_info = min::MISSING(),| \\
+\verb|      const min::phrase_position & pp =| \\
+\verb|          min::MISSING_PHRASE_POSITION )|
+\begin{indpar}
+To output a {\tt BEG\ldots}, {\tt END\ldots}, or {\tt CONT} instruction
+the compiler must first create the {\tt mex:instr} instruction and set
+its {\tt op\_code} and {\tt trace\_class}.  The compiler must then
+compute the instructions position {\tt pp} and {\tt trace\_info}.
+If the {\tt trace\_info} has
+trace packet variables\pagnote{TRACE-PACKET-VARIABLE}), the
+compiler must output push instructions using
+{\tt mexstack::\EOL push\_\EOL push\_\EOL instr}
+to push the corresponding trace values into the process stack.
+Note that these trace values are \underline{not} recorded in the
+compiler variable stack.
+\end{indpar}
+
 
 TBD
 
@@ -2332,10 +2384,6 @@ is in 1-1 correspondence with the process stack, and the index of a
 variable is both the index of the variable in the compiler variable stack
 and the index of the variable's value in the run-time process stack.
 
-
-To output a {\tt BEG\ldots}, {\tt END\ldots}, or {\tt CONT} instruction,
-the compiler should call one of the functions below.  These functions
-maintain the following data:
 
 TBD
 
