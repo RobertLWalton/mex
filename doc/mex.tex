@@ -2281,8 +2281,11 @@ that do \underline{not} decrease either {\tt lexical\_level} or
 cannot be pushed into the stack.
 \end{enumerate}
 
+These rules must be enforced by the compiler -- they are not enforced
+by {\tt mexstack}.
+
 An intuitive way of putting this is that the working part of the
-stack consists of variables of index {\tt $i$ $geq$ stack\_limit}.
+stack consists of variables of index {\tt $i$ $\geq$ stack\_limit}.
 
 More specifically, {\tt stack\_limit} is set by {\tt BEG\ldots}
 instructions (via the {\tt mexstack::begx} function below) as follows: \\
@@ -2293,8 +2296,11 @@ instructions (via the {\tt mexstack::begx} function below) as follows: \\
 \tt BEGF & \tt var\_stack\_length + {\rm instruction} immedA \\
          & ({\tt immedA} is minimum number of expected arguments) \\
 \end{tabular} \\
+Here {\tt var\_stack\_length} is the value before the {\tt BEG\ldots}
+instruction is compiled.
 The {\tt END\ldots} instructions (via the {\tt mexstack::endx} function below)
-restore {\tt stack\_\EOL limit} to its previous value.
+restore {\tt stack\_\EOL limit} to its previous value, the value
+before the corresponding {\tt BEG\ldots} was compiled.
 
 The {\tt mexstack::init} function (see below) zeros these variables.
 \end{indpar}
@@ -2336,6 +2342,8 @@ where \\
 							      because \\
 \hspace*{3em}~trace values a not recorded in the compiler variable stack)
 \end{indpar}
+
+The following function initializes the {\tt mexstack} data described above:
 
 \verb|void mexstack:| \MEXSTACKKEY{init} \verb|( void )|
 \begin{indpar}
@@ -2390,17 +2398,21 @@ the compiler must call one of these functions.
 To output a {\tt BEG\ldots}, {\tt END\ldots}, or {\tt CONT} instruction
 the compiler must first create the {\tt mex:instr} instruction and set
 its {\tt op\_code} and {\tt trace\_class}.  The compiler must then
-compute the instructions position {\tt pp} and {\tt trace\_info}.
+compute the instruction's position {\tt pp} and {\tt trace\_info}.
 If the {\tt trace\_info} has
-trace packet variables\pagnote{TRACE-PACKET-VARIABLE}), the
+trace packet variables\pagnote{TRACE-PACKET-VARIABLE}, the
 compiler must output push instructions using
 {\tt mexstack::\EOL push\_\EOL push\_\EOL instr}
 to push the corresponding trace values into the process stack.
 Note that these trace values are \underline{not} recorded in the
-compiler variable stack.
+compiler variable stack.  The number of these trace values becomes
+the {\tt tvars} parameter of these functions.
 
 Lastly, in the case of the {\tt BEGL} instruction, the compiler must
 push the `{\tt next}' variables into the variables stack.
+This is done before calling {\tt begx} because these variables should
+be given the value of {\tt mexstack::depth[.]} \underline{before} it is
+incremented by {\tt begx}.
 
 Then the compiler must call {\tt begx} for an {\tt BEG\ldots} instruction,
 {\tt endx} for an {\tt END\ldots} instruction, and {\tt cont} for
@@ -2413,20 +2425,15 @@ is ignored.
 After calling {\tt begx} for an {\tt BEGF} instruction, the compiler
 must push variables into the variable stack for the minimum number of
 expected argments (equals {\tt nargs} parameter to the {\tt begx} function).
+This is done after calling {\tt begx} because these variables should
+be given the value of {\tt mexstack::lexical\_level} \underline{after} it is
+incremented by {\tt begx}.
 
 \end{indpar}
 
 
-TBD
-
-An upward function call is a call from a {\tt CALL\ldots} instruction in
-a level $L$ function block to a level $L'\leq L$ function block.
-In the \underline{absence} of upward function calls,
-the compiler's variable stack
-is in 1-1 correspondence with the process stack, and the index of a
-variable is both the index of the variable in the compiler variable stack
-and the index of the variable's value in the run-time process stack.
-
+\subsubsection{MEX Stack Component Jump Management}
+\label{MEX-STACK-COMPONENT-JUMP-MANAGEMENT}
 
 TBD
 
