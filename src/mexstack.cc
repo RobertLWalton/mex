@@ -2,7 +2,7 @@
 //
 // File:	mexstack.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu May 30 09:37:45 EDT 2024
+// Date:	Fri May 31 03:22:10 EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -193,7 +193,7 @@ void mexstack::begx ( mex::instr & instr,
 {
     mexstack::block_element e =
         { instr.op_code, 0,
-	  mexstack::var_stack_length + nvars,
+	  mexstack::var_stack_length,
 	  mexstack::func_stack_length, 0,
 	  nvars,
 	  mexcom::output_module->length };
@@ -208,6 +208,8 @@ void mexstack::begx ( mex::instr & instr,
 	MIN_ASSERT ( tvars == 0,
 	             "BEGF has trace variables" );
 	e.end_op_code = mex::ENDF;
+	e.stack_limit =
+	    mexstack::var_stack_length + nvars;
 
 	++ L;
 	mexstack::depth[L] = 0;
@@ -220,7 +222,6 @@ void mexstack::begx ( mex::instr & instr,
     else if ( instr.op_code == mex::BEGL )
     {
 	e.end_op_code = mex::ENDL;
-	e.stack_limit= mexstack::var_stack_length;
 
         ++ mexstack::depth[L];
 	instr.immedA = tvars;

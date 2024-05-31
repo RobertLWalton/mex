@@ -244,7 +244,7 @@
 
 \author{Robert L. Walton}
 
-\date{May 30, 2024}
+\date{May 31, 2024}
  
 \maketitle
 
@@ -2252,6 +2252,7 @@ The {\tt mexstack} component also maintains the following:
     \MEXSTACKKEY{lp}\verb|[mex::max_lexical_level+1]| \\
 \verb|min::uns32 mexstack::| &
     \MEXSTACKKEY{fp}\verb|[mex::max_lexical_level+1]| \\
+\verb|min::uns32 mexstack::| & \MEXSTACKKEY{stack\_limit} \\
 \end{tabular}
 \begin{indpar}
 {\tt Lexical\_level} is the current lexical level, i.e., the lexical
@@ -2264,11 +2265,36 @@ the variable with index $i$ has level $<L$.
 
 {\tt Fp[$L$]} is the index of the frame pointer in the variable
 stack of the function of level $L$ currently being compiled.  More
-specifically, {\tt fp[$L$] = lp[$L$]} plus the number of arguments
-to this function.
+specifically, {\tt fp[$L$] = lp[$L$]} plus the minimum number of arguments
+expected by this function.
 
 Recall that level $0$ is the module code outside all functions,
 so {\tt lp[0] = fp[0] = 0}.
+
+{\tt Stack\_limit} is set so that for a variable of index
+{\tt $i$ < stack\_limit}:
+\begin{enumerate}
+\item The variable cannot be popped from the stack by instructions
+that do \underline{not} decrease either {\tt lexical\_level} or
+{\tt depth[lexical\_level]}.
+\item A new variable of the same name (i.e., a '{\tt next}' variable)
+cannot be pushed into the stack.
+\end{enumerate}
+
+An intuitive way of putting this is that the working part of the
+stack consists of variables of index {\tt $i$ $geq$ stack\_limit}.
+
+More specifically, {\tt stack\_limit} is set by {\tt BEG\ldots}
+instructions (via the {\tt mexstack::begx} function below) as follows: \\
+\hspace*{3em}\begin{tabular}{@{}ll}
+\tt BEG & \tt var\_stack\_length \\
+\tt BEGL & \tt var\_stack\_length + {\rm instruction} immedB \\
+         & ({\tt immedB} is number of loop next variables) \\
+\tt BEGF & \tt var\_stack\_length + {\rm instruction} immedA \\
+         & ({\tt immedA} is minimum number of expected arguments) \\
+\end{tabular} \\
+The {\tt END\ldots} instructions (via the {\tt mexstack::endx} function below)
+restore {\tt stack\_\EOL limit} to its previous value.
 
 The {\tt mexstack::init} function (see below) zeros these variables.
 \end{indpar}
@@ -2323,6 +2349,7 @@ mexstack::lexical_level
 mexstack::depth[0]
 mexstack::lp[0]
 mexstack::fp[0]
+mexstack::stack_limit
 \end{verbatim}\end{indpar}
 
 It also empties and re-initializes
@@ -2371,6 +2398,22 @@ compiler must output push instructions using
 to push the corresponding trace values into the process stack.
 Note that these trace values are \underline{not} recorded in the
 compiler variable stack.
+
+Lastly, in the case of the {\tt BEGL} instruction, the compiler must
+push the `{\tt next}' variables into the variables stack.
+
+Then the compiler must call {\tt begx} for an {\tt BEG\ldots} instruction,
+{\tt endx} for an {\tt END\ldots} instruction, and {\tt cont} for
+a {\tt CONT} instruction.  For {\tt BEGF} {\tt nvars} is the minimum number
+of arguments expected (will become value of instruction {\tt immedA}).
+For {\tt BEGL} {\tt nvars} is the number of loop `{\tt next}' variables
+(will become value of instruction {\tt immedB}).  For {\tt BEG} {\tt nvars}
+is ignored.
+
+After calling {\tt begx} for an {\tt BEGF} instruction, the compiler
+must push variables into the variable stack for the minimum number of
+expected argments (equals {\tt nargs} parameter to the {\tt begx} function).
+
 \end{indpar}
 
 
