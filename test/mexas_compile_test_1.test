@@ -18,9 +18,8 @@ PUSHI 2 Y
 ADD Z
     [16:2;1] ADD T_AOP 0 0 0 [$ MISSING $]; Z
     STACKS: VARIABLES: Z
-ERROR: in mexas_compile_test_1.mex: line ####: variable named X not
-       defined; instruction changed to PUSHI missing value:
-PUSH X
+ERROR: variable named X not defined; instruction changed to PUSHI
+       missing value
 PUSH X
     [18:3;2] PUSHI T_PUSH 0 0 0 [$ MISSING $]; [$ MISSING $]
 POP
@@ -149,19 +148,16 @@ JMPLT ITS-X
     STACKS: VARIABLES: * Y X
 POP
     [91:41;2] POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
-ERROR: extra stuff at end of instruction:  'this is extra for a PUSH'
-       mexas_compile_test_1.mex: lines ####-####
+ERROR: extra stuff at end of instruction: 'this is extra for a PUSH' ...
 
 // Check for extra stuff at end of instruction
 //
 PUSHI 300 X 'this is extra for a PUSH'
     [95:42;3] PUSHI T_PUSH 0 0 0 300; X
-ERROR: extra stuff at end of instruction:  Z
-       mexas_compile_test_1.mex: line ####:
+ERROR: extra stuff at end of instruction: Z ...
 PUSH X Y Z
     [96:43;4] PUSHS T_PUSH 0 0 0 [$ MISSING $]; [< X Y >]
-ERROR: extra stuff at end of instruction:  'extra stuff' X Y
-       mexas_compile_test_1.mex: line ####:
+ERROR: extra stuff at end of instruction: 'extra stuff' ...
 JMP FOO 'extra stuff' X Y
     [97:44;4] JMP T_JMP 0 0 0 [$ MISSING $]; FOO
 ERROR: in mexas_compile_test_1.mex: line ####: jump target undefined: FOO;

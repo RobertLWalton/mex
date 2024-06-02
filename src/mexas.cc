@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat May 25 22:00:17 EDT 2024
+// Date:	Sun Jun  2 04:50:21 EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -304,11 +304,14 @@ void mexas::push_push_instr
     else
     {
 	mexcom::compile_error
-	    ( pp, "variable named ",
-		  min::pgen ( name ),
-		  " not defined; instruction"
-		  " changed to PUSHI missing"
-		  " value" );
+	    (    mexcom::print_switch
+	      == mexcom::PRINT_WITH_SOURCE ?
+	          min::MISSING_PHRASE_POSITION : pp,
+	      "variable named ",
+	      min::pgen ( name ),
+	      " not defined; instruction"
+	      " changed to PUSHI missing"
+	      " value" );
 	instr.op_code = mex::PUSHI;
 	instr.trace_class = mex::T_PUSH;
 	trace_info = min::MISSING();
@@ -1889,56 +1892,39 @@ mex::module mexas::compile ( min::file file )
 	}
 	TRACE:
 	{
-	    bool no_source = false;
 	    if ( index < mexas::statement->length )
 	    {
-		min::printer printer =
-		    mexcom::input_file->printer;
 		min::phrase_position pp =
 		    m->position[m->length - 1];
-		printer << min::bom << "ERROR: "
-		        << min::place_indent ( 0 )
-			<< "extra stuff at end of"
-			   " instruction: ";
-		while (   index
-		        < mexas::statement->length )
+		if (    mexcom::print_switch
+		     == mexcom::PRINT_WITH_SOURCE )
+		    pp = min::MISSING_PHRASE_POSITION;
+		min::gen item = mexas::statement[index];
+		char quote[3] = "\0\0";
+		if ( ( item == mexas::single_quote
+		       ||
+		       item == mexas::double_quote )
+		     &&
+		       index + 1
+		     < mexas::statement->length )
 		{
-		    min::gen item =
-			mexas::statement[index++];
-		    printer << " ";
-		    if ( ( item == mexas::single_quote
-		           ||
-			   item == mexas::double_quote )
-			 &&
-			   index
-			 < mexas::statement->length )
-		        printer
-			    << min::pgen_never_quote
-			           ( item )
-			    << min::pgen_never_quote
-			           ( mexas::statement
-				         [index++] )
-			    << min::pgen_never_quote
-			           ( item );
-		    else
-		        printer << min::pgen ( item );
+		    min::strncpy ( quote, item, 1 );
+		    item = mexas::statement[++index];
 		}
-		printer << min::indent
-		        << min::pline_numbers
-			   ( mexcom::input_file, pp )
-			<< ":" << min::eom;
-
-		min::print_phrase_lines
-		    ( printer, mexcom::input_file, pp );
-
-		++ mexcom::error_count;
-
-		no_source = true;
+		mexcom::compile_error
+		    ( pp,
+		      "extra stuff at end of"
+		      " instruction: ",
+		      min::pnop,
+		      quote,
+		      min::pgen_never_quote ( item ),
+		      quote,
+		      min::pnop,
+		      " ..." );
 	    }
 	    mexcom::trace_instr
 		( m->length - 1,
-		  mexstack::var_stack_length,
-		  no_source );
+		  mexstack::var_stack_length );
 	    continue;
 	}
 
