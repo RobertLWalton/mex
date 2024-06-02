@@ -2,7 +2,7 @@
 //
 // File:	mexstack.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu May 30 09:38:48 EDT 2024
+// Date:	Sun Jun  2 15:19:59 EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -29,13 +29,6 @@
 
 namespace mexstack {
 
-
-void push_push_instr
-        ( min::gen new_name, min::gen old_name,
-	  min::uns32 index,
-	  const min::phrase_position & pp =
-	      min::MISSING_PHRASE_POSITION,
-	  min::uns32 sp_offset = 0 );
 
 extern min::uns8 lexical_level;
 extern min::uns8 depth[mex::max_lexical_level+1];
@@ -143,6 +136,24 @@ inline void push_jump
 
 // Support Functions
 // ------- ---------
+
+void push_push_instr
+        ( min::gen new_name, min::gen old_name,
+	  min::uns32 index,
+	  const min::phrase_position & pp =
+	      min::MISSING_PHRASE_POSITION,
+	  min::uns32 sp_offset = 0 );
+
+enum print
+{
+    NO_PRINT,
+    PRINT,
+    PRINT_WITH_SOURCE
+};
+extern print print_switch;
+void print_instr ( min::uns32 location,
+                   bool no_source = false,
+		   min::uns32 stack_offset = 0 );
 
 unsigned jump_list_delete
 	( mexstack::jump_list jlist );

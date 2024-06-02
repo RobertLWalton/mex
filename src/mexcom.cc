@@ -2,7 +2,7 @@
 //
 // File:	mexcom.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat May 25 21:59:21 EDT 2024
+// Date:	Sun Jun  2 15:37:29 EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -19,7 +19,6 @@
 
 # include <mexcom.h>
 
-mexcom::print mexcom::print_switch = mexcom::NO_PRINT;
 bool mexcom::trace_never = false;
 
 min::uns32 mexcom::error_count;
@@ -266,50 +265,4 @@ void mexcom::compile_warn
 	      message4, message5, message6,
 	      message7, message8, message9 );
     ++ mexcom::warning_count;
-}
-
-
-void mexcom::trace_instr
-	( min::uns32 location,
-	  min::uns32 stack_length,
-	  bool no_source )
-{
-    mexcom::print print = mexcom::print_switch;
-    min::printer printer =
-	mexcom::input_file->printer;
-    mex::module m = mexcom::output_module;
-
-    if ( print == mexcom::NO_PRINT )
-	return;
-
-    min::phrase_position pp = m->position[location];
-    if ( print == mexcom::PRINT_WITH_SOURCE
-         &&
-	 ! no_source )
-	min::print_phrase_lines
-	    ( printer, mexcom::input_file, pp );
-
-    mex::instr instr = m[location];
-    printer
-        << min::bol << min::bom <<"    "
-	<< "[" << pp.end.line
-	<< ":" << location
-	<< ";" << stack_length
-	<< "] "
-	<< min::place_indent ( 0 )
-	<< mex::op_infos[instr.op_code].name
-        << " T_"
-        << mex::trace_class_infos
-	       [instr.trace_class].name;
-    if ( instr.trace_depth != 0 )
-        printer
-	    << '[' << instr.trace_depth << ']';
-    printer
-        << " " << instr.immedA
-	<< " " << instr.immedB
-	<< " " << instr.immedC
-	<< " " << instr.immedD
-	<< "; "
-	<< m->trace_info[location]
-	<< min::eom;
 }

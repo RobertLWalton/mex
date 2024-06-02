@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Jun  2 04:50:21 EDT 2024
+// Date:	Sun Jun  2 15:33:36 EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -304,8 +304,8 @@ void mexas::push_push_instr
     else
     {
 	mexcom::compile_error
-	    (    mexcom::print_switch
-	      == mexcom::PRINT_WITH_SOURCE ?
+	    (    mexstack::print_switch
+	      == mexstack::PRINT_WITH_SOURCE ?
 	          min::MISSING_PHRASE_POSITION : pp,
 	      "variable named ",
 	      min::pgen ( name ),
@@ -350,10 +350,8 @@ min::uns32 mexas::get_trace_info
 		              min::MISSING() };
 	    mexcom::push_instr ( instr, pp );
 	}
-	mexcom::trace_instr
-	    ( mexcom::output_module->length - 1,
-	      mexstack::var_stack_length,
-	      true );
+	mexstack::print_instr
+	    ( mexcom::output_module->length - 1, true );
     }
     return len - 1;
 }
@@ -1064,9 +1062,9 @@ mex::module mexas::compile ( min::file file )
 		    continue;
 		}
 
-		if ( mexcom::print_switch
+		if ( mexstack::print_switch
 		     ==
-		     mexcom::PRINT_WITH_SOURCE )
+		     mexstack::PRINT_WITH_SOURCE )
 		    min::print_phrase_lines
 			( mexcom::input_file->printer,
 			  mexcom::input_file, pp );
@@ -1077,17 +1075,17 @@ mex::module mexas::compile ( min::file file )
 	    }
 	    case ::STACKS:
 	    {
-		if ( mexcom::print_switch
+		if ( mexstack::print_switch
 		     ==
-		     mexcom::NO_PRINT )
+		     mexstack::NO_PRINT )
 		    continue;
 
 		min::printer printer =
 		    mexcom::input_file->printer;
 
-		if ( mexcom::print_switch
+		if ( mexstack::print_switch
 		     ==
-		     mexcom::PRINT_WITH_SOURCE )
+		     mexstack::PRINT_WITH_SOURCE )
 		{
 		    min::phrase_position spp = pp;
 		    -- spp.end.line;
@@ -1498,18 +1496,16 @@ mex::module mexas::compile ( min::file file )
 	    }
 	    case mex::ENDF:
 	    {
-		if ( mexcom::print_switch
+		if ( mexstack::print_switch
 		     ==
-		     mexcom::PRINT_WITH_SOURCE )
+		     mexstack::PRINT_WITH_SOURCE )
 		    min::print_phrase_lines
 			( mexcom::input_file->printer,
 			  mexcom::input_file, pp );
 		mexstack::endx
 		    ( instr, 0, min::MISSING(), pp );
-		mexcom::trace_instr
-		    ( m->length - 1,
-	              mexstack::var_stack_length,
-		      true );
+		mexstack::print_instr
+		    ( m->length - 1, true );
 		continue;
 	    }
 	    case mex::RET:
@@ -1896,8 +1892,8 @@ mex::module mexas::compile ( min::file file )
 	    {
 		min::phrase_position pp =
 		    m->position[m->length - 1];
-		if (    mexcom::print_switch
-		     == mexcom::PRINT_WITH_SOURCE )
+		if (    mexstack::print_switch
+		     == mexstack::PRINT_WITH_SOURCE )
 		    pp = min::MISSING_PHRASE_POSITION;
 		min::gen item = mexas::statement[index];
 		char quote[3] = "\0\0";
@@ -1922,9 +1918,7 @@ mex::module mexas::compile ( min::file file )
 		      min::pnop,
 		      " ..." );
 	    }
-	    mexcom::trace_instr
-		( m->length - 1,
-		  mexstack::var_stack_length );
+	    mexstack::print_instr ( m->length - 1 );
 	    continue;
 	}
 

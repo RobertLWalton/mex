@@ -2,7 +2,7 @@
 //
 // File:	mexstack.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri May 31 03:22:10 EDT 2024
+// Date:	Sun Jun  2 15:26:50 EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -18,6 +18,9 @@
 // ----- --- ----
 
 # include <mexstack.h>
+
+mexstack::print mexstack::print_switch =
+    mexstack::NO_PRINT;
 
 # define L mexstack::lexical_level
 # define SP mexstack::var_stack_length
@@ -66,6 +69,51 @@ static min::initializer initializer ( ::initialize );
 
 // Support Functions
 // ------- ---------
+
+void mexstack::print_instr
+	( min::uns32 location,
+	  bool no_source, min::uns32 stack_offset )
+{
+    mexstack::print print = mexstack::print_switch;
+    min::printer printer =
+	mexcom::input_file->printer;
+    mex::module m = mexcom::output_module;
+
+    if ( print == mexstack::NO_PRINT )
+	return;
+
+    min::phrase_position pp = m->position[location];
+    if ( print == mexstack::PRINT_WITH_SOURCE
+         &&
+	 ! no_source )
+	min::print_phrase_lines
+	    ( printer, mexcom::input_file, pp );
+
+    mex::instr instr = m[location];
+    printer
+        << min::bol << min::bom <<"    "
+	<< "[" << pp.end.line
+	<< ":" << location
+	<< ";" <<   mexstack::var_stack_length
+	          + stack_offset
+	<< "] "
+	<< min::place_indent ( 0 )
+	<< mex::op_infos[instr.op_code].name
+        << " T_"
+        << mex::trace_class_infos
+	       [instr.trace_class].name;
+    if ( instr.trace_depth != 0 )
+        printer
+	    << '[' << instr.trace_depth << ']';
+    printer
+        << " " << instr.immedA
+	<< " " << instr.immedB
+	<< " " << instr.immedC
+	<< " " << instr.immedD
+	<< "; "
+	<< m->trace_info[location]
+	<< min::eom;
+}
 
 unsigned mexstack::jump_list_delete
 	( mexstack::jump_list jlist )
@@ -169,10 +217,8 @@ unsigned mexstack::jump_list_resolve
 			      - next->jmp_location;
 		instr->trace_depth = depth_diff;
 
-		mexcom::trace_instr
-		    ( next->jmp_location,
-		      mexstack::var_stack_length,
-		      true );
+		mexstack::print_instr
+		    ( next->jmp_location, true );
 	    }
 
 	    previous->next = next->next;
@@ -320,10 +366,8 @@ unsigned mexstack::endx ( mex::instr & instr,
 	    mexcom::output_module + e.begin_location;
         ip->immedC = mexcom::output_module->length + 1
 	           - e.begin_location;
-	mexcom::trace_instr
-	    ( e.begin_location,
-	      mexstack::var_stack_length,
-	      true );
+	mexstack::print_instr
+	    ( e.begin_location, true );
 	instr.immedB = L;
 	mexstack::jump_list_delete ( mexstack::jumps );
 	mexstack::var_stack_length =

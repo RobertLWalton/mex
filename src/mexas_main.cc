@@ -2,7 +2,7 @@
 //
 // File:	mexas_main.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat May 25 22:00:41 EDT 2024
+// Date:	Sun Jun  2 15:31:40 EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -31,12 +31,12 @@ int main ( int argc, char * argv[] )
 	const char * num;
 	char * q;
 	if ( strcmp ( "-pa", arg ) == 0 )
-	    mexcom::print_switch = mexcom::PRINT;
+	    mexstack::print_switch = mexstack::PRINT;
 	else if ( strcmp ( "-pasource", arg ) == 0 )
-	    mexcom::print_switch =
-	        mexcom::PRINT_WITH_SOURCE;
+	    mexstack::print_switch =
+	        mexstack::PRINT_WITH_SOURCE;
 	else if ( strcmp ( "-paoff", arg ) == 0 )
-	    mexcom::print_switch = mexcom::NO_PRINT;
+	    mexstack::print_switch = mexstack::NO_PRINT;
 
 	else if ( strcmp ( "-tcnormal", arg ) == 0 )
 	    mexcom::trace_never = false;
