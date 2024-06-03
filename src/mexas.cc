@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Jun  2 15:33:36 EDT 2024
+// Date:	Mon Jun  3 03:46:47 EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -272,13 +272,15 @@ void mexas::make_module_interface ( void )
 void mexas::push_push_instr
         ( min::gen new_name, min::gen name,
 	  const min::phrase_position & pp,
-	  min::uns32 offset )
+	  bool no_source,
+	  min::int32 stack_offset )
 {
     min::uns32 i = search ( name, SP );
     if ( i != mexas::NOT_FOUND )
     {
     	mexstack::push_push_instr
-	    ( new_name, name, i, pp, offset );
+	    ( new_name, name, i, pp,
+	      no_source, stack_offset );
 	return;
     }
 
@@ -316,7 +318,9 @@ void mexas::push_push_instr
 	instr.trace_class = mex::T_PUSH;
 	trace_info = min::MISSING();
     }
-    mexcom::push_instr ( instr, pp, trace_info );
+    mexstack::push_instr
+        ( instr, pp, trace_info,
+	  no_source, stack_offset + 1 );
 }
 
 min::uns32 mexas::get_trace_info
@@ -337,7 +341,7 @@ min::uns32 mexas::get_trace_info
 	if ( mexas::is_name ( n ) )
 	{
 	    mexas::push_push_instr
-	        ( mexas::star, n, pp, j - 1 );
+	        ( mexas::star, n, pp, true, j - 1 );
 	}
 	else
 	{
@@ -348,10 +352,10 @@ min::uns32 mexas::get_trace_info
 	    mex::instr instr =
 		{ mex::PUSHI, 0, 0, 0, 0, 0, 0,
 		              min::MISSING() };
-	    mexcom::push_instr ( instr, pp );
+	    mexstack::push_instr
+	        ( instr, pp, min::MISSING(),
+		  true, j - 1 );
 	}
-	mexstack::print_instr
-	    ( mexcom::output_module->length - 1, true );
     }
     return len - 1;
 }
@@ -769,8 +773,8 @@ mex::module mexas::compile ( min::file file )
 	    mexas::push_variable
 	        ( mexas::variables, name,
 	          L, mexstack::depth[L] );
-	    mexcom::push_instr ( instr, pp, name );
-	    goto TRACE;
+	    mexstack::push_instr ( instr, pp, name );
+	    goto EXTRA_STUFF_CHECK;
 	}
 	JUMP:
 	{
@@ -799,8 +803,8 @@ mex::module mexas::compile ( min::file file )
 		mexstack::push_jump
 		    ( mexstack::jumps, je );
 	    }
-	    mexcom::push_instr ( instr, pp, target );
-	    goto TRACE;
+	    mexstack::push_instr ( instr, pp, target );
+	    goto EXTRA_STUFF_CHECK;
 	}
 	NON_ARITHMETIC:
 	{
@@ -850,8 +854,12 @@ mex::module mexas::compile ( min::file file )
 		{
 		case ::PUSH:
 		{
+		    mexas::push_variable
+			( mexas::variables, new_name,
+			  L, mexstack::depth[L] );
 		    mexas::push_push_instr
-		        ( new_name, name, pp );
+		        ( new_name, name, pp,
+			  false, -1 );
 		    break;
 		}
 		case ::PUSHM:
@@ -883,7 +891,10 @@ mex::module mexas::compile ( min::file file )
 		    min::locatable_gen trace_info
 			( min::new_lab_gen
 			      ( labbuf, 2 ) );
-		    mexcom::push_instr
+		    mexas::push_variable
+			( mexas::variables, new_name,
+			  L, mexstack::depth[L] );
+		    mexstack::push_instr
 			( instr, pp, trace_info );
 		    break;
 		}
@@ -917,16 +928,15 @@ mex::module mexas::compile ( min::file file )
 		    min::locatable_gen trace_info
 			( min::new_lab_gen
 			      ( labbuf, 3 ) );
-		    mexcom::push_instr
+		    mexas::push_variable
+			( mexas::variables, new_name,
+			  L, mexstack::depth[L] );
+		    mexstack::push_instr
 			( instr, pp, trace_info );
 
 		    break;
 		}
 		}
-
-		mexas::push_variable
-		    ( mexas::variables, new_name,
-		      L, mexstack::depth[L] );
 		break;
 	    }
 	    case mex::PUSHI:
@@ -951,11 +961,11 @@ mex::module mexas::compile ( min::file file )
 		if ( new_name == min::NONE() )
 		    new_name = mexas::star;
 
-		mexcom::push_instr
-		    ( instr, pp, new_name );
 		mexas::push_variable
 		    ( mexas::variables, new_name,
 		      L, mexstack::depth[L] );
+		mexstack::push_instr
+		    ( instr, pp, new_name );
 		break;
 	    }
 	    case ::POP:
@@ -1041,10 +1051,10 @@ mex::module mexas::compile ( min::file file )
 		min::locatable_gen trace_info
 		    ( min::new_lab_gen ( labbuf, 2 ) );
 
-		mexcom::push_instr
-		    ( instr, pp, trace_info );
 		min::pop ( mexas::variables );
 	        mexstack::var_stack_length -= 1;
+		mexstack::push_instr
+		    ( instr, pp, trace_info );
 		break;
 	    }
 	    case ::LABEL:
@@ -1199,7 +1209,7 @@ mex::module mexas::compile ( min::file file )
 		    mexas::get_name ( index );
 		if ( trace_class == min::NONE() )
 		{
-		    mexcom::push_instr ( instr, pp );
+		    mexstack::push_instr ( instr, pp );
 		    break;
 		}
 		trace_class = min::get
@@ -1224,7 +1234,7 @@ mex::module mexas::compile ( min::file file )
 		    mexas::get_num ( index );
 		if ( trace_depth == min::NONE() )
 		{
-		    mexcom::push_instr ( instr, pp );
+		    mexstack::push_instr ( instr, pp );
 		    break;
 		}
 		min::uns32 depth;
@@ -1245,7 +1255,7 @@ mex::module mexas::compile ( min::file file )
 		    mexas::get_num ( index );
 		if ( immedA == min::NONE() )
 		{
-		    mexcom::push_instr ( instr, pp );
+		    mexstack::push_instr ( instr, pp );
 		    break;
 		}
 		if ( !  mexas::check_parameter
@@ -1257,7 +1267,7 @@ mex::module mexas::compile ( min::file file )
 		    mexas::get_num ( index );
 		if ( immedB == min::NONE() )
 		{
-		    mexcom::push_instr ( instr, pp );
+		    mexstack::push_instr ( instr, pp );
 		    break;
 		}
 		if ( !  mexas::check_parameter
@@ -1269,7 +1279,7 @@ mex::module mexas::compile ( min::file file )
 		    mexas::get_num ( index );
 		if ( immedC == min::NONE() )
 		{
-		    mexcom::push_instr ( instr, pp );
+		    mexstack::push_instr ( instr, pp );
 		    break;
 		}
 		if ( !  mexas::check_parameter
@@ -1284,7 +1294,7 @@ mex::module mexas::compile ( min::file file )
 		        mexas::get_name ( index );
 		    if ( instr.immedD == min::NONE() )
 		    {
-			mexcom::push_instr
+			mexstack::push_instr
 			    ( instr, pp );
 			break;
 		    }
@@ -1306,7 +1316,7 @@ mex::module mexas::compile ( min::file file )
 		        min::new_stub_gen ( m );
 		}
 
-		mexcom::push_instr ( instr, pp );
+		mexstack::push_instr ( instr, pp );
 		break;
 	    }
 	    case mex::BEG:
@@ -1496,16 +1506,8 @@ mex::module mexas::compile ( min::file file )
 	    }
 	    case mex::ENDF:
 	    {
-		if ( mexstack::print_switch
-		     ==
-		     mexstack::PRINT_WITH_SOURCE )
-		    min::print_phrase_lines
-			( mexcom::input_file->printer,
-			  mexcom::input_file, pp );
 		mexstack::endx
 		    ( instr, 0, min::MISSING(), pp );
-		mexstack::print_instr
-		    ( m->length - 1, true );
 		continue;
 	    }
 	    case mex::RET:
@@ -1532,9 +1534,9 @@ mex::module mexas::compile ( min::file file )
 		    continue;
 		instr.immedB = L;
 		instr.immedC = nresults;
-		mexcom::push_instr ( instr, pp );
 		min::pop ( mexas::variables, nresults );
 	        mexstack::var_stack_length -= nresults;
+		mexstack::push_instr ( instr, pp );
 		break;
 	    }
 	    case ::CALL:
@@ -1735,8 +1737,6 @@ mex::module mexas::compile ( min::file file )
 		instr.immedA = nargs;
 		instr.immedB = nresults;
 		instr.immedC = begf_location;
-		mexcom::push_instr
-		    ( instr, pp, trace_info );
 
 		min::pop ( mexas::variables, nargs );
 	        mexstack::var_stack_length -= nargs;
@@ -1746,6 +1746,8 @@ mex::module mexas::compile ( min::file file )
 			( mexas::variables,
 			  statement[first+i],
 			  L, mexstack::depth[L] );
+		mexstack::push_instr
+		    ( instr, pp, trace_info );
 		break;
 	    }
 	    case mex::SET_TRACE:
@@ -1780,7 +1782,7 @@ mex::module mexas::compile ( min::file file )
 		}
 		instr.immedA = flags;
 
-		mexcom::push_instr ( instr, pp );
+		mexstack::push_instr ( instr, pp );
 		break;
 	    }
 	    case mex::SET_EXCEPTS:
@@ -1815,7 +1817,7 @@ mex::module mexas::compile ( min::file file )
 		}
 		instr.immedA = flags;
 
-		mexcom::push_instr ( instr, pp );
+		mexstack::push_instr ( instr, pp );
 		break;
 	    }
 	    case mex::SET_OPTIMIZE:
@@ -1833,7 +1835,7 @@ mex::module mexas::compile ( min::file file )
 			      " parameter; `OFF'"
 			      " assumed" );
 
-		mexcom::push_instr ( instr, pp );
+		mexstack::push_instr ( instr, pp );
 		break;
 	    }
 	    case mex::NOP:
@@ -1846,7 +1848,7 @@ mex::module mexas::compile ( min::file file )
 		    mexas::get_trace_info
 			( trace_info, index, pp );
 		instr.immedA = tvars;
-		mexcom::push_instr
+		mexstack::push_instr
 		    ( instr, pp, trace_info );
 		break;
 	    }
@@ -1873,28 +1875,24 @@ mex::module mexas::compile ( min::file file )
 		if ( new_name == min::NONE() )
 		    new_name = mexas::star;
 
-		mexcom::push_instr
-		    ( instr, pp, new_name );
-
 		mexas::push_variable
 		    ( mexas::variables, new_name,
 		      L, mexstack::depth[L] );
+		mexstack::push_instr
+		    ( instr, pp, new_name );
 		break;
 	    }
 
 	    default:
-		mexcom::push_instr ( instr, pp );
+		mexstack::push_instr ( instr, pp );
 	    }
 	}
-	TRACE:
+	EXTRA_STUFF_CHECK:
 	{
 	    if ( index < mexas::statement->length )
 	    {
 		min::phrase_position pp =
 		    m->position[m->length - 1];
-		if (    mexstack::print_switch
-		     == mexstack::PRINT_WITH_SOURCE )
-		    pp = min::MISSING_PHRASE_POSITION;
 		min::gen item = mexas::statement[index];
 		char quote[3] = "\0\0";
 		if ( ( item == mexas::single_quote
@@ -1918,7 +1916,6 @@ mex::module mexas::compile ( min::file file )
 		      min::pnop,
 		      " ..." );
 	    }
-	    mexstack::print_instr ( m->length - 1 );
 	    continue;
 	}
 

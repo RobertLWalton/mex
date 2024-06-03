@@ -63,11 +63,11 @@ PUSH Y
              * >]
 CALLG mexas_joint_test_1a MIN 2 R
     [13:2;1] CALLG T_CALLG 2 1 0 PACKED_VEC; [< MIN R >]
-    [14:3;1] PUSHG T_PUSH 0 0 0 PACKED_VEC; [< X mexas_joint_test_1a
+    [14:3;2] PUSHG T_PUSH 0 0 0 PACKED_VEC; [< X mexas_joint_test_1a
              * >]
-    [14:4;1] PUSHG T_PUSH 1 0 0 PACKED_VEC; [< Y mexas_joint_test_1a
+    [14:4;3] PUSHG T_PUSH 1 0 0 PACKED_VEC; [< Y mexas_joint_test_1a
              * >]
-    [14:5;1] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< R * >]
+    [14:5;4] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< R * >]
 TRACE 'R = MIN(X,Y)' X Y R
     [14:6;1] TRACE T_ALWAYS 3 0 0 [$ MISSING $]; [< "R = MIN(X,Y)" X Y
              R >]
@@ -80,11 +80,11 @@ PUSH Z
              * >]
 CALL MIN 2 R
     [18:9;2] CALLG T_CALLG 2 1 0 PACKED_VEC; [< MIN R >]
-    [19:10;2] PUSHG T_PUSH 1 0 0 PACKED_VEC; [< Y mexas_joint_test_1a
+    [19:10;3] PUSHG T_PUSH 1 0 0 PACKED_VEC; [< Y mexas_joint_test_1a
               * >]
-    [19:11;2] PUSHG T_PUSH 2 0 0 PACKED_VEC; [< Z mexas_joint_test_1a
+    [19:11;4] PUSHG T_PUSH 2 0 0 PACKED_VEC; [< Z mexas_joint_test_1a
               * >]
-    [19:12;2] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< R * >]
+    [19:12;5] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< R * >]
 TRACE 'R = MIN(Y,Z)' Y Z R
     [19:13;2] TRACE T_ALWAYS 3 0 0 [$ MISSING $]; [< "R = MIN(Y,Z)" Y Z
               R >]
@@ -97,11 +97,11 @@ PUSH X
               * >]
 CALL MIN 2 R
     [23:16;3] CALLG T_CALLG 2 1 0 PACKED_VEC; [< MIN R >]
-    [24:17;3] PUSHG T_PUSH 2 0 0 PACKED_VEC; [< Z mexas_joint_test_1a
+    [24:17;4] PUSHG T_PUSH 2 0 0 PACKED_VEC; [< Z mexas_joint_test_1a
               * >]
-    [24:18;3] PUSHG T_PUSH 0 0 0 PACKED_VEC; [< X mexas_joint_test_1a
+    [24:18;5] PUSHG T_PUSH 0 0 0 PACKED_VEC; [< X mexas_joint_test_1a
               * >]
-    [24:19;3] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< R * >]
+    [24:19;6] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< R * >]
 TRACE 'R = MIN(Z,X)' Z X R
     [24:20;3] TRACE T_ALWAYS 3 0 0 [$ MISSING $]; [< "R = MIN(Z,X)" Z X
               R >]

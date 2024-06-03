@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri May 24 16:00:37 EDT 2024
+// Date:	Mon Jun  3 03:48:31 EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -37,8 +37,9 @@ void push_push_instr
         ( min::gen new_name, min::gen name,
 	  const min::phrase_position & pp =
 	      min::MISSING_PHRASE_POSITION,
-	  min::uns32 offset = 0 );
-    // Just like mexas:push_inst, but constructs the
+	  bool no_source = false,
+	  min::int32 offset = 0 );
+    // Just like mexstack:push_inst, but constructs the
     // instruction to be pushed to the code vector
     // using a PUSH... op code and using the `name'
     // to specify the stack or module global location

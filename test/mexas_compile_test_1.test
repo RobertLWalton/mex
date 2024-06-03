@@ -148,18 +148,27 @@ JMPLT ITS-X
     STACKS: VARIABLES: * Y X
 POP
     [91:41;2] POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
-ERROR: extra stuff at end of instruction: 'this is extra for a PUSH' ...
 
 // Check for extra stuff at end of instruction
 //
 PUSHI 300 X 'this is extra for a PUSH'
     [95:42;3] PUSHI T_PUSH 0 0 0 300; X
-ERROR: extra stuff at end of instruction: Z ...
+ERROR: in mexas_compile_test_1.mex: lines ####-#### extra stuff at end of
+       instruction: 'this is extra for a PUSH' ...:
+
+// Check for extra stuff at end of instruction
+//
+PUSHI 300 X 'this is extra for a PUSH'
 PUSH X Y Z
     [96:43;4] PUSHS T_PUSH 0 0 0 [$ MISSING $]; [< X Y >]
-ERROR: extra stuff at end of instruction: 'extra stuff' ...
+ERROR: in mexas_compile_test_1.mex: line ####: extra stuff at end of
+       instruction: Z ...:
+PUSH X Y Z
 JMP FOO 'extra stuff' X Y
     [97:44;4] JMP T_JMP 0 0 0 [$ MISSING $]; FOO
+ERROR: in mexas_compile_test_1.mex: line ####: extra stuff at end of
+       instruction: 'extra stuff' ...:
+JMP FOO 'extra stuff' X Y
 ERROR: in mexas_compile_test_1.mex: line ####: jump target undefined: FOO;
        JMP... is unresolved:
 JMP FOO 'extra stuff' X Y

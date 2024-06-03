@@ -43,9 +43,9 @@ BEGF MIN X Y
     [27:13;3] END T_END 0 0 0 [$ MISSING $]; [$ MISSING $]
     LABEL DONE
     [23:10;3] JMP T_JMP[1] 0 0 4 [$ MISSING $]; DONE
-    [29:14;3] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< X * >]
-    [29:15;3] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< Y * >]
-    [29:16;3] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< Z * >]
+    [29:14;4] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< X * >]
+    [29:15;5] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< Y * >]
+    [29:16;6] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< Z * >]
     TRACE "Z = MIN ( X, Y )" X Y Z
     [29:17;3] TRACE T_ALWAYS 3 0 0 [$ MISSING $]; [< "Z = MIN ( X, Y )"
               X Y Z >]
@@ -80,9 +80,9 @@ BEGF TEST-BASIC-ARITHMETIC X Y
     [44:28;4] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< Y * >]
     ADD Z
     [45:29;3] ADD T_AOP 0 0 0 [$ MISSING $]; Z
-    [46:30;3] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< X * >]
-    [46:31;3] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< Y * >]
-    [46:32;3] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< Z * >]
+    [46:30;4] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< X * >]
+    [46:31;5] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< Y * >]
+    [46:32;6] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< Z * >]
     TRACE 'Z = X + Y' X Y Z
     [46:33;3] TRACE T_ALWAYS 3 0 0 [$ MISSING $]; [< "Z = X + Y" X Y
               Z >]
@@ -94,9 +94,9 @@ BEGF TEST-BASIC-ARITHMETIC X Y
     [49:36;4] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< Y * >]
     SUB Z
     [50:37;3] SUB T_AOP 0 0 0 [$ MISSING $]; Z
-    [51:38;3] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< X * >]
-    [51:39;3] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< Y * >]
-    [51:40;3] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< Z * >]
+    [51:38;4] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< X * >]
+    [51:39;5] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< Y * >]
+    [51:40;6] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< Z * >]
     TRACE 'Z = X - Y' X Y Z
     [51:41;3] TRACE T_ALWAYS 3 0 0 [$ MISSING $]; [< "Z = X - Y" X Y
               Z >]
@@ -108,9 +108,9 @@ BEGF TEST-BASIC-ARITHMETIC X Y
     [54:44;4] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< Y * >]
     MUL Z
     [55:45;3] MUL T_AOP 0 0 0 [$ MISSING $]; Z
-    [56:46;3] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< X * >]
-    [56:47;3] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< Y * >]
-    [56:48;3] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< Z * >]
+    [56:46;4] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< X * >]
+    [56:47;5] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< Y * >]
+    [56:48;6] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< Z * >]
     TRACE 'Z = X * Y' X Y Z
     [56:49;3] TRACE T_ALWAYS 3 0 0 [$ MISSING $]; [< "Z = X * Y" X Y
               Z >]
@@ -122,9 +122,9 @@ BEGF TEST-BASIC-ARITHMETIC X Y
     [59:52;4] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< Y * >]
     DIV Z
     [60:53;3] DIV T_AOP 0 0 0 [$ MISSING $]; Z
-    [61:54;3] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< X * >]
-    [61:55;3] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< Y * >]
-    [61:56;3] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< Z * >]
+    [61:54;4] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< X * >]
+    [61:55;5] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< Y * >]
+    [61:56;6] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< Z * >]
     TRACE 'Z = X / Y' X Y Z
     [61:57;3] TRACE T_ALWAYS 3 0 0 [$ MISSING $]; [< "Z = X / Y" X Y
               Z >]
@@ -136,9 +136,9 @@ BEGF TEST-BASIC-ARITHMETIC X Y
     [64:60;4] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< Y * >]
     MOD Z
     [65:61;3] MOD T_AOP 0 0 0 [$ MISSING $]; Z
-    [66:62;3] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< X * >]
-    [66:63;3] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< Y * >]
-    [66:64;3] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< Z * >]
+    [66:62;4] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< X * >]
+    [66:63;5] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< Y * >]
+    [66:64;6] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< Z * >]
     TRACE 'Z = X MOD Y' X Y Z
     [66:65;3] TRACE T_ALWAYS 3 0 0 [$ MISSING $]; [< "Z = X MOD Y" X Y
               Z >]
@@ -204,9 +204,9 @@ BEGF SUM X Y
     [95:90;4] ENDL T_ENDL 0 2 10 [$ MISSING $]; [$ MISSING $]
     LABEL DONE
     [87:82;4] JMPGT T_JMPS[1] 2 0 9 [$ MISSING $]; DONE
-    [97:91;4] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< S * >]
-    [97:92;4] PUSHS T_PUSH 4 0 0 [$ MISSING $]; [< X * >]
-    [97:93;4] PUSHS T_PUSH 4 0 0 [$ MISSING $]; [< Y * >]
+    [97:91;5] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< S * >]
+    [97:92;6] PUSHS T_PUSH 4 0 0 [$ MISSING $]; [< X * >]
+    [97:93;7] PUSHS T_PUSH 4 0 0 [$ MISSING $]; [< Y * >]
     TRACE 'S = SUM I FOR X <= I <= Y' S X Y
     [97:94;4] TRACE T_ALWAYS 3 0 0 [$ MISSING $]; [<
               "S = SUM I FOR X <= I <= Y" S X Y >]

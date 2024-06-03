@@ -2,7 +2,7 @@
 //
 // File:	mexstack.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Jun  2 15:19:59 EDT 2024
+// Date:	Mon Jun  3 03:48:11 EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -137,13 +137,6 @@ inline void push_jump
 // Support Functions
 // ------- ---------
 
-void push_push_instr
-        ( min::gen new_name, min::gen old_name,
-	  min::uns32 index,
-	  const min::phrase_position & pp =
-	      min::MISSING_PHRASE_POSITION,
-	  min::uns32 sp_offset = 0 );
-
 enum print
 {
     NO_PRINT,
@@ -153,7 +146,38 @@ enum print
 extern print print_switch;
 void print_instr ( min::uns32 location,
                    bool no_source = false,
-		   min::uns32 stack_offset = 0 );
+		   min::int32 stack_offset = 0 );
+
+extern bool trace_never;
+inline void push_instr
+        ( mex::instr & instr,
+	  const min::phrase_position & pp =
+	      min::MISSING_PHRASE_POSITION,
+	  min::gen trace_info = min::MISSING(),
+	  bool no_source = false,
+	  min::int32 stack_offset = 0 )
+{
+    if ( mexcom::trace_never
+         &&
+	 instr.trace_class != mex::T_ALWAYS )
+        instr.trace_class = mex::T_NEVER;
+
+    mex::module_ins m = mexcom::output_module;
+    mex::push_instr ( m, instr );
+    mex::push_position ( m, pp );
+    mex::push_trace_info ( m, trace_info );
+    if ( mexstack::print_switch != mexstack::NO_PRINT )
+        mexstack::print_instr
+	    ( m->length - 1, no_source, stack_offset );
+}
+
+void push_push_instr
+        ( min::gen new_name, min::gen old_name,
+	  min::uns32 index,
+	  const min::phrase_position & pp =
+	      min::MISSING_PHRASE_POSITION,
+	  bool no_source = false,
+	  min::int32 stack_offset = 0 );
 
 unsigned jump_list_delete
 	( mexstack::jump_list jlist );

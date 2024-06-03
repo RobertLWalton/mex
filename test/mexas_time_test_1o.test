@@ -60,9 +60,9 @@ BEGF MAIN
     [36:18;4] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< high * >]
     CALL sum 2 answer
     [37:19;3] CALLM T_CALLM 2 1 0 [$ MISSING $]; [< sum answer >]
-    [39:20;3] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< low * >]
-    [39:21;3] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< high * >]
-    [39:22;3] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< answer * >]
+    [39:20;4] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< low * >]
+    [39:21;5] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< high * >]
+    [39:22;6] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< answer * >]
     TRACE "answer = sum i: low <= i <= high" \
           low high answer
     [39:23;3] TRACE T_ALWAYS 3 0 0 [$ MISSING $]; [<

@@ -33,18 +33,18 @@ PUSHI 1 X
     [25:7;3] PUSHI T_PUSH 0 0 0 1; X
 PUSHI 2 Y
     [26:8;4] PUSHI T_PUSH 0 0 0 2; Y
-    [27:9;4] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< X * >]
-    [27:10;4] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< Y * >]
+    [27:9;5] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< X * >]
+    [27:10;6] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< Y * >]
 TRACE 'X and Y differ' X Y
     [27:11;4] TRACE T_ALWAYS 2 0 0 [$ MISSING $]; [< "X and Y differ" X
               Y >]
-    [28:12;4] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< X * >]
-    [28:13;4] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< Y * >]
+    [28:12;5] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< X * >]
+    [28:13;6] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< Y * >]
 WARN "X and Y differ" X Y
     [28:14;4] WARN T_ALWAYS 2 0 0 [$ MISSING $]; [< "X and Y differ" X
               Y >]
-    [29:15;4] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< X * >]
-    [29:16;4] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< Y * >]
+    [29:15;5] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< X * >]
+    [29:16;6] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< Y * >]
 ERROR "X and Y differ" X Y
     [29:17;4] ERROR T_ALWAYS 2 0 0 [$ MISSING $]; [< "X and Y differ" X
               Y >]

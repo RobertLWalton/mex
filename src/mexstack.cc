@@ -2,7 +2,7 @@
 //
 // File:	mexstack.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Jun  2 15:26:50 EDT 2024
+// Date:	Mon Jun  3 03:47:11 EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -72,7 +72,7 @@ static min::initializer initializer ( ::initialize );
 
 void mexstack::print_instr
 	( min::uns32 location,
-	  bool no_source, min::uns32 stack_offset )
+	  bool no_source, min::int32 stack_offset )
 {
     mexstack::print print = mexstack::print_switch;
     min::printer printer =
@@ -244,6 +244,8 @@ void mexstack::begx ( mex::instr & instr,
 	  nvars,
 	  mexcom::output_module->length };
 
+    min::int32 stack_offset = 0;
+
     if ( instr.op_code == mex::BEGF )
     {
         MIN_ASSERT ( mexstack::lexical_level
@@ -256,6 +258,7 @@ void mexstack::begx ( mex::instr & instr,
 	e.end_op_code = mex::ENDF;
 	e.stack_limit =
 	    mexstack::var_stack_length + nvars;
+	stack_offset = nvars;
 
 	++ L;
 	mexstack::depth[L] = 0;
@@ -287,7 +290,8 @@ void mexstack::begx ( mex::instr & instr,
 
     min::push ( mexstack::blocks ) = e;
     mexstack::stack_limit = e.stack_limit;
-    mexcom::push_instr ( instr, pp, trace_info );
+    mexstack::push_instr
+        ( instr, pp, trace_info, false, stack_offset );
 }
 
 unsigned mexstack::endx ( mex::instr & instr,
@@ -366,8 +370,16 @@ unsigned mexstack::endx ( mex::instr & instr,
 	    mexcom::output_module + e.begin_location;
         ip->immedC = mexcom::output_module->length + 1
 	           - e.begin_location;
+
+	if ( mexstack::print_switch
+	     ==
+	     mexstack::PRINT_WITH_SOURCE )
+	    min::print_phrase_lines
+		( mexcom::input_file->printer,
+		  mexcom::input_file, pp );
 	mexstack::print_instr
 	    ( e.begin_location, true );
+
 	instr.immedB = L;
 	mexstack::jump_list_delete ( mexstack::jumps );
 	mexstack::var_stack_length =
@@ -401,7 +413,9 @@ unsigned mexstack::endx ( mex::instr & instr,
     mexstack::stack_limit =
         ( len == 0 ? 0 : 
 	  (mexstack::blocks+(len-1))->stack_limit );
-    mexcom::push_instr ( instr, pp, trace_info );
+    mexstack::push_instr
+        ( instr, pp, trace_info,
+	  instr.op_code == mex::ENDF );
 
     return 0;
 }
@@ -435,7 +449,7 @@ void mexstack::cont ( mex::instr & instr,
     instr.immedC = mexcom::output_module->length
 		 - bp->begin_location - 1;
 
-    mexcom::push_instr ( instr, pp, trace_info );
+    mexstack::push_instr ( instr, pp, trace_info );
 }
 
 
@@ -443,7 +457,8 @@ void mexstack::push_push_instr
         ( min::gen new_name, min::gen name,
 	  min::uns32 index,
 	  const min::phrase_position & pp,
-	  min::uns32 sp_offset )
+	  bool no_source,
+	  min::int32 stack_offset )
 {
     mex::instr instr =
 	{ 0, 0, 0, 0, 0, 0, 0, min::MISSING() };
@@ -457,7 +472,7 @@ void mexstack::push_push_instr
     {
 	instr.op_code = mex::PUSHS;
 	instr.trace_class = mex::T_PUSH;
-	instr.immedA = SP + sp_offset - index - 1;
+	instr.immedA = SP + stack_offset - index - 1;
     }
     else if ( index >= mexstack::fp[k] )
     {
@@ -473,5 +488,7 @@ void mexstack::push_push_instr
 	instr.immedA = mexstack::fp[k] - index;
 	instr.immedB = k;
     }
-    mexcom::push_instr ( instr, pp, trace_info );
+    mexstack::push_instr
+        ( instr, pp, trace_info,
+	  no_source, stack_offset + 1 );
 }
