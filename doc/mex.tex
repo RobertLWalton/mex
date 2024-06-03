@@ -2269,65 +2269,6 @@ before the corresponding {\tt BEG\ldots} was compiled.
 The {\tt mexstack::init} function (see below) zeros these variables.
 \end{indpar}
 
-The following function uses the {\tt mexstack} data described above:
-
-\verb|void mexstack:| \MEXSTACKKEY{push\_push\_instr} \\
-\verb|    ( min::gen new_name, min::gen old_name,| \\
-\verb|      min::ins32 index,| \\
-\verb|      const min::phrase_position & pp =| \\
-\verb|          min::MISSING_PHRASE_POSITION,| \\
-\verb|          sp_offset = 0 )|
-\begin{indpar}
-This function creates a {\tt PUSH\ldots} instruction that pushes
-into the process stack\pagnote{PROCESS-STACK}
-the value of the variable referenced by the variable stack entry
-with the given {\tt index}, and executes {\tt mex::push\_instr}
-to push that instruction into the {\tt mexcom::output\_module}
-code vector.
-
-More specifically, the created instruction is always given
-trace class {\tt mex::T\_PUSH}, phrase position {\tt pp},
-trace info equal to a label whose components are {\tt old\_name}
-and {\tt new\_name} in that order, and the following:
-
-If {\tt index >= lp[L]}: \\
-\hspace*{3em}\verb|op_code = mex::PUSHS, immedA = SP + sp_offset - 1 - index|
-
-If for {\tt K<L},~~~{\tt fp[$K$] <= index < lp[$K$+1]}: \\
-\hspace*{3em}\verb|op_code = mex::PUSHL, immedA = index - fp[K], immedB = K|
-
-If for {\tt K<L},~~~{\tt lp[$K$] <= index < fp[$K$]}: \\
-\hspace*{3em}\verb|op_code = mex::PUSHA, immedA = fp[K] - index, immedB = K|
-
-where \\
-\hspace*{3em}\verb|L = mexstack::lexical_level| \\
-\hspace*{3em}\verb|SP = mexstack::var_stack_length| \\
-\hspace*{3em}({\tt sp\_offset} corrects {\tt SP} when pushing trace values
-							      because \\
-\hspace*{3em}~trace values a not recorded in the compiler variable stack)
-\end{indpar}
-
-The following function initializes the {\tt mexstack} data described above:
-
-\verb|void mexstack:| \MEXSTACKKEY{init} \verb|( void )|
-\begin{indpar}
-This function initializes {\tt mexstack} component data at the beginning
-of the compilation of a module.  Specifically this function zeros:
-\begin{indpar}\begin{verbatim}
-mexstack::var_stack_length
-mexstack::func_stack_length
-mexstack::func_var_stack_length
-mexstack::lexical_level
-mexstack::depth[0]
-mexstack::lp[0]
-mexstack::fp[0]
-mexstack::stack_limit
-\end{verbatim}\end{indpar}
-
-It also empties and re-initializes
-the block and jump stacks described in subsequent sections.
-\end{indpar}
-
 \subsubsection{MEX Stack Component Utility Functions}
 \label{MEX-STACK-COMPONENT-UTILITY-FUNCTIONS}
 
@@ -2406,6 +2347,65 @@ location and the {\tt no\_source} and {\tt stack\_offset}
 arguments.
 \end{indpar}
 
+\verb|void mexstack:| \MEXSTACKKEY{push\_push\_instr} \\
+\verb|    ( min::gen new_name, min::gen old_name,| \\
+\verb|      min::ins32 index,| \\
+\verb|      const min::phrase_position & pp =| \\
+\verb|          min::MISSING_PHRASE_POSITION,| \\
+\verb|      bool no_source = false,| \\
+\verb|      min::int32 stack_offset = 0 )|
+\begin{indpar}
+This function creates a {\tt PUSH\ldots} instruction that pushes
+into the process stack\pagnote{PROCESS-STACK}
+the value of the variable referenced by the variable stack entry
+with the given {\tt index}, and executes {\tt mexstack::push\_instr}
+to push that instruction into the {\tt mexcom::\EOL output\_\EOL module}
+code vector.  The {\tt no\_source} and {\tt stack\_offset} parameters
+are passed to {\tt mexstack::\EOL push\_\EOL instr}.
+
+More specifically, the created instruction is always given
+trace class {\tt mex::T\_PUSH}, phrase position {\tt pp},
+trace info equal to a label whose components are {\tt old\_name}
+and {\tt new\_name} in that order, and the following:
+
+If {\tt index >= lp[L]}: \\
+\hspace*{3em}\verb|op_code = mex::PUSHS, immedA = SP + stack_offset - index - 1|
+
+If for {\tt K<L},~~~{\tt fp[$K$] <= index < lp[$K$+1]}: \\
+\hspace*{3em}\verb|op_code = mex::PUSHL, immedA = index - fp[K], immedB = K|
+
+If for {\tt K<L},~~~{\tt lp[$K$] <= index < fp[$K$]}: \\
+\hspace*{3em}\verb|op_code = mex::PUSHA, immedA = fp[K] - index, immedB = K|
+
+where \\
+\hspace*{3em}\verb|L = mexstack::lexical_level| \\
+\hspace*{3em}\verb|SP = mexstack::var_stack_length| \\
+\hspace*{3em}({\tt sp\_offset} corrects {\tt SP} when pushing trace values
+							      because \\
+\hspace*{3em}~trace values a not recorded in the compiler variable stack)
+\end{indpar}
+
+The following function initializes the {\tt mexstack} data described above:
+
+\verb|void mexstack:| \MEXSTACKKEY{init} \verb|( void )|
+\begin{indpar}
+This function initializes {\tt mexstack} component data at the beginning
+of the compilation of a module.  Specifically this function zeros:
+\begin{indpar}\begin{verbatim}
+mexstack::var_stack_length
+mexstack::func_stack_length
+mexstack::func_var_stack_length
+mexstack::lexical_level
+mexstack::depth[0]
+mexstack::lp[0]
+mexstack::fp[0]
+mexstack::stack_limit
+\end{verbatim}\end{indpar}
+
+It also empties and re-initializes
+the block and jump stacks described in subsequent sections.
+\end{indpar}
+
 \subsubsection{MEX Stack Component Block Management}
 \label{MEX-STACK-COMPONENT-BLOCK-MANAGEMENT}
 
@@ -2474,12 +2474,11 @@ incremented by {\tt begx}.
 \end{indpar}
 
 
-\subsubsection{MEX Stack Component Jump Management}
-\label{MEX-STACK-COMPONENT-JUMP-MANAGEMENT}
+\subsubsection{MEX Stack Component JMP Management}
+\label{MEX-STACK-COMPONENT-JMP-MANAGEMENT}
 
-TBD
-
-A {\em jmp-target} is a MIN string that identifies
+A {\em jmp-target} is a MIN name (number, identifier string, or
+label whose components are MIN names) that identifies
 a code vector index value which can be used by \TT{JMP\ldots}
 instructions as the point in the code vector to jump to.
 
@@ -2505,13 +2504,17 @@ To allow this, an element of the pending jump list contains:
 \begin{enumerate}
 \item The location of the jump instruction so it can be updated
 when its target is found.
-\item The {\em jmp-target} MIN string.
+\item The {\em jmp-target} MIN name.
 \item The lexical level $L$ of the {\tt JMP\ldots} instruction.
-\item The maximum depth $D$ allowed for the target.
+\item The depth $D$ of the {\tt JMP\ldots} instruction.
+\item The minimum $K$ of $D$ and
+      the depths immediately after any {\tt END} or {\tt ENDL} instructions
+      encountered since the {\tt JMP\ldots} instruction was encountered.
+      $K\le D$.
 \item The length $S$ of the variable stack just after the {\tt JMP\ldots}
-      instruction pops variable elements from the stack.
-\item The minimum $M$ of $S$ and all the variable stack lengths that have
-      occurred after \TT{END} or \TT{ENDL} instructions encountered
+      instruction pops its operands from the stack.
+\item The minimum $M$ of $S$ and all the variable stack lengths immediately
+      after any {\tt END} or {\tt ENDL} instructions encountered
       since the {\tt JMP\ldots} instruction was encountered.
       $M\le S$.
 \end{enumerate}
@@ -2520,28 +2523,26 @@ A call to {\tt jmp\_target} is legal if each of its
 corresponding {\tt JMP\ldots} instructions (there can be more than one)
 is such that:
 \begin{enumerate}
-\item There is no {\tt ENDF} instruction between the {\tt JMP\ldots}
-and the call to {\tt jmp\_target}.
-\item The call to {\tt jmp\_target} is not inside a block whose
-{\tt BEG/BEGL} instruction is between the {\tt JMP\ldots}
-and the call to {\tt jmp\_target}.
+\item The lexical level when {\tt jmp\_target} is called equals $L$.
+Equivalently, there is no {\tt ENDF} instruction between the
+{\tt JMP\ldots}~and the {\tt jmp\_target}.
+\item The depth when {\tt jmp\_target} is called equals $K$.
+Equivalently, the call to {\tt jmp\_target} is not inside a block whose
+{\tt BEG/BEGL} instruction is between the {\tt JMP\ldots}~and
+the {\tt jmp\_target}.
 \item The value of {\tt var\_stack\_length} when {\tt jmp\_target}
-is called \underline{equals} the minimum of its value just after
-the {\tt JMP\ldots} instruction pops any operands it has and
-the values of {\tt var\_stack\_length} just after any {\tt END/ENDL}
-instructions that are between the {\tt JMP\ldots} instruction and the
-call to {\tt jmp\_target}.
+is called \underline{equals} $M$.
 \end{enumerate}
 
 A \TT{JMP\ldots} instruction for which a legal target exists
 is called \key{resolvable}.  Other \TT{JMP\ldots} instructions
 are \key{unresolvable} and are in error.
 
-TBD
-
-The following illustrate this rule when the jump does \underline{not}
+The following MEXAS assembler program illustrates this
+rule when the jump does \underline{not}
 reduce depth and $M$ = the variables stack length just after the
-\TT{JMP\ldots} is compiled:
+\TT{JMP\ldots} is compiled (in MEXAS the {\tt LABEL} statements
+call {\tt jmp\_target}):
 
 Example 1:
 \begin{indpar}\begin{verbatim}
@@ -2593,6 +2594,33 @@ BEG
 END
 // Stack length is S + 1
 \end{verbatim}\end{indpar}
+
+The following are the {\tt mexstack} component {\tt JMP}
+management functions:
+
+\verb|void mexstack:| \MEXSTACKKEY{push\_jmp\_instr} \\
+\verb|        ( mex::instr & instr,| \\
+\verb|          min::gen target,| \\
+\verb|          const min::phrase_position & pp =| \\
+\verb|              min::MISSING_PHRASE_POSITION,| \\
+\verb|          bool no_source = false,| \\
+\verb|          min::int32 stack_offset = 0 )|
+\begin{indpar}
+{\tt Instr.op\_code} must be set to {\tt JMP\ldots}
+and {\tt instr.trace\_class} must be set.
+This function executes {\tt mexstack::push\_instr}
+to push that instruction into the {\tt mexcom::\EOL output\_\EOL module}
+code vector.  The {\tt no\_source} and {\tt stack\_offset}
+parameters are passed to {\tt mexstack::\EOL push\_\EOL instr}.
+
+If the {\tt JMP\ldots} instruction takes operands from the process stack,
+these should be popped from the compiler variables stack before this
+function is called,  and {\tt stack\_\EOL offset} should be allowed
+to default to {\tt 0}.
+
+Lastly this function creates an element of the pending jump list
+for the newly output {\tt JMP\ldots} instruction.
+\end{indpar}
 
 \section{MEXAS Language}
 \label{MEXAS Language}
