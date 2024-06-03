@@ -2,7 +2,7 @@
 //
 // File:	mexcom.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Jun  2 15:37:17 EDT 2024
+// Date:	Mon Jun  3 04:38:53 EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -50,24 +50,6 @@ extern min::locatable_var<mexcom::module_stack>
 // ------- ---------
 
 void init_op_code_table ( void );
-
-extern bool trace_never;
-inline void push_instr
-        ( mex::instr & instr,
-	  const min::phrase_position & pp =
-	      min::MISSING_PHRASE_POSITION,
-	  min::gen trace_info = min::MISSING() )
-{
-    if ( mexcom::trace_never
-         &&
-	 instr.trace_class != mex::T_ALWAYS )
-        instr.trace_class = mex::T_NEVER;
-
-    mex::module_ins m = mexcom::output_module;
-    mex::push_instr ( m, instr );
-    mex::push_position ( m, pp );
-    mex::push_trace_info ( m, trace_info );
-}
 
 void compile_error
 	( const min::phrase_position & pp,

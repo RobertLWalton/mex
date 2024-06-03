@@ -2,7 +2,7 @@
 //
 // File:	mexas_main.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Jun  2 15:31:40 EDT 2024
+// Date:	Mon Jun  3 04:43:10 EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -39,9 +39,9 @@ int main ( int argc, char * argv[] )
 	    mexstack::print_switch = mexstack::NO_PRINT;
 
 	else if ( strcmp ( "-tcnormal", arg ) == 0 )
-	    mexcom::trace_never = false;
+	    mexstack::trace_never = false;
 	else if ( strcmp ( "-tcnever", arg ) == 0 )
-	    mexcom::trace_never = true;
+	    mexstack::trace_never = true;
 
 	else if ( strcmp ( "-o:on", arg ) == 0 )
 	    mex::run_optimize = true;

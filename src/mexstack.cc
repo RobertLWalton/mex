@@ -19,6 +19,7 @@
 
 # include <mexstack.h>
 
+bool mexstack::trace_never = false;
 mexstack::print mexstack::print_switch =
     mexstack::NO_PRINT;
 

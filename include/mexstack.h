@@ -2,7 +2,7 @@
 //
 // File:	mexstack.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Jun  3 03:48:11 EDT 2024
+// Date:	Mon Jun  3 04:44:16 EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -157,7 +157,7 @@ inline void push_instr
 	  bool no_source = false,
 	  min::int32 stack_offset = 0 )
 {
-    if ( mexcom::trace_never
+    if ( mexstack::trace_never
          &&
 	 instr.trace_class != mex::T_ALWAYS )
         instr.trace_class = mex::T_NEVER;
