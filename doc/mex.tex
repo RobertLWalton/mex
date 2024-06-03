@@ -244,7 +244,7 @@
 
 \author{Robert L. Walton}
 
-\date{June 1, 2024}
+\date{June 3, 2024}
  
 \maketitle
 
@@ -2086,43 +2086,6 @@ For except named {\tt "XX"} with mask {\tt M = 1 <{}< FE\_XX}: \\
 \subsubsection{MEX Basic Compiler Functions}
 \label{MEX-BASIC-COMPILER-FUNCTIONS}
 
-\verb|bool mexcom::| \MEXCOMKEY{trace\_never} \verb|= false| \\
-\verb|inline void mexcom::| \MEXCOMKEY{push\_instr} \\
-\verb|        ( mex::instr & instr,| \\
-\verb|          const min::phrase_position & pp =| \\
-\verb|              min::MISSING_PHRASE_POSITION,| \\
-\verb|          min::gen trace_info = min::MISSING() )|
-\begin{indpar}
-Push the given parts of an instruction into the corresponding
-{\tt mexcom::\EOL output\_\EOL module} stacks.
-If {\tt mexcom::\EOL trace\_\EOL never} is {\tt true} and
-{\tt instr.trace\_class != mex::T\_ALWAYS}, first modify
-{\tt instr.trace\_class} to equal {\tt mex::T\_NEVER}.
-\end{indpar}
-
-\verb|enum mexcome::| \MEXCOMKEY{print} \\
-\verb|{| \\
-\verb|    mexcom::| \MEXCOMKEY{NO\_PRINT}, \\
-\verb|    mexcom::| \MEXCOMKEY{PRINT}, \\
-\verb|    mexcom::| \MEXCOMKEY{PRINT\_WITH\_SOURCE} \\
-\verb|}| \\
-\verb|mexcom::print mexcom::| \MEXCOMKEY{print\_switch}
-    \verb|= mexcom::NO_PRINT| \\
-\verb|void mexcom::| \MEXCOMKEY{trace\_instr} \\
-\verb|        ( min::uns32 location,| \\
-\verb|          min::uns32 stack_length,| \\
-\verb|          bool no_source = false )|
-\begin{indpar}
-Print trace of instruction at {\tt mexcom::output\_module[location]},
-as per {\tt mexcom::\EOL print\_switch}, except do not print source lines if
-{\tt no\_source} is {\tt true}.
-Printing is done using {\tt mexcom::\EOL input\_\EOL file} and
-{\tt mexcom::\EOL input\_\EOL file->\EOL printer}.
-The format is as in Section~\ref{TRACE-MESSAGES}.
-{\tt Stack\_\EOL length} is used in the {\em trace-header} and
-is usually set to {\tt mexstack::var\_stack\_length}.
-\end{indpar}
-
 \verb|min::uns32 mexcom::| \MEXCOMKEY{error\_count} \\
 \verb|min::uns32 mexcom::| \MEXCOMKEY{warning\_count} \\
 \verb|void mexcom::| \MEXCOMKEY{compile\_error} \\
@@ -2219,7 +2182,8 @@ For stack management the compiler and the {\tt mexstack} component
 communicate through the following variables and functions:
 
 \begin{tabular}{@{}r@{~~~}l}
-\verb|min::uns32 mexstack::| & \MEXSTACKKEY{var\_stack\_length} \\
+\verb|min::uns32 mexstack::| & \MEXSTACKKEY{var\_stack\_length}%
+    \label{VAR-STACK-LENGTH} \\
 \verb|min::uns32 mexstack::| & \MEXSTACKKEY{func\_stack\_length} \\
 \verb|min::uns32 mexstack::| & \MEXSTACKKEY{func\_var\_stack\_length} \\
 \verb|void mexstack::| & \MEXSTACKKEY{pop\_stacks} {\tt ( void )}
@@ -2362,6 +2326,84 @@ mexstack::stack_limit
 
 It also empties and re-initializes
 the block and jump stacks described in subsequent sections.
+\end{indpar}
+
+\subsubsection{MEX Stack Component Utility Functions}
+\label{MEX-STACK-COMPONENT-UTILITY-FUNCTIONS}
+
+\verb|enum mexstack::| \MEXCOMKEY{print} \\
+\verb|{| \\
+\verb|    mexstack::| \MEXCOMKEY{NO\_PRINT}, \\
+\verb|    mexstack::| \MEXCOMKEY{PRINT}, \\
+\verb|    mexstack::| \MEXCOMKEY{PRINT\_WITH\_SOURCE} \\
+\verb|}| \\
+\verb|mexstack::print mexstack::| \MEXCOMKEY{print\_switch}
+    \verb|= mexstack::NO_PRINT| \\
+\verb|void mexstack::| \MEXCOMKEY{trace\_instr} \\
+\verb|        ( min::uns32 location,| \\
+\verb|          min::uns32 stack_length,| \\
+\verb|          bool no_source = false,| \\
+\verb|          min::int32 stack_offset = 0 )|
+\begin{indpar}
+Print the {\tt mexcom::output\_module[location]} instruction,
+as per {\tt mexstack::\EOL print\_\EOL switch},
+except do not print source lines if
+{\tt no\_source} is {\tt true}.
+Printing is done using {\tt mexcom::\EOL input\_\EOL file} and
+{\tt mexcom::\EOL input\_\EOL file->\EOL printer}.
+
+The instruction printout has the syntax:
+\begin{indpar}
+\emkey{instruction-printout} ::= \\
+\hspace*{2em} {\em printout-header}
+    \begin{tabular}[t]{l}
+    {\em op-code} \TT{T\_}{\em trace-class}
+               \{ \TT{[} {\em trace-depth} \TT{]} \}\QMARK{} \\
+    {\em immedA} {\em immedB} {\em immedC} {\em immedD}
+	       \{ \TT{;} {\em trace-info} \}\QMARK{} \\
+    \end{tabular}
+\\[0.5ex]
+\emkey{printout-header} ::=
+    \TT{[}{\em line-number}\TT{:}{\em code-vector-location}%
+                        \TT{,}{\em var\_stack\_length} \TT{]}
+\end{indpar}
+The source code is defined by {\tt mexcom::ouput\_module->position[location]}.
+The {\em line-number} is the number of the \underline{last} source code
+line (the first file line is
+number \TT{1}).  The first {\em code-vector-location} is \TT{0}.
+{\em Var\_stack\_length}\pagnote{VAR-STACK-LENGTH}
+is the value \underline{after}
+the instruction is ouput (for {\tt PUSH\ldots} instructions
+that push {\em trace-packet-variables}\pagnote{TRACE-PACKET-VARIABLE}
+the number of {\em trace-packet-variables} pushed so far is added, as
+these instructions do not update the compiler variables stack).
+The {\em trace-depth} is printed only if it is not zero,
+and the {\em trace-info} is printed only if it is not \TT{min::MISSING()}.
+
+In some cases assembling an instruction or declaration (e.g., \TT{LABEL})
+modifies a previously assembled instruction.  In these cases the
+modified previously assembled instruction is printed just after it has
+been modified, and before any instruction currently being assembled.
+\end{indpar}
+
+\verb|bool mexstack::| \MEXCOMKEY{trace\_never} \verb|= false| \\
+\verb|inline void mexstack::| \MEXCOMKEY{push\_instr} \\
+\verb|        ( mex::instr & instr,| \\
+\verb|          const min::phrase_position & pp =| \\
+\verb|              min::MISSING_PHRASE_POSITION,| \\
+\verb|          min::gen trace_info = min::MISSING(),| \\
+\verb|          bool no_source = false,| \\
+\verb|          min::int32 stack_offset = 0 )|
+\begin{indpar}
+Push the given parts of an instruction into the corresponding
+{\tt mexcom::\EOL output\_\EOL module} stacks.
+If {\tt mexstack::\EOL trace\_\EOL never} is {\tt true} and
+additionally {\tt instr.trace\_class != mex::\EOL T\_ALWAYS}, first modify
+{\tt instr.trace\_class} to equal {\tt mex::T\_NEVER}.
+
+Lastly call {\tt mexstack::print\_instr} with the instruction
+location and the {\tt no\_source} and {\tt stack\_offset}
+arguments.
 \end{indpar}
 
 \subsubsection{MEX Stack Component Block Management}
