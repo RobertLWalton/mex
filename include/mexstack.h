@@ -2,7 +2,7 @@
 //
 // File:	mexstack.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Jun  4 02:28:42 EDT 2024
+// Date:	Tue Jun  4 02:51:26 EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -157,6 +157,13 @@ inline void push_instr
 	  bool no_source = false,
 	  min::int32 stack_offset = 0 )
 {
+    MIN_ASSERT
+        ( instr.op_code < mex::NUMBER_OF_OP_CODES,
+	  "illegal op_code in call to mexstack::"
+	  "push_instr" );
+    if ( instr.trace_class == 0 )
+        instr.trace_class =
+	    mex::op_infos[instr.op_code].trace_class;
     if ( mexstack::trace_never
          &&
 	 instr.trace_class != mex::T_ALWAYS )

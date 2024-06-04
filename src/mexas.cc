@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Jun  3 03:46:47 EDT 2024
+// Date:	Tue Jun  4 02:52:19 EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -688,8 +688,6 @@ mex::module mexas::compile ( min::file file )
 	{
 	    op_type = mex::op_infos[op_code].op_type;
 	    instr.op_code = op_code;
-	    instr.trace_class =
-	        mex::op_infos[op_code].trace_class;
 	}
 
 	switch ( op_type )

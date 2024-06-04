@@ -2336,11 +2336,15 @@ been modified, and before any instruction currently being assembled.
 \verb|          bool no_source = false,| \\
 \verb|          min::int32 stack_offset = 0 )|
 \begin{indpar}
-Push the given parts of an instruction into the corresponding
+If {\tt instr.trace\_class} is {\tt 0} set it to \\
+\hspace*{3em}{\tt mex::op\_\EOL infos[instr.op\_\EOL code].trace\_\EOL class}.
+\\
+Then if {\tt mexstack::\EOL trace\_\EOL never} is {\tt true} and
+additionally {\tt instr.trace\_class != mex::\EOL T\_ALWAYS}, set
+{\tt instr.trace\_class} to {\tt mex::T\_NEVER}.
+
+Then push the given parts of an instruction into the corresponding
 {\tt mexcom::\EOL output\_\EOL module} stacks.
-If {\tt mexstack::\EOL trace\_\EOL never} is {\tt true} and
-additionally {\tt instr.trace\_class != mex::\EOL T\_ALWAYS}, first modify
-{\tt instr.trace\_class} to equal {\tt mex::T\_NEVER}.
 
 Lastly call {\tt mexstack::print\_instr} with the instruction
 location and the {\tt no\_source} and {\tt stack\_offset}
@@ -2523,10 +2527,14 @@ A call to {\tt jmp\_target} is legal if each of its
 corresponding {\tt JMP\ldots} instructions (there can be more than one)
 is such that:
 \begin{enumerate}
-\item The lexical level when {\tt jmp\_target} is called equals $L$.
-Equivalently, there is no {\tt ENDF} instruction between the
+\item
+There is no {\tt ENDF} instruction between the
 {\tt JMP\ldots}~and the {\tt jmp\_target}.
-\item The depth when {\tt jmp\_target} is called equals $MD$.
+Equivalently, the smallest function containing the {\tt jmp\_target}
+is the same as the smallest function containing the {\tt JMP\ldots}
+(or both are outside any function).
+\item The depth when {\tt jmp\_target} is called is equal to or less
+than $MD$.
 Equivalently, the call to {\tt jmp\_target} is not inside a block whose
 {\tt BEG/BEGL} instruction is between the {\tt JMP\ldots}~and
 the {\tt jmp\_target}.
