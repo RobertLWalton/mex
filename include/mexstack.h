@@ -2,7 +2,7 @@
 //
 // File:	mexstack.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Jun  3 04:44:16 EDT 2024
+// Date:	Tue Jun  4 02:28:42 EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -65,7 +65,7 @@ struct jump_element
 {
     const min::gen target_name;
     min::uns32 jmp_location;
-    min::uns8 lexical_level, depth, maximum_depth;
+    min::uns8 lexical_level, depth, minimum_depth;
     min::uns32 var_stack_length, var_stack_minimum;
     min::uns32 next;
     jump_element
@@ -74,7 +74,7 @@ struct jump_element
 	jmp_location ( j.jmp_location ),
 	lexical_level ( j.lexical_level ),
         depth ( j.depth ),
-        maximum_depth ( j.maximum_depth ),
+        minimum_depth ( j.minimum_depth ),
         var_stack_length ( j.var_stack_length ),
         var_stack_minimum ( j.var_stack_minimum ),
 	next ( j.next ) {}
@@ -83,7 +83,7 @@ struct jump_element
 	      min::uns32 jmp_location,
 	      min::uns32 lexical_level,
               min::uns32 depth,
-              min::uns32 maximum_depth,
+              min::uns32 minimum_depth,
               min::uns32 var_stack_length,
               min::uns32 var_stack_minimum,
               min::uns32 next ) :
@@ -91,7 +91,7 @@ struct jump_element
 	jmp_location ( jmp_location ),
 	lexical_level ( lexical_level ),
         depth ( depth ),
-        maximum_depth ( maximum_depth ),
+        minimum_depth ( minimum_depth ),
         var_stack_length ( var_stack_length ),
         var_stack_minimum ( var_stack_minimum ),
 	next ( next ) {}

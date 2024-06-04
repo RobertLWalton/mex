@@ -2,7 +2,7 @@
 //
 // File:	mexstack.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Jun  3 03:47:11 EDT 2024
+// Date:	Tue Jun  4 02:28:01 EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -163,8 +163,8 @@ unsigned mexstack::jump_list_update
 	    jlist + n;
 	if ( next->lexical_level < L )
 	    break;
-	if ( next->maximum_depth > mexstack::depth[L] )
-	    next->maximum_depth = mexstack::depth[L];
+	if ( next->minimum_depth > mexstack::depth[L] )
+	     next->minimum_depth = mexstack::depth[L];
 	if ( next->var_stack_minimum > SP )
 	    next->var_stack_minimum = SP;
 	previous = next;
@@ -192,7 +192,7 @@ unsigned mexstack::jump_list_resolve
 	    break;
 	if ( target_name == next->target_name
 	     &&
-	     next->maximum_depth >= mexstack::depth[L] )
+	     next->minimum_depth >= mexstack::depth[L] )
 	{
 	    min::uns32 depth_diff =
 	        next->depth - mexstack::depth[L];
@@ -201,12 +201,12 @@ unsigned mexstack::jump_list_resolve
 	    if ( SP > next->var_stack_minimum )
 		mexcom::compile_error
 		    ( pp, "code jumped over pushes"
-		          " values into the stack;"
+		          " of values into the stack;"
 			  " JMP unresolved" );
 	    else if ( SP < next->var_stack_minimum )
 		mexcom::compile_error
 		    ( pp, "code jumped over pops"
-		          " values from the stack;"
+		          " of values from the stack;"
 			  " JMP unresolved" );
 	    else
 	    {

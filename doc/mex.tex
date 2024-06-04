@@ -244,7 +244,7 @@
 
 \author{Robert L. Walton}
 
-\date{June 3, 2024}
+\date{June 4, 2024}
  
 \maketitle
 
@@ -2507,16 +2507,16 @@ when its target is found.
 \item The {\em jmp-target} MIN name.
 \item The lexical level $L$ of the {\tt JMP\ldots} instruction.
 \item The depth $D$ of the {\tt JMP\ldots} instruction.
-\item The minimum $K$ of $D$ and
+\item The minimum $MD$ of $D$ and
       the depths immediately after any {\tt END} or {\tt ENDL} instructions
       encountered since the {\tt JMP\ldots} instruction was encountered.
-      $K\le D$.
+      $MD\le D$.
 \item The length $S$ of the variable stack just after the {\tt JMP\ldots}
       instruction pops its operands from the stack.
-\item The minimum $M$ of $S$ and all the variable stack lengths immediately
+\item The minimum $MS$ of $S$ and all the variable stack lengths immediately
       after any {\tt END} or {\tt ENDL} instructions encountered
       since the {\tt JMP\ldots} instruction was encountered.
-      $M\le S$.
+      $MS\le S$.
 \end{enumerate}
 
 A call to {\tt jmp\_target} is legal if each of its
@@ -2526,12 +2526,12 @@ is such that:
 \item The lexical level when {\tt jmp\_target} is called equals $L$.
 Equivalently, there is no {\tt ENDF} instruction between the
 {\tt JMP\ldots}~and the {\tt jmp\_target}.
-\item The depth when {\tt jmp\_target} is called equals $K$.
+\item The depth when {\tt jmp\_target} is called equals $MD$.
 Equivalently, the call to {\tt jmp\_target} is not inside a block whose
 {\tt BEG/BEGL} instruction is between the {\tt JMP\ldots}~and
 the {\tt jmp\_target}.
 \item The value of {\tt var\_stack\_length} when {\tt jmp\_target}
-is called \underline{equals} $M$.
+is called \underline{equals} $MS$.
 \end{enumerate}
 
 A \TT{JMP\ldots} instruction for which a legal target exists
