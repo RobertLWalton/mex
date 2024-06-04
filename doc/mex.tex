@@ -2615,7 +2615,7 @@ management functions:
 \verb|          min::int32 stack_offset = 0 )|
 \begin{indpar}
 {\tt Instr.op\_code} must be set to {\tt JMP\ldots}
-and {\tt instr.trace\_class} must be set.
+and {\tt instr.trace\_class} may be set or may be {\tt 0}.
 This function executes {\tt mexstack::push\_instr}
 to push that instruction into the {\tt mexcom::\EOL output\_\EOL module}
 code vector.  The {\tt no\_source} and {\tt stack\_offset}
@@ -2629,6 +2629,56 @@ to default to {\tt 0}.
 Lastly this function creates an element of the pending jump list
 for the newly output {\tt JMP\ldots} instruction.
 \end{indpar}
+
+\verb|min::uns32 mexstack:| \MEXSTACKKEY{jmp\_target}
+    \verb|( min::gen target )|
+\begin{indpar}
+Resolve all pending jumps that have the current lexical level, a minimum
+depth $MD$ not greater than the current depth, and the
+given {\tt target}.
+Resolved jumps transfer to the current location: \\
+\hspace*{3em}\verb|mexcom::output_module->length|
+
+Resolved pending jumps are removed from the list
+of pending jumps.  The number of resolved jumps is returned.
+\end{indpar}
+
+\verb|min::uns32 mexstack:| \MEXSTACKKEY{jmp\_clear} \verb|( void )|
+\begin{indpar}
+Delete all pending jumps with the current lexical level (making these
+jumps unresolved and in error), and
+call {\tt mexcom::compile\_error} to indicate which pending jumps
+were deleted.  Return the number of deleted pending jumps.
+
+This is called by {\tt mexstack::endx} for each {\tt ENDF} instruction.
+
+It must also be called by the compiler at the end of compiling a
+module.
+
+Pending jumps are added at the end of the pending jump list, and
+as this function is called whenever the lexical level decreases by one,
+pending jumps are sorted by lexical level in the pending jump list.
+\end{indpar}
+
+\verb|min::uns32 mexstack:| \MEXSTACKKEY{jmp\_update} \verb|( void )|
+\begin{indpar}
+For all pending jumps with the current lexical level $L$ decrease
+their minimum depth $MD$ if necessary to {\tt mexstack::depth[$L$]}
+and decrease their minimum stack $MS$ if necessary to 
+{\tt mexstack::var\_stack\_length}.  Return the number of elements
+of lexical level $L$, even those not modified.
+
+This function is called by {\tt mexstack::endx} for {\tt END} and
+{\tt ENDL} instructions just after {\tt mexstack::depth[$L$]}
+and {\tt mexstack::var\_stack\_length} have been decremented
+(restored to their values just before the corresponding {\tt BEG} or
+{\tt BEGL} instructions were output).
+
+This function need \underline{not} be called by the compiler, but
+could be called to count the number of pending jumps with the
+current lexical level (without modifying any pending jumps).
+\end{indpar}
+
 
 \section{MEXAS Language}
 \label{MEXAS Language}
