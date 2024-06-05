@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Jun  4 02:52:19 EDT 2024
+// Date:	Wed Jun  5 01:55:49 EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -785,23 +785,9 @@ mex::module mexas::compile ( min::file file )
 			  " instruction will fail" );
 		    // instr fails because immedC = 0
 		target = min::MISSING();
-		    // For trace_info
 	    }
-	    else
-	    {
-		mexstack::jump_element je =
-		    { target,
-		      m->length,
-		      L,
-		      mexstack::depth[L],
-		      mexstack::depth[L],
-		      SP,
-		      SP,
-		      0 };
-		mexstack::push_jump
-		    ( mexstack::jumps, je );
-	    }
-	    mexstack::push_instr ( instr, pp, target );
+	    mexstack::push_jmp_instr
+		( instr, target, pp );
 	    goto EXTRA_STUFF_CHECK;
 	}
 	NON_ARITHMETIC:
@@ -1077,8 +1063,7 @@ mex::module mexas::compile ( min::file file )
 			( mexcom::input_file->printer,
 			  mexcom::input_file, pp );
 
-		mexstack::jump_list_resolve
-		    ( mexstack::jumps, target );
+		mexstack::jmp_target ( target );
 		continue;
 	    }
 	    case ::STACKS:
@@ -1919,7 +1904,7 @@ mex::module mexas::compile ( min::file file )
 
     }
 
-    mexstack::jump_list_delete ( mexstack::jumps );
+    mexstack::jmp_clear();
 
     if ( mexcom::error_count > 0 )
         return min::NULL_STUB;

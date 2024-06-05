@@ -2,7 +2,7 @@
 //
 // File:	mexstack.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Jun  4 02:28:01 EDT 2024
+// Date:	Wed Jun  5 02:32:24 EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -46,7 +46,7 @@ min::uns32 mexstack::stack_limit;
 
 static min::uns32 jump_element_gen_disp[] =
 {
-    min::DISP ( & mexstack::jump_element::target_name ),
+    min::DISP ( & mexstack::jump_element::target ),
     min::DISP_END
 };
 
@@ -116,9 +116,10 @@ void mexstack::print_instr
 	<< min::eom;
 }
 
-unsigned mexstack::jump_list_delete
-	( mexstack::jump_list jlist )
+unsigned mexstack::jmp_clear ( void )
 {
+    mexstack::jump_list jlist = mexstack::jumps;
+
     min::ptr<mexstack::jump_element> free =
         jlist + 0;
     min::ptr<mexstack::jump_element> previous =
@@ -131,13 +132,15 @@ unsigned mexstack::jump_list_delete
     {
         min::ptr<mexstack::jump_element> next =
 	    jlist + n;
-	if (   next->lexical_level
-	     < mexstack::lexical_level )
+	if ( next->lexical_level < L )
 	    break;
+	MIN_ASSERT
+	    ( next->lexical_level == L,
+	      "jmp_clear not called at ENDF" );
 	mexcom::compile_error
 	    ( m->position[next->jmp_location],
 	      "jump target undefined: ",
-	      min::pgen ( next->target_name ),
+	      min::pgen ( next->target ),
 	      "; JMP... is unresolved" );
 	    // Unresolved JMP... instructions have
 	    // immedC == 0 which triggers a fatal
@@ -150,9 +153,10 @@ unsigned mexstack::jump_list_delete
     return count;
 }
 
-unsigned mexstack::jump_list_update
-	( mexstack::jump_list jlist )
+unsigned mexstack::jmp_update ( void )
 {
+    mexstack::jump_list jlist = mexstack::jumps;
+
     min::ptr<mexstack::jump_element> previous =
         jlist + 1;
 
@@ -163,6 +167,9 @@ unsigned mexstack::jump_list_update
 	    jlist + n;
 	if ( next->lexical_level < L )
 	    break;
+	MIN_ASSERT
+	    ( next->lexical_level == L,
+	      "jmp_clear not called at ENDF" );
 	if ( next->minimum_depth > mexstack::depth[L] )
 	     next->minimum_depth = mexstack::depth[L];
 	if ( next->var_stack_minimum > SP )
@@ -173,10 +180,15 @@ unsigned mexstack::jump_list_update
     return count;
 }
 
-unsigned mexstack::jump_list_resolve
-	( mexstack::jump_list jlist,
-	  min::gen target_name )
+unsigned mexstack::jmp_target
+	( min::gen target )
 {
+    MIN_ASSERT
+        ( min::is_name ( target ),
+	  "jmp_target target is not a MIN name" );
+
+    mexstack::jump_list jlist = mexstack::jumps;
+
     min::ptr<mexstack::jump_element> free =
         jlist + 0;
     min::ptr<mexstack::jump_element> previous =
@@ -190,7 +202,7 @@ unsigned mexstack::jump_list_resolve
 	    jlist + n;
 	if ( next->lexical_level < L )
 	    break;
-	if ( target_name == next->target_name
+	if ( target == next->target
 	     &&
 	     next->minimum_depth >= mexstack::depth[L] )
 	{
@@ -249,9 +261,7 @@ void mexstack::begx ( mex::instr & instr,
 
     if ( instr.op_code == mex::BEGF )
     {
-        MIN_ASSERT ( mexstack::lexical_level
-	             <
-		     mex::max_lexical_level,
+        MIN_ASSERT ( L < mex::max_lexical_level,
 		     "mex::max_lexical_level"
 		     " exceeded" );
 	MIN_ASSERT ( tvars == 0,
@@ -382,7 +392,7 @@ unsigned mexstack::endx ( mex::instr & instr,
 	    ( e.begin_location, true );
 
 	instr.immedB = L;
-	mexstack::jump_list_delete ( mexstack::jumps );
+	mexstack::jmp_clear();
 	mexstack::var_stack_length =
 		e.stack_limit - e.nvars;
 	-- L;
@@ -397,7 +407,7 @@ unsigned mexstack::endx ( mex::instr & instr,
 	-- mexstack::depth[L];
 	mexstack::var_stack_length =
 		e.stack_limit - e.nvars;
-	mexstack::jump_list_update ( mexstack::jumps );
+	mexstack::jmp_update();
     }
     else // if mex::END
     {
@@ -406,7 +416,7 @@ unsigned mexstack::endx ( mex::instr & instr,
 	-- mexstack::depth[L];
 	mexstack::var_stack_length =
 		e.stack_limit;
-	mexstack::jump_list_update ( mexstack::jumps );
+	mexstack::jmp_update();
     }
     mexstack::pop_stacks();
 

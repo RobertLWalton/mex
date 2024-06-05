@@ -2,7 +2,7 @@
 //
 // File:	mexstack.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Jun  4 02:51:26 EDT 2024
+// Date:	Wed Jun  5 02:27:47 EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -63,14 +63,14 @@ extern min::uns32 stack_limit;
 
 struct jump_element
 {
-    const min::gen target_name;
+    const min::gen target;
     min::uns32 jmp_location;
     min::uns8 lexical_level, depth, minimum_depth;
     min::uns32 var_stack_length, var_stack_minimum;
     min::uns32 next;
     jump_element
 	    ( const jump_element & j ) :
-	target_name ( j.target_name ),
+	target ( j.target ),
 	jmp_location ( j.jmp_location ),
 	lexical_level ( j.lexical_level ),
         depth ( j.depth ),
@@ -79,7 +79,7 @@ struct jump_element
         var_stack_minimum ( j.var_stack_minimum ),
 	next ( j.next ) {}
     jump_element
-	    ( min::gen target_name,
+	    ( min::gen target,
 	      min::uns32 jmp_location,
 	      min::uns32 lexical_level,
               min::uns32 depth,
@@ -87,7 +87,7 @@ struct jump_element
               min::uns32 var_stack_length,
               min::uns32 var_stack_minimum,
               min::uns32 next ) :
-	target_name ( target_name ),
+	target ( target ),
 	jmp_location ( jmp_location ),
 	lexical_level ( lexical_level ),
         depth ( depth ),
@@ -131,7 +131,7 @@ inline void push_jump
     (lst + next)->next = active->next;
     active->next = next;
     min::unprotected::acc_write_update
-        ( lst, e.target_name );
+        ( lst, e.target );
 }
 
 // Support Functions
@@ -186,13 +186,31 @@ void push_push_instr
 	  bool no_source = false,
 	  min::int32 stack_offset = 0 );
 
-unsigned jump_list_delete
-	( mexstack::jump_list jlist );
-unsigned jump_list_update
-	( mexstack::jump_list jlist );
-unsigned jump_list_resolve
-	( mexstack::jump_list jlist,
-	  min::gen target_name );
+inline void push_jmp_instr
+        ( mex::instr & instr,
+	  min::gen target,
+	  const min::phrase_position & pp =
+	      min::MISSING_PHRASE_POSITION,
+	  bool no_source = false,
+	  min::int32 stack_offset = 0 )
+{
+    mexstack::push_instr
+        ( instr, pp, target, no_source, stack_offset );
+    min::uns8 L = mexstack::lexical_level,
+              D = mexstack::depth[L];
+    min::uns32 S = mexstack::var_stack_length
+                 + stack_offset;
+    mexstack::jump_element je = {
+        target,
+	mexcom::output_module->length - 1,
+	L, D, D, S, S, 0 };
+    mexstack::push_jump ( mexstack::jumps, je );
+
+}
+
+unsigned jmp_clear ( void );
+unsigned jmp_update ( void );
+unsigned jmp_target ( min::gen target );
 
 void begx ( mex::instr & instr,
 	    min::uns32 nvars, min::uns32 tvars,
