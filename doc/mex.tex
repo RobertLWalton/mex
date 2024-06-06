@@ -2448,7 +2448,8 @@ the compiler must call one of these functions.
 \begin{indpar}
 To output a {\tt BEG\ldots}, {\tt END\ldots}, or {\tt CONT} instruction
 the compiler must first create the {\tt mex:instr} instruction and set
-its {\tt op\_code} and {\tt trace\_class}.  The compiler must then
+its {\tt op\_code} and {\tt trace\_class} (which can be set to {\tt 0}
+so it will then be set by {\tt mexstack::push\_instr}).  The compiler must then
 compute the instruction's position {\tt pp} and {\tt trace\_info}.
 If the {\tt trace\_info} has
 trace packet variables\pagnote{TRACE-PACKET-VARIABLE}, the
@@ -2480,6 +2481,32 @@ This is done after calling {\tt begx} because these variables should
 be given the value of {\tt mexstack::lexical\_level} \underline{after} it is
 incremented by {\tt begx}.
 
+All these functions fill in parts of {\tt instr} and end by calling
+{\tt mexstack::push\_instr}.  To do this, {\tt begx} pushes into the
+block stack a block description containing:
+\begin{enumerate}
+\item The {\tt BEG\ldots}~{\tt op\_code}
+\item The corresponding {\tt END\ldots}~{\tt op\_code} for checking purposes.
+\item Saved values of the {\tt stack\_limit}, {\tt func\_stack\_length},
+and {\tt func\_var\_stack\_\EOL length}
+\item The {\tt nvars} argument
+\item The location of the {\tt BEG\ldots} instruction
+\end{enumerate}
+This block description is popped from the block stack by the {\tt endx}
+function, which uses information in the description to fill in parts of the
+{\tt BEG\ldots}~and {\tt END\ldots}~instructions and to restore the compiler's
+values of {\tt stack\_limit}, {\tt var\_stack\_length} (which equals
+{\tt stack\_limit} - {\tt nvars} for {\tt ENDF} and {\tt ENDL}
+and {\tt stack\_limit} for {\tt END}), {\tt func\_stack\_length},
+and {\tt func\_var\_stack\_length} (by calling the
+{\tt mexstack::pop\_\EOL stacks}
+function provided by the compiler).
+The block description is also used
+by the {\em cont} function to fill in parts of the {\tt CONT} instruction.
+
+{\tt Begx} and {\tt endx} also adjust the current lexical level and
+depth as required by the {\tt BEG\ldots}~and {\tt END\ldots}~instructions
+(e.g., {\tt BEGL} increments the depth and {\tt ENDL} decrements it).
 \end{indpar}
 
 
