@@ -2,7 +2,7 @@
 //
 // File:	mexstack.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Jun  5 02:32:24 EDT 2024
+// Date:	Thu Jun  6 11:35:20 EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -70,6 +70,27 @@ static min::initializer initializer ( ::initialize );
 
 // Support Functions
 // ------- ---------
+
+void mexstack::init ( void )
+{
+    mexstack::var_stack_length		= 0;
+    mexstack::func_stack_length		= 0;
+    mexstack::func_var_stack_length	= 0;
+    mexstack::lexical_level		= 0;
+    mexstack::depth[0]			= 0;
+    mexstack::lp[0]			= 0;
+    mexstack::fp[0]			= 0;
+    mexstack::stack_limit		= 0;
+
+    min::pop ( mexstack::blocks,
+               mexstack::blocks->length );
+    min::pop ( mexstack::jumps,
+               mexstack::jumps->length );
+    mexstack::jump_element e =
+        { min::MISSING(), 0, 0, 0, 0, 0, 0, 0 };
+    min::push ( mexstack::jumps ) = e;  // Free head.
+    min::push ( mexstack::jumps ) = e;  // Active head.
+}
 
 void mexstack::print_instr
 	( min::uns32 location,

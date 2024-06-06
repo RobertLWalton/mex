@@ -244,7 +244,7 @@
 
 \author{Robert L. Walton}
 
-\date{June 4, 2024}
+\date{June 6, 2024}
  
 \maketitle
 
@@ -2145,15 +2145,15 @@ of their smallest containing block (function or non-function) plus 1.
 Instructions are assigned the level and depth of their smallest containing
 block.
 
-MEX and {\tt mexstack} assume that the compiler
+The MEX stack compiler component ({\tt mexstack}) assumes that the compiler
 maintains a variable stack, a function stack, and a function variable stack
 (a \key{function variable} is a function with no arguments whose name
 behaves like a variable name).
-When the compiler outputs a {\tt PUSH\ldots}
-instruction that creates a variable, it pushes the name of the variable
+When the compiler outputs a {\tt PUSH\ldots}~instruction
+that creates a variable, it pushes the name of the variable
 into the variable stack.  When the compiler outputs a {\tt BEGF}
 instruction that creates a function, it pushes the name of the function
-into the function stack if the function has arguments, and into the
+into the function stack if the function has arguments, or into the
 function variable stack if the function has no arguments.
 The stack elements are assigned the level and depth
 of the instructions output to create them.
@@ -2173,12 +2173,13 @@ it is added.
 
 Note that trace values (values of
 trace packet variables\pagnote{TRACE-PACKET-VARIABLE}) in the process
-stack are not recorded in the compiler variables stack.
+stack are \underline{not} recorded in the compiler variables stack when their
+{\tt PUSH\ldots}~instructions are output.
 
 \subsubsection{MEX Stack Component Data}
 \label{MEX-STACK-COMPONENT-DATA}
 
-For stack management the compiler and the {\tt mexstack} component
+For stack management the compiler and {\tt mexstack}
 communicate through the following variables and functions:
 
 \begin{tabular}{@{}r@{~~~}l}
@@ -2196,7 +2197,7 @@ variable, function, and function variable elements in the compiler
 symbol table.
 
 These are mostly maintained by the compiler and read by {\tt mexstack}
-component code.  However, {\tt mexstack} code may \underline{decrease}
+code.  However, {\tt mexstack} code may \underline{decrease}
 (or leave untouched) the values in these variables and then,
 \underline{before} returning control to the compiler, call the
 {\tt pop\_stacks} function which is provided by the compiler and which
@@ -2206,7 +2207,7 @@ the values in the above variables.
 The {\tt mexstack::init} function (see below) zeros these variables.
 \end{indpar}
 
-The {\tt mexstack} component also maintains the following:
+{\tt Mexstack} also maintains the following:
 
 \begin{tabular}{@{}l@{~~~}l}
 \verb|min::uns8 mexstack::| & \MEXSTACKKEY{lexical\_level} \\
@@ -2224,12 +2225,12 @@ level of the next instruction to be output by the compiler.
 {\tt Depth[$L$]} is the current depth of level $L\leq${lexical\_level}.
 
 {\tt Lp[$L$]} is the index of the first variable of level $L$ in the
-variable stack, or more specifically, for all $i<${\tt lp[$L$]},
-the variable with index $i$ has level $<L$.
+variable stack, or more specifically, for any variable of index $i$,
+$i<${\tt lp[$L$]} if and only if the variable has level $<L$.
 
 {\tt Fp[$L$]} is the index of the frame pointer in the variable
 stack of the function of level $L$ currently being compiled.  More
-specifically, {\tt fp[$L$] = lp[$L$]} plus the minimum number of arguments
+specifically, {\tt fp[$L$] = lp[$L$]} + the minimum number of arguments
 expected by this function.
 
 Recall that level $0$ is the module code outside all functions,
@@ -2266,7 +2267,8 @@ The {\tt END\ldots} instructions (via the {\tt mexstack::endx} function below)
 restore {\tt stack\_\EOL limit} to its previous value, the value
 before the corresponding {\tt BEG\ldots} was compiled.
 
-The {\tt mexstack::init} function (see below) zeros these variables.
+The {\tt mexstack::init} function (see below) zeros {\tt lexical\_level},
+{\tt depth[0]}, {\tt lp[0]}, {\tt fp[0]}, and {\tt stack\_limit}.
 \end{indpar}
 
 \subsubsection{MEX Stack Component Utility Functions}
@@ -2280,9 +2282,8 @@ The {\tt mexstack::init} function (see below) zeros these variables.
 \verb|}| \\
 \verb|mexstack::print mexstack::| \MEXCOMKEY{print\_switch}
     \verb|= mexstack::NO_PRINT| \\
-\verb|void mexstack::| \MEXCOMKEY{trace\_instr} \\
+\verb|void mexstack::| \MEXCOMKEY{print\_instr} \\
 \verb|        ( min::uns32 location,| \\
-\verb|          min::uns32 stack_length,| \\
 \verb|          bool no_source = false,| \\
 \verb|          min::int32 stack_offset = 0 )|
 \begin{indpar}
@@ -2306,25 +2307,28 @@ The instruction printout has the syntax:
 \\[0.5ex]
 \emkey{printout-header} ::=
     \TT{[}{\em line-number}\TT{:}{\em code-vector-location}%
-                        \TT{,}{\em var\_stack\_length} \TT{]}
+                        \TT{,}{\em var-stack-length} \TT{]}
 \end{indpar}
 The source code is defined by {\tt mexcom::ouput\_module->position[location]}.
 The {\em line-number} is the number of the \underline{last} source code
 line (the first file line is
 number \TT{1}).  The first {\em code-vector-location} is \TT{0}.
-{\em Var\_stack\_length}\pagnote{VAR-STACK-LENGTH}
-is the value \underline{after}
-the instruction is ouput (for {\tt PUSH\ldots} instructions
+{\em Var-stack-length} equals {\tt var\_stack\_length}\pagnote{VAR-STACK-LENGTH}
+plus {\tt stack\_offset} and is the compiler variable stack length
+\underline{after} the instruction is ouput.  In particular,
+for {\tt PUSH\ldots} instructions
 that push {\em trace-packet-variables}\pagnote{TRACE-PACKET-VARIABLE}
-the number of {\em trace-packet-variables} pushed so far is added, as
-these instructions do not update the compiler variables stack).
+{\tt stack\_offset} is set to
+the number of {\em trace-packet-variables} pushed so far, as
+these instructions do not update {\tt var\_stack\_length}.
 The {\em trace-depth} is printed only if it is not zero,
 and the {\em trace-info} is printed only if it is not \TT{min::MISSING()}.
 
 In some cases assembling an instruction or declaration (e.g., \TT{LABEL})
 modifies a previously assembled instruction.  In these cases the
-modified previously assembled instruction is printed just after it has
-been modified, and before any instruction currently being assembled.
+modified previously assembled instruction is printed (without its source)
+just after it has
+been modified, and before any instruction currently being output.
 \end{indpar}
 
 \verb|bool mexstack::| \MEXCOMKEY{trace\_never} \verb|= false| \\
@@ -2364,7 +2368,8 @@ into the process stack\pagnote{PROCESS-STACK}
 the value of the variable referenced by the variable stack entry
 with the given {\tt index}, and executes {\tt mexstack::push\_instr}
 to push that instruction into the {\tt mexcom::\EOL output\_\EOL module}
-code vector.  The {\tt no\_source} and {\tt stack\_offset} parameters
+code vector.  The {\tt pp}, {\tt no\_source},
+and {\tt stack\_offset} parameters
 are passed to {\tt mexstack::\EOL push\_\EOL instr}.
 
 More specifically, the created instruction is always given
@@ -2372,7 +2377,7 @@ trace class {\tt mex::T\_PUSH}, phrase position {\tt pp},
 trace info equal to a label whose components are {\tt old\_name}
 and {\tt new\_name} in that order, and the following:
 
-If {\tt index >= lp[L]}: \\
+If {\tt lp[L] <= index}: \\
 \hspace*{3em}\verb|op_code = mex::PUSHS, immedA = SP + stack_offset - index - 1|
 
 If for {\tt K<L},~~~{\tt fp[$K$] <= index < lp[$K$+1]}: \\
@@ -2384,7 +2389,7 @@ If for {\tt K<L},~~~{\tt lp[$K$] <= index < fp[$K$]}: \\
 where \\
 \hspace*{3em}\verb|L = mexstack::lexical_level| \\
 \hspace*{3em}\verb|SP = mexstack::var_stack_length| \\
-\hspace*{3em}({\tt sp\_offset} corrects {\tt SP} when pushing trace values
+\hspace*{3em}({\tt stack\_offset} corrects {\tt SP} when pushing trace values
 							      because \\
 \hspace*{3em}~trace values a not recorded in the compiler variable stack)
 \end{indpar}
@@ -2393,7 +2398,7 @@ The following function initializes the {\tt mexstack} data described above:
 
 \verb|void mexstack:| \MEXSTACKKEY{init} \verb|( void )|
 \begin{indpar}
-This function initializes {\tt mexstack} component data at the beginning
+This function initializes {\tt mexstack} data at the beginning
 of the compilation of a module.  Specifically this function zeros:
 \begin{indpar}\begin{verbatim}
 mexstack::var_stack_length
@@ -2603,7 +2608,7 @@ END
 // Stack length is S + 1
 \end{verbatim}\end{indpar}
 
-The following are the {\tt mexstack} component {\tt JMP}
+The following are the {\tt mexstack} {\tt JMP}
 management functions:
 
 \verb|void mexstack:| \MEXSTACKKEY{push\_jmp\_instr} \\

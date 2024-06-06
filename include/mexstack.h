@@ -2,7 +2,7 @@
 //
 // File:	mexstack.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Jun  5 02:27:47 EDT 2024
+// Date:	Thu Jun  6 12:10:52 EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -208,9 +208,7 @@ inline void push_jmp_instr
 
 }
 
-unsigned jmp_clear ( void );
-unsigned jmp_update ( void );
-unsigned jmp_target ( min::gen target );
+void init ( void );
 
 void begx ( mex::instr & instr,
 	    min::uns32 nvars, min::uns32 tvars,
@@ -227,6 +225,10 @@ void cont ( mex::instr & instr,
 	    min::gen trace_info = min::MISSING(),
             const min::phrase_position & pp =
 	        min::MISSING_PHRASE_POSITION );
+
+unsigned jmp_clear ( void );
+unsigned jmp_update ( void );
+unsigned jmp_target ( min::gen target );
 
 } // end mexstack namespace
 

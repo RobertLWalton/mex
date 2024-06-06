@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Jun  5 01:55:49 EDT 2024
+// Date:	Thu Jun  6 11:41:48 EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -632,26 +632,12 @@ mex::module mexas::compile ( min::file file )
     mexcom::error_count = 0;
     mexcom::warning_count = 0;
 
+    mexstack::init();
+
     min::pop ( mexas::variables,
                mexas::variables->length );
-    mexstack::var_stack_length = 0;
     min::pop ( mexas::functions,
                mexas::functions->length );
-    mexstack::func_stack_length = 0;
-    min::pop ( mexstack::blocks,
-               mexstack::blocks->length );
-    mexstack::stack_limit = 0;
-    min::pop ( mexstack::jumps,
-               mexstack::jumps->length );
-    mexstack::jump_element e =
-        { min::MISSING(), 0, 0, 0, 0, 0, 0, 0 };
-    min::push ( mexstack::jumps ) = e;  // Free head.
-    min::push ( mexstack::jumps ) = e;  // Active head.
-
-    L = 0;
-    mexstack::depth[0] = 0;
-    mexstack::lp[0] = 0;
-    mexstack::fp[0] = 0;
 
     mexcom::input_file = file;
 
