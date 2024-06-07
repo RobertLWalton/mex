@@ -244,7 +244,7 @@
 
 \author{Robert L. Walton}
 
-\date{June 6, 2024}
+\date{June 7, 2024}
  
 \maketitle
 
@@ -2649,8 +2649,9 @@ management functions:
 and {\tt instr.trace\_class} may be set or may be {\tt 0}.
 This function executes {\tt mexstack::push\_instr}
 to push that instruction into the {\tt mexcom::\EOL output\_\EOL module}
-code vector.  The {\tt no\_source} and {\tt stack\_offset}
+code vector.  The {\tt pp}, {\tt no\_source}, and {\tt stack\_offset}
 parameters are passed to {\tt mexstack::\EOL push\_\EOL instr}.
+The instruction {\tt trace\_info} is set equal to the {\tt target}.
 
 If the {\tt JMP\ldots} instruction takes operands from the process stack,
 these should be popped from the compiler variables stack before this
@@ -2665,12 +2666,15 @@ for the newly output {\tt JMP\ldots} instruction.
     \verb|( min::gen target )|
 \begin{indpar}
 Resolve all pending jumps that have the current lexical level, a minimum
-depth $MD$ not greater than the current depth, and the
+depth $MD$ equal to the current depth, and the
 given {\tt target}.
 Resolved jumps transfer to the current location: \\
 \hspace*{3em}\verb|mexcom::output_module->length|
 
-Resolved pending jumps are removed from the list
+The {\em trace\_depth} of a resolved {\tt JMP\ldots}~is set to the the depth 
+of the {\tt JMP\ldots}~minus the current depth.
+
+Resolved jumps are removed from the list
 of pending jumps.  The number of resolved jumps is returned.
 \end{indpar}
 
