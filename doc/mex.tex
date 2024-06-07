@@ -1632,20 +1632,20 @@ If \TT{module->\EOL trace\_\EOL info[i]} is not a MIN string,
 \label{TRACE-PACKET-BASED-TRACE-MESSAGES}
 
 A \key{trace packet} is a \key{trace packet message} and a list of
-\skey{trace packet variable}s.\label{TRACE-PACKET-VARIABLE}
+\skey{trace variable}s.\label{TRACE-VARIABLE}
 The trace message of a trace packet
 instruction has the form:
 \begin{indpar}
     {\em trace-header}\TT{:} ~
     {\em trace-packet-message} ~
-    \{\TT{,} {\em trace-packet-variable}\TT{=}{\em value} \} \STAR{}
+    \{\TT{,} {\em trace-variable}\TT{=}{\em value} \} \STAR{}
 \end{indpar}
 
 For a trace packet instruction
 \TT{module->\EOL trace\_\EOL info[i]} is the MIN label
 \begin{center}
 \vspace*{-1ex}
-\TT{[<} {\em trace-packet-message} ~ {\em trace-packet-variable}\STAR{} \TT{>]}
+\TT{[<} {\em trace-packet-message} ~ {\em trace-variable}\STAR{} \TT{>]}
 \end{center}
 If \TT{module->\EOL trace\_\EOL info[i]} is not a MIN label with at
 least one element, then just the {\em trace-header} is output.
@@ -1663,17 +1663,17 @@ Special Trace Packet Instructions: &
 \end{center}
 
 For standard trace packet instructions, the compiler must push
-the values of the trace packet variables into the stack just
+the values of the trace variables into the stack just
 before the instruction.  Then the instruction is traced before
 it is executed, if tracing the instruction is enabled.  Lastly
-the instruction execution pops the trace packet variable
+the instruction execution pops the trace variable
 values from the stack, which is why instructions such as \TT{NOP} and
 \TT{TRACE}
 can pop stack values.  This trace variable pushing and popping are made
 invisible to the programmer by the compiler.
 
 The special trace packet instructions do \underline{no} pushing and popping
-of trace packet variable values, and sometimes use the trace packet
+of trace variable values, and sometimes use the trace packet
 of an instruction related to them rather than a trace packet of their
 own.  Specifically:
 
@@ -1686,28 +1686,28 @@ own.  Specifically:
 \TT{ENDL}/\TT{CONT}  & Uses the trace packet of the associated \TT{BEGL},
                        with the \TT{next-\ldots} variable values in the
 		       stack \underline{after} the \TT{ENDL} or \TT{CONT}
-		       has been executed as the trace packet variables.
+		       has been executed as the trace variables.
 		       At this time these \TT{next-\ldots} variable values
 		       are a copy of the loop variable values for the next
 		       iteration.
 \\[0.5ex]
 \TT{CALL\ldots}  & Uses the trace packet of the associated \TT{BEGF},
                    with the argument values in the stack as the trace
-		   packet variable values. 
+		   variable values. 
 		   Also the {\em op-code}
 		   in the {\em trace-header} is replaced by
 		   \TT{CALL\ldots{} to BEGF}.
 \\[0.5ex]
 \TT{RET}/\TT{ENDF}  & Uses the trace packet of the associated \TT{CALL},
                    with the return values in the stack as the trace
-		   packet variable values.
+		   variable values.
 		   Also the {\em op-code}
 		   in the {\em trace-header} is replaced by
 		   \TT{RET to CALL\ldots} or \TT{ENDF to CALL\ldots}.
 \end{tabular}
 \end{center}
 
-Note: The compiler should make the trace packet variables of a \TT{BEGL}
+Note: The compiler should make the trace variables of a \TT{BEGL}
 match the names actually used in source code to refer to the loop
 variables, and similarly for \TT{BEGF} and arguments and \TT{CALL\ldots}
 and return values.
@@ -2172,7 +2172,7 @@ it is assigned as its index the number of variables in the table before
 it is added.
 
 Note that trace values (values of
-trace packet variables\pagnote{TRACE-PACKET-VARIABLE}) in the process
+trace variables\pagnote{TRACE-VARIABLE}) in the process
 stack are \underline{not} recorded in the compiler variables stack when their
 {\tt PUSH\ldots}~instructions are output.
 
@@ -2317,9 +2317,9 @@ number \TT{1}).  The first {\em code-vector-location} is \TT{0}.
 plus {\tt stack\_offset} and is the compiler variable stack length
 \underline{after} the instruction is ouput.  In particular,
 for {\tt PUSH\ldots} instructions
-that push {\em trace-packet-variables}\pagnote{TRACE-PACKET-VARIABLE}
+that push {\em trace-variables}\pagnote{TRACE-VARIABLE}
 {\tt stack\_offset} is set to
-the number of {\em trace-packet-variables} pushed so far, as
+the number of {\em trace-variables} pushed so far, as
 these instructions do not update {\tt var\_stack\_length}.
 The {\em trace-depth} is printed only if it is not zero,
 and the {\em trace-info} is printed only if it is not \TT{min::MISSING()}.
@@ -2452,7 +2452,7 @@ its {\tt op\_code} and {\tt trace\_class} (which can be set to {\tt 0}
 so it will then be set by {\tt mexstack::push\_instr}).  The compiler must then
 compute the instruction's position {\tt pp} and {\tt trace\_info}.
 If the {\tt trace\_info} has
-trace packet variables\pagnote{TRACE-PACKET-VARIABLE}, the
+trace variables\pagnote{TRACE-VARIABLE}, the
 compiler must output push instructions using
 {\tt mexstack::\EOL push\_\EOL push\_\EOL instr}
 to push the corresponding trace values into the process stack.
@@ -2721,8 +2721,9 @@ current lexical level (without modifying any pending jumps).
 \key{MEXAS} is an assembly language for MEX.  The \ttkey{mexas}
 assembler can be use as a MEX compiler.
 
-MEXAS is a tool for debugging MEX and a rough prototype for more
-advanced MEX compilers.
+MEXAS serves as a prototype for more advanced MEX compilers
+and as a tool for debugging MEX and the {\tt mexcom} and
+{\tt mexstack} compiler components.
 
 \subsection{MEXAS Syntax}
 \label{MEXAS-SYNTAX}
@@ -2794,233 +2795,27 @@ lexeme (\TT{\textbackslash}) must be lexemes surrounded by whitespace.
 Illegal characters are replaced by \TT{\#} and become part of the
 current lexeme or comment.  An error message accompanies such replacement.
 
-\subsection{Lexical Level and Depth}
-\label{LEXICAL-LEVEL-AND-DEPTH}
+\subsection{Interface with MEX Compiler Components}
+\label{INTERFACE-WITH-MEX-COMPILER-COMPONENTS}
 
-Functions are bracketed with \TT{BEGF} and \TT{ENDF}
-and have a \key{lexical level}.  The lexical level of a function
-that is \underline{not} inside any other function is \TT{1}.
-The lexical level of any other function $F$ is one plus the lexical
-level of the smallest function containing $F$.
-The lexical level of an instruction
-is that of the smallest function containing the instruction.
-The lexical level of instructions
-that are \underline{not} inside any function is \TT{0}.
+{\tt MEXAS} uses the concepts, data, and functions of the
+{\tt mexcom} and {\tt mexstack} MEX compiler components
 
-Code also contains (non-function) \skey{block}s that are
-bracketed with either \TT{BEG} and \TT{END} or with
-\TT{BEGL} and \TT{ENDL}.  A block has a \key{container}
-and within the container a \key{depth}.
-A block not inside a function has the module as its container.
-The container of a block inside a function is the smallest
-function containing the block.
+Specifically {\tt MEXAS} implements a variable stack and a function stack.
+{\tt MEXAS} does not have function variables, but does permit functions
+with no arguments to be referenced in {\tt CALL} statements.
 
-The depth of a block that is not inside any other block with
-the same container is \TT{1}.  The depth of any other block $B$
-is one plus the depth of the smallest block containing $B$.
-The depth of an instruction
-is that of the smallest block containing the instruction.
-The depth of instructions in a container
-that are \underline{not} inside any block that is in the container
-is \TT{0}.
-
-\subsection{Assembler Stacks}
-\label{ASSEMBLER-STACKS}
-
-The assembler maintains several stacks during assembly.
-
-The assembler's \key{variable stack} mirrors the stack of
-the process during execution.  Each variable stack
-element specifies the lexical level and depth of the
-instruction that created the stack element, and optionally
-assigns a name to the stack element.  These names are the
-variable names of the assembly, and can be used in
-push and pop instructions to name stack elements read or
-written.
-
-When assembled, most instructions manipulate the variable
-stack just as they will manipulate the process stack
-when executed.  The \TT{BEG} instruction does nothing
-but when the \TT{END} instruction is assembled, it pops
-from the end of the variable stack all elements with
-the same lexical level and depth as the \TT{END} instruction.
-\TT{BEGL} and \TT{ENDL} behave similarly, except that
-\TT{BEGL} pushes next variables into the variable stack
-(these have depth one less
-than that of the \TT{BEGL} and \TT{ENDL}: see Next Variables and Loops,
-\itemref{NEXT-VARIABLES-AND-LOOPS}).
-\TT{BEGF} and \TT{ENDF} behave similarly except that \TT{BEGF}
-pushes arguments into the variable stack (these have the same
-lexical level and depth as the \TT{BEGF} and \TT{ENDF}).
-
-Two instructions that treat the variable stack very differently
-from a process stack are \TT{CALL\ldots} and \TT{JMP}.  \TT{CALL\ldots}
-pops arguments from the variable stack and pushes returned values.
-\TT{JMP} does nothing to the variable stack, and the conditional
-jumps \TT{JMP\ldots} just pops two elements.
-
-In order to locate arguments in the variable stack, the assembler variable
-\TT{fp[$L$]} is maintained when a \TT{BEGF} is assembled as the
-variable stack size after argument elements are pushed into the
-variable stack by \TT{BEGF}: see \TT{BEGF}, \pagref{BEGF}.
-
-The assembler's \key{function stack} specifies the functions that
-can be called by a \TT{CALL\ldots} instruction.  \TT{BEGF} pushes
-a element with a name, lexical level, and depth, and behaves
-for the function stack like \TT{PUSH\ldots} does for the variable stack.
-\TT{END\ldots} instructions pop the function stack in the same manner as
-they pop the variable stack.
-
-At the end of assembly, the variable and function stacks hold
-elements of lexical level 0 and depth 0.  These stacks are then
-saved as the module's interface that allows global variables
-and lexical level 1 functions of the module to be accessed by
-other modules.
-
-Lastly the assembler maintains a \key{block stack} whose only
-purpose is to check that \TT{BEG\ldots} and \TT{END\ldots} instructions
-occur in matching pairs.
-
-\subsection{JMP Targets}
-\label{JMP-TARGETS}
-
-A {\em jmp-target} is a name\pagnote{NAME} that identifies
-a code vector index value which can be used by \TT{JMP\ldots}
-instructions as the point in the code vector to jump to.
-
-{\em Jmp-targets} are defined by \TT{LABEL} declarations
-of the form:
-\begin{center}
-\ttkey{LABEL} {\em jmp-target}
-\end{center}
-
-\TT{JMP\ldots} instructions are forward-referencing: their
-{\em jmp-targets} are defined by \TT{LABEL} declarations that
-occur in source code \underline{after} the \TT{JMP\ldots} instruction.
-To manage \TT{JMP\ldots} instructions and their targets,
-the assembler maintains a list of \skey{pending jumps}:
-that is, jumps whose {\em jmp-target} has not yet been
-declared.  When a \TT{LABEL} declaration is processed,
-the pending jump list is searched for matching jumps,
-and those that are found are resolved and removed from
-the list.  Resolving involves calculating the distance
-between the jump and its target, and the number of
-process stack elements the jump should pop.  Jump instructions
-are allowed to pop stack elements, but cannot push them.
-
-To allow this, an element of the pending jump list contains:
-\begin{enumerate}
-\item The location of the jump instruction so it can be updated
-when its target is found.
-\item The {\em jmp-target} name.
-\item The lexical level $L$ of the jump instruction.
-\item The maximum depth $D$ allowed for the target.
-\item The length $S$ of the variable stack just after the jump instruction
-      pops variable elements from the stack.
-\item The minimum $M$ of $S$ and all the variable stack lengths that have
-      occurred after \TT{END} or \TT{ENDL} instructions encountered
-      since the jump instruction was encountered.
-      $M\le S$.
-\end{enumerate}
-
-A \TT{JMP\ldots} instruction for which a legal target exists
-is called \key{resolvable}.  Other \TT{JMP\ldots} instructions
-are \key{unresolvable} and are in error.
-
-The following instructions/declarations act on the pending jump list:
-
-\ttkey{JMP\dots} {\em jmp-target}
-\begin{indpar}
-Add an element to the pending jmp list with $L$, $D$,
-$S$ set to their current values and $M=S$.
-\end{indpar}
-
-\ttkey{END}/\ttkey{ENDL}
-\begin{indpar}
-For all pending jumps whose $D$ is equal to that
-of the \TT{END}/\TT{ENDL}, decrement that $D$ by 1.
-
-For all pending jumps whose $M$ is greater than the
-variable stack length $s$ will be after the \TT{END}/\TT{ENDL},
-decrease their $M$ to $s$.
-\end{indpar}
-
-\ttkey{LABEL} {\em jmp-target}\label{LABEL}
-\begin{indpar}
-Search the pending jump list for matching elements with $L$ equal
-to the current lexical level and $D$ not less than the current
-depth, resolve these, and remove them from
-the pending jmp list.
-\end{indpar}
-
-\ttkey{ENDF}
-\begin{indpar}
-Search the pending jump list for elements with $L$ equal to the
-lexical level of the \TT{ENDF} and remove them as being unresolvable,
-and therefore in error.
-\end{indpar}
-
-{\bf Jump Stack Rule}: When a jump list element is resolved, its $M$
-must equal the length of the stack when the resolving \TT{LABEL}
-is encountered.
-
-The following illustrate this rule when the jump does \underline{not}
-reduce depth and $M$ = the variables stack length just after the
-\TT{JMP\ldots} is compiled:
-
-Example 1:
-\begin{indpar}\begin{verbatim}
-// Program to calculate minimum ( X, Y ) in stack.
-//
-// Stack length is S
-PUSH X
-PUSH Y
-// Stack length is S + 2
-JMPLT ITS-X    // M = S
-// Stack length is S
-PUSH Y
-// Stack length is S + 1
-JMP DONE       // M = S + 1
-// Stack length is S + 1
-LABEL ITS-X    // JMPLT ITS-X *illegal*, M == S != S + 1
-PUSH X
-// Stack length is S + 2
-LABEL DONE     // JMP DONE *illegal*, M == S + 1 != S + 2
-// Stack length is S + 2
-\end{verbatim}\end{indpar}
-
-Example 2:
-\begin{indpar}\begin{verbatim}
-// Program to calculate minimum ( X, Y ) in stack.
-//
-// Stack length is S
-PUSH 0 Z
-// Stack length is S + 1
-BEG
-    // Stack length is S + 1
-    PUSH X
-    PUSH Y
-    // Stack length is S + 3
-    JMPLT ITS-X    // M = S + 1
-    // Stack length is S + 1
-    PUSH Y
-    // Stack length is S + 2
-    POP Z
-    // Stack length is S + 1
-    JMP DONE       // M = S + 1
-    // Stack length is S + 1
-    LABEL ITS-X    // JMPLT ITS-X legal, M == S + 1 == S + 1
-    PUSH X
-    // Stack length is S + 2
-    POP Z
-    // Stack length is S + 1
-    LABEL DONE    // JMP DONE legal, M == S + 1 == S + 1
-END
-// Stack length is S + 1
-\end{verbatim}\end{indpar}
+A variable in the variable stack has an index as specified by the
+{\tt mexstack} component.  A function in the function stack
+has an index equal the location of its {\tt BEGF} instruction.
+After a module is assembled,
+it is executed, and then the variable and function stacks are
+encoded in the module interface that maps variable and function names
+to indices.
 
 
-
+ combine these tables, so
+ variables and functions are all in one table. However for varia
 \subsection{MEXAS Instructions}
 \label{MEXAS-INSTRUCTIONS}
 
@@ -3048,7 +2843,8 @@ The {\em new-variable-name}
 must \underline{not} be the same as the name of any variable of
 less lexical level or depth than the instruction, or the same name
 as that of an argument of a function (see \TT{BEGF}).  Note that the
-\TT{next-} variables of a loop have depth one less than the instructions
+\TT{next-} variables\pagnote{NEXT-VARIABLE}
+of a loop have depth one less than the instructions
 in the loop.
 
 If {\em new-variable-name} is missing or `\TT{*}',
@@ -3079,6 +2875,31 @@ and some have {\em trace-packet} arguments, where:
 These specify the {\em trace-info} for the instructions:
 see Trace-Packet Based Trace Messages,
 \itemref{TRACE-PACKET-BASED-TRACE-MESSAGES}.
+\item To assemble a run-time instruction, MEXAS first adjusts the
+variable stack to correspond its desired state \underline{after}
+the instruction executes, and \underline{then} calls a {\tt mexstack} function
+(such as {\tt push\_instr} or {\tt begx}) to push the instruction
+into the module code vector.
+
+One exception is the {\tt BEGF} instruction: the argument variables are
+pushed into the variables stack \underline{after} calling {\tt begx}
+(which calls {\tt push\_instr}).
+
+The other exception involves trace variables.  These are handled by
+calling {\tt push\_push\_\EOL instr} for each trace variable \underline{before}
+assembling the run-time instruction.  Trace variables are \underline{not}
+pushed into the assembler variable stack.
+Each call to {\tt push\_push\_instr} has a {\tt stack\_offset} argument
+equal to the number of trace variables pushed so far for the run-time
+instruction, beginning with the number {\tt 1} for the first trace variable.
+\item
+In describing the MEXAS statements that output a run-time instruction,
+we describe what the assembler does to the variable stack, pending
+jump list, etc., but omit reference to outputting the instructions to the
+module code vector (including instructions to push trace variable values).
+Thus when we say that the assembler does nothing for {\tt NOP}, {\tt TRACE},
+{\tt WARN}, and {\tt ERROR},
+we mean nothing but outputting instructions to the module code vector.
 \end{enumerate}
 
 \needspace{15\baselineskip}
@@ -3184,7 +3005,7 @@ or in a different module.
 At run-time this instruction's actions are as described in
 Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}.  At assembly-time,
 this instruction adds an element to the pending jump
-list (see JMP Targets, \itemref{JMP-TARGETS}).
+list (see JMP Management, \itemref{MEX-STACK-COMPONENT-JMP-MANAGEMENT}).
 \end{indpar}
 
 \ttkey{JMP\ldots} ~ {\em jmp-target}
@@ -3195,7 +3016,7 @@ At run-time these instruction's actions are as described in
 Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}.  At assembly-time,
 these instructions pop two elements from the variable stack
 and then add an element to the pending jump list
-(see JMP Targets, \itemref{JMP-TARGETS}).
+(see JMP Management, \itemref{MEX-STACK-COMPONENT-JMP-MANAGEMENT}).
 
 Note that
 the pending jump list element
@@ -3217,7 +3038,7 @@ Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}.  At assembly-time,
 it pops from the variable and function stacks all elements with the
 same lexical level and depth as the \TT{END} instruction, then
 decrements the depth, then updates the jump list
-(see JMP Targets, \itemref{JMP-TARGETS}).
+(see JMP Management, \itemref{MEX-STACK-COMPONENT-JMP-MANAGEMENT}).
 \end{indpar}
 
 \ttkey{BEGL} ~ {\em nnext} ~ {\em trace-message}\QMARK{}
@@ -3234,7 +3055,8 @@ and depth,
 then pushes {\em nnext} variable stack elements with current lexical
 level and depth
 and with names derived from their {\em nnext}'th predecessor
-in the stack by adding the prefix `\TT{next-}.' to the predecessor's
+in the stack by adding the prefix `\TT{next-}'\label{NEXT-VARIABLE}
+to the predecessor's
 name.  Then this instruction increments the current instruction depth.
 
 Thus for example, if the top two stack elements have names
@@ -3410,7 +3232,8 @@ this instruction does nothing.
 
 \ttkey{LABEL} ~ {\em jmp-target}
 \begin{indpar}
-See \pagref{LABEL}.
+This statement just calls {\tt mexstack::jmp\_target} with the given
+{\tt jmp-target} name.
 \end{indpar}
 
 \ttkey{STACKS}
