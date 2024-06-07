@@ -2,7 +2,7 @@
 //
 // File:	mexstack.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Jun  6 11:35:20 EDT 2024
+// Date:	Thu Jun  6 21:06:03 EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -225,7 +225,7 @@ unsigned mexstack::jmp_target
 	    break;
 	if ( target == next->target
 	     &&
-	     next->minimum_depth >= mexstack::depth[L] )
+	     next->minimum_depth == mexstack::depth[L] )
 	{
 	    min::uns32 depth_diff =
 	        next->depth - mexstack::depth[L];

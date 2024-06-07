@@ -2565,11 +2565,10 @@ There is no {\tt ENDF} instruction between the
 Equivalently, the smallest function containing the {\tt jmp\_target}
 is the same as the smallest function containing the {\tt JMP\ldots}
 (or both are outside any function).
-\item The depth when {\tt jmp\_target} is called is equal to or less
-than $MD$.
-Equivalently, the call to {\tt jmp\_target} is not inside a block whose
-{\tt BEG/BEGL} instruction is between the {\tt JMP\ldots}~and
-the {\tt jmp\_target}.
+\item The depth when {\tt jmp\_target} is called is \underline{equals} $MD$.
+Equivalently, the smallest block containing the {\tt jmp\_target}
+also contains the {\tt JMP\ldots}~instruction (which may be in an even
+smaller block).
 \item The value of {\tt var\_stack\_length} when {\tt jmp\_target}
 is called \underline{equals} $MS$.
 \end{enumerate}
@@ -2578,11 +2577,11 @@ A \TT{JMP\ldots} instruction for which a legal target exists
 is called \key{resolvable}.  Other \TT{JMP\ldots} instructions
 are \key{unresolvable} and are in error.
 
-The following MEXAS assembler program illustrates this
+The following MEXAS assembler programs illustrate this
 rule when the jump does \underline{not}
 reduce depth and $M$ = the variables stack length just after the
-\TT{JMP\ldots} is compiled (in MEXAS the {\tt LABEL} statements
-call {\tt jmp\_target}):
+\TT{JMP\ldots} is compiled (in MEXAS a {\tt LABEL} statement
+just calls {\tt jmp\_target}):
 
 Example 1:
 \begin{indpar}\begin{verbatim}
