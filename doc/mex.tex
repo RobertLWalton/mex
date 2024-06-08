@@ -2972,8 +2972,8 @@ At assembly time, pushes into the variable stack an
 element with {\em new-variable-name} as its name.
 
 The search for {\em variable-name} begins with the entire variable
-stack and proceeds through the variable stacks of previously assembled modules,
-most recently assembled module first.
+stack and proceeds through the variable stacks of previously assembled modules
+in most recently assembled first order.
 \TT{PUSH} assembles
 to the runtime instruction \TT{PUSHS}, \TT{PUSHL}, \TT{PUSHG},
 or \TT{PUSHA}, depending on the location of the variable.
@@ -3122,11 +3122,6 @@ represent the arguments to the function).
 The number of {\em variable-names} can be less than,
 but may \underline{not} be greater than, the number of actual
 arguments.
-
-Lastly the instruction saves the current variable stack size
-in the assembly-time variable fp[$L$],
-where $L$ is the lexical level of the \TT{BEGF}
-instruction.  This is used to implement \TT{PUSHA}.
 \end{indpar}
 
 \ttkey{ENDF} ~ {\em trace-message}\QMARK{}
@@ -3148,7 +3143,7 @@ the associated \TT{BEGF} instruction, and clear the pending jmp list.
 \begin{indpar}
 At run-time this instruction's actions are as described in
 Figure~\itemref{FUNCTION-INSTRUCTIONS}.  At assembly-time,
-it pops from the variable variable stack {\em nargs} values
+it pops from the variable variable stack {\em nargs} variables
 and pushes into the stack one element for each {\em variable-name}
 (representing the results of the function execution).
 The number of {\em variable-names} \underline{must} equal
@@ -3163,7 +3158,7 @@ The {\em function-name} is searched for in the function stack.
 \begin{indpar}
 At run-time this instruction's actions are as described in
 Figure~\itemref{FUNCTION-INSTRUCTIONS}.  At assembly-time,
-the actions are the same as for \TT{CALL}.
+the actions are the same as for \TT{CALLM}.
 
 The {\em function-name} is searched for in the function stack of
 the previously assembled module named, as it is at the
@@ -3177,7 +3172,7 @@ of the module are present in this stack).
 \begin{indpar}
 This instruction searches for the {\em function-name} first in the function
 stack and then in the function stacks of the previously assembled
-modules in the order in which they were assembled.  It then
+modules, in most recently assembled first order.  It then
 assembles to \TT{CALLM} or \TT{CALLG}.
 \end{indpar}
 
