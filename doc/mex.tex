@@ -2224,7 +2224,7 @@ The {\tt mexstack::init} function (see below) zeros these variables.
 level of the next instruction to be output by the compiler.
 {\tt Depth[$L$]} is the current depth of level $L\leq${lexical\_level}.
 
-{\tt Lp[$L$]} is the index of the first variable of level $L$ in the
+{\tt Lp[$L$]}\label{LP} is the index of the first variable of level $L$ in the
 variable stack, or more specifically, for any variable of index $i$,
 $i<${\tt lp[$L$]} if and only if the variable has level $<L$.
 
@@ -3015,9 +3015,9 @@ or in a different module.
 \begin{indpar}
 At run-time this instruction's actions are as described in
 Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}.  At assembly-time,
-this instruction adds an element to the pending jump list
-(by calling
-{\tt mexstack::push\_\EOL jmp\_instr}\pagnote{PUSH-JMP-INSTR}).
+this instruction 
+calls {\tt mexstack::push\_\EOL jmp\_instr}\pagnote{PUSH-JMP-INSTR}
+to add an element to the pending jump list.
 \end{indpar}
 
 \ttkey{JMP\ldots} ~ {\em jmp-target}
@@ -3026,10 +3026,10 @@ Here \ldots~denotes one of \TT{EQ}, \TT{NE}, etc.
 
 At run-time these instruction's actions are as described in
 Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}.  At assembly-time,
-these instructions pop two elements from the variable stack
-and then add an element to the pending jump list
-(by calling
-{\tt mexstack::push\_\EOL jmp\_instr}\pagnote{PUSH-JMP-INSTR}).
+these instructions first pop two elements from the variable stack
+and then
+call {\tt mexstack::\EOL push\_\EOL jmp\_instr}\pagnote{PUSH-JMP-INSTR}
+to add an element to the pending jump list.
 
 Note that
 the pending jump list element
@@ -3041,19 +3041,20 @@ the two elements are popped.
 \begin{indpar}
 At run-time this instruction's actions are as described in
 Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}.  At assembly-time,
-\TT{BEG} increments the depth and sets {\tt stack\_limit}\pagnote{STACK-LIMIT}
-(by calling {\tt mexstack::begx}\pagnote{BEGX}).
+calls {\tt mexstack::begx}\pagnote{BEGX} to
+increment the depth and set the {\tt stack\_limit}\pagnote{STACK-LIMIT}.
 \end{indpar}
 
 \ttkey{END} ~ {\em trace-packet}\QMARK{}
 \begin{indpar}
 At run-time this instruction's actions are as described in
-Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}.  At assembly-time,
-it pops from the variable and function stacks all elements with the
-same lexical level and depth as the \TT{END} instruction, resets
+Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}.
+At assembly-time,
+calls {\tt mexstack::endx}\pagnote{ENDX} to
+pop from the variable and function stacks all elements with the
+same lexical level and depth as the \TT{END} instruction, reset
 {\tt stack\_limit} to its value when the companion {\tt BEG} was encountered,
-decrements the depth, and updates the pending jmp list
-(all by calling {\tt mexstack::endx}\pagnote{ENDX}).
+decrement the depth, and update the pending jmp list.
 \end{indpar}
 
 \ttkey{BEGL} ~ {\em nnext} ~ {\em trace-message}\QMARK{}
@@ -3072,7 +3073,12 @@ level and depth
 and with names derived from their {\em nnext}'th predecessor
 in the stack by adding the prefix `\TT{next-}'\label{NEXT-VARIABLE}
 to the predecessor's
-name.  Then this instruction increments the current instruction depth.
+name.
+
+Then this instruction calls
+{\tt mexstack::begx}\pagnote{BEGX} to increment
+the current instruction depth and set the
+{\tt stack\_limit}\pagnote{STACK-LIMIT}.
 
 Thus for example, if the top two stack elements have names
 \TT{X} and \TT{Y} and {\em nnext} is \TT{2}, the two elements
@@ -3092,7 +3098,9 @@ Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}.  At assembly-time,
 \begin{indpar}
 At run-time this instruction's actions are as described in
 Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}.  At assembly-time,
-this instruction does nothing.
+this instruction does nothing (i.e., it calls {\tt mexstack::cont}\pagnote{CONT}
+which does nothing but fill in instruction fields and push the instruction
+into the module code vector).
 \end{indpar}
 
 \ttkey{BEGF}\label{BEGF} ~ {\em function-name} ~ {\em variable-name}\STAR{} ~
@@ -3102,8 +3110,12 @@ At run-time this instruction's actions are as described in
 Figure~\itemref{FUNCTION-INSTRUCTIONS}.  At assembly-time,
 this instruction first pushes an element with the {\em function-name}
 into the function stack.
-Then this instruction increments the current lexical level
-and sets the current depth to zero.
+
+Then this instruction calls {\tt mexstack::begx}\pagnote{BEGX}
+to increment the current lexical level to $L$, set the current depth to zero,
+and set {\tt stack\_limit}\pagnote{STACK-LIMIT},
+{\tt lp[$L$]}\pagnote{LP}, and {\tt fp[$L$]}.
+
 Lastly this instruction pushes one element with each
 of the {\em variable-names} into the variable stack (they
 represent the arguments to the function).
@@ -3120,11 +3132,15 @@ instruction.  This is used to implement \TT{PUSHA}.
 \ttkey{ENDF} ~ {\em trace-message}\QMARK{}
 \begin{indpar}
 At run-time this instruction's actions are as described in
-Figure~\itemref{FUNCTION-INSTRUCTIONS}.  At assembly-time,
-it pops from the variable and function stacks all elements with the
-same lexical level as the \TT{ENDF} instruction, and then restores
+Figure~\itemref{FUNCTION-INSTRUCTIONS}.
+At assembly-time,
+calls {\tt mexstack::endx}\pagnote{ENDX} to
+pop from the variable and function stacks all elements with the
+same lexical level as the \TT{ENDF} instruction,
+restore 
+{\tt stack\_limit} and
 the current lexical level and depth to what they were before
-the associated \TT{BEGF} instruction.
+the associated \TT{BEGF} instruction, and clear the pending jmp list.
 \end{indpar}
 
 \ttkey{CALLM} ~ {\em function-name} ~ {\em nargs} ~
