@@ -2282,7 +2282,7 @@ The {\tt mexstack::init} function (see below) zeros {\tt lexical\_level},
 \verb|}| \\
 \verb|mexstack::print mexstack::| \MEXCOMKEY{print\_switch}
     \verb|= mexstack::NO_PRINT| \\
-\verb|void mexstack::| \MEXCOMKEY{print\_instr} \\
+\verb|void mexstack::| \MEXCOMKEY{print\_instr}\label{PRINT-INSTR} \\
 \verb|        ( min::uns32 location,| \\
 \verb|          bool no_source = false,| \\
 \verb|          min::int32 stack_offset = 0 )|
@@ -3340,15 +3340,15 @@ A {\em mexas-operation} is effective for all subsequent
 until an \TT{-o:off} is encountered.
 
 Details are:
-\begin{center}
-\begin{tabular}{lp{4.5in}}
+\begin{indpar}\begin{tabular}{p{1.3in}p{4.4in}}
 {\em mexas-filname} & Name of file, usually ending in \TT{.mex}, containing
                       instructions as described in
                       MEXAS Instructions, \itemref{MEXAS-INSTRUCTIONS}.
 		      The file is assembled as a module and given the
 		      filename minus any \TT{.mex} extension as its
 		      module name.
-\\[0.5ex]
+\end{tabular}\end{indpar}
+\begin{indpar}\begin{tabular}{p{1.3in}p{4.4in}}
 \begin{tabular}[t]{@{}l@{}}
 \TT{-pa} \\
 \TT{-pasource} \\
@@ -3357,9 +3357,9 @@ Details are:
                       it is assembled, and if so, whether source lines
 		      from the file are printed before the instruction.
 		      Default is \TT{-paoff}.
-		      See Assembled Instruction Printing,
-		      \itemref{ASSEMBLED-INSTRUCTION-PRINTING}.
-\\[0.5ex]
+		      See {\tt mexstack::print\_instr}\pagnote{PRINT-INSTR}.
+\end{tabular}\end{indpar}
+\begin{indpar}\begin{tabular}{p{1.3in}p{4.4in}}
 \TT{-tcnever}	    & Determines the trace class of an assembled instruction. \\
 \label{-TCNEVER}
 \TT{-tcnormal}	    & \TT{-tcnormal} sets the trace class of the op code
@@ -3374,19 +3374,22 @@ Details are:
 		      can\underline{not} be listed: their flags are always
 		      on and off, respectively.
 		      Default is \TT{-tc:NONE}.
-\\[0.5ex]
+\end{tabular}\end{indpar}
+\begin{indpar}\begin{tabular}{p{1.3in}p{4.4in}}
 \TT{-ex:}{\em ex-list}
 		    & Sets the process \TT{excepts\_mask} at the start of mex
 		      program execution.
 		      Default is \TT{-ex:DIVBYZERO,INVALID,OVERFLOW}.
-\\[0.5ex]
+\end{tabular}\end{indpar}
+\begin{indpar}\begin{tabular}{p{1.3in}p{4.4in}}
 \begin{tabular}[t]{@{}l@{}}
 \TT{-o:off} \\
 \TT{-o:on} \\
 \end{tabular}	    & Sets the process \TT{optimize} flag \TT{on} or \TT{off}
                       at the start of mex program execution.
 		      Default is \TT{-o:off}.
-\\[0.5ex]
+\end{tabular}\end{indpar}
+\begin{indpar}\begin{tabular}{p{1.3in}p{4.4in}}
 \TT{-counter} $L$   & Sets the process \TT{counter\_limit} to integer $L$.
 \\[0.5ex]
 \TT{-stack} $L$	    & Sets the process \TT{max\_length} (stack size)
@@ -3395,7 +3398,8 @@ Details are:
 \TT{-return-stack} $L$
 		    & Sets the process \TT{return\_stack->max\_length}
 		      (return stack size) to integer $L$.
-\\[0.5ex]
+\end{tabular}\end{indpar}
+\begin{indpar}\begin{tabular}{p{1.3in}p{4.4in}}
 \TT{-r} {\em function-name}
                     & Calls the named function, which must be of lexical
 		      level 1 in some previously assembled module.
@@ -3404,46 +3408,7 @@ Details are:
 \\[0.5ex]
 		    & The function must take no arguments and return no
 		      results.
-\end{tabular}
-\end{center}
-
-
-\subsubsection{Assembled Instruction Printing}
-\label{ASSEMBLED-INSTRUCTION-PRINTING}
-
-The printout of an assembled instruction begins with the source
-lines of the code that contained the instruction, if this is
-enabled.  All source lines after the line ending the previous
-instruction are printed.
-
-An instruction printout has the syntax:
-\begin{indpar}
-\emkey{instruction-printout} ::= \\
-\hspace*{2em} {\em printout-header}
-    \begin{tabular}[t]{l}
-    {\em op-code} \TT{T\_}{\em trace-class}
-               \{ \TT{[} {\em trace-depth} \TT{]} \}\QMARK{} \\
-    {\em immedA} {\em immedB} {\em immedC} {\em immedD}
-	       \{ \TT{;} {\em trace-info} \}\QMARK{} \\
-    \end{tabular}
-\\[0.5ex]
-\emkey{printout-header} ::=
-    \TT{[}{\em line-number}\TT{:}{\em code-vector-location}%
-                        \TT{,}{\em variables-stack-length} \TT{]}
-\end{indpar}
-The {\em line-number} is the number of the \underline{last} source code
-line containing code that generated the instruction (the first file line is
-number \TT{1}).  The first {\em code-vector-location} is \TT{0}.
-The {\em variables-stack-length} is the value \underline{before}
-the instruction
-is assembled. The {\em trace-depth} is printed only if it is not zero,
-and the {\em trace-info} is printed only if it is not \TT{min::MISSING()}.
-
-In some cases assembling an instruction or declaration (e.g., \TT{LABEL})
-modifies a previously assembled instruction.  In these cases the
-modified previously assembled instruction is printed just after it has
-been modified, and before any instruction currently being assembled.
-
+\end{tabular}\end{indpar}
 
 \clearpage
 
