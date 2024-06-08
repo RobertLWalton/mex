@@ -244,7 +244,7 @@
 
 \author{Robert L. Walton}
 
-\date{June 7, 2024}
+\date{June 8, 2024}
  
 \maketitle
 
@@ -2237,7 +2237,7 @@ Recall that level $0$ is the module code outside all functions,
 so {\tt lp[0] = fp[0] = 0}.
 
 {\tt Stack\_limit} is set so that for a variable of index
-{\tt $i$ < stack\_limit}:
+{\tt $i$ < stack\_limit}\label{STACK-LIMIT}:
 \begin{enumerate}
 \item The variable cannot be popped from the stack by instructions
 that do \underline{not} decrease either {\tt lexical\_level} or
@@ -2355,7 +2355,8 @@ location and the {\tt no\_source} and {\tt stack\_offset}
 arguments.
 \end{indpar}
 
-\verb|void mexstack:| \MEXSTACKKEY{push\_push\_instr} \\
+\verb|void mexstack:| \MEXSTACKKEY{push\_push\_instr}
+                      \label{PUSH-PUSH-INSTR} \\
 \verb|    ( min::gen new_name, min::gen old_name,| \\
 \verb|      min::ins32 index,| \\
 \verb|      const min::phrase_position & pp =| \\
@@ -2425,21 +2426,21 @@ This encoding is done by {\tt mexstack} functions described below.
 To output a {\tt BEG\ldots}, {\tt END\ldots}, or {\tt CONT} instruction,
 the compiler must call one of these functions.
 
-\verb|void mexstack:| \MEXSTACKKEY{begx} \\
+\verb|void mexstack:| \MEXSTACKKEY{begx} \label{BEGX} \\
 \verb|    ( mex::instr & instr,| \\
 \verb|      min::uns32 nvars, min::uns32 tvars,| \\
 \verb|      min::gen trace_info = min::MISSING(),| \\
 \verb|      const min::phrase_position & pp =| \\
 \verb|          min::MISSING_PHRASE_POSITION )|
 \\[0.5ex]
-\verb|void mexstack:| \MEXSTACKKEY{endx} \\
+\verb|void mexstack:| \MEXSTACKKEY{endx} \label{ENDX} \\
 \verb|    ( mex::instr & instr,| \\
 \verb|      min::uns32 tvars,| \\
 \verb|      min::gen trace_info = min::MISSING(),| \\
 \verb|      const min::phrase_position & pp =| \\
 \verb|          min::MISSING_PHRASE_POSITION )|
 \\[0.5ex]
-\verb|void mexstack:| \MEXSTACKKEY{cont} \\
+\verb|void mexstack:| \MEXSTACKKEY{cont} \label{CONT} \\
 \verb|    ( mex::instr & instr,| \\
 \verb|      min::uns32 tvars,| \\
 \verb|      min::gen trace_info = min::MISSING(),| \\
@@ -2637,7 +2638,8 @@ END
 The following are the {\tt mexstack} {\tt JMP}
 management functions:
 
-\verb|void mexstack:| \MEXSTACKKEY{push\_jmp\_instr} \\
+\verb|void mexstack:| \MEXSTACKKEY{push\_jmp\_instr}
+		      \label{PUSH-JMP-INSTR} \\
 \verb|        ( mex::instr & instr,| \\
 \verb|          min::gen target,| \\
 \verb|          const min::phrase_position & pp =| \\
@@ -2842,7 +2844,10 @@ that names an element being pushed to the variables stack.
 The {\em new-variable-name}
 must \underline{not} be the same as the name of any variable of
 less lexical level or depth than the instruction, or the same name
-as that of an argument of a function (see \TT{BEGF}).  Note that the
+as that of an argument of a function (specifically, must not have the same
+name as a variable whose index is
+{\tt < mexas::stack\_limit}\pagnote{STACK-LIMIT}).
+Note that the
 \TT{next-} variables\pagnote{NEXT-VARIABLE}
 of a loop have depth one less than the instructions
 in the loop.
@@ -2909,7 +2914,8 @@ Given the above notes, the instruction descriptions are:
 {\em aop} ~ {\em new-variable-name}\QMARK{}
 \begin{indpar}
 Here {\em aop} is any arithmetic operation code from
-Figure~\itemref{ARITHMETIC-INSTRUCTIONS}, and the run-time
+Figure~\itemref{ARITHMETIC-INSTRUCTIONS}, except {\tt POWI},
+and the run-time
 action of the instruction is specified in that figure.
 
 At assembly-time the same number of elements are popped from the variable stack
@@ -2961,22 +2967,27 @@ of the module are present in this stack).
              {\em new-variable-name}\QMARK{}
 \begin{indpar}
 At run-time, pushes into the process stack a copy of the variable
-named in the variable stack or global variable vector.
+named in the variable stack or previously assembled module variable stack.
 At assembly time, pushes into the variable stack an
 element with {\em new-variable-name} as its name.
 
 The search for {\em variable-name} begins with the entire variable
-stack and proceeds through the variable stacks of previously assembled modules
-in the order that the modules were assembled.  \TT{PUSH} assembles
+stack and proceeds through the variable stacks of previously assembled modules,
+most recently assembled module first.
+\TT{PUSH} assembles
 to the runtime instruction \TT{PUSHS}, \TT{PUSHL}, \TT{PUSHG},
 or \TT{PUSHA}, depending on the location of the variable.
+
+(If the variable name is in the variable stack,
+{\tt mexstack::push\_\EOL push\_instr}\pagnote{PUSH-PUSH-INSTR}
+is called.  Otherwise {\tt PUSHG} is used.)
 \end{indpar}
 
 \ttkey{PUSHI} ~ {\em number} ~ {\em new-variable-name}\QMARK{}
 \begin{indpar}
 At run-time, pushes into the process stack a copy of
 the {\em number}\pagnote{NUMBER}.
-At assembly time, pushes into the variable stack an element
+At assembly time, pushes into the variable stack an
 element with {\em new-variable-name} as its name.
 \end{indpar}
 
@@ -3004,8 +3015,9 @@ or in a different module.
 \begin{indpar}
 At run-time this instruction's actions are as described in
 Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}.  At assembly-time,
-this instruction adds an element to the pending jump
-list (see JMP Management, \itemref{MEX-STACK-COMPONENT-JMP-MANAGEMENT}).
+this instruction adds an element to the pending jump list
+(by calling
+{\tt mexstack::push\_\EOL jmp\_instr}\pagnote{PUSH-JMP-INSTR}).
 \end{indpar}
 
 \ttkey{JMP\ldots} ~ {\em jmp-target}
@@ -3016,7 +3028,8 @@ At run-time these instruction's actions are as described in
 Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}.  At assembly-time,
 these instructions pop two elements from the variable stack
 and then add an element to the pending jump list
-(see JMP Management, \itemref{MEX-STACK-COMPONENT-JMP-MANAGEMENT}).
+(by calling
+{\tt mexstack::push\_\EOL jmp\_instr}\pagnote{PUSH-JMP-INSTR}).
 
 Note that
 the pending jump list element
@@ -3028,7 +3041,8 @@ the two elements are popped.
 \begin{indpar}
 At run-time this instruction's actions are as described in
 Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}.  At assembly-time,
-\TT{BEG} just increments the depth.
+\TT{BEG} increments the depth and sets {\tt stack\_limit}\pagnote{STACK-LIMIT}
+(by calling {\tt mexstack::begx}\pagnote{BEGX}).
 \end{indpar}
 
 \ttkey{END} ~ {\em trace-packet}\QMARK{}
@@ -3036,9 +3050,10 @@ Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}.  At assembly-time,
 At run-time this instruction's actions are as described in
 Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}.  At assembly-time,
 it pops from the variable and function stacks all elements with the
-same lexical level and depth as the \TT{END} instruction, then
-decrements the depth, then updates the jump list
-(see JMP Management, \itemref{MEX-STACK-COMPONENT-JMP-MANAGEMENT}).
+same lexical level and depth as the \TT{END} instruction, resets
+{\tt stack\_limit} to its value when the companion {\tt BEG} was encountered,
+decrements the depth, and updates the pending jmp list
+(all by calling {\tt mexstack::endx}\pagnote{ENDX}).
 \end{indpar}
 
 \ttkey{BEGL} ~ {\em nnext} ~ {\em trace-message}\QMARK{}
