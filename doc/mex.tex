@@ -244,7 +244,7 @@
 
 \author{Robert L. Walton}
 
-\date{June 8, 2024}
+\date{June 10, 2024}
  
 \maketitle
 
@@ -1993,10 +1993,9 @@ functions that can be shared among all these compilers.
 \subsection{MEX Basic Compiler Component}
 \label{MEX-BASIC-COMPILER-COMPONENT}
 
-The MEX basic compiler component provides a function to push an
-instruction into a module, compiler error and
-warning printing and counting functions, an instruction trace printing
-functions, and various data structures such as a stack of all the
+The MEX basic compiler component provides functions that print
+compiler error and warning messages and count errors and warnings.
+It also provides some data structures including a stack of all the
 modules compiled and information tables for op codes, trace classes,
 trace flags, and except masks.
 
@@ -2025,7 +2024,8 @@ The MEX basic compiler component is in the following:
 \begin{indpar}
 These must be set by the compiler to
 the {\tt mex::module} currently being compiled and
-its input file.
+its input file.  The printer used by the compiler is
+{\tt mexcom::input\_file->printer}.
 \end{indpar}
 
 \begin{tabular}{@{}r@{~~~}l}
@@ -2114,7 +2114,8 @@ For except named {\tt "XX"} with mask {\tt M = 1 <{}< FE\_XX}: \\
 Print error message (or warning message).  Increment
 {\tt mexcom::error\_count} (or increment {\tt mexcom::\EOL warning\_count}).
 If {\tt pp != min::\EOL MISSING\_\EOL PHRASE\_\EOL POSITION},
-print source lines after error message.  Printing is done using
+print source lines after error message, and print the source file name and
+source line numbers as part of the error message.  Printing is done using
 {\tt mexcom::\EOL input\_\EOL file} and
 {\tt mexcom::\EOL input\_\EOL file->\EOL printer}.
 \end{indpar}
