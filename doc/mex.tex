@@ -2749,8 +2749,10 @@ and as a tool for debugging MEX and the {\tt mexcom} and
 \subsection{MEXAS Syntax}
 \label{MEXAS-SYNTAX}
 
-MEXAS programs are written in ASCII.  Control characters other
-than whitespace, and non-ASCII bytes, are illegal and are
+MEXAS programs are written in ASCII.
+Non-ASCII bytes and
+control characters other than whitespace
+are illegal and are
 replaced by `\#'.
 
 A MEXAS program consists of statements which are instructions
@@ -2801,7 +2803,7 @@ number to the POSIX \TT{strtod} function.
 
 A \key{name}\label{NAME} is a lexeme beginning with a letter that is
 \underline{not} a number (\TT{nan}, \TT{InF}, etc. are numbers
-and not names).
+and not names) and is not longer than 32 characters.
 
 A \key{string}\label{STRING} is a lexeme beginning with quote and ending
 with the same kind of quote.
@@ -2835,8 +2837,6 @@ encoded in the module interface that maps variable and function names
 to indices.
 
 
- combine these tables, so
- variables and functions are all in one table. However for varia
 \subsection{MEXAS Instructions}
 \label{MEXAS-INSTRUCTIONS}
 
@@ -2854,7 +2854,7 @@ the top of the stack hides the element lower down.
 If two elements have the same {\em function-name}, the element nearer
 the top of the stack hides the element lower down.
 \item Stack searches always proceed from the topmost stack element
-the bottommost, and accept the first element found with the desired name.
+to the bottommost, and accept the first element found with the desired name.
 \item Modules are named by the name of the file assembled to produce
 the module, with the suffix \TT{.mex} deleted.  Such a name is
 a \emkey{module-name}.
@@ -2895,6 +2895,8 @@ and some have {\em trace-packet} arguments, where:
 \emkey{trace-message} ::= {\em string}
 \\[0.5ex]
 \emkey{trace-packet} ::= {\em trace-message} {\em trace-variable}\STAR{}
+\\[0.5ex]
+\emkey{trace-variable} ::= {\em variable-name}
 \end{indpar}
 These specify the {\em trace-info} for the instructions:
 see Trace-Packet Based Trace Messages,
@@ -2978,7 +2980,7 @@ element with {\em new-variable-name} as its name.
 
 The variable stack searched for {\em variable-name} is the variable
 stack of the previously assembled module named, as it is at the
-end of the compilation of that module (only level 0 variables
+end of the assembly of that module (only level 0, depth 0 variables
 of the module are present in this stack).
 \end{indpar}
 

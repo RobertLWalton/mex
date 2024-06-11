@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Jun  3 03:48:31 EDT 2024
+// Date:	Tue Jun 11 17:10:03 EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -199,9 +199,12 @@ bool next_statement ( void );
 //
 inline bool is_name ( min::gen lexeme )
 {
-    min::str_ptr sp ( lexeme );
-    return ( sp && strlen ( sp ) >= 1
-	        && isalpha ( sp[0] ) );
+    if ( min::is_id_str ( lexeme ) )
+    {
+	min::str_ptr sp ( lexeme );
+	return ( isalpha ( sp[0] ) );
+    }
+    else return false;
 }
 
 // If statement[i] exists and is a name, return the name
