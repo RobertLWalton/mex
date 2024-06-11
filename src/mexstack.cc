@@ -2,7 +2,7 @@
 //
 // File:	mexstack.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Jun  6 21:06:03 EDT 2024
+// Date:	Tue Jun 11 03:17:21 EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -130,11 +130,13 @@ void mexstack::print_instr
     printer
         << " " << instr.immedA
 	<< " " << instr.immedB
-	<< " " << instr.immedC
-	<< " " << instr.immedD
-	<< "; "
-	<< m->trace_info[location]
-	<< min::eom;
+	<< " " << instr.immedC;
+    if ( instr.immedD != min::MISSING() )
+	printer << " " << instr.immedD;
+    if ( m->trace_info[location] != min::MISSING() )
+	printer << "; "
+	        << m->trace_info[location];
+    printer << min::eom;
 }
 
 unsigned mexstack::jmp_clear ( void )

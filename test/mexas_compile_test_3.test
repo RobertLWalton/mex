@@ -12,41 +12,41 @@
 // RESULT = MIN ( ARG1, ARG2 )
 //
 BEGF MIN ARG1 ARG2
-    [14:0;2] BEGF T_BEGF 2 1 0 [$ MISSING $]; [< MIN ARG1 ARG2 >]
+    [14:0;2] BEGF T_BEGF 2 1 0; [< MIN ARG1 ARG2 >]
     STACKS: VARIABLES: ARG2 ARG1
             FUNCTIONS: | MIN
     PUSH ARG1
-    [16:1;3] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< ARG1 * >]
+    [16:1;3] PUSHS T_PUSH 1 0 0; [< ARG1 * >]
     PUSH ARG2
-    [17:2;4] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< ARG2 * >]
+    [17:2;4] PUSHS T_PUSH 1 0 0; [< ARG2 * >]
     JMPLT ITS-ARG1
-    [18:3;2] JMPLT T_JMPS 0 0 0 [$ MISSING $]; ITS-ARG1
+    [18:3;2] JMPLT T_JMPS 0 0 0; ITS-ARG1
     PUSH ARG2
-    [19:4;3] PUSHS T_PUSH 0 0 0 [$ MISSING $]; [< ARG2 * >]
+    [19:4;3] PUSHS T_PUSH 0 0 0; [< ARG2 * >]
     RET 1
-    [20:5;2] RET T_RET 0 1 1 [$ MISSING $]; [$ MISSING $]
+    [20:5;2] RET T_RET 0 1 1
     LABEL ITS-ARG1
-    [18:3;2] JMPLT T_JMPS 0 0 3 [$ MISSING $]; ITS-ARG1
+    [18:3;2] JMPLT T_JMPS 0 0 3; ITS-ARG1
     PUSH ARG1
-    [22:6;3] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< ARG1 * >]
+    [22:6;3] PUSHS T_PUSH 1 0 0; [< ARG1 * >]
     RET 1
-    [23:7;2] RET T_RET 0 1 1 [$ MISSING $]; [$ MISSING $]
+    [23:7;2] RET T_RET 0 1 1
     STACKS: VARIABLES: ARG2 ARG1
             FUNCTIONS: | MIN
 ENDF
-    [14:0;2] BEGF T_BEGF 2 1 9 [$ MISSING $]; [< MIN ARG1 ARG2 >]
-    [25:8;0] ENDF T_ENDF 0 1 0 [$ MISSING $]; [$ MISSING $]
+    [14:0;2] BEGF T_BEGF 2 1 9; [< MIN ARG1 ARG2 >]
+    [25:8;0] ENDF T_ENDF 0 1 0
 
 PUSHI 23 X
     [27:9;1] PUSHI T_PUSH 0 0 0 23; X
 PUSHI 157 Y
     [28:10;2] PUSHI T_PUSH 0 0 0 157; Y
 CALL MIN 2 Z
-    [29:11;1] CALLM T_CALLM 2 1 0 [$ MISSING $]; [< MIN Z >]
+    [29:11;1] CALLM T_CALLM 2 1 0; [< MIN Z >]
     STACKS: VARIABLES: Z
             FUNCTIONS: MIN
 POP
-    [31:12;0] POPS T_POP 0 0 0 [$ MISSING $]; [< Z * >]
+    [31:12;0] POPS T_POP 0 0 0; [< Z * >]
 * {14:0,0,0} BEGF
 * {27:9,0,1} PUSHI: X <= 23
 * {28:10,1,2} PUSHI: Y <= 157

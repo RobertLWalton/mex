@@ -11,14 +11,14 @@
 // SELECT ( ARG1, ARG2 ) = ARG1
 //
 BEGF SELECT ARG1 ARG2
-    [13:0;2] BEGF T_BEGF 2 1 0 [$ MISSING $]; [< SELECT ARG1 ARG2 >]
+    [13:0;2] BEGF T_BEGF 2 1 0; [< SELECT ARG1 ARG2 >]
     PUSH ARG1
-    [14:1;3] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< ARG1 * >]
+    [14:1;3] PUSHS T_PUSH 1 0 0; [< ARG1 * >]
     RET 1
-    [15:2;2] RET T_RET 0 1 1 [$ MISSING $]; [$ MISSING $]
+    [15:2;2] RET T_RET 0 1 1
 ENDF
-    [13:0;2] BEGF T_BEGF 2 1 4 [$ MISSING $]; [< SELECT ARG1 ARG2 >]
-    [16:3;0] ENDF T_ENDF 0 1 0 [$ MISSING $]; [$ MISSING $]
+    [13:0;2] BEGF T_BEGF 2 1 4; [< SELECT ARG1 ARG2 >]
+    [16:3;0] ENDF T_ENDF 0 1 0
 
 PUSHI 115 X
     [18:4;1] PUSHI T_PUSH 0 0 0 115; X
@@ -44,14 +44,14 @@ mexas_joint_test_2a.mex successfully compiled
 // SELECT ( ARG1, ARG2 ) = ARG2
 //
 BEGF SELECT ARG1 ARG2
-    [13:0;2] BEGF T_BEGF 2 1 0 [$ MISSING $]; [< SELECT ARG1 ARG2 >]
+    [13:0;2] BEGF T_BEGF 2 1 0; [< SELECT ARG1 ARG2 >]
     PUSH ARG2
-    [14:1;3] PUSHS T_PUSH 0 0 0 [$ MISSING $]; [< ARG2 * >]
+    [14:1;3] PUSHS T_PUSH 0 0 0; [< ARG2 * >]
     RET 1
-    [15:2;2] RET T_RET 0 1 1 [$ MISSING $]; [$ MISSING $]
+    [15:2;2] RET T_RET 0 1 1
 ENDF
-    [13:0;2] BEGF T_BEGF 2 1 4 [$ MISSING $]; [< SELECT ARG1 ARG2 >]
-    [16:3;0] ENDF T_ENDF 0 1 0 [$ MISSING $]; [$ MISSING $]
+    [13:0;2] BEGF T_BEGF 2 1 4; [< SELECT ARG1 ARG2 >]
+    [16:3;0] ENDF T_ENDF 0 1 0
 
 PUSHI 295 X
     [18:4;1] PUSHI T_PUSH 0 0 0 295; X
@@ -84,8 +84,7 @@ PUSHG mexas_joint_test_2b Y
 CALLG mexas_joint_test_2a SELECT 2 R // Select X
     [14:2;1] CALLG T_CALLG 2 1 0 PACKED_VEC; [< SELECT R >]
 TRACE 'R = SELECT(X,Y) RETURNS X'
-    [15:3;1] TRACE T_ALWAYS 0 0 0 [$ MISSING $]; [<
-             "R = SELECT(X,Y) RETURNS X" >]
+    [15:3;1] TRACE T_ALWAYS 0 0 0; [< "R = SELECT(X,Y) RETURNS X" >]
 
 PUSHG mexas_joint_test_2b X
     [17:4;2] PUSHG T_PUSH 0 0 0 PACKED_VEC; [< * mexas_joint_test_2b
@@ -96,8 +95,7 @@ PUSHG mexas_joint_test_2a Y
 CALLG mexas_joint_test_2b SELECT 2 R // Select Y
     [19:6;2] CALLG T_CALLG 2 1 0 PACKED_VEC; [< SELECT R >]
 TRACE 'R = SELECT(X,Y) RETURNS Y'
-    [20:7;2] TRACE T_ALWAYS 0 0 0 [$ MISSING $]; [<
-             "R = SELECT(X,Y) RETURNS Y" >]
+    [20:7;2] TRACE T_ALWAYS 0 0 0; [< "R = SELECT(X,Y) RETURNS Y" >]
 * {12:0,0,0} PUSHG: X <= * in mexas_joint_test_2a = 115
 * {13:1,1,1} PUSHG: Y <= * in mexas_joint_test_2b = 287
 * {14:2,2,2} CALLG to BEGF: SELECT, ARG1=115, ARG2=287

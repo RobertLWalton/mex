@@ -13,24 +13,24 @@
 PUSHI 101
     [13:0;1] PUSHI T_PUSH 0 0 0 101; *
 NEG
-    [14:1;1] NEG T_AOP 0 0 0 [$ MISSING $]; *
+    [14:1;1] NEG T_AOP 0 0 0; *
 ABS
-    [15:2;1] ABS T_AOP 0 0 0 [$ MISSING $]; *
+    [15:2;1] ABS T_AOP 0 0 0; *
 POP
-    [16:3;0] POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
+    [16:3;0] POPS T_POP 0 0 0; [< * * >]
 
 PUSHI 100
     [18:4;1] PUSHI T_PUSH 0 0 0 100; *
 PUSHI 10
     [19:5;2] PUSHI T_PUSH 0 0 0 10; *
 ADD
-    [20:6;1] ADD T_AOP 0 0 0 [$ MISSING $]; *
+    [20:6;1] ADD T_AOP 0 0 0; *
 PUSHI 10
     [21:7;2] PUSHI T_PUSH 0 0 0 10; *
 SUB
-    [22:8;1] SUB T_AOP 0 0 0 [$ MISSING $]; *
+    [22:8;1] SUB T_AOP 0 0 0; *
 POP
-    [23:9;0] POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
+    [23:9;0] POPS T_POP 0 0 0; [< * * >]
 
 PUSHI 100
     [25:10;1] PUSHI T_PUSH 0 0 0 100; *
@@ -39,33 +39,33 @@ ADDI 10
 SUBI 10
     [27:12;1] SUBI T_AOP 0 0 0 10; *
 POP
-    [28:13;0] POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
+    [28:13;0] POPS T_POP 0 0 0; [< * * >]
 
 PUSHI 10
     [30:14;1] PUSHI T_PUSH 0 0 0 10; *
 PUSHI 110
     [31:15;2] PUSHI T_PUSH 0 0 0 110; *
 SUBR
-    [32:16;1] SUBR T_AOP 0 0 0 [$ MISSING $]; *
+    [32:16;1] SUBR T_AOP 0 0 0; *
 POP
-    [33:17;0] POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
+    [33:17;0] POPS T_POP 0 0 0; [< * * >]
 PUSHI 10
     [34:18;1] PUSHI T_PUSH 0 0 0 10; *
 SUBRI 110
     [35:19;1] SUBRI T_AOP 0 0 0 110; *
 POP
-    [36:20;0] POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
+    [36:20;0] POPS T_POP 0 0 0; [< * * >]
 
 PUSHI 123
     [38:21;1] PUSHI T_PUSH 0 0 0 123; *
 PUSHI 5
     [39:22;2] PUSHI T_PUSH 0 0 0 5; *
 MUL
-    [40:23;1] MUL T_AOP 0 0 0 [$ MISSING $]; *
+    [40:23;1] MUL T_AOP 0 0 0; *
 PUSHI 5
     [41:24;2] PUSHI T_PUSH 0 0 0 5; *
 DIV
-    [42:25;1] DIV T_AOP 0 0 0 [$ MISSING $]; *
+    [42:25;1] DIV T_AOP 0 0 0; *
 MULI 5
     [43:26;1] MULI T_AOP 0 0 0 5; *
 DIVI 5
@@ -77,7 +77,7 @@ SUBI 1
 DIVI 5
     [47:30;1] DIVI T_AOP 0 0 0 5; *
 POP
-    [48:31;0] POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
+    [48:31;0] POPS T_POP 0 0 0; [< * * >]
 
 PUSHI 5
     [50:32;1] PUSHI T_PUSH 0 0 0 5; *
@@ -86,32 +86,32 @@ PUSHI 5
 PUSHI 123
     [52:34;3] PUSHI T_PUSH 0 0 0 123; *
 MUL
-    [53:35;2] MUL T_AOP 0 0 0 [$ MISSING $]; *
+    [53:35;2] MUL T_AOP 0 0 0; *
 DIVR
-    [54:36;1] DIVR T_AOP 0 0 0 [$ MISSING $]; *
+    [54:36;1] DIVR T_AOP 0 0 0; *
 POP
-    [55:37;0] POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
+    [55:37;0] POPS T_POP 0 0 0; [< * * >]
 PUSHI 5
     [56:38;1] PUSHI T_PUSH 0 0 0 5; *
 PUSHI 615
     [57:39;2] PUSHI T_PUSH 0 0 0 615; *
 DIVR
-    [58:40;1] DIVR T_AOP 0 0 0 [$ MISSING $]; *
+    [58:40;1] DIVR T_AOP 0 0 0; *
 POP
-    [59:41;0] POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
+    [59:41;0] POPS T_POP 0 0 0; [< * * >]
 PUSHI 5
     [60:42;1] PUSHI T_PUSH 0 0 0 5; *
 DIVRI 615
     [61:43;1] DIVRI T_AOP 0 0 0 615; *
 POP
-    [62:44;0] POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
+    [62:44;0] POPS T_POP 0 0 0; [< * * >]
 
 PUSHI 4.567
     [64:45;1] PUSHI T_PUSH 0 0 0 4.567; *
 PUSHI 1
     [65:46;2] PUSHI T_PUSH 0 0 0 1; *
 MOD
-    [66:47;1] MOD T_AOP 0 0 0 [$ MISSING $]; *
+    [66:47;1] MOD T_AOP 0 0 0; *
 MULI 1000
     [67:48;1] MULI T_AOP 0 0 0 1000; *
 ADDI 4000
@@ -119,204 +119,204 @@ ADDI 4000
 MODI 1000
     [69:50;1] MODI T_AOP 0 0 0 1000; *
 POP
-    [70:51;0] POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
+    [70:51;0] POPS T_POP 0 0 0; [< * * >]
 PUSHI 1
     [71:52;1] PUSHI T_PUSH 0 0 0 1; *
 MODRI 4.567
     [72:53;1] MODRI T_AOP 0 0 0 4.567; *
 POP
-    [73:54;0] POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
+    [73:54;0] POPS T_POP 0 0 0; [< * * >]
 PUSHI 1000
     [74:55;1] PUSHI T_PUSH 0 0 0 1000; *
 PUSHI 4567
     [75:56;2] PUSHI T_PUSH 0 0 0 4567; *
 MODR
-    [76:57;1] MODR T_AOP 0 0 0 [$ MISSING $]; *
+    [76:57;1] MODR T_AOP 0 0 0; *
 POP
-    [77:58;0] POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
+    [77:58;0] POPS T_POP 0 0 0; [< * * >]
 
 PUSHI 1.5
     [79:59;1] PUSHI T_PUSH 0 0 0 1.5; *
 FLOOR
-    [80:60;1] FLOOR T_AOP 0 0 0 [$ MISSING $]; *
+    [80:60;1] FLOOR T_AOP 0 0 0; *
 CEIL
-    [81:61;1] CEIL T_AOP 0 0 0 [$ MISSING $]; *
+    [81:61;1] CEIL T_AOP 0 0 0; *
 ADDI 0.1
     [82:62;1] ADDI T_AOP 0 0 0 0.1; *
 CEIL
-    [83:63;1] CEIL T_AOP 0 0 0 [$ MISSING $]; *
+    [83:63;1] CEIL T_AOP 0 0 0; *
 FLOOR
-    [84:64;1] FLOOR T_AOP 0 0 0 [$ MISSING $]; *
+    [84:64;1] FLOOR T_AOP 0 0 0; *
 POP
-    [85:65;0] POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
+    [85:65;0] POPS T_POP 0 0 0; [< * * >]
 
 PUSHI 1.5
     [87:66;1] PUSHI T_PUSH 0 0 0 1.5; *
 TRUNC
-    [88:67;1] TRUNC T_AOP 0 0 0 [$ MISSING $]; *
+    [88:67;1] TRUNC T_AOP 0 0 0; *
 ROUND
-    [89:68;1] ROUND T_AOP 0 0 0 [$ MISSING $]; *
+    [89:68;1] ROUND T_AOP 0 0 0; *
 PUSHI 2.5
     [90:69;2] PUSHI T_PUSH 0 0 0 2.5; *
 TRUNC
-    [91:70;2] TRUNC T_AOP 0 0 0 [$ MISSING $]; *
+    [91:70;2] TRUNC T_AOP 0 0 0; *
 ROUND
-    [92:71;2] ROUND T_AOP 0 0 0 [$ MISSING $]; *
+    [92:71;2] ROUND T_AOP 0 0 0; *
 PUSHI -1.5
     [93:72;3] PUSHI T_PUSH 0 0 0 -1.5; *
 TRUNC
-    [94:73;3] TRUNC T_AOP 0 0 0 [$ MISSING $]; *
+    [94:73;3] TRUNC T_AOP 0 0 0; *
 ROUND
-    [95:74;3] ROUND T_AOP 0 0 0 [$ MISSING $]; *
+    [95:74;3] ROUND T_AOP 0 0 0; *
 PUSHI -2.5
     [96:75;4] PUSHI T_PUSH 0 0 0 -2.5; *
 TRUNC
-    [97:76;4] TRUNC T_AOP 0 0 0 [$ MISSING $]; *
+    [97:76;4] TRUNC T_AOP 0 0 0; *
 ROUND
-    [98:77;4] ROUND T_AOP 0 0 0 [$ MISSING $]; *
+    [98:77;4] ROUND T_AOP 0 0 0; *
 POP
-    [99:78;3] POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
+    [99:78;3] POPS T_POP 0 0 0; [< * * >]
 
 PUSHI 1.5
     [101:79;4] PUSHI T_PUSH 0 0 0 1.5; *
 ROUND
-    [102:80;4] ROUND T_AOP 0 0 0 [$ MISSING $]; *
+    [102:80;4] ROUND T_AOP 0 0 0; *
 TRUNC
-    [103:81;4] TRUNC T_AOP 0 0 0 [$ MISSING $]; *
+    [103:81;4] TRUNC T_AOP 0 0 0; *
 PUSHI 2.5
     [104:82;5] PUSHI T_PUSH 0 0 0 2.5; *
 ROUND
-    [105:83;5] ROUND T_AOP 0 0 0 [$ MISSING $]; *
+    [105:83;5] ROUND T_AOP 0 0 0; *
 TRUNC
-    [106:84;5] TRUNC T_AOP 0 0 0 [$ MISSING $]; *
+    [106:84;5] TRUNC T_AOP 0 0 0; *
 PUSHI -1.5
     [107:85;6] PUSHI T_PUSH 0 0 0 -1.5; *
 ROUND
-    [108:86;6] ROUND T_AOP 0 0 0 [$ MISSING $]; *
+    [108:86;6] ROUND T_AOP 0 0 0; *
 TRUNC
-    [109:87;6] TRUNC T_AOP 0 0 0 [$ MISSING $]; *
+    [109:87;6] TRUNC T_AOP 0 0 0; *
 PUSHI -2.5
     [110:88;7] PUSHI T_PUSH 0 0 0 -2.5; *
 ROUND
-    [111:89;7] ROUND T_AOP 0 0 0 [$ MISSING $]; *
+    [111:89;7] ROUND T_AOP 0 0 0; *
 TRUNC
-    [112:90;7] TRUNC T_AOP 0 0 0 [$ MISSING $]; *
+    [112:90;7] TRUNC T_AOP 0 0 0; *
 POP
-    [113:91;6] POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
+    [113:91;6] POPS T_POP 0 0 0; [< * * >]
 
 PUSHI 1234
     [115:92;7] PUSHI T_PUSH 0 0 0 1234; *
 LOG
-    [116:93;7] LOG T_AOP 0 0 0 [$ MISSING $]; *
+    [116:93;7] LOG T_AOP 0 0 0; *
 EXP
-    [117:94;7] EXP T_AOP 0 0 0 [$ MISSING $]; *
+    [117:94;7] EXP T_AOP 0 0 0; *
 LOG10
-    [118:95;7] LOG10 T_AOP 0 0 0 [$ MISSING $]; *
+    [118:95;7] LOG10 T_AOP 0 0 0; *
 EXP10
-    [119:96;7] EXP10 T_AOP 0 0 0 [$ MISSING $]; *
+    [119:96;7] EXP10 T_AOP 0 0 0; *
 POP
-    [120:97;6] POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
+    [120:97;6] POPS T_POP 0 0 0; [< * * >]
 
 PUSHI 1
     [122:98;7] PUSHI T_PUSH 0 0 0 1; *
 ASIN DEG90
-    [123:99;7] ASIN T_AOP 0 0 0 [$ MISSING $]; DEG90
+    [123:99;7] ASIN T_AOP 0 0 0; DEG90
 PUSH DEG90
-    [124:100;8] PUSHS T_PUSH 0 0 0 [$ MISSING $]; [< DEG90 * >]
+    [124:100;8] PUSHS T_PUSH 0 0 0; [< DEG90 * >]
 SIN
-    [125:101;8] SIN T_AOP 0 0 0 [$ MISSING $]; *
+    [125:101;8] SIN T_AOP 0 0 0; *
 PUSH DEG90
-    [126:102;9] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< DEG90 * >]
+    [126:102;9] PUSHS T_PUSH 1 0 0; [< DEG90 * >]
 COS
-    [127:103;9] COS T_AOP 0 0 0 [$ MISSING $]; *
+    [127:103;9] COS T_AOP 0 0 0; *
 PUSH DEG90
-    [128:104;10] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< DEG90 * >]
+    [128:104;10] PUSHS T_PUSH 2 0 0; [< DEG90 * >]
 TAN
-    [129:105;10] TAN T_AOP 0 0 0 [$ MISSING $]; *
+    [129:105;10] TAN T_AOP 0 0 0; *
 POP
-    [130:106;9] POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
+    [130:106;9] POPS T_POP 0 0 0; [< * * >]
 
 PUSHI 1
     [132:107;10] PUSHI T_PUSH 0 0 0 1; *
 ATAN DEG45
-    [133:108;10] ATAN T_AOP 0 0 0 [$ MISSING $]; DEG45
+    [133:108;10] ATAN T_AOP 0 0 0; DEG45
 PUSH DEG45
-    [134:109;11] PUSHS T_PUSH 0 0 0 [$ MISSING $]; [< DEG45 * >]
+    [134:109;11] PUSHS T_PUSH 0 0 0; [< DEG45 * >]
 SIN
-    [135:110;11] SIN T_AOP 0 0 0 [$ MISSING $]; *
+    [135:110;11] SIN T_AOP 0 0 0; *
 PUSH DEG45
-    [136:111;12] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< DEG45 * >]
+    [136:111;12] PUSHS T_PUSH 1 0 0; [< DEG45 * >]
 COS
-    [137:112;12] COS T_AOP 0 0 0 [$ MISSING $]; *
+    [137:112;12] COS T_AOP 0 0 0; *
 PUSH DEG45
-    [138:113;13] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< DEG45 * >]
+    [138:113;13] PUSHS T_PUSH 2 0 0; [< DEG45 * >]
 TAN
-    [139:114;13] TAN T_AOP 0 0 0 [$ MISSING $]; *
+    [139:114;13] TAN T_AOP 0 0 0; *
 POP
-    [140:115;12] POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
+    [140:115;12] POPS T_POP 0 0 0; [< * * >]
 
 PUSHI 1
     [142:116;13] PUSHI T_PUSH 0 0 0 1; *
 ACOS DEG0
-    [143:117;13] ACOS T_AOP 0 0 0 [$ MISSING $]; DEG0
+    [143:117;13] ACOS T_AOP 0 0 0; DEG0
 PUSH DEG0
-    [144:118;14] PUSHS T_PUSH 0 0 0 [$ MISSING $]; [< DEG0 * >]
+    [144:118;14] PUSHS T_PUSH 0 0 0; [< DEG0 * >]
 SIN
-    [145:119;14] SIN T_AOP 0 0 0 [$ MISSING $]; *
+    [145:119;14] SIN T_AOP 0 0 0; *
 PUSH DEG0
-    [146:120;15] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< DEG0 * >]
+    [146:120;15] PUSHS T_PUSH 1 0 0; [< DEG0 * >]
 COS
-    [147:121;15] COS T_AOP 0 0 0 [$ MISSING $]; *
+    [147:121;15] COS T_AOP 0 0 0; *
 PUSH DEG0
-    [148:122;16] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< DEG0 * >]
+    [148:122;16] PUSHS T_PUSH 2 0 0; [< DEG0 * >]
 TAN
-    [149:123;16] TAN T_AOP 0 0 0 [$ MISSING $]; *
+    [149:123;16] TAN T_AOP 0 0 0; *
 POP
-    [150:124;15] POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
+    [150:124;15] POPS T_POP 0 0 0; [< * * >]
 
 PUSHI 1
     [152:125;16] PUSHI T_PUSH 0 0 0 1; *
 PUSHI 1
     [153:126;17] PUSHI T_PUSH 0 0 0 1; *
 ATAN2
-    [154:127;16] ATAN2 T_AOP 0 0 0 [$ MISSING $]; *
+    [154:127;16] ATAN2 T_AOP 0 0 0; *
 POP
-    [155:128;15] POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
+    [155:128;15] POPS T_POP 0 0 0; [< * * >]
 PUSHI 10
     [156:129;16] PUSHI T_PUSH 0 0 0 10; *
 PUSHI -10
     [157:130;17] PUSHI T_PUSH 0 0 0 -10; *
 ATAN2
-    [158:131;16] ATAN2 T_AOP 0 0 0 [$ MISSING $]; *
+    [158:131;16] ATAN2 T_AOP 0 0 0; *
 POP
-    [159:132;15] POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
+    [159:132;15] POPS T_POP 0 0 0; [< * * >]
 PUSHI -10
     [160:133;16] PUSHI T_PUSH 0 0 0 -10; *
 PUSHI 10
     [161:134;17] PUSHI T_PUSH 0 0 0 10; *
 ATAN2R
-    [162:135;16] ATAN2R T_AOP 0 0 0 [$ MISSING $]; *
+    [162:135;16] ATAN2R T_AOP 0 0 0; *
 POP
-    [163:136;15] POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
+    [163:136;15] POPS T_POP 0 0 0; [< * * >]
 
 PUSHI 2
     [165:137;16] PUSHI T_PUSH 0 0 0 2; *
 POWI 10
-    [166:138;16] POWI T_AOP 10 0 0 [$ MISSING $]; *
+    [166:138;16] POWI T_AOP 10 0 0; *
 POP
-    [167:139;15] POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
+    [167:139;15] POPS T_POP 0 0 0; [< * * >]
 PUSHI 0
     [168:140;16] PUSHI T_PUSH 0 0 0 0; *
 POWI 10
-    [169:141;16] POWI T_AOP 10 0 0 [$ MISSING $]; *
+    [169:141;16] POWI T_AOP 10 0 0; *
 POP
-    [170:142;15] POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
+    [170:142;15] POPS T_POP 0 0 0; [< * * >]
 PUSHI 0
     [171:143;16] PUSHI T_PUSH 0 0 0 0; *
 POWI 0
-    [172:144;16] POWI T_AOP 0 0 0 [$ MISSING $]; *
+    [172:144;16] POWI T_AOP 0 0 0; *
 POP
-    [173:145;15] POPS T_POP 0 0 0 [$ MISSING $]; [< * * >]
+    [173:145;15] POPS T_POP 0 0 0; [< * * >]
 * {13:0,0,0} PUSHI: * <= 101
 * {14:1,1,1} NEG: * = -101 <= - 101
 * {15:2,1,2} ABS: * = 101 <= abs -101

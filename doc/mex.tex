@@ -244,7 +244,7 @@
 
 \author{Robert L. Walton}
 
-\date{June 10, 2024}
+\date{June 11, 2024}
  
 \maketitle
 
@@ -2162,7 +2162,7 @@ When the block end instruction ({\tt ENDF}, {\tt ENDL}, or {\tt END}) for
 this level and depth is output, the elements with this level and depth
 are popped from their stacks.
 
-The compiler actually implements the stacks as symbol tables optimized
+The compiler may implement the stacks as symbol tables optimized
 for looking up names.  These tables are stacks only in the sense that
 elements can be deleted in the reverse order to that which they were added.
 The compiler may also combine these tables, so variables and functions
@@ -2176,6 +2176,18 @@ Note that trace values (values of
 trace variables\pagnote{TRACE-VARIABLE}) in the process
 stack are \underline{not} recorded in the compiler variables stack when their
 {\tt PUSH\ldots}~instructions are output.
+
+The MEX stack compiler component is in the following:
+
+\begin{indpar}
+\begin{tabular}{l}
+{\tt namespace} \ttkey{mexstack}
+\\
+{\tt \ldots/mex/include/}\ttkey{mexstack.h}
+\\
+{\tt \ldots/mex/src/}\ttkey{mexstack.cc}
+\end{tabular}
+\end{indpar}
 
 \subsubsection{MEX Stack Component Data}
 \label{MEX-STACK-COMPONENT-DATA}
@@ -2262,11 +2274,11 @@ instructions (via the {\tt mexstack::begx} function below) as follows: \\
 \tt BEGF & \tt var\_stack\_length + {\rm instruction} immedA \\
          & ({\tt immedA} is minimum number of expected arguments) \\
 \end{tabular} \\
-Here {\tt var\_stack\_length} is the value before the {\tt BEG\ldots}
+Here {\tt var\_stack\_length} is the value just before the {\tt BEG\ldots}
 instruction is compiled.
 The {\tt END\ldots} instructions (via the {\tt mexstack::endx} function below)
 restore {\tt stack\_\EOL limit} to its previous value, the value
-before the corresponding {\tt BEG\ldots} was compiled.
+just before the corresponding {\tt BEG\ldots} was compiled.
 
 The {\tt mexstack::init} function (see below) zeros {\tt lexical\_level},
 {\tt depth[0]}, {\tt lp[0]}, {\tt fp[0]}, and {\tt stack\_limit}.
@@ -2322,14 +2334,16 @@ that push {\em trace-variables}\pagnote{TRACE-VARIABLE}
 {\tt stack\_offset} is set to
 the number of {\em trace-variables} pushed so far, as
 these instructions do not update {\tt var\_stack\_length}.
-The {\em trace-depth} is printed only if it is not zero,
-and the {\em trace-info} is printed only if it is not \TT{min::MISSING()}.
+{\em Trace-depth} is printed only if it is not zero,
+{\em immedD} is printed only if it is not \TT{min::MISSING()},
+and {\em trace-info} is printed only if it is not \TT{min::MISSING()}.
 
-In some cases assembling an instruction or declaration (e.g., \TT{LABEL})
+In some cases assembling an instruction or declaration
+(e.g., \TT{MEXAS LABEL}\pagnote{LABEL})
 modifies a previously assembled instruction.  In these cases the
-modified previously assembled instruction is printed (without its source)
-just after it has
-been modified, and before any instruction currently being output.
+convention is to print the
+modified previously assembled instruction (without its source)
+just before the instruction currently being assembled.
 \end{indpar}
 
 \verb|bool mexstack::| \MEXCOMKEY{trace\_never} \verb|= false| \\
@@ -2393,7 +2407,7 @@ where \\
 \hspace*{3em}\verb|SP = mexstack::var_stack_length| \\
 \hspace*{3em}({\tt stack\_offset} corrects {\tt SP} when pushing trace values
 							      because \\
-\hspace*{3em}~trace values a not recorded in the compiler variable stack)
+\hspace*{3em}~trace values are not recorded in the compiler variable stack)
 \end{indpar}
 
 The following function initializes the {\tt mexstack} data described above:
@@ -2415,6 +2429,8 @@ mexstack::stack_limit
 
 It also empties and re-initializes
 the block and jump stacks described in subsequent sections.
+However it does \underline{not} change any {\tt mexcom} data,
+such as the error and warning counts.
 \end{indpar}
 
 \subsubsection{MEX Stack Component Block Management}
@@ -3257,7 +3273,7 @@ this instruction does nothing.
 \subsection{MEXAS Declarations}
 \label{MEXAS-DECLARATIONS}
 
-\ttkey{LABEL} ~ {\em jmp-target}
+\ttkey{LABEL}\label{LABEL} ~ {\em jmp-target}
 \begin{indpar}
 This statement just calls {\tt mexstack::jmp\_target} with the given
 {\tt jmp-target} name.

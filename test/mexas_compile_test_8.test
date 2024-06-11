@@ -11,226 +11,210 @@
 // Basic Optimize Test
 //
 SET_TRACE SET_OPTIMIZE
-    [13:0;0] SET_TRACE T_ALWAYS 1048576 0 0 [$ MISSING $]; [$ MISSING $]
+    [13:0;0] SET_TRACE T_ALWAYS 1048576 0 0
 SET_OPTIMIZE OFF
-    [14:1;0] SET_OPTIMIZE T_SET_OPTIMIZE 0 0 0 [$ MISSING $]
-             ; [$ MISSING $]
+    [14:1;0] SET_OPTIMIZE T_SET_OPTIMIZE 0 0 0
 BEGF MIN X Y
-    [15:2;2] BEGF T_BEGF 2 1 0 [$ MISSING $]; [< MIN X Y >]
+    [15:2;2] BEGF T_BEGF 2 1 0; [< MIN X Y >]
     PUSHI 0 Z
     [16:3;3] PUSHI T_PUSH 0 0 0 0; Z
     BEG
-    [17:4;3] BEG T_BEG 0 0 0 [$ MISSING $]; [$ MISSING $]
+    [17:4;3] BEG T_BEG 0 0 0
         PUSH X
-    [18:5;4] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< X * >]
+    [18:5;4] PUSHS T_PUSH 2 0 0; [< X * >]
         PUSH Y
-    [19:6;5] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< Y * >]
+    [19:6;5] PUSHS T_PUSH 2 0 0; [< Y * >]
         JMPGT ITS-Y
-    [20:7;3] JMPGT T_JMPS 0 0 0 [$ MISSING $]; ITS-Y
+    [20:7;3] JMPGT T_JMPS 0 0 0; ITS-Y
         PUSH X
-    [21:8;4] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< X * >]
+    [21:8;4] PUSHS T_PUSH 2 0 0; [< X * >]
         POP Z
-    [22:9;3] POPS T_POP 1 0 0 [$ MISSING $]; [< * Z >]
+    [22:9;3] POPS T_POP 1 0 0; [< * Z >]
         JMP DONE
-    [23:10;3] JMP T_JMP 0 0 0 [$ MISSING $]; DONE
+    [23:10;3] JMP T_JMP 0 0 0; DONE
         LABEL ITS-Y
-    [20:7;3] JMPGT T_JMPS 0 0 4 [$ MISSING $]; ITS-Y
+    [20:7;3] JMPGT T_JMPS 0 0 4; ITS-Y
         PUSH Y
-    [25:11;4] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< Y * >]
+    [25:11;4] PUSHS T_PUSH 1 0 0; [< Y * >]
         POP Z
-    [26:12;3] POPS T_POP 1 0 0 [$ MISSING $]; [< * Z >]
+    [26:12;3] POPS T_POP 1 0 0; [< * Z >]
     END
-    [27:13;3] END T_END 0 0 0 [$ MISSING $]; [$ MISSING $]
+    [27:13;3] END T_END 0 0 0
     LABEL DONE
-    [23:10;3] JMP T_JMP[1] 0 0 4 [$ MISSING $]; DONE
-    [29:14;4] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< X * >]
-    [29:15;5] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< Y * >]
-    [29:16;6] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< Z * >]
+    [23:10;3] JMP T_JMP[1] 0 0 4; DONE
+    [29:14;4] PUSHS T_PUSH 2 0 0; [< X * >]
+    [29:15;5] PUSHS T_PUSH 2 0 0; [< Y * >]
+    [29:16;6] PUSHS T_PUSH 2 0 0; [< Z * >]
     TRACE "Z = MIN ( X, Y )" X Y Z
-    [29:17;3] TRACE T_ALWAYS 3 0 0 [$ MISSING $]; [< "Z = MIN ( X, Y )"
-              X Y Z >]
+    [29:17;3] TRACE T_ALWAYS 3 0 0; [< "Z = MIN ( X, Y )" X Y Z >]
 ENDF
-    [15:2;3] BEGF T_BEGF 2 1 17 [$ MISSING $]; [< MIN X Y >]
-    [30:18;0] ENDF T_ENDF 0 1 0 [$ MISSING $]; [$ MISSING $]
+    [15:2;3] BEGF T_BEGF 2 1 17; [< MIN X Y >]
+    [30:18;0] ENDF T_ENDF 0 1 0
 
 PUSHI 5.5
     [32:19;1] PUSHI T_PUSH 0 0 0 5.5; *
 PUSHI 3.4
     [33:20;2] PUSHI T_PUSH 0 0 0 3.4; *
 CALL MIN 2
-    [34:21;0] CALLM T_CALLM 2 0 2 [$ MISSING $]; [< MIN >]
+    [34:21;0] CALLM T_CALLM 2 0 2; [< MIN >]
 SET_OPTIMIZE ON
-    [35:22;0] SET_OPTIMIZE T_SET_OPTIMIZE 1 0 0 [$ MISSING $]
-              ; [$ MISSING $]
+    [35:22;0] SET_OPTIMIZE T_SET_OPTIMIZE 1 0 0
 PUSHI 5.5
     [36:23;1] PUSHI T_PUSH 0 0 0 5.5; *
 PUSHI 3.4
     [37:24;2] PUSHI T_PUSH 0 0 0 3.4; *
 CALL MIN 2
-    [38:25;0] CALLM T_CALLM 2 0 2 [$ MISSING $]; [< MIN >]
+    [38:25;0] CALLM T_CALLM 2 0 2; [< MIN >]
 
 // Basic Arithmetic Operations Optimize Test
 //
 BEGF TEST-BASIC-ARITHMETIC X Y
-    [42:26;2] BEGF T_BEGF 2 1 0 [$ MISSING $]; [< TEST-BASIC-ARITHMETIC
-              X Y >]
+    [42:26;2] BEGF T_BEGF 2 1 0; [< TEST-BASIC-ARITHMETIC X Y >]
     PUSH X
-    [43:27;3] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< X * >]
+    [43:27;3] PUSHS T_PUSH 1 0 0; [< X * >]
     PUSH Y
-    [44:28;4] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< Y * >]
+    [44:28;4] PUSHS T_PUSH 1 0 0; [< Y * >]
     ADD Z
-    [45:29;3] ADD T_AOP 0 0 0 [$ MISSING $]; Z
-    [46:30;4] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< X * >]
-    [46:31;5] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< Y * >]
-    [46:32;6] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< Z * >]
+    [45:29;3] ADD T_AOP 0 0 0; Z
+    [46:30;4] PUSHS T_PUSH 2 0 0; [< X * >]
+    [46:31;5] PUSHS T_PUSH 2 0 0; [< Y * >]
+    [46:32;6] PUSHS T_PUSH 2 0 0; [< Z * >]
     TRACE 'Z = X + Y' X Y Z
-    [46:33;3] TRACE T_ALWAYS 3 0 0 [$ MISSING $]; [< "Z = X + Y" X Y
-              Z >]
+    [46:33;3] TRACE T_ALWAYS 3 0 0; [< "Z = X + Y" X Y Z >]
     POP
-    [47:34;2] POPS T_POP 0 0 0 [$ MISSING $]; [< Z * >]
+    [47:34;2] POPS T_POP 0 0 0; [< Z * >]
     PUSH X
-    [48:35;3] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< X * >]
+    [48:35;3] PUSHS T_PUSH 1 0 0; [< X * >]
     PUSH Y
-    [49:36;4] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< Y * >]
+    [49:36;4] PUSHS T_PUSH 1 0 0; [< Y * >]
     SUB Z
-    [50:37;3] SUB T_AOP 0 0 0 [$ MISSING $]; Z
-    [51:38;4] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< X * >]
-    [51:39;5] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< Y * >]
-    [51:40;6] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< Z * >]
+    [50:37;3] SUB T_AOP 0 0 0; Z
+    [51:38;4] PUSHS T_PUSH 2 0 0; [< X * >]
+    [51:39;5] PUSHS T_PUSH 2 0 0; [< Y * >]
+    [51:40;6] PUSHS T_PUSH 2 0 0; [< Z * >]
     TRACE 'Z = X - Y' X Y Z
-    [51:41;3] TRACE T_ALWAYS 3 0 0 [$ MISSING $]; [< "Z = X - Y" X Y
-              Z >]
+    [51:41;3] TRACE T_ALWAYS 3 0 0; [< "Z = X - Y" X Y Z >]
     POP
-    [52:42;2] POPS T_POP 0 0 0 [$ MISSING $]; [< Z * >]
+    [52:42;2] POPS T_POP 0 0 0; [< Z * >]
     PUSH X
-    [53:43;3] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< X * >]
+    [53:43;3] PUSHS T_PUSH 1 0 0; [< X * >]
     PUSH Y
-    [54:44;4] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< Y * >]
+    [54:44;4] PUSHS T_PUSH 1 0 0; [< Y * >]
     MUL Z
-    [55:45;3] MUL T_AOP 0 0 0 [$ MISSING $]; Z
-    [56:46;4] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< X * >]
-    [56:47;5] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< Y * >]
-    [56:48;6] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< Z * >]
+    [55:45;3] MUL T_AOP 0 0 0; Z
+    [56:46;4] PUSHS T_PUSH 2 0 0; [< X * >]
+    [56:47;5] PUSHS T_PUSH 2 0 0; [< Y * >]
+    [56:48;6] PUSHS T_PUSH 2 0 0; [< Z * >]
     TRACE 'Z = X * Y' X Y Z
-    [56:49;3] TRACE T_ALWAYS 3 0 0 [$ MISSING $]; [< "Z = X * Y" X Y
-              Z >]
+    [56:49;3] TRACE T_ALWAYS 3 0 0; [< "Z = X * Y" X Y Z >]
     POP
-    [57:50;2] POPS T_POP 0 0 0 [$ MISSING $]; [< Z * >]
+    [57:50;2] POPS T_POP 0 0 0; [< Z * >]
     PUSH X
-    [58:51;3] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< X * >]
+    [58:51;3] PUSHS T_PUSH 1 0 0; [< X * >]
     PUSH Y
-    [59:52;4] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< Y * >]
+    [59:52;4] PUSHS T_PUSH 1 0 0; [< Y * >]
     DIV Z
-    [60:53;3] DIV T_AOP 0 0 0 [$ MISSING $]; Z
-    [61:54;4] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< X * >]
-    [61:55;5] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< Y * >]
-    [61:56;6] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< Z * >]
+    [60:53;3] DIV T_AOP 0 0 0; Z
+    [61:54;4] PUSHS T_PUSH 2 0 0; [< X * >]
+    [61:55;5] PUSHS T_PUSH 2 0 0; [< Y * >]
+    [61:56;6] PUSHS T_PUSH 2 0 0; [< Z * >]
     TRACE 'Z = X / Y' X Y Z
-    [61:57;3] TRACE T_ALWAYS 3 0 0 [$ MISSING $]; [< "Z = X / Y" X Y
-              Z >]
+    [61:57;3] TRACE T_ALWAYS 3 0 0; [< "Z = X / Y" X Y Z >]
     POP
-    [62:58;2] POPS T_POP 0 0 0 [$ MISSING $]; [< Z * >]
+    [62:58;2] POPS T_POP 0 0 0; [< Z * >]
     PUSH X
-    [63:59;3] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< X * >]
+    [63:59;3] PUSHS T_PUSH 1 0 0; [< X * >]
     PUSH Y
-    [64:60;4] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< Y * >]
+    [64:60;4] PUSHS T_PUSH 1 0 0; [< Y * >]
     MOD Z
-    [65:61;3] MOD T_AOP 0 0 0 [$ MISSING $]; Z
-    [66:62;4] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< X * >]
-    [66:63;5] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< Y * >]
-    [66:64;6] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< Z * >]
+    [65:61;3] MOD T_AOP 0 0 0; Z
+    [66:62;4] PUSHS T_PUSH 2 0 0; [< X * >]
+    [66:63;5] PUSHS T_PUSH 2 0 0; [< Y * >]
+    [66:64;6] PUSHS T_PUSH 2 0 0; [< Z * >]
     TRACE 'Z = X MOD Y' X Y Z
-    [66:65;3] TRACE T_ALWAYS 3 0 0 [$ MISSING $]; [< "Z = X MOD Y" X Y
-              Z >]
+    [66:65;3] TRACE T_ALWAYS 3 0 0; [< "Z = X MOD Y" X Y Z >]
     POP
-    [67:66;2] POPS T_POP 0 0 0 [$ MISSING $]; [< Z * >]
+    [67:66;2] POPS T_POP 0 0 0; [< Z * >]
 ENDF
-    [42:26;2] BEGF T_BEGF 2 1 42 [$ MISSING $]; [< TEST-BASIC-ARITHMETIC
-              X Y >]
-    [68:67;0] ENDF T_ENDF 0 1 0 [$ MISSING $]; [$ MISSING $]
+    [42:26;2] BEGF T_BEGF 2 1 42; [< TEST-BASIC-ARITHMETIC X Y >]
+    [68:67;0] ENDF T_ENDF 0 1 0
 
 SET_OPTIMIZE OFF
-    [70:68;0] SET_OPTIMIZE T_SET_OPTIMIZE 0 0 0 [$ MISSING $]
-              ; [$ MISSING $]
+    [70:68;0] SET_OPTIMIZE T_SET_OPTIMIZE 0 0 0
 PUSHI 100
     [71:69;1] PUSHI T_PUSH 0 0 0 100; *
 PUSHI 200
     [72:70;2] PUSHI T_PUSH 0 0 0 200; *
 CALL TEST-BASIC-ARITHMETIC 2
-    [73:71;0] CALLM T_CALLM 2 0 26 [$ MISSING $]; [<
-              TEST-BASIC-ARITHMETIC >]
+    [73:71;0] CALLM T_CALLM 2 0 26; [< TEST-BASIC-ARITHMETIC >]
 SET_OPTIMIZE ON
-    [74:72;0] SET_OPTIMIZE T_SET_OPTIMIZE 1 0 0 [$ MISSING $]
-              ; [$ MISSING $]
+    [74:72;0] SET_OPTIMIZE T_SET_OPTIMIZE 1 0 0
 PUSHI 100
     [75:73;1] PUSHI T_PUSH 0 0 0 100; *
 PUSHI 200
     [76:74;2] PUSHI T_PUSH 0 0 0 200; *
 CALL TEST-BASIC-ARITHMETIC 2
-    [77:75;0] CALLM T_CALLM 2 0 26 [$ MISSING $]; [<
-              TEST-BASIC-ARITHMETIC >]
+    [77:75;0] CALLM T_CALLM 2 0 26; [< TEST-BASIC-ARITHMETIC >]
 
 // Loop Optimize Test
 //
 BEGF SUM X Y
-    [81:76;2] BEGF T_BEGF 2 1 0 [$ MISSING $]; [< SUM X Y >]
+    [81:76;2] BEGF T_BEGF 2 1 0; [< SUM X Y >]
     PUSHI 0 S
     [82:77;3] PUSHI T_PUSH 0 0 0 0; S
     PUSH X I
-    [83:78;4] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< X I >]
+    [83:78;4] PUSHS T_PUSH 2 0 0; [< X I >]
     BEGL 2
-    [84:79;6] BEGL T_BEGL 0 2 0 [$ MISSING $]; [< LOOP S I >]
+    [84:79;6] BEGL T_BEGL 0 2 0; [< LOOP S I >]
         PUSH I
-    [85:80;7] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< I * >]
+    [85:80;7] PUSHS T_PUSH 2 0 0; [< I * >]
         PUSH Y
-    [86:81;8] PUSHS T_PUSH 5 0 0 [$ MISSING $]; [< Y * >]
+    [86:81;8] PUSHS T_PUSH 5 0 0; [< Y * >]
         JMPGT DONE
-    [87:82;6] JMPGT T_JMPS 0 0 0 [$ MISSING $]; DONE
+    [87:82;6] JMPGT T_JMPS 0 0 0; DONE
         PUSH S
-    [88:83;7] PUSHS T_PUSH 3 0 0 [$ MISSING $]; [< S * >]
+    [88:83;7] PUSHS T_PUSH 3 0 0; [< S * >]
         PUSH I
-    [89:84;8] PUSHS T_PUSH 3 0 0 [$ MISSING $]; [< I * >]
+    [89:84;8] PUSHS T_PUSH 3 0 0; [< I * >]
         ADD
-    [90:85;7] ADD T_AOP 0 0 0 [$ MISSING $]; *
+    [90:85;7] ADD T_AOP 0 0 0; *
         POP next-S
-    [91:86;6] POPS T_POP 2 0 0 [$ MISSING $]; [< * next-S >]
+    [91:86;6] POPS T_POP 2 0 0; [< * next-S >]
         PUSH I
-    [92:87;7] PUSHS T_PUSH 2 0 0 [$ MISSING $]; [< I * >]
+    [92:87;7] PUSHS T_PUSH 2 0 0; [< I * >]
         ADDI 1
     [93:88;7] ADDI T_AOP 0 0 0 1; *
         POP next-I
-    [94:89;6] POPS T_POP 1 0 0 [$ MISSING $]; [< * next-I >]
+    [94:89;6] POPS T_POP 1 0 0; [< * next-I >]
     ENDL
-    [95:90;4] ENDL T_ENDL 0 2 10 [$ MISSING $]; [$ MISSING $]
+    [95:90;4] ENDL T_ENDL 0 2 10
     LABEL DONE
-    [87:82;4] JMPGT T_JMPS[1] 2 0 9 [$ MISSING $]; DONE
-    [97:91;5] PUSHS T_PUSH 1 0 0 [$ MISSING $]; [< S * >]
-    [97:92;6] PUSHS T_PUSH 4 0 0 [$ MISSING $]; [< X * >]
-    [97:93;7] PUSHS T_PUSH 4 0 0 [$ MISSING $]; [< Y * >]
+    [87:82;4] JMPGT T_JMPS[1] 2 0 9; DONE
+    [97:91;5] PUSHS T_PUSH 1 0 0; [< S * >]
+    [97:92;6] PUSHS T_PUSH 4 0 0; [< X * >]
+    [97:93;7] PUSHS T_PUSH 4 0 0; [< Y * >]
     TRACE 'S = SUM I FOR X <= I <= Y' S X Y
-    [97:94;4] TRACE T_ALWAYS 3 0 0 [$ MISSING $]; [<
-              "S = SUM I FOR X <= I <= Y" S X Y >]
+    [97:94;4] TRACE T_ALWAYS 3 0 0; [< "S = SUM I FOR X <= I <= Y" S X
+              Y >]
 ENDF
-    [81:76;4] BEGF T_BEGF 2 1 20 [$ MISSING $]; [< SUM X Y >]
-    [98:95;0] ENDF T_ENDF 0 1 0 [$ MISSING $]; [$ MISSING $]
+    [81:76;4] BEGF T_BEGF 2 1 20; [< SUM X Y >]
+    [98:95;0] ENDF T_ENDF 0 1 0
 SET_OPTIMIZE OFF
-    [99:96;0] SET_OPTIMIZE T_SET_OPTIMIZE 0 0 0 [$ MISSING $]
-              ; [$ MISSING $]
+    [99:96;0] SET_OPTIMIZE T_SET_OPTIMIZE 0 0 0
 PUSHI 1
     [100:97;1] PUSHI T_PUSH 0 0 0 1; *
 PUSHI 10
     [101:98;2] PUSHI T_PUSH 0 0 0 10; *
 CALL SUM 2
-    [102:99;0] CALLM T_CALLM 2 0 76 [$ MISSING $]; [< SUM >]
+    [102:99;0] CALLM T_CALLM 2 0 76; [< SUM >]
 SET_OPTIMIZE ON
-    [103:100;0] SET_OPTIMIZE T_SET_OPTIMIZE 1 0 0 [$ MISSING $]
-                ; [$ MISSING $]
+    [103:100;0] SET_OPTIMIZE T_SET_OPTIMIZE 1 0 0
 PUSHI 1
     [104:101;1] PUSHI T_PUSH 0 0 0 1; *
 PUSHI 10
     [105:102;2] PUSHI T_PUSH 0 0 0 10; *
 CALL SUM 2
-    [106:103;0] CALLM T_CALLM 2 0 76 [$ MISSING $]; [< SUM >]
+    [106:103;0] CALLM T_CALLM 2 0 76; [< SUM >]
 * {13:0,0,0} SET_TRACE: SET_OPTIMIZE
 * {14:1,0,1} SET_OPTIMIZE: OFF <= OFF
 *** {29:17,6,17} TRACE: "Z = MIN ( X, Y )", X=5.5, Y=3.4, Z=3.4
