@@ -2476,9 +2476,9 @@ compiler must output push instructions using
 to push the corresponding trace values into the process stack.
 Note that these trace values are \underline{not} recorded in the
 compiler variable stack.  The number of these trace values becomes
-the {\tt tvars} parameter of these functions.
+the {\tt tvars} parameter of the above functions.
 
-Lastly, in the case of the {\tt BEGL} instruction, the compiler must
+Also, in the case of the {\tt BEGL} instruction, the compiler must
 push the `{\tt next}' variables into the variables stack.
 This is done before calling {\tt begx} because these variables should
 be given the value of {\tt mexstack::depth[.]} \underline{before} it is
@@ -2520,7 +2520,7 @@ and {\tt func\_var\_stack\_length} (by calling the
 {\tt mexstack::pop\_\EOL stacks}
 function provided by the compiler).
 The block description is also used
-by the {\em cont} function to fill in parts of the {\tt CONT} instruction.
+by the {\tt cont} function to fill in parts of the {\tt CONT} instruction.
 
 {\tt Begx} and {\tt endx} also adjust the current lexical level and
 depth as required by the {\tt BEG\ldots}~and {\tt END\ldots}~instructions
@@ -2536,13 +2536,14 @@ label whose components are MIN names) that identifies
 a code vector index value which can be used by \TT{JMP\ldots}
 instructions as the point in the code vector to jump to.
 
-\TT{JMP\ldots} instructions pushed into the code vector
+\TT{JMP\ldots} instructions are pushed into the code vector
 using the {\tt mexstack::jmpx} function, and their targets are
 declared by the {\tt mexstack::jmp\_target} function.
 \TT{JMP\ldots} instructions are forward-referencing: their
-{\em jmp-targets} are declared after the \TT{JMP\ldots} instruction.
+{\em jmp-targets} are declared after the \TT{JMP\ldots} instruction
+(only {\tt ENDL} instructions can jump backwards).
 To manage \TT{JMP\ldots} instructions and their targets,
-{\tt mexstack} maintains a list of \skey{pending jumps}:
+{\tt mexstack::jumpx} pushes an element into a list of \skey{pending jumps}:
 that is, jumps whose {\em jmp-target} has not yet been
 declared.  When {\tt mexstack::jmp\_target} is called,
 the pending jump list is searched for jumps with the given
@@ -2554,7 +2555,7 @@ process stack elements the \TT{JMP\ldots} should pop.
 \TT{JMP\ldots} instructions
 are allowed to pop stack elements, but cannot push them.
 
-To allow this, an element of the pending jump list contains:
+To permit this, an element of the pending jump list contains:
 \begin{enumerate}
 \item The location of the jump instruction so it can be updated
 when its target is found.
@@ -2565,7 +2566,8 @@ when its target is found.
       the depths immediately after any {\tt END} or {\tt ENDL} instructions
       encountered since the {\tt JMP\ldots} instruction was encountered.
       $MD\le D$.
-\item The length $S$ of the variable stack just after the {\tt JMP\ldots}
+\item The length $S$ of the variable stack (i.e., the value of
+      {\tt var\_stack\_length}) just after the {\tt JMP\ldots}
       instruction pops its operands from the stack.
 \item The minimum $MS$ of $S$ and all the variable stack lengths immediately
       after any {\tt END} or {\tt ENDL} instructions encountered
@@ -2609,16 +2611,16 @@ Example 1:
 PUSH X
 PUSH Y
 // Stack length is S + 2
-JMPLT ITS-X    // M = S
+JMPLT ITS-X    // MS = S
 // Stack length is S
 PUSH Y
 // Stack length is S + 1
-JMP DONE       // M = S + 1
+JMP DONE       // MS = S + 1
 // Stack length is S + 1
-LABEL ITS-X    // JMPLT ITS-X *illegal*, M == S != S + 1
+LABEL ITS-X    // JMPLT ITS-X *illegal*, MS == S != S + 1
 PUSH X
 // Stack length is S + 2
-LABEL DONE     // JMP DONE *illegal*, M == S + 1 != S + 2
+LABEL DONE     // JMP DONE *illegal*, MS == S + 1 != S + 2
 // Stack length is S + 2
 \end{verbatim}\end{indpar}
 
@@ -2634,20 +2636,20 @@ BEG
     PUSH X
     PUSH Y
     // Stack length is S + 3
-    JMPLT ITS-X    // M = S + 1
+    JMPLT ITS-X    // MS = S + 1
     // Stack length is S + 1
     PUSH Y
     // Stack length is S + 2
     POP Z
     // Stack length is S + 1
-    JMP DONE       // M = S + 1
+    JMP DONE       // MS = S + 1
     // Stack length is S + 1
-    LABEL ITS-X    // JMPLT ITS-X legal, M == S + 1 == S + 1
+    LABEL ITS-X    // JMPLT ITS-X legal, MS == S + 1 == S + 1
     PUSH X
     // Stack length is S + 2
     POP Z
     // Stack length is S + 1
-    LABEL DONE    // JMP DONE legal, M == S + 1 == S + 1
+    LABEL DONE    // JMP DONE legal, MS == S + 1 == S + 1
 END
 // Stack length is S + 1
 \end{verbatim}\end{indpar}
@@ -2711,7 +2713,7 @@ module.
 
 Pending jumps are added at the end of the pending jump list, and
 as this function is called whenever the lexical level decreases by one,
-pending jumps are sorted by lexical level in the pending jump list.
+pending jumps are sorted by ascending lexical level in the pending jump list.
 \end{indpar}
 
 \verb|min::uns32 mexstack:| \MEXSTACKKEY{jmp\_update} \verb|( void )|
