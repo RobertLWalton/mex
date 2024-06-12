@@ -958,7 +958,8 @@ for specifics.
 
 The process's \TT{counter} is incremented once every time an instruction
 finishes execution.  The process stops when
-\TT{counter >= counter\_\EOL limit}.   The \TT{optimized\_counter}
+\TT{counter >= counter\_\EOL limit}\label{COUNTER-LIMIT}.
+The \TT{optimized\_counter}
 is incremented (along with the \TT{counter})
 for every instruction executed in optimize mode;
 it has no limit and is for information purposes only.
@@ -1365,7 +1366,7 @@ exceptions.
 In non-optimized mode, i.e.~when a process's \TT{optimize} member is \TT{false},
 an instruction that raises an exception prints
 an error message if the instruction exception is one whose bit
-is on in the process's \TT{excepts\_mask} member.
+is on in the process's \TT{excepts\_mask}\label{EXCEPTS-MASK} member.
 This error message is always followed by a trace of the instruction
 (regardless of the process trace flag settings): see
 Instruction Tracing, \itemref{INSTRUCTION-TRACING}.
@@ -1390,13 +1391,13 @@ a process's \TT{excepts\_mask} member is:
 \label{INSTRUCTION-TRACING}
 
 A process has two modes: \key{normal} and \key{optimized}, as
-determined by the \TT{optimize} member of the process.
+determined by the \TT{optimize}\label{OPTIMIZE} member of the process.
 The default setting of the \TT{optimize} member of a process
 is \TT{false}.
 
 In normal mode, tracing of an instruction
 is controlled by the \key{trace class} $C$ of the instruction
-and the \key{trace flags} $F$ of the process.  If
+and the \key{trace flags}\label{TRACE-FLAGS} $F$ of the process.  If
 \TT{$F$ \& ( 1 <{}< $C$ ) != 0} the instruction is traced.
 
 In optimized mode, instructions are \underline{not} traced,
@@ -3337,8 +3338,8 @@ appear in its arguments.  The syntax is:
 \begin{indpar}
 \emkey{MEXAS-command} ::= \ttkey{mexas} ~ {\em mexas-operation}\STAR{}
 \\[0.5ex]
-\emkey{mexas-operation} ::=
-    \begin{tabular}[t]{l@{~~~~~}l}
+\emkey{mexas-operation} ::= \\
+\hspace*{3em}\begin{tabular}[t]{l@{~~~~~}l}
     \emkey{mexas-filename}		& [assemble the file] \\
     \ttkey{-pa} 			& [print assembled instructions] \\
     \ttkey{-pasource}			& [ditto and include source lines] \\
@@ -3347,13 +3348,14 @@ appear in its arguments.  The syntax is:
     \ttkey{-tcnever}			& [assemble with \TT{NEVER}
                                            trace class] \\
     \ttkey{-tcnormal}			& [assemble with normal trace class] \\
-    \ttkey{-tc:}{\em tc-list}		& [run tracing listed trace classes] \\
-    \ttkey{-ex:}{\em ex-list}		& [run with given excepts\_mask] \\
-    \ttkey{-o:on}			& [run with optimize on] \\
-    \ttkey{-o:off}			& [run with optimize off] \\
-    \ttkey{-counter} $L$		& [set instruction counter limit] \\
-    \ttkey{-stack} $L$		        & [set stack size] \\
-    \ttkey{-return-stack} $L$	        & [set return stack size] \\
+    \ttkey{-tc:}{\em tc-list}		& [set process {\tt trace\_flags}] \\
+    \ttkey{-ex:}{\em ex-list}		& [set process {\tt excepts\_mask}] \\
+    \ttkey{-o:on}			& [set process optimize on] \\
+    \ttkey{-o:off}			& [set process optimize off] \\
+    \ttkey{-counter} $L$		& [set process instruction
+                                           {\tt counter\_limit}] \\
+    \ttkey{-stack} $L$		        & [set process stack size] \\
+    \ttkey{-return-stack} $L$	        & [set process return stack size] \\
     \ttkey{-r} {\em function-name}	& [run named function] \\
     \end{tabular}
 \\[0.5ex]
@@ -3402,14 +3404,16 @@ Details are:
 \begin{indpar}\begin{tabular}{p{1.3in}p{4.4in}}
 \TT{-tcnever}	    & Determines the trace class of an assembled instruction. \\
 \label{-TCNEVER}
-\TT{-tcnormal}	    & \TT{-tcnormal} sets the trace class of the op code
+\TT{-tcnormal}	    & \TT{-tcnormal} sets the trace class of an op code
+                      to that
 		      given by Figure~\itemref{TRACE-CLASSES-AND-GROUPS}.
                       \TT{-tcnever} sets the class to \TT{NEVER} unless
 		      the normal instruction trace class is \TT{ALWAYS}.
 		      Default is \TT{-tcnormal}.
 \\[0.5ex]
 \TT{-tc:}{\em tc-list} \label{-TC:}
-		    & Sets the process \TT{trace\_flags} at the start of mex
+		    & Sets the process \TT{trace\_flags}\pagnote{TRACE-FLAGS}
+		      at the start of mex
 		      program execution.  \TT{ALWAYS} and \TT{NEVER}
 		      can\underline{not} be listed: their flags are always
 		      on and off, respectively.
@@ -3417,7 +3421,8 @@ Details are:
 \end{tabular}\end{indpar}
 \begin{indpar}\begin{tabular}{p{1.3in}p{4.4in}}
 \TT{-ex:}{\em ex-list}
-		    & Sets the process \TT{excepts\_mask} at the start of mex
+		    & Sets the process \TT{excepts\_mask}\pagnote{EXCEPTS-MASK}
+		      at the start of mex
 		      program execution.
 		      Default is \TT{-ex:DIVBYZERO,INVALID,OVERFLOW}.
 \end{tabular}\end{indpar}
@@ -3425,12 +3430,15 @@ Details are:
 \begin{tabular}[t]{@{}l@{}}
 \TT{-o:off} \\
 \TT{-o:on} \\
-\end{tabular}	    & Sets the process \TT{optimize} flag \TT{on} or \TT{off}
+\end{tabular}	    & Sets the process \TT{optimize} flag\pagnote{OPTIMIZE}
+                     \TT{on} or \TT{off}
                       at the start of mex program execution.
 		      Default is \TT{-o:off}.
 \end{tabular}\end{indpar}
 \begin{indpar}\begin{tabular}{p{1.3in}p{4.4in}}
-\TT{-counter} $L$   & Sets the process \TT{counter\_limit} to integer $L$.
+\TT{-counter} $L$   & Sets the process
+                      \TT{counter\_limit}\pagnote{COUNTER-LIMIT}
+		      to integer $L$.
 \\[0.5ex]
 \TT{-stack} $L$	    & Sets the process \TT{max\_length} (stack size)
                       to integer $L$.
