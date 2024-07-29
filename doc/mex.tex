@@ -244,7 +244,7 @@
 
 \author{Robert L. Walton}
 
-\date{June 11, 2024}
+\date{July 28, 2024}
  
 \maketitle
 
@@ -753,17 +753,17 @@ The interface to a MEX module and its code vector is:
 \verb|struct                        mex::| & \MEXKEY{module\_header}
 \LABEL{MEX::MODULE_HEADER} \\
 \verb|{                                  | \\
-\verb|    min::uns32 | & \TTMKEY{control}{in {\tt mex::code\_header}} \\
-\verb|    min::uns32 | & \TTMKEY{length}{in {\tt mex::code\_header}} \\
-\verb|    min::uns32 | & \TTMKEY{max\_length}{in {\tt mex::code\_header}} \\
-\verb|    min::gen | & \TTMKEY{name}{in {\tt mex::code\_header}} \\
+\verb|    min::uns32 | & \TTMKEY{control}{in {\tt mex::module\_header}} \\
+\verb|    min::uns32 | & \TTMKEY{length}{in {\tt mex::module\_header}} \\
+\verb|    min::uns32 | & \TTMKEY{max\_length}{in {\tt mex::module\_header}} \\
+\verb|    min::gen | & \TTMKEY{name}{in {\tt mex::module\_header}} \\
 \verb|    min::phrase_position_vec | & \TTMKEY{position}
-                                              {in {\tt mex::code\_header}} \\
+                                              {in {\tt mex::module\_header}} \\
 \verb|    min::packed_vec_ptr<min::gen> | & \TTMKEY{globals}
-                                              {in {\tt mex::code\_header}} \\
-\verb|    min::gen | & \TTMKEY{interface}{in {\tt mex::code\_header}} \\
+                                              {in {\tt mex::module\_header}} \\
+\verb|    min::gen | & \TTMKEY{interface}{in {\tt mex::module\_header}} \\
 \verb|    min::packed_vec_ptr<min::gen> | & \TTMKEY{trace\_info}
-                                              {in {\tt mex::code\_header}} \\
+                                              {in {\tt mex::module\_header}} \\
 \verb|}                                  | \\
 \end{tabular}
 
