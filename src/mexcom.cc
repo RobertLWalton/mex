@@ -2,7 +2,7 @@
 //
 // File:	mexcom.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Jun  3 04:40:36 EDT 2024
+// Date:	Wed Aug  7 15:28:04 EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -207,7 +207,12 @@ static void print_error_or_warning
 	  const char * message9 )
 {
     min::printer printer = mexcom::input_file->printer;
-    printer << min::bol << min::bom
+    bool html =   printer->print_format.op_flags
+	        & min::OUTPUT_HTML;
+    printer << min::bol;
+    if ( html ) min::tag(printer)
+                    << "<div class='error'>";
+    printer << min::bom
             << type << ": " << min::place_indent ( 0 );
     if ( pp )
         printer << "in "
@@ -218,6 +223,8 @@ static void print_error_or_warning
             << message4 << message5 << message6
 	    << message7 << message8 << message9;
     if ( pp ) printer << ":";
+
+    if ( html ) min::tag(printer) << "</div>";
     printer << min::eom;
 
     if ( pp )
