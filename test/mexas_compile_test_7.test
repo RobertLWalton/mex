@@ -52,7 +52,7 @@ TRACE_EXCEPTS
 * {17:4,1,4} TRACE_EXCEPTS: INEXACT *OVERFLOW
 * {18:5,1,5} NEG: * = -inf <= - inf
 !!! ERROR: invalid operand(s)
-* {19:6,1,6} LOG: * = nan <= log -inf
+* {19:6,1,6} LOG: * = -nan <= log -inf
 * {20:7,1,7} TRACE_EXCEPTS: INEXACT *INVALID *OVERFLOW
 * {21:8,1,8} PUSHI: * <= 10
 * {22:9,2,9} PUSHI: * <= 0
