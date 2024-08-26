@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun May 19 12:19:24 EDT 2024
+// Date:	Mon Aug 26 01:25:38 AM EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -98,6 +98,8 @@ static min::packed_vec<mex::ret>
 	   NULL,
 	   ::return_stack_element_stub_disp );
 
+static min::locatable_gen ZERO
+    ( min::new_num_gen ( 0 ) );
 static void check_op_infos ( void );
 static void check_trace_class_infos ( void );
 static void check_state_infos ( void );
@@ -492,13 +494,44 @@ static bool optimized_run_process ( mex::process p )
 	case mex::JMPLEQ:
 	case mex::JMPGT:
 	case mex::JMPGEQ:
+	case mex::JMPF:
+	case mex::JMPT:
 	{
 	    min::uns32 immedA = pc->immedA;
+	    min::uns32 immedB = 0;
+	        // Left 0 for JMP, JMPF, JMPT.
 	    min::uns32 immedC = pc->immedC;
 	    min::gen * new_sp = sp;
 	    bool execute_jmp = true;
-	    if ( op_code != mex::JMP )
+	    if ( op_code == mex::JMPF
+	         ||
+		 op_code == mex::JMPT )
 	    {
+	        new_sp -= 1;
+		min::gen arg = new_sp[0];
+		if ( arg == ZERO )
+		    goto FALSE_FOUND;
+		if ( min::is_obj ( arg ) )
+		{
+		    min::obj_vec_ptr vp = arg;
+		    if ( min::size_of ( vp ) == 0 )
+		        goto FALSE_FOUND;
+		}
+		// TRUE found.
+		//
+		if ( op_code == mex::JMPF )
+		    execute_jmp = false;
+		goto JMP_EXECUTE;
+
+	    FALSE_FOUND:
+		if ( op_code == mex::JMPT )
+		    execute_jmp = false;
+		goto JMP_EXECUTE;
+	    }
+	    else if ( op_code != mex::JMP )
+	    {
+		immedB = pc->immedB;
+
 		min::float64 arg1, arg2;
 		if ( sp < spbegin + 2 )
 		    goto ERROR_EXIT;
@@ -536,6 +569,8 @@ static bool optimized_run_process ( mex::process p )
 		    break;
 		}
 	    }
+
+	JMP_EXECUTE:
 	    if ( immedA > new_sp - spbegin
 		 ||
 		 immedC > pcend - pc
@@ -545,6 +580,11 @@ static bool optimized_run_process ( mex::process p )
 
 	    if ( ! execute_jmp )
 	    {
+	        if ( immedB == 1 )
+		{
+		    new_sp[0] = new_sp[1];
+		    ++ new_sp;
+		}
 	        sp = new_sp;
 		break;
 	    }
@@ -895,6 +935,8 @@ mex::op_info mex::op_infos [ mex::NUMBER_OF_OP_CODES ] =
     { mex::JMPLEQ, J2, T_JMPS, "JMPLEQ", "<=" },
     { mex::JMPGT, J2, T_JMPS, "JMPGT", ">" },
     { mex::JMPGEQ, J2, T_JMPS, "JMPGEQ", ">=" },
+    { mex::JMPF, J1, T_JMPS, "JMPF", NULL },
+    { mex::JMPT, J1, T_JMPS, "JMPT", NULL },
     { mex::BEG, NONA, T_BEG, "BEG", NULL },
     { mex::NOP, NONA, T_NOP, "NOP", NULL },
     { mex::END, NONA, T_END, "END", NULL },
@@ -1225,6 +1267,7 @@ bool mex::run_process ( mex::process p )
 	min::uns8 trace_class = pc->trace_class;
 	op_info * op_info;
 	min::float64 arg1, arg2;
+	min::gen arg;
 	min::gen * new_sp = sp;
 	min::uns32 trace_flags = p->trace_flags; 
 
@@ -1300,6 +1343,16 @@ bool mex::run_process ( mex::process p )
 	    arg1 = FG ( new_sp[0] );
 	    arg2 = 0; // To avoid error detector.
 	    goto ARITHMETIC;
+	case J1:
+	    new_sp -= 1;
+	    if ( new_sp < spbegin )
+	    {
+	        message = "illegal SP: stack to small"
+		          " for instruction";
+		goto INNER_FATAL;
+	    }
+	    arg = new_sp[0];
+	    goto JUMP;
 	case J2:
 	    new_sp -= 2;
 	    if ( new_sp < spbegin )
@@ -1546,6 +1599,8 @@ bool mex::run_process ( mex::process p )
 	    // Process JMP.
 
 	    min::uns32 immedA = pc->immedA;
+	    min::uns32 immedB = 0;
+	        // Left 0 for JMP, JMPF, JMPT.
 	    min::uns32 immedC = pc->immedC;
 
 	    if ( immedA > new_sp - spbegin )
@@ -1568,8 +1623,39 @@ bool mex::run_process ( mex::process p )
 
 	    bool bad_jmp = false;
 	    bool execute_jmp = true;
-	    if ( op_code != mex::JMP )
+	    if ( op_code == mex::JMPF
+	         ||
+		 op_code == mex::JMPT )
 	    {
+		if ( arg == ZERO )
+		    goto FALSE_FOUND;
+		if ( min::is_obj ( arg ) )
+		{
+		    min::obj_vec_ptr vp = arg;
+		    if ( min::size_of ( vp ) == 0 )
+		        goto FALSE_FOUND;
+		}
+		// TRUE found.
+		//
+		if ( op_code == mex::JMPF )
+		    execute_jmp = false;
+		goto JMP_EXECUTE;
+
+	    FALSE_FOUND:
+		if ( op_code == mex::JMPT )
+		    execute_jmp = false;
+		goto JMP_EXECUTE;
+	    }
+	    else if ( op_code != mex::JMP )
+	    {
+		immedB = pc->immedB;
+		if ( immedB > 1 )
+		{
+		    message = "JMP immedB != 0 or 1;"
+		              " illegal ";
+		    goto INNER_FATAL;
+		}
+
 		if ( std::isnan ( arg1 )
 		     ||
 		     std::isnan ( arg2 )
@@ -1600,6 +1686,8 @@ bool mex::run_process ( mex::process p )
 		    break;
 		}
 	    }
+
+	JMP_EXECUTE:
 
 	    if ( execute_jmp
 	         &&
@@ -1687,7 +1775,14 @@ bool mex::run_process ( mex::process p )
 	    }
 
 	    if ( ! execute_jmp )
+	    {
+	        if ( immedB == 1 )
+		{
+		    new_sp[0] = new_sp[1];
+		    ++ new_sp;
+		}
 		sp = new_sp;
+	    }
 	    else
 	    {
 		sp = new_sp - (int) immedA;

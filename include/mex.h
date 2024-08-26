@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun May 19 12:19:02 EDT 2024
+// Date:	Sun Aug 25 09:29:25 PM EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -64,6 +64,7 @@ enum op_code {
     JMPEQ, JMPNE,
     JMPLT, JMPLEQ,
     JMPGT, JMPGEQ,
+    JMPF, JMPT,
     BEG, NOP,
     END,
     BEGL,
@@ -127,7 +128,9 @@ enum op_type
     J2 =   7,	// sp[-1] and sp[0] are the arithmetic
                 // operands in that order, and the
 		// operation is a jump.
-    J =    8,	// JMP, no arithmetic operands.
+    J1 =   8,	// sp[0] is an operand, and the
+    		// operation is a jump.
+    J =    9,	// JMP, no arithmetic operands.
 };
 
 struct op_info
