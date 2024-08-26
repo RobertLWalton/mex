@@ -2,7 +2,7 @@
 //
 // File:        mexas_compile_test_1.mex
 // Author:      Bob Walton (walton@acm.org)
-// Date:        Tue Sep  5 02:47:49 EDT 2023
+// Date:        Mon Aug 26 06:20:50 AM EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -149,10 +149,86 @@ JMPLT ITS-X
 POP
     [91:41;2] POPS T_POP 0 0 0; [< * * >]
 
+// JMP TEST 5
+// Z = 1 if 5 < X < 10 else 0
+//
+PUSHI NaN Z
+    [96:42;3] PUSHI T_PUSH 0 0 0 nan; Z
+    STACKS: VARIABLES: Z Y X
+PUSHI 5
+    [98:43;4] PUSHI T_PUSH 0 0 0 5; *
+PUSH X
+    [99:44;5] PUSHS T_PUSH 3 0 0; [< X * >]
+JMPGEQ * ITS-0
+    [100:45;3] JMPGEQ T_JMPS 0 1 0; ITS-0
+PUSHI 10
+    [101:46;5] PUSHI T_PUSH 0 0 0 10; *
+JMPGEQ ITS-0
+    [102:47;3] JMPGEQ T_JMPS 0 0 0; ITS-0
+PUSHI 1
+    [103:48;4] PUSHI T_PUSH 0 0 0 1; *
+POP // Z, but illegal as Z has same depth
+    [104:49;3] POPS T_POP 0 0 0; [< * * >]
+JMP DONE
+    [105:50;3] JMP T_JMP 0 0 0; DONE
+LABEL ITS-0
+    [102:47;3] JMPGEQ T_JMPS 0 0 4; ITS-0
+    [100:45;3] JMPGEQ T_JMPS 0 1 6; ITS-0
+PUSHI 0
+    [107:51;4] PUSHI T_PUSH 0 0 0 0; *
+POP // Z, but illegal as Z has same depth
+    [108:52;3] POPS T_POP 0 0 0; [< * * >]
+LABEL DONE
+    [105:50;3] JMP T_JMP 0 0 3; DONE
+POP
+    [110:53;2] POPS T_POP 0 0 0; [< Z * >]
+    STACKS: VARIABLES: Y X
+
+// JMP TEST 6
+// Z = 1 if Z == 0 else 0 if Z == 1 else 10
+//
+PUSHI 1 Z
+    [116:54;3] PUSHI T_PUSH 0 0 0 1; Z
+    STACKS: VARIABLES: Z Y X
+PUSH Z
+    [118:55;4] PUSHS T_PUSH 0 0 0; [< Z * >]
+JMPF ITS-0
+    [119:56;3] JMPF T_JMPS 0 0 0; ITS-0
+PUSH Z
+    [120:57;4] PUSHS T_PUSH 0 0 0; [< Z * >]
+JMPT ITS-1
+    [121:58;3] JMPT T_JMPS 0 0 0; ITS-1
+PUSHI 10
+    [122:59;4] PUSHI T_PUSH 0 0 0 10; *
+POP // Z, but illegal as Z has same depth
+    [123:60;3] POPS T_POP 0 0 0; [< * * >]
+JMP DONE
+    [124:61;3] JMP T_JMP 0 0 0; DONE
+LABEL ITS-0
+    [119:56;3] JMPF T_JMPS 0 0 6; ITS-0
+PUSHI 0
+    [126:62;4] PUSHI T_PUSH 0 0 0 0; *
+POP // Z, but illegal as Z has same depth
+    [127:63;3] POPS T_POP 0 0 0; [< * * >]
+JMP DONE
+    [128:64;3] JMP T_JMP 0 0 0; DONE
+LABEL ITS-1
+    [121:58;3] JMPT T_JMPS 0 0 7; ITS-1
+PUSHI 1
+    [130:65;4] PUSHI T_PUSH 0 0 0 1; *
+POP // Z, but illegal as Z has same depth
+    [131:66;3] POPS T_POP 0 0 0; [< * * >]
+LABEL DONE
+    [128:64;3] JMP T_JMP 0 0 3; DONE
+    [124:61;3] JMP T_JMP 0 0 6; DONE
+POP
+    [133:67;2] POPS T_POP 0 0 0; [< Z * >]
+    STACKS: VARIABLES: Y X
+
 // Check for extra stuff at end of instruction
 //
 PUSHI 300 X 'this is extra for a PUSH'
-    [95:42;3] PUSHI T_PUSH 0 0 0 300; X
+    [138:68;3] PUSHI T_PUSH 0 0 0 300; X
 ERROR: in mexas_compile_test_1.mex: lines ####-#### extra stuff at end of
        instruction: 'this is extra for a PUSH' ...:
 
@@ -160,16 +236,16 @@ ERROR: in mexas_compile_test_1.mex: lines ####-#### extra stuff at end of
 //
 PUSHI 300 X 'this is extra for a PUSH'
 PUSH X Y Z
-    [96:43;4] PUSHS T_PUSH 0 0 0; [< X Y >]
+    [139:69;4] PUSHS T_PUSH 0 0 0; [< X Y >]
 ERROR: in mexas_compile_test_1.mex: line ####: extra stuff at end of
        instruction: Z ...:
 PUSH X Y Z
 JMP FOO 'extra stuff' X Y
-    [97:44;4] JMP T_JMP 0 0 0; FOO
+    [140:70;4] JMP T_JMP 0 0 0; FOO
 ERROR: in mexas_compile_test_1.mex: line ####: extra stuff at end of
        instruction: 'extra stuff' ...:
 JMP FOO 'extra stuff' X Y
-ERROR: in mexas_compile_test_1.mex: line ####: jump target undefined: FOO;
-       JMP... is unresolved:
+ERROR: in mexas_compile_test_1.mex: line ####: jump target undefined:
+       FOO; JMP... is unresolved:
 JMP FOO 'extra stuff' X Y
 exiting due to compile errors

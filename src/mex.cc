@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Aug 26 01:25:38 AM EDT 2024
+// Date:	Mon Aug 26 02:04:27 AM EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1735,7 +1735,9 @@ bool mex::run_process ( mex::process p )
 		{
 		    min::gen trace_info =
 		        m->trace_info[p->pc.index];
-		    if ( min::is_str ( trace_info ) )
+		    if ( min::is_str ( trace_info )
+		         ||
+			 min::is_num ( trace_info ) )
 		        p->printer << " " << trace_info;
 		    else
 		        p->printer << " *";
@@ -1761,12 +1763,20 @@ bool mex::run_process ( mex::process p )
 			p->printer
 			    << " is UNsuccessful:"
 			       " false";
+		    p->printer << " <= ";
 
-		    char buffer[200];
-		    sprintf
-		        ( buffer, " <= %.15g %s %.15g",
-			  arg1, op_info->oper, arg2 );
-		    p->printer << buffer;
+		    if ( op_info->oper == NULL )
+		        p->printer << min::pgen ( arg );
+		    else
+		    {
+			char buffer[200];
+			sprintf
+			    ( buffer,
+			      "%.15g %s %.15g",
+			      arg1, op_info->oper,
+			      arg2 );
+			p->printer << buffer;
+		    }
 		}
 
 		p->printer << min::eom;

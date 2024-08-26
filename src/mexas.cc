@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Jun  6 11:41:48 EDT 2024
+// Date:	Mon Aug 26 02:21:29 AM EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -676,6 +676,9 @@ mex::module mexas::compile ( min::file file )
 	    instr.op_code = op_code;
 	}
 
+	min::gen top_name = min::NONE();
+	    // If not NONE, JUMP does extra push at end.
+
 	switch ( op_type )
 	{
 	case mex::NONA:
@@ -725,9 +728,26 @@ mex::module mexas::compile ( min::file file )
 	    mexstack::var_stack_length -= 1;
 	    goto ARITHMETIC;
 
+	case mex::J1:
+	    if ( SP < mexstack::stack_limit + 1 )
+	        goto STACK_TOO_SHORT;
+	    min::pop ( variables, 1 );
+	    mexstack::var_stack_length -= 1;
+	    goto JUMP;
+
 	case mex::J2:
 	    if ( SP < mexstack::stack_limit + 2 )
 	        goto STACK_TOO_SHORT;
+	    if ( mexas::get_star ( index )
+	         ==
+		 mexas::star )
+	    {
+		top_name =
+		    (~ (   variables
+			 + ( variables->length - 1 ) ) )
+		    ->name;
+		instr.immedB = 1;
+	    }
 	    min::pop ( variables, 2 );
 	    mexstack::var_stack_length -= 2;
 	    // Fall through.
@@ -774,6 +794,11 @@ mex::module mexas::compile ( min::file file )
 	    }
 	    mexstack::push_jmp_instr
 		( instr, target, pp );
+
+	    if ( top_name != min::NONE() )
+		mexas::push_variable
+		    ( mexas::variables, top_name,
+		      L, mexstack::depth[L] );
 	    goto EXTRA_STUFF_CHECK;
 	}
 	NON_ARITHMETIC:

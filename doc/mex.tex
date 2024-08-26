@@ -244,7 +244,7 @@
 
 \author{Robert L. Walton}
 
-\date{August 25, 2024}
+\date{August 26, 2024}
  
 \maketitle
 
@@ -1575,12 +1575,12 @@ If \TT{module->\EOL trace\_\EOL info[i]} is not a MIN string,
 
 \begin{center}
 {\em trace-header} {\em jmp-target} \TT{is successful:~true}
-                    \TT{<=} {\em value} {\em operator} {\em value}
+                    \TT{<=} {\em value} \{ {\em operator} {\em value} \}\QMARK{}
 \end{center}
 or
 \begin{center}
 {\em trace-header} {\em jmp-target} \TT{is UNsuccessful:~false}
-                    \TT{<=} {\em value} {\em operator} {\em value}
+                    \TT{<=} {\em value} \{ {\em operator} {\em value} \}\QMARK{}
 \end{center}
 
 or for a plain unconditional \TT{JMP} instruction, just:
@@ -1590,8 +1590,8 @@ or for a plain unconditional \TT{JMP} instruction, just:
 
 For a jump instruction the value of
 \TT{module->\EOL trace\_\EOL info[i]} is {\em jmp-target}
-as a MIN string.
-If \TT{module->\EOL trace\_\EOL info[i]} is not a MIN string,
+as a MIN string or number.
+If \TT{module->\EOL trace\_\EOL info[i]} is not a MIN string or number,
 \TT{*} is used as {\em jump-target}.
 
 \subsubsection{Push/Pop Tracing}
@@ -3053,21 +3053,38 @@ calls {\tt mexstack::push\_\EOL jmp\_instr}\pagnote{PUSH-JMP-INSTR}
 to add an element to the pending jump list.
 \end{indpar}
 
-\ttkey{JMP\ldots} ~ {\em jmp-target}
+\ttkey{JMP\ldots} ~ \TT{*}\QMARK{} {\em jmp-target}
 \begin{indpar}
 Here \ldots~denotes one of \TT{EQ}, \TT{NE}, etc.
 
 At run-time these instruction's actions are as described in
-Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}.  At assembly-time,
-these instructions first pop two elements from the variable stack
-and then
+Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}, where the \TT{*}
+option sets \TT{immedB} = 1 (otherwise it is 0).  At assembly-time,
+these instructions first pop two elements from the variable stack,
+then
 call {\tt mexstack::\EOL push\_\EOL jmp\_instr}\pagnote{PUSH-JMP-INSTR}
+to add an element to the pending jump list, then if \TT{*} is present
+push the first element popped back onto the variable stack.
+
+Note that
+the pending jump list element
+$S$ value is the length of the variable stack \underline{after}
+the two elements are popped (and before any element is pushed back).
+\end{indpar}
+
+\ttkey{JMPF}/\ttkey{JMPT} {\em jmp-target}
+\begin{indpar}
+At run-time these instruction's actions are as described in
+Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}.
+At assembly-time,
+these instructions first pop one element from the variable stack and
+then call {\tt mexstack::\EOL push\_\EOL jmp\_instr}\pagnote{PUSH-JMP-INSTR}
 to add an element to the pending jump list.
 
 Note that
 the pending jump list element
 $S$ value is the length of the variable stack \underline{after}
-the two elements are popped.
+the one element is popped.
 \end{indpar}
 
 \ttkey{BEG} ~ {\em trace-packet}\QMARK{}
