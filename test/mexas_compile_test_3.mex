@@ -2,7 +2,7 @@
 //
 // File:	mexas_compile_test_3.mex
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Aug 28 06:53:50 EDT 2023
+// Date:	Mon Aug 26 03:37:50 PM EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -28,4 +28,32 @@ PUSHI 23 X
 PUSHI 157 Y
 CALL MIN 2 Z
 STACKS
+POP
+
+// BEGF ... ENDF and JMPF/JMPT Test
+// RESULT = 1 IF ARG == 0 AND 0 IF ARG != 0
+//
+BEGF FLIP ARG
+    PUSH ARG
+    JMPF ITS-0
+    PUSH ARG
+    JMPT ITS-1
+    PUSHI 555
+    RET 1
+    LABEL ITS-0
+    PUSHI 1
+    RET 1
+    LABEL ITS-1
+    PUSHI 0
+    RET 1
+ENDF
+
+PUSHI 0
+CALL FLIP 1 Z
+POP
+PUSHI 1
+CALL FLIP 1 Z
+POP
+PUSHI 26
+CALL FLIP 1 Z
 POP

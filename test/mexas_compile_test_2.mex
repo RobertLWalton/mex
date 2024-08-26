@@ -2,7 +2,7 @@
 //
 // File:	mexas_compile_test_2.mex
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Aug 14 06:48:51 EDT 2023
+// Date:	Mon Aug 26 03:27:53 PM EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -54,6 +54,38 @@ BEGL 2
 ENDL
 STACKS
 LABEL DONE
+POP
+POP
+POP
+
+// BEGL ... ENDL and JMP... * TEST
+// Z = NUMBER OF MULTIPLES OF X IN [Y1,Y2]
+//
+PUSHI 0.3 X
+PUSHI 4 Y1
+PUSHI 6.2 Y2
+PUSHI 0 COUNT
+PUSHI 0 Y
+BEGL 2
+    PUSH Y1
+    PUSH Y
+    JMPGT * CONTINUE
+    PUSH Y2
+    JMPGT DONE
+    PUSH COUNT
+    ADDI 1
+    POP next-COUNT
+
+    LABEL CONTINUE
+    PUSH Y
+    PUSH X
+    ADD
+    POP next-Y
+ENDL
+STACKS
+LABEL DONE
+POP
+POP
 POP
 POP
 POP
