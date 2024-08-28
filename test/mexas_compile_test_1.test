@@ -2,7 +2,7 @@
 //
 // File:        mexas_compile_test_1.mex
 // Author:      Bob Walton (walton@acm.org)
-// Date:        Mon Aug 26 06:20:50 AM EDT 2024
+// Date:        Tue Aug 27 09:38:25 PM EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -150,85 +150,108 @@ POP
     [91:41;2] POPS T_POP 0 0 0; [< * * >]
 
 // JMP TEST 5
+// Z = MIN ( X, Y )
+// Done legally by jumping over a POP/PUSH pair.
+//
+    STACKS: VARIABLES: Y X
+PUSH Y Z
+    [98:42;3] PUSHS T_PUSH 0 0 0; [< Y Z >]
+PUSH X
+    [99:43;4] PUSHS T_PUSH 2 0 0; [< X * >]
+PUSH Y
+    [100:44;5] PUSHS T_PUSH 2 0 0; [< Y * >]
+JMPGEQ DONE
+    [101:45;3] JMPGEQ T_JMPS 0 0 0; DONE
+POP
+    [102:46;2] POPS T_POP 0 0 0; [< Z * >]
+PUSH X Z
+    [103:47;3] PUSHS T_PUSH 1 0 0; [< X Z >]
+LABEL DONE
+    [101:45;3] JMPGEQ T_JMPS 0 0 3; DONE
+    STACKS: VARIABLES: Z Y X
+POP
+    [106:48;2] POPS T_POP 0 0 0; [< Z * >]
+
+// JMP TEST 6
 // Z = 1 if 5 < X < 10 else 0
 //
 PUSHI NaN Z
-    [96:42;3] PUSHI T_PUSH 0 0 0 nan; Z
+    [111:49;3] PUSHI T_PUSH 0 0 0 nan; Z
     STACKS: VARIABLES: Z Y X
 PUSHI 5
-    [98:43;4] PUSHI T_PUSH 0 0 0 5; *
+    [113:50;4] PUSHI T_PUSH 0 0 0 5; *
 PUSH X
-    [99:44;5] PUSHS T_PUSH 3 0 0; [< X * >]
+    [114:51;5] PUSHS T_PUSH 3 0 0; [< X * >]
 JMPGEQ * ITS-0
-    [100:45;3] JMPGEQ T_JMPS 0 1 0; ITS-0
+    [115:52;3] JMPGEQ T_JMPS 0 1 0; ITS-0
 PUSHI 10
-    [101:46;5] PUSHI T_PUSH 0 0 0 10; *
+    [116:53;5] PUSHI T_PUSH 0 0 0 10; *
 JMPGEQ ITS-0
-    [102:47;3] JMPGEQ T_JMPS 0 0 0; ITS-0
+    [117:54;3] JMPGEQ T_JMPS 0 0 0; ITS-0
 PUSHI 1
-    [103:48;4] PUSHI T_PUSH 0 0 0 1; *
+    [118:55;4] PUSHI T_PUSH 0 0 0 1; *
 POP // Z, but illegal as Z has same depth
-    [104:49;3] POPS T_POP 0 0 0; [< * * >]
+    [119:56;3] POPS T_POP 0 0 0; [< * * >]
 JMP DONE
-    [105:50;3] JMP T_JMP 0 0 0; DONE
+    [120:57;3] JMP T_JMP 0 0 0; DONE
 LABEL ITS-0
-    [102:47;3] JMPGEQ T_JMPS 0 0 4; ITS-0
-    [100:45;3] JMPGEQ T_JMPS 0 1 6; ITS-0
+    [117:54;3] JMPGEQ T_JMPS 0 0 4; ITS-0
+    [115:52;3] JMPGEQ T_JMPS 0 1 6; ITS-0
 PUSHI 0
-    [107:51;4] PUSHI T_PUSH 0 0 0 0; *
+    [122:58;4] PUSHI T_PUSH 0 0 0 0; *
 POP // Z, but illegal as Z has same depth
-    [108:52;3] POPS T_POP 0 0 0; [< * * >]
+    [123:59;3] POPS T_POP 0 0 0; [< * * >]
 LABEL DONE
-    [105:50;3] JMP T_JMP 0 0 3; DONE
+    [120:57;3] JMP T_JMP 0 0 3; DONE
 POP
-    [110:53;2] POPS T_POP 0 0 0; [< Z * >]
+    [125:60;2] POPS T_POP 0 0 0; [< Z * >]
     STACKS: VARIABLES: Y X
 
-// JMP TEST 6
+// JMP TEST 7
 // Z = 1 if Z == 0 else 0 if Z == 1 else 10
 //
 PUSHI 1 Z
-    [116:54;3] PUSHI T_PUSH 0 0 0 1; Z
+    [131:61;3] PUSHI T_PUSH 0 0 0 1; Z
     STACKS: VARIABLES: Z Y X
 PUSH Z
-    [118:55;4] PUSHS T_PUSH 0 0 0; [< Z * >]
+    [133:62;4] PUSHS T_PUSH 0 0 0; [< Z * >]
 JMPF ITS-0
-    [119:56;3] JMPF T_JMPS 0 0 0; ITS-0
+    [134:63;3] JMPF T_JMPS 0 0 0; ITS-0
 PUSH Z
-    [120:57;4] PUSHS T_PUSH 0 0 0; [< Z * >]
+    [135:64;4] PUSHS T_PUSH 0 0 0; [< Z * >]
 JMPT ITS-1
-    [121:58;3] JMPT T_JMPS 0 0 0; ITS-1
+    [136:65;3] JMPT T_JMPS 0 0 0; ITS-1
 PUSHI 10
-    [122:59;4] PUSHI T_PUSH 0 0 0 10; *
+    [137:66;4] PUSHI T_PUSH 0 0 0 10; *
 POP // Z, but illegal as Z has same depth
-    [123:60;3] POPS T_POP 0 0 0; [< * * >]
+    [138:67;3] POPS T_POP 0 0 0; [< * * >]
 JMP DONE
-    [124:61;3] JMP T_JMP 0 0 0; DONE
+    [139:68;3] JMP T_JMP 0 0 0; DONE
 LABEL ITS-0
-    [119:56;3] JMPF T_JMPS 0 0 6; ITS-0
+    [134:63;3] JMPF T_JMPS 0 0 6; ITS-0
 PUSHI 0
-    [126:62;4] PUSHI T_PUSH 0 0 0 0; *
+    [141:69;4] PUSHI T_PUSH 0 0 0 0; *
 POP // Z, but illegal as Z has same depth
-    [127:63;3] POPS T_POP 0 0 0; [< * * >]
+    [142:70;3] POPS T_POP 0 0 0; [< * * >]
 JMP DONE
-    [128:64;3] JMP T_JMP 0 0 0; DONE
+    [143:71;3] JMP T_JMP 0 0 0; DONE
 LABEL ITS-1
-    [121:58;3] JMPT T_JMPS 0 0 7; ITS-1
+    [136:65;3] JMPT T_JMPS 0 0 7; ITS-1
 PUSHI 1
-    [130:65;4] PUSHI T_PUSH 0 0 0 1; *
+    [145:72;4] PUSHI T_PUSH 0 0 0 1; *
 POP // Z, but illegal as Z has same depth
-    [131:66;3] POPS T_POP 0 0 0; [< * * >]
+    [146:73;3] POPS T_POP 0 0 0; [< * * >]
 LABEL DONE
-    [128:64;3] JMP T_JMP 0 0 3; DONE
-    [124:61;3] JMP T_JMP 0 0 6; DONE
+    [143:71;3] JMP T_JMP 0 0 3; DONE
+    [139:68;3] JMP T_JMP 0 0 6; DONE
 POP
-    [133:67;2] POPS T_POP 0 0 0; [< Z * >]
+    [148:74;2] POPS T_POP 0 0 0; [< Z * >]
     STACKS: VARIABLES: Y X
 
 // Check for extra stuff at end of instruction
 //
 PUSHI 300 X 'this is extra for a PUSH'
-    [138:68;3] PUSHI T_PUSH 0 0 0 300; X
+    [153:75;3] PUSHI T_PUSH 0 0 0 300; X
 ERROR: in mexas_compile_test_1.mex: lines ####-#### extra stuff at end of
        instruction: 'this is extra for a PUSH' ...:
 
@@ -236,12 +259,12 @@ ERROR: in mexas_compile_test_1.mex: lines ####-#### extra stuff at end of
 //
 PUSHI 300 X 'this is extra for a PUSH'
 PUSH X Y Z
-    [139:69;4] PUSHS T_PUSH 0 0 0; [< X Y >]
+    [154:76;4] PUSHS T_PUSH 0 0 0; [< X Y >]
 ERROR: in mexas_compile_test_1.mex: line ####: extra stuff at end of
        instruction: Z ...:
 PUSH X Y Z
 JMP FOO 'extra stuff' X Y
-    [140:70;4] JMP T_JMP 0 0 0; FOO
+    [155:77;4] JMP T_JMP 0 0 0; FOO
 ERROR: in mexas_compile_test_1.mex: line ####: extra stuff at end of
        instruction: 'extra stuff' ...:
 JMP FOO 'extra stuff' X Y

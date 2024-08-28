@@ -2,7 +2,7 @@
 //
 // File:	mexas_compile_test_1.mex
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Aug 26 06:20:50 AM EDT 2024
+// Date:	Tue Aug 27 09:38:25 PM EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -91,6 +91,21 @@ STACKS
 POP
 
 // JMP TEST 5
+// Z = MIN ( X, Y )
+// Done legally by jumping over a POP/PUSH pair.
+//
+STACKS
+PUSH Y Z
+PUSH X
+PUSH Y
+JMPGEQ DONE
+POP
+PUSH X Z
+LABEL DONE
+STACKS
+POP
+
+// JMP TEST 6
 // Z = 1 if 5 < X < 10 else 0
 //
 PUSHI NaN Z
@@ -110,7 +125,7 @@ LABEL DONE
 POP
 STACKS
 
-// JMP TEST 6
+// JMP TEST 7
 // Z = 1 if Z == 0 else 0 if Z == 1 else 10
 //
 PUSHI 1 Z
