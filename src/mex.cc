@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Aug 26 02:04:27 AM EDT 2024
+// Date:	Fri Aug 30 02:41:11 AM EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -98,13 +98,18 @@ static min::packed_vec<mex::ret>
 	   NULL,
 	   ::return_stack_element_stub_disp );
 
-static min::locatable_gen ZERO
-    ( min::new_num_gen ( 0 ) );
+min::locatable_gen mex::ZERO;
+min::locatable_gen mex::FALSE;
+min::locatable_gen mex::TRUE;
 static void check_op_infos ( void );
 static void check_trace_class_infos ( void );
 static void check_state_infos ( void );
 static void initialize ( void )
 {
+    mex::ZERO = min::new_num_gen ( 0 );
+    mex::FALSE = min::new_str_gen ( "FALSE" );
+    mex::TRUE = min::new_str_gen ( "TRUE" );
+
     check_op_infos();
     check_trace_class_infos();
     check_state_infos();
@@ -489,7 +494,7 @@ static bool optimized_run_process ( mex::process p )
 	}
 	case mex::JMP:
 	case mex::JMPEQ:
-	case mex::JMPNE:
+	case mex::JMPNEQ:
 	case mex::JMPLT:
 	case mex::JMPLEQ:
 	case mex::JMPGT:
@@ -509,7 +514,9 @@ static bool optimized_run_process ( mex::process p )
 	    {
 	        new_sp -= 1;
 		min::gen arg = new_sp[0];
-		if ( arg == ZERO )
+		if ( arg == mex::ZERO
+		     ||
+		     arg == mex::FALSE )
 		    goto FALSE_FOUND;
 		if ( min::is_obj ( arg ) )
 		{
@@ -552,7 +559,7 @@ static bool optimized_run_process ( mex::process p )
 		case mex::JMPEQ:
 		    execute_jmp = ( arg1 == arg2 );
 		    break;
-		case mex::JMPNE:
+		case mex::JMPNEQ:
 		    execute_jmp = ( arg1 != arg2 );
 		    break;
 		case mex::JMPLT:
@@ -930,7 +937,7 @@ mex::op_info mex::op_infos [ mex::NUMBER_OF_OP_CODES ] =
     { mex::POPS, NONA, T_POP, "POPS", NULL },
     { mex::JMP, J, T_JMP, "JMP", NULL },
     { mex::JMPEQ, J2, T_JMPS, "JMPEQ", "==" },
-    { mex::JMPNE, J2, T_JMPS, "JMPNE", "!=" },
+    { mex::JMPNEQ, J2, T_JMPS, "JMPNEQ", "!=" },
     { mex::JMPLT, J2, T_JMPS, "JMPLT", "<" },
     { mex::JMPLEQ, J2, T_JMPS, "JMPLEQ", "<=" },
     { mex::JMPGT, J2, T_JMPS, "JMPGT", ">" },
@@ -1627,7 +1634,9 @@ bool mex::run_process ( mex::process p )
 	         ||
 		 op_code == mex::JMPT )
 	    {
-		if ( arg == ZERO )
+		if ( arg == mex::ZERO
+		     ||
+		     arg == mex::FALSE )
 		    goto FALSE_FOUND;
 		if ( min::is_obj ( arg ) )
 		{
@@ -1669,7 +1678,7 @@ bool mex::run_process ( mex::process p )
 		case mex::JMPEQ:
 		    execute_jmp = ( arg1 == arg2 );
 		    break;
-		case mex::JMPNE:
+		case mex::JMPNEQ:
 		    execute_jmp = ( arg1 != arg2 );
 		    break;
 		case mex::JMPLT:

@@ -244,7 +244,7 @@
 
 \author{Robert L. Walton}
 
-\date{August 26, 2024}
+\date{August 30, 2024}
  
 \maketitle
 
@@ -1023,6 +1023,15 @@ for details concerning nested functions.
 The housekeeping instruction set is in
 Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}.
 
+Some instructions use the values of the following parameters to represent
+the logical values `true' and `false':
+
+\hspace*{0.3in}\begin{tabular}{rll}
+\tt min::gen mex::& \ttkey{ZERO}  & \tt // Default: the MIN number 0. \\
+\tt min::gen mex::& \ttkey{FALSE} & \tt // Default: the MIN string "FALSE". \\
+\tt min::gen mex::& \ttkey{TRUE}  & \tt // Default: the MIN string "TRUE".  \\
+\end{tabular}
+
 \pagebreak
 
 
@@ -1146,7 +1155,7 @@ Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}.
       It is \\
     & illegal for \TT{immedC} = 0 (\TT{JMP} would jump to itself).
 \\\hline
-\ttkey{JMPEQ}/\ttkey{JMPNE}
+\ttkey{JMPEQ}/\ttkey{JMPNEQ}
     & Pop 2 values and compare them.  If they are equal/not-equal \\
     & continue as per the \TT{JMP} instruction.  Otherwise if
       \TT{immedB} == 0, \\
@@ -1163,10 +1172,10 @@ Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}.
     & greater-than/greater-than-or-equal-to the first popped.
 \\\hline
 \ttkey{JMPF}/\ttkey{JMPT}
-    & Pop 1 value and test whether it is 0 or an object with
-      0 vector \\
-    & elements (representing `false').  Continue as per \TT{JMP} if yes/no, \\
-    & but otherwise do nothing more.
+    & Pop 1 value and test whether it equals \TT{mex::ZERO} or
+      \TT{mex::FALSE}, \\
+    & or is a MIN object with 0 vector elements.  Continue as per \TT{JMP} \\
+    & if yes, but otherwise do nothing more.
 \\\hline
 \ttkey{BEG}/\ttkey{END}
     & Subtract \TT{immedA} from

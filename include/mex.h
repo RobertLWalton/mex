@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Aug 25 09:29:25 PM EDT 2024
+// Date:	Fri Aug 30 02:36:44 AM EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -28,6 +28,10 @@
 # include <min.h>
 
 namespace mex {
+
+extern min::locatable_gen ZERO;
+extern min::locatable_gen FALSE;
+extern min::locatable_gen TRUE;
 
 
 // Program Instructions
@@ -61,7 +65,7 @@ enum op_code {
     PUSHS, PUSHL, PUSHI, PUSHG,
     POPS,
     JMP,
-    JMPEQ, JMPNE,
+    JMPEQ, JMPNEQ,
     JMPLT, JMPLEQ,
     JMPGT, JMPGEQ,
     JMPF, JMPT,
