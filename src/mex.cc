@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Aug 30 02:41:11 AM EDT 2024
+// Date:	Wed Sep  4 05:21:00 PM EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -101,6 +101,7 @@ static min::packed_vec<mex::ret>
 min::locatable_gen mex::ZERO;
 min::locatable_gen mex::FALSE;
 min::locatable_gen mex::TRUE;
+static min::locatable_gen STAR;
 static void check_op_infos ( void );
 static void check_trace_class_infos ( void );
 static void check_state_infos ( void );
@@ -109,6 +110,7 @@ static void initialize ( void )
     mex::ZERO = min::new_num_gen ( 0 );
     mex::FALSE = min::new_str_gen ( "FALSE" );
     mex::TRUE = min::new_str_gen ( "TRUE" );
+    ::STAR = min::new_str_gen ( "*" );
 
     check_op_infos();
     check_trace_class_infos();
@@ -1551,8 +1553,9 @@ bool mex::run_process ( mex::process p )
 		{
 		    min::gen trace_info =
 		        m->trace_info[p->pc.index];
-		    if ( min::is_str ( trace_info ) )
-		        p->printer << trace_info;
+		    if ( trace_info != ::STAR )
+		        p->printer << min::pgen_name
+			                ( trace_info );
 		    else
 		        p->printer << "*";
 		}
@@ -1744,10 +1747,11 @@ bool mex::run_process ( mex::process p )
 		{
 		    min::gen trace_info =
 		        m->trace_info[p->pc.index];
-		    if ( min::is_str ( trace_info )
-		         ||
-			 min::is_num ( trace_info ) )
-		        p->printer << " " << trace_info;
+		    if ( trace_info != ::STAR )
+		        p->printer
+			    << " "
+			    << min::pgen_name
+			           ( trace_info );
 		    else
 		        p->printer << " *";
 		}
@@ -2326,10 +2330,12 @@ bool mex::run_process ( mex::process p )
 		case mex::PUSHNARGS:
 		{
 		    p->printer << ":";
-		    if ( min::is_str ( tinfo ) )
-		        p->printer << " "
-			           << tinfo
-				   << " <=";
+		    if ( tinfo != ::STAR )
+		        p->printer
+			    << " "
+			    << min::pgen_name
+			           ( tinfo )
+			    << " <=";
 		    else
 		        p->printer << " * <=";
 		    if ( op_code == mex::PUSHNARGS )
