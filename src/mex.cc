@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Sep  4 05:21:00 PM EDT 2024
+// Date:	Wed Sep  4 08:29:14 PM EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -120,6 +120,21 @@ static min::initializer initializer ( ::initialize );
 
 // Support Functions
 //
+struct pvar
+{
+    min::gen value;
+    pvar ( min::gen value ) : value ( value ) {}
+};
+
+inline min::printer operator <<
+    ( min::printer p, const ::pvar & pvar )
+{
+    if ( pvar.value == ::STAR )
+        return p << "*";
+    else
+        return p << min::pgen_name ( pvar.value );
+}
+
 static min::float64 powi ( min::float64 x, unsigned i )
 {
     min::float64 r = 1, z = x;
@@ -1553,11 +1568,7 @@ bool mex::run_process ( mex::process p )
 		{
 		    min::gen trace_info =
 		        m->trace_info[p->pc.index];
-		    if ( trace_info != ::STAR )
-		        p->printer << min::pgen_name
-			                ( trace_info );
-		    else
-		        p->printer << "*";
+		    p->printer << ::pvar ( trace_info );
 		}
 		else
 		    p->printer << "*";
@@ -1747,13 +1758,8 @@ bool mex::run_process ( mex::process p )
 		{
 		    min::gen trace_info =
 		        m->trace_info[p->pc.index];
-		    if ( trace_info != ::STAR )
-		        p->printer
-			    << " "
-			    << min::pgen_name
-			           ( trace_info );
-		    else
-		        p->printer << " *";
+		    p->printer << " "
+			       << ::pvar ( trace_info );
 		}
 		else
 		    p->printer << " *";
@@ -2302,9 +2308,9 @@ bool mex::run_process ( mex::process p )
 			 min::lablen ( lp ) == 2 )
 		    {
 		        p->printer << " "
-			           << lp[1]
+			           << ::pvar ( lp[1] )
 				   << " <= "
-				   << lp[0]
+				   << ::pvar ( lp[0] )
 				   << " =";
 		    }
 		    else if ( op_code == mex::PUSHG
@@ -2314,9 +2320,9 @@ bool mex::run_process ( mex::process p )
 			      min::lablen ( lp ) == 3 )
 		    {
 		        p->printer << " "
-			           << lp[2]
+			           << ::pvar ( lp[2] )
 				   << " <= "
-				   << lp[0]
+				   << ::pvar ( lp[0] )
 				   << " in "
 				   << lp[1]
 				   << " =";
@@ -2329,15 +2335,9 @@ bool mex::run_process ( mex::process p )
 		case mex::PUSHI:
 		case mex::PUSHNARGS:
 		{
-		    p->printer << ":";
-		    if ( tinfo != ::STAR )
-		        p->printer
-			    << " "
-			    << min::pgen_name
-			           ( tinfo )
-			    << " <=";
-		    else
-		        p->printer << " * <=";
+		    p->printer << ": "
+			       << ::pvar ( tinfo )
+			       << " <=";
 		    if ( op_code == mex::PUSHNARGS )
 		        p->printer << " nargs["
 			           << immedB
@@ -2424,13 +2424,14 @@ bool mex::run_process ( mex::process p )
 
 		        min::uns32 len =
 			    min::lablen ( lp );
-		        p->printer << lp[0];
+		        p->printer << ::pvar ( lp[0] );
 			for ( min::uns32 i = 1;
 			      i < len; ++ i )
 			{
 			    min::uns32 j = len - i;
 			    p->printer
-			        << ", " << lp[i]
+			        << ", "
+				<< ::pvar ( lp[i] )
 				<< "=";
 			    if ( j <= p->length )
 			        p->printer
