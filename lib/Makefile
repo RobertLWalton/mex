@@ -2,7 +2,7 @@
 #
 # File:		Makefile
 # Author:	Bob Walton (walton@acm.org)
-# Date:		Thu May 30 09:43:21 EDT 2024
+# Date:		Sat Sep  7 04:21:53 PM EDT 2024
 #
 # The authors have placed this program in the public
 # domain; they make no warranty and accept no liability
@@ -38,10 +38,9 @@ WFLAGS = -Wall -Wextra \
 MIN_H =	${MIN}/lib/libmin.a
 
 MEX_H =	${MIN_H} \
-		../include/mex.h \
-		../include/mexas.h
+		../include/mex.h
 
-MEX_O =	mex.o mexcom.o mexstack.o mexas.o
+MEX_O =	mex.o mexcom.o mexstack.o
 
 mex.o:	\
 	${MIN_H} \
@@ -72,19 +71,6 @@ mexstack.o:	\
 	g++ -g ${GFLAGS} ${WFLAGS} \
 	    -I ../include -I ${MIN}/include \
 	    -c ../src/mexstack.cc
-
-mexas.o:	\
-	${MIN_H} \
-	../include/mex.h \
-	../include/mexcom.h \
-	../include/mexstack.h \
-	../include/mexas.h \
-	../src/mexas.cc \
-	Makefile
-	g++ -g ${GFLAGS} ${WFLAGS} \
-	    -I ../include -I ${MIN}/include \
-	    -c ../src/mexas.cc
-
 
 libmex.a:       ${MEX_O}
 	rm -f libmex.a
