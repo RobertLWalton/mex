@@ -6,14 +6,14 @@
 *********** {22:7,14,40} CALLM to BEGF: sum, low=9, high=10
 ************* {22:7,16,47} CALLM to BEGF: sum, low=10, high=10
 *************** {22:7,18,54} CALLM to BEGF: sum, low=11, high=10
-***************** {30:12,19,59} RET to CALLM: sum, *=0
-*************** {27:10,17,62} RET to CALLM: sum, *=10
-************* {27:10,15,65} RET to CALLM: sum, *=19
-*********** {27:10,13,68} RET to CALLM: sum, *=27
-********* {27:10,11,71} RET to CALLM: sum, *=34
-******* {27:10,9,74} RET to CALLM: sum, *=40
-***** {27:10,7,77} RET to CALLM: sum, *=45
-*** {27:10,5,80} RET to CALLM: sum, answer=49
+***************** {30:12,17,59} RET to CALLM: sum, *=0
+*************** {27:10,15,62} RET to CALLM: sum, *=10
+************* {27:10,13,65} RET to CALLM: sum, *=19
+*********** {27:10,11,68} RET to CALLM: sum, *=27
+********* {27:10,9,71} RET to CALLM: sum, *=34
+******* {27:10,7,74} RET to CALLM: sum, *=40
+***** {27:10,5,77} RET to CALLM: sum, *=45
+*** {27:10,3,80} RET to CALLM: sum, answer=49
 * {39:22,6,84} TRACE: "answer = sum i: low <= i <= high", low=4,
                       high=10, answer=49
 mexas_compile_test_11.mex successfully compiled

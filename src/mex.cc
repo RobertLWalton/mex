@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Sep  4 08:29:14 PM EDT 2024
+// Date:	Sun Sep 15 01:22:10 PM EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1119,8 +1119,10 @@ static void check_state_infos ( void )
     }
 }
 
-inline min::printer print_message_header
-	( mex::process p, min::phrase_position pp )
+inline min::printer print_header
+	( mex::process p,
+	  min::phrase_position pp,
+	  int sp_change = 0 )
 {
     p->printer << min::bom;
 
@@ -1292,7 +1294,7 @@ bool mex::run_process ( mex::process p )
 	op_info * op_info;
 	min::float64 arg1, arg2;
 	min::gen arg;
-	min::gen * new_sp = sp;
+	int sp_change = 0;
 	min::uns32 trace_flags = p->trace_flags; 
 
 	if ( op_code >= mex::NUMBER_OF_OP_CODES )
@@ -1313,80 +1315,49 @@ bool mex::run_process ( mex::process p )
 	case NONA:
 	    goto NON_ARITHMETIC;
 	case A2:
-	    new_sp -= 2;
-	    if ( new_sp < spbegin )
-	    {
-	        message = "illegal SP: stack to small"
-		          " for instruction";
-		goto INNER_FATAL;
-	    }
-	    arg1 = FG ( new_sp[0] );
-	    arg2 = FG ( new_sp[1] );
+	    sp_change = -1;
+	    if ( sp - 2 < spbegin )
+	        goto STACK_TOO_SMALL;
+	    arg1 = FG ( sp[-2] );
+	    arg2 = FG ( sp[-1] );
 	    goto ARITHMETIC;
 	case A2R:
-	    new_sp -= 2;
-	    if ( new_sp < spbegin )
-	    {
-	        message = "illegal SP: stack to small"
-		          " for instruction";
-		goto INNER_FATAL;
-	    }
-	    arg1 = FG ( new_sp[1] );
-	    arg2 = FG ( new_sp[0] );
+	    sp_change = -1;
+	    if ( sp - 2 < spbegin )
+	        goto STACK_TOO_SMALL;
+	    arg1 = FG ( sp[-1] );
+	    arg2 = FG ( sp[-2] );
 	    goto ARITHMETIC;
 	case A2I:
-	    new_sp -= 1;
-	    if ( new_sp < spbegin )
-	    {
-	        message = "illegal SP: stack to small"
-		          " for instruction";
-		goto INNER_FATAL;
-	    }
-	    arg1 = FG ( new_sp[0] );
+	    if ( sp - 1 < spbegin )
+	        goto STACK_TOO_SMALL;
+	    arg1 = FG ( sp[-1] );
 	    arg2 = FG ( pc->immedD );
 	    goto ARITHMETIC;
 	case A2RI:
-	    new_sp -= 1;
-	    if ( new_sp < spbegin )
-	    {
-	        message = "illegal SP: stack to small"
-		          " for instruction";
-		goto INNER_FATAL;
-	    }
+	    if ( sp - 1 < spbegin )
+	        goto STACK_TOO_SMALL;
 	    arg1 = FG ( pc->immedD );
-	    arg2 = FG ( new_sp[0] );
+	    arg2 = FG ( sp[-1] );
 	    goto ARITHMETIC;
 	case A1:
-	    new_sp -= 1;
-	    if ( new_sp < spbegin )
-	    {
-	        message = "illegal SP: stack to small"
-		          " for instruction";
-		goto INNER_FATAL;
-	    }
-	    arg1 = FG ( new_sp[0] );
+	    if ( sp - 1 < spbegin )
+	        goto STACK_TOO_SMALL;
+	    arg1 = FG ( sp[-1] );
 	    arg2 = 0; // To avoid error detector.
 	    goto ARITHMETIC;
 	case J1:
-	    new_sp -= 1;
-	    if ( new_sp < spbegin )
-	    {
-	        message = "illegal SP: stack to small"
-		          " for instruction";
-		goto INNER_FATAL;
-	    }
-	    arg = new_sp[0];
+	    sp_change = -1;
+	    if ( sp - 1 < spbegin )
+	        goto STACK_TOO_SMALL;
+	    arg = sp[-1];
 	    goto JUMP;
 	case J2:
-	    new_sp -= 2;
-	    if ( new_sp < spbegin )
-	    {
-	        message = "illegal SP: stack to small"
-		          " for instruction";
-		goto INNER_FATAL;
-	    }
-	    arg1 = FG ( new_sp[0] );
-	    arg2 = FG ( new_sp[1] );
+	    sp_change = -2;
+	    if ( sp - 2 < spbegin )
+	        goto STACK_TOO_SMALL;
+	    arg1 = FG ( sp[-2] );
+	    arg2 = FG ( sp[-1] );
 	    goto JUMP;
 	case J:
 	    goto JUMP;
@@ -1561,7 +1532,7 @@ bool mex::run_process ( mex::process p )
 		    m->position[p->pc.index] :
 		    min::MISSING_PHRASE_POSITION;
 
-		print_message_header ( p, pp )
+		print_header ( p, pp, sp_change )
 		    << " " << op_info->name << ": ";
 
 		if ( m->trace_info != min::NULL_STUB  )
@@ -1609,8 +1580,8 @@ bool mex::run_process ( mex::process p )
 	        RESTORE;
 	    }
 
-	    * new_sp ++ = min::new_num_gen ( result );
-	    sp = new_sp;
+	    sp += sp_change;
+	    sp[-1] = min::new_num_gen ( result );
 
 	    goto LOOP;
 	}
@@ -1624,7 +1595,7 @@ bool mex::run_process ( mex::process p )
 	        // Left 0 for JMP, JMPF, JMPT.
 	    min::uns32 immedC = pc->immedC;
 
-	    if ( immedA > new_sp - spbegin )
+	    if ( immedA > ( sp + sp_change ) - spbegin )
 	    {
 	        message = "JMP immedA is greater than"
 		          " stack size";
@@ -1728,6 +1699,11 @@ bool mex::run_process ( mex::process p )
 		 trace_class == mex::T_JMPS )
 	        ++ jmp_trace_class;
 
+	    if ( execute_jmp )
+	        sp_change -= (int) immedA;
+	    else if ( immedB == 1 )
+	        sp_change = -1;
+
 	    if ( bad_jmp
 	         ||
 		 trace_flags & (1 << jmp_trace_class ) )
@@ -1748,7 +1724,7 @@ bool mex::run_process ( mex::process p )
 		    m->position[p->pc.index] :
 		    min::MISSING_PHRASE_POSITION;
 
-		print_message_header ( p, pp )
+		print_header ( p, pp, sp_change )
 		    << " " << op_info->name;
 
 		if ( m->trace_info != min::NULL_STUB
@@ -1805,20 +1781,15 @@ bool mex::run_process ( mex::process p )
 
 	    if ( ! execute_jmp )
 	    {
-	        if ( immedB == 1 )
-		{
-		    new_sp[0] = new_sp[1];
-		    ++ new_sp;
-		}
-		sp = new_sp;
+	        if ( immedB == 1 ) sp[-2] = sp[-1];
 	    }
 	    else
 	    {
-		sp = new_sp - (int) immedA;
 		p->trace_depth -= pc->trace_depth;
 		pc += immedC;
 		-- pc;
 	    }
+	    sp += sp_change;
 
 	    goto LOOP;
 	}
@@ -1866,11 +1837,13 @@ bool mex::run_process ( mex::process p )
 		if ( sp >= spend )
 		    goto STACK_LIMIT_STOP;
 		value = sp[-(int)immedA-1];
+		sp_change = +1;
 		break;
 	    case mex::PUSHI:
 		if ( sp >= spend )
 		    goto STACK_LIMIT_STOP;
 		value = immedD;
+		sp_change = +1;
 		break;
 	    case mex::PUSHG:
 	    {
@@ -1898,6 +1871,7 @@ bool mex::run_process ( mex::process p )
 		if ( sp >= spend )
 		    goto STACK_LIMIT_STOP;
 		value = mg->globals[immedA];
+		sp_change = +1;
 		break;
 	    }
 	    case mex::PUSHL:
@@ -1938,6 +1912,7 @@ bool mex::run_process ( mex::process p )
 		    goto INNER_FATAL;
 		}
 		value = spbegin[p->fp[immedB] + immedA];
+		sp_change = +1;
 		break;
 	    case mex::PUSHA:
 		if ( immedB < 1 || immedB > p->level )
@@ -1957,6 +1932,7 @@ bool mex::run_process ( mex::process p )
 		}
 		value = spbegin
 		    [p->fp[immedB] - (int) immedA];
+		sp_change = +1;
 		break;
 	    case mex::PUSHNARGS:
 		if ( immedB < 1 || immedB > p->level )
@@ -1971,6 +1947,7 @@ bool mex::run_process ( mex::process p )
 		    goto STACK_LIMIT_STOP;
 		value = min::new_num_gen
 		    ( p->nargs[immedB] );
+		sp_change = +1;
 		break;
 	    case mex::POPS:
 		if ( sp <= spbegin )
@@ -1988,6 +1965,7 @@ bool mex::run_process ( mex::process p )
 		    goto INNER_FATAL;
 		}
 		value = sp[-1];
+		sp_change = -1;
 		break;
 	    case mex::END:
 	        if ( p->trace_depth == 0 )
@@ -2009,6 +1987,7 @@ bool mex::run_process ( mex::process p )
 			      " length";
 		    goto INNER_FATAL;
 		}
+		sp_change = - (int) immedA;
 		break;
 	    }
 	    case mex::BEGL:
@@ -2022,6 +2001,7 @@ bool mex::run_process ( mex::process p )
 		}
 		if ( sp + immedB > spend + immedA )
 		    goto STACK_LIMIT_STOP;
+		sp_change = - (int) immedA + immedB;
 	        break;
 	    case mex::ENDL:
 	    case mex::CONT:
@@ -2060,7 +2040,7 @@ bool mex::run_process ( mex::process p )
 		else
 		    tinfo  = min::MISSING();
 
-		// ENDL/CONT updates stack before trace
+		// ENDL/CONT updates stack before trace.
 		//
 		sp -= immedA;
 		for ( int i = immedB; 0 < i; -- i )
@@ -2083,6 +2063,7 @@ bool mex::run_process ( mex::process p )
 		        "immedA larger than stack size";
 		    goto INNER_FATAL;
 		}
+		sp_change = - (int) immedA;
 	        break;
 	    case mex::BEGF:
 	        if ( immedC > pcend - pc )
@@ -2207,6 +2188,14 @@ bool mex::run_process ( mex::process p )
 		    goto INNER_FATAL;
 		}
 
+		// RET/ENDF updates stack before trace.
+		//
+		min::gen * qend = sp - (int) immedA;
+		min::gen * q = qend - (int) immedC;
+		while ( q < qend )
+		    * new_sp ++ = * q ++;
+		sp = new_sp;
+
 		break;
 	    }
 	    case mex::CALLM:
@@ -2268,6 +2257,8 @@ bool mex::run_process ( mex::process p )
 
 		to_op_code = target->op_code;
 
+		// CALL does not change sp or the stack.
+
 		break;
 	    }
 
@@ -2288,7 +2279,7 @@ bool mex::run_process ( mex::process p )
 		    m->position[p->pc.index] :
 		    min::MISSING_PHRASE_POSITION;
 
-		print_message_header ( p, pp )
+		print_header ( p, pp, sp_change )
 		    << " " << op_infos[op_code].name;
 
 		switch ( op_code )
@@ -2545,9 +2536,6 @@ bool mex::run_process ( mex::process p )
 		-- rp;
 		const mex::ret * ret =
 		   ~ ( p->return_stack + rp );
-	        min::gen * new_sp =
-		    spbegin + p->fp[immedB]
-		            - (int) p->nargs[immedB];
 		mex::module em = ret->saved_pc.module;
 		min::uns32 new_pc = ret->saved_pc.index;
 
@@ -2555,12 +2543,6 @@ bool mex::run_process ( mex::process p )
 		p->fp[immedB] = ret->saved_fp;
 		p->nargs[immedB] = ret->saved_nargs;
 		RW_UNS32 p->return_stack->length = rp;
-
-		min::gen * qend = sp - (int) immedA;
-		min::gen * q = qend - (int) immedC;
-		while ( q < qend )
-		    * new_sp ++ = * q ++;
-		sp = new_sp;
 
 		p->level = ret->saved_level;
 		-- p->trace_depth;
@@ -2642,6 +2624,11 @@ bool mex::run_process ( mex::process p )
 	    SAVE;
 	    p->state = mex::RETURN_STACK_LIMIT_STOP;
 	    return false;
+
+	STACK_TOO_SMALL:
+	    message = "illegal SP: stack to small"
+		      " for instruction";
+	    goto INNER_FATAL;
 
 	// Fatal error discovered in loop.
 	//

@@ -109,7 +109,7 @@ TRACE 'R = MIN(Z,X)' Z X R
 *** {16:2,3,4} PUSHS: * <= ARG2 = 157
 *** {17:3,4,5} JMPLT ITS-ARG1 is successful: true <= 23 < 157
 *** {21:6,2,6} PUSHS: * <= ARG1 = 23
-*** {22:7,3,7} RET to CALLG: MIN, R=23
+*** {22:7,1,7} RET to CALLG: MIN, R=23
 * {14:3,1,8} PUSHG: * <= X in mexas_joint_test_1a = 23
 * {14:4,2,9} PUSHG: * <= Y in mexas_joint_test_1a = 157
 * {14:5,3,10} PUSHS: * <= R = 23
@@ -121,7 +121,7 @@ TRACE 'R = MIN(Z,X)' Z X R
 *** {16:2,4,16} PUSHS: * <= ARG2 = -58
 *** {17:3,5,17} JMPLT ITS-ARG1 is UNsuccessful: false <= 157 < -58
 *** {18:4,3,18} PUSHS: * <= ARG2 = -58
-*** {19:5,4,19} RET to CALLG: MIN, R=-58
+*** {19:5,2,19} RET to CALLG: MIN, R=-58
 * {19:10,2,20} PUSHG: * <= Y in mexas_joint_test_1a = 157
 * {19:11,3,21} PUSHG: * <= Z in mexas_joint_test_1a = -58
 * {19:12,4,22} PUSHS: * <= R = -58
@@ -133,7 +133,7 @@ TRACE 'R = MIN(Z,X)' Z X R
 *** {16:2,5,28} PUSHS: * <= ARG2 = 23
 *** {17:3,6,29} JMPLT ITS-ARG1 is successful: true <= -58 < 23
 *** {21:6,4,30} PUSHS: * <= ARG1 = -58
-*** {22:7,5,31} RET to CALLG: MIN, R=-58
+*** {22:7,3,31} RET to CALLG: MIN, R=-58
 * {24:17,3,32} PUSHG: * <= Z in mexas_joint_test_1a = -58
 * {24:18,4,33} PUSHG: * <= X in mexas_joint_test_1a = 23
 * {24:19,5,34} PUSHS: * <= R = -58
