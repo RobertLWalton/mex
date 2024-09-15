@@ -244,7 +244,7 @@
 
 \author{Robert L. Walton}
 
-\date{August 30, 2024}
+\date{September 15, 2024}
  
 \maketitle
 
@@ -1150,8 +1150,8 @@ the logical values `true' and `false':
 \\\hline
 \ttkey{JMP}
     & Subtract \TT{immedA} from \TT{sp} (popping the stack \TT{immedA} times),
-      then \\
-    & add \TT{immedC} to the \TT{pc} (skipping \TT{immedC} instructions).
+      \\
+    & then add \TT{immedC} to the \TT{pc} (skipping \TT{immedC} instructions).
       It is \\
     & illegal for \TT{immedC} = 0 (\TT{JMP} would jump to itself).
 \\\hline
@@ -1159,9 +1159,8 @@ the logical values `true' and `false':
     & Pop 2 values and compare them.  If they are equal/not-equal \\
     & continue as per the \TT{JMP} instruction.  Otherwise if
       \TT{immedB} == 0, \\
-    & do nothing more, but if \TT{immedB} == 1, push the first value
-      popped \\
-    & back into the stack.
+    & do nothing more, but if \TT{immedB} == 1, push the first value \\
+    & popped back into the stack.
 \\\hline
 \ttkey{JMPLT}/\ttkey{JMPLEQ}
     & Ditto, but \TT{JMP} if the second popped is \\
@@ -1172,10 +1171,9 @@ the logical values `true' and `false':
     & greater-than/greater-than-or-equal-to the first popped.
 \\\hline
 \ttkey{JMPF}/\ttkey{JMPT}
-    & Pop 1 value and test whether it equals \TT{mex::ZERO} or
-      \TT{mex::FALSE}, \\
-    & or is a MIN object with 0 vector elements.  Continue as per \TT{JMP} \\
-    & if yes, but otherwise do nothing more.
+    & Pop 1 value and test whether it equals \TT{mex::ZERO} or \\
+    & \TT{mex::FALSE}, or is a MIN object with 0 vector elements.  \\
+    & Continue as per \TT{JMP} if yes, but otherwise do nothing more.
 \\\hline
 \ttkey{BEG}/\ttkey{END}
     & Subtract \TT{immedA} from
@@ -1220,8 +1218,7 @@ the logical values `true' and `false':
     & minimum number of arguments expected.
 \\\hline
 \ttkey{ENDF}
-    & Same as a \TT{RET} instruction (below) with
-      \TT{immedA} = \TT{immedC} = 0. 
+    & Same as a \TT{RET} instruction (below) with \TT{immedC} = 0. 
 \\\hline
 \ttkey{CALLM}
     & Push a \TT{mex::ret} value $e$ into the return stack, setting
@@ -1252,20 +1249,18 @@ the logical values `true' and `false':
     & member from \TT{immedD} (which must convert to a \TT{mex::module}).
 \\\hline
 \ttkey{RET}
-    & Check that \TT{immedB} equals \TT{p->level}.  Then subtract
-      \TT{immedA} from \\
-    & \TT{sp} (popping the stack \TT{immedA} times).  The
-      values popped are \\
-    & always trace values.  Pop element $e$ from the
-      return stack and \\
-    & check that \TT{immedC} equals \TT{$e$.nresults}.  Pop \TT{immedC}
-      values from \\
-    & the stack and save them.  Set \TT{sp} to
-      \TT{fp[immedB] - nargs[immedB]} \\
-    & (popping the current function execution stack values).   Then push \\
-    & the saved values into the stack.  Lastly, restore the process \\
-    & members saved in \TT{$e$.saved\_\{pc,level,fp,nargs\}}, and \\
-    & increment the restored \TT{pc} by \TT{1}.
+    & Check that \TT{immedB} equals \TT{p->level}.  Then pop element $e$
+      from \\
+    & the return stack and check that \TT{immedC} equals
+       \TT{$e$.nresults}.  Next \\
+    & pop \TT{immedC} values from the stack and save them.  Set \TT{sp} to \\
+    & \TT{fp[immedB] - nargs[immedB]} (popping the
+      current function \\
+    & execution stack values).  Then push the saved values into the stack. \\
+    & Lastly, restore the process members saved in \\
+    & \TT{$e$.saved\_\{pc,level,fp,nargs\}}, and increment the 
+      restored \TT{pc} \\
+    & by \TT{1}.
 \\\hline
 \ttkey{PUSHA}
     & Push the stack vector value with index \TT{fp[immedB] - immedA}. \\

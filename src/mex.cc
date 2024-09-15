@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Sep 15 01:22:10 PM EDT 2024
+// Date:	Sun Sep 15 04:39:17 PM EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -756,7 +756,6 @@ static bool optimized_run_process ( mex::process p )
 	}
 	case mex::RET:
 	{
-	    min::uns32 immedA = pc->immedA;
 	    min::uns32 immedB = pc->immedB;
 	    min::uns32 immedC = pc->immedC;
 	    if ( immedB != p->level )
@@ -776,10 +775,7 @@ static bool optimized_run_process ( mex::process p )
 	    min::uns32 new_fp = ret->saved_fp;
 	    if ( new_fp > new_sp - spbegin )
 		goto ERROR_EXIT;
-	    if ( immedA + immedC < immedA )
-		// Check for overflow.
-	        goto ERROR_EXIT;
-	    if ( immedA + immedC > sp - new_sp )
+	    if ( immedC > sp - new_sp )
 	        goto ERROR_EXIT;
 
 	    mex::module em = ret->saved_pc.module;
@@ -803,7 +799,7 @@ static bool optimized_run_process ( mex::process p )
 	    p->nargs[immedB] = ret->saved_nargs;
 	    RW_UNS32 p->return_stack->length = rp;
 
-	    min::gen * qend = sp - (int) immedA;
+	    min::gen * qend = sp;
 	    min::gen * q = qend - (int) immedC;
 	    while ( q < qend )
 	        * new_sp ++ = * q ++;
@@ -2087,7 +2083,7 @@ bool mex::run_process ( mex::process p )
 		}
 		break;
 	    case mex::ENDF:
-		immedA = immedC = 0;
+		immedC = 0;
 		// Fall through
 	    case mex::RET:
 	    {
@@ -2122,13 +2118,11 @@ bool mex::run_process ( mex::process p )
 		    spbegin + p->fp[immedB]
 		            - (int) p->nargs[immedB];
 
-		if ( immedA + immedC < immedA
-		     ||
-		     immedA + immedC > sp - new_sp )
+		if (  immedC > sp - new_sp )
 		{
 		    // Not possible for ENDF.
 		    message =
-		        "RET: immedA+immedC is"
+		        "RET: immedC is"
 			" larger than portion of stack"
 			" at current lexical level";
 		    goto INNER_FATAL;
@@ -2190,7 +2184,7 @@ bool mex::run_process ( mex::process p )
 
 		// RET/ENDF updates stack before trace.
 		//
-		min::gen * qend = sp - (int) immedA;
+		min::gen * qend = sp;
 		min::gen * q = qend - (int) immedC;
 		while ( q < qend )
 		    * new_sp ++ = * q ++;
