@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Aug 26 02:21:29 AM EDT 2024
+// Date:	Sun Sep 15 06:37:51 AM EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -320,7 +320,7 @@ void mexas::push_push_instr
     }
     mexstack::push_instr
         ( instr, pp, trace_info,
-	  no_source, stack_offset + 1 );
+	  no_source, stack_offset );
 }
 
 min::uns32 mexas::get_trace_info
@@ -341,7 +341,7 @@ min::uns32 mexas::get_trace_info
 	if ( mexas::is_name ( n ) )
 	{
 	    mexas::push_push_instr
-	        ( mexas::star, n, pp, true, j - 1 );
+	        ( mexas::star, n, pp, true, j );
 	}
 	else
 	{
@@ -853,8 +853,7 @@ mex::module mexas::compile ( min::file file )
 			( mexas::variables, new_name,
 			  L, mexstack::depth[L] );
 		    mexas::push_push_instr
-		        ( new_name, name, pp,
-			  false, -1 );
+		        ( new_name, name, pp );
 		    break;
 		}
 		case ::PUSHM:
