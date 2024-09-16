@@ -40,10 +40,10 @@ PUSHI 157 Y
     [26:10;2] PUSHI T_PUSH 0 0 0 157; Y
 PUSHI -58 Z
     [27:11;3] PUSHI T_PUSH 0 0 0 -58; Z
-* {13:0,0,0} BEGF
-* {25:9,0,1} PUSHI: X <= 23
-* {26:10,1,2} PUSHI: Y <= 157
-* {27:11,2,3} PUSHI: Z <= -58
+* {14:0,0,0} BEGF
+* {26:9,0,1} PUSHI: X <= 23
+* {27:10,1,2} PUSHI: Y <= 157
+* {28:11,2,3} PUSHI: Z <= -58
 mexas_joint_test_1a.mex successfully compiled
 // MEXAS Joint Test 1b Input
 //
@@ -102,40 +102,40 @@ CALL MIN 2 R
     [24:19;6] PUSHS T_PUSH 2 0 0; [< R * >]
 TRACE 'R = MIN(Z,X)' Z X R
     [24:20;3] TRACE T_ALWAYS 3 0 0; [< "R = MIN(Z,X)" Z X R >]
-* {11:0,0,0} PUSHG: * <= X in mexas_joint_test_1a = 23
-* {12:1,1,1} PUSHG: * <= Y in mexas_joint_test_1a = 157
-* {13:2,2,2} CALLG to BEGF: MIN, ARG1=23, ARG2=157
-*** {15:1,2,3} PUSHS: * <= ARG1 = 23
-*** {16:2,3,4} PUSHS: * <= ARG2 = 157
-*** {17:3,4,5} JMPLT ITS-ARG1 is successful: true <= 23 < 157
-*** {21:6,2,6} PUSHS: * <= ARG1 = 23
-*** {22:7,1,7} RET to CALLG: MIN, R=23
-* {14:3,1,8} PUSHG: * <= X in mexas_joint_test_1a = 23
-* {14:4,2,9} PUSHG: * <= Y in mexas_joint_test_1a = 157
-* {14:5,3,10} PUSHS: * <= R = 23
-* {14:6,4,11} TRACE: "R = MIN(X,Y)", X=23, Y=157, R=23
-* {16:7,1,12} PUSHG: * <= Y in mexas_joint_test_1a = 157
-* {17:8,2,13} PUSHG: * <= Z in mexas_joint_test_1a = -58
-* {18:9,3,14} CALLG to BEGF: MIN, ARG1=157, ARG2=-58
-*** {15:1,3,15} PUSHS: * <= ARG1 = 157
-*** {16:2,4,16} PUSHS: * <= ARG2 = -58
-*** {17:3,5,17} JMPLT ITS-ARG1 is UNsuccessful: false <= 157 < -58
-*** {18:4,3,18} PUSHS: * <= ARG2 = -58
-*** {19:5,2,19} RET to CALLG: MIN, R=-58
-* {19:10,2,20} PUSHG: * <= Y in mexas_joint_test_1a = 157
-* {19:11,3,21} PUSHG: * <= Z in mexas_joint_test_1a = -58
-* {19:12,4,22} PUSHS: * <= R = -58
-* {19:13,5,23} TRACE: "R = MIN(Y,Z)", Y=157, Z=-58, R=-58
-* {21:14,2,24} PUSHG: * <= Z in mexas_joint_test_1a = -58
-* {22:15,3,25} PUSHG: * <= X in mexas_joint_test_1a = 23
-* {23:16,4,26} CALLG to BEGF: MIN, ARG1=-58, ARG2=23
-*** {15:1,4,27} PUSHS: * <= ARG1 = -58
-*** {16:2,5,28} PUSHS: * <= ARG2 = 23
-*** {17:3,6,29} JMPLT ITS-ARG1 is successful: true <= -58 < 23
-*** {21:6,4,30} PUSHS: * <= ARG1 = -58
-*** {22:7,3,31} RET to CALLG: MIN, R=-58
-* {24:17,3,32} PUSHG: * <= Z in mexas_joint_test_1a = -58
-* {24:18,4,33} PUSHG: * <= X in mexas_joint_test_1a = 23
-* {24:19,5,34} PUSHS: * <= R = -58
-* {24:20,6,35} TRACE: "R = MIN(Z,X)", Z=-58, X=23, R=-58
+* {12:0,0,0} PUSHG: * <= X in mexas_joint_test_1a = 23
+* {13:1,1,1} PUSHG: * <= Y in mexas_joint_test_1a = 157
+* {14:2,2,2} CALLG to BEGF: MIN, ARG1=23, ARG2=157
+*** {16:1,2,3} PUSHS: * <= ARG1 = 23
+*** {17:2,3,4} PUSHS: * <= ARG2 = 157
+*** {18:3,4,5} JMPLT ITS-ARG1 is successful: true <= 23 < 157
+*** {22:6,2,6} PUSHS: * <= ARG1 = 23
+*** {23:7,1,7} RET to CALLG: MIN, R=23
+* {15:3,1,8} PUSHG: * <= X in mexas_joint_test_1a = 23
+* {15:4,2,9} PUSHG: * <= Y in mexas_joint_test_1a = 157
+* {15:5,3,10} PUSHS: * <= R = 23
+* {15:6,4,11} TRACE: "R = MIN(X,Y)", X=23, Y=157, R=23
+* {17:7,1,12} PUSHG: * <= Y in mexas_joint_test_1a = 157
+* {18:8,2,13} PUSHG: * <= Z in mexas_joint_test_1a = -58
+* {19:9,3,14} CALLG to BEGF: MIN, ARG1=157, ARG2=-58
+*** {16:1,3,15} PUSHS: * <= ARG1 = 157
+*** {17:2,4,16} PUSHS: * <= ARG2 = -58
+*** {18:3,5,17} JMPLT ITS-ARG1 is UNsuccessful: false <= 157 < -58
+*** {19:4,3,18} PUSHS: * <= ARG2 = -58
+*** {20:5,2,19} RET to CALLG: MIN, R=-58
+* {20:10,2,20} PUSHG: * <= Y in mexas_joint_test_1a = 157
+* {20:11,3,21} PUSHG: * <= Z in mexas_joint_test_1a = -58
+* {20:12,4,22} PUSHS: * <= R = -58
+* {20:13,5,23} TRACE: "R = MIN(Y,Z)", Y=157, Z=-58, R=-58
+* {22:14,2,24} PUSHG: * <= Z in mexas_joint_test_1a = -58
+* {23:15,3,25} PUSHG: * <= X in mexas_joint_test_1a = 23
+* {24:16,4,26} CALLG to BEGF: MIN, ARG1=-58, ARG2=23
+*** {16:1,4,27} PUSHS: * <= ARG1 = -58
+*** {17:2,5,28} PUSHS: * <= ARG2 = 23
+*** {18:3,6,29} JMPLT ITS-ARG1 is successful: true <= -58 < 23
+*** {22:6,4,30} PUSHS: * <= ARG1 = -58
+*** {23:7,3,31} RET to CALLG: MIN, R=-58
+* {25:17,3,32} PUSHG: * <= Z in mexas_joint_test_1a = -58
+* {25:18,4,33} PUSHG: * <= X in mexas_joint_test_1a = 23
+* {25:19,5,34} PUSHS: * <= R = -58
+* {25:20,6,35} TRACE: "R = MIN(Z,X)", Z=-58, X=23, R=-58
 mexas_joint_test_1b.mex successfully compiled

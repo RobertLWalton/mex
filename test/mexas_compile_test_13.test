@@ -16,7 +16,7 @@ PUSHI 100 X
 TEST_INSTRUCTION ADD AOP 5 \
      1 2 3 2.53  // Only ADD is relevant
     [16:1;1] ADD T_AOP[5] 1 2 3 2.53
-* {14:0,0,0} PUSHI: X <= 100
+* {15:0,0,0} PUSHI: X <= 100
 !!! FATAL PROGRAM FORMAT ERROR:
 illegal SP: stack to small for instruction
 PC->MODULE = mexas_compile_test_13.mex, PC INDEX = 1

@@ -26,10 +26,10 @@ PUSHI 190 Y
     [19:5;2] PUSHI T_PUSH 0 0 0 190; Y
 PUSHI -183 Z
     [20:6;3] PUSHI T_PUSH 0 0 0 -183; Z
-* {13:0,0,0} BEGF
-* {18:4,0,1} PUSHI: X <= 115
-* {19:5,1,2} PUSHI: Y <= 190
-* {20:6,2,3} PUSHI: Z <= -183
+* {14:0,0,0} BEGF
+* {19:4,0,1} PUSHI: X <= 115
+* {20:5,1,2} PUSHI: Y <= 190
+* {21:6,2,3} PUSHI: Z <= -183
 mexas_joint_test_2a.mex successfully compiled
 // MEXAS Joint Test 2b Input
 //
@@ -59,10 +59,10 @@ PUSHI 287 Y
     [19:5;2] PUSHI T_PUSH 0 0 0 287; Y
 PUSHI -243 Z
     [20:6;3] PUSHI T_PUSH 0 0 0 -243; Z
-* {13:0,0,0} BEGF
-* {18:4,0,1} PUSHI: X <= 295
-* {19:5,1,2} PUSHI: Y <= 287
-* {20:6,2,3} PUSHI: Z <= -243
+* {14:0,0,0} BEGF
+* {19:4,0,1} PUSHI: X <= 295
+* {20:5,1,2} PUSHI: Y <= 287
+* {21:6,2,3} PUSHI: Z <= -243
 mexas_joint_test_2b.mex successfully compiled
 // MEXAS Joint Test 2c Input
 //
@@ -96,16 +96,16 @@ CALLG mexas_joint_test_2b SELECT 2 R // Select Y
     [19:6;2] CALLG T_CALLG 2 1 0 PACKED_VEC; [< SELECT R >]
 TRACE 'R = SELECT(X,Y) RETURNS Y'
     [20:7;2] TRACE T_ALWAYS 0 0 0; [< "R = SELECT(X,Y) RETURNS Y" >]
-* {12:0,0,0} PUSHG: X <= * in mexas_joint_test_2a = 115
-* {13:1,1,1} PUSHG: Y <= * in mexas_joint_test_2b = 287
-* {14:2,2,2} CALLG to BEGF: SELECT, ARG1=115, ARG2=287
-*** {14:1,2,3} PUSHS: * <= ARG1 = 115
-*** {15:2,1,4} RET to CALLG: SELECT, R=115
-* {15:3,1,5} TRACE: "R = SELECT(X,Y) RETURNS X"
-* {17:4,1,6} PUSHG: X <= * in mexas_joint_test_2b = 295
-* {18:5,2,7} PUSHG: Y <= * in mexas_joint_test_2a = 190
-* {19:6,3,8} CALLG to BEGF: SELECT, ARG1=295, ARG2=190
-*** {14:1,3,9} PUSHS: * <= ARG2 = 190
-*** {15:2,2,10} RET to CALLG: SELECT, R=190
-* {20:7,2,11} TRACE: "R = SELECT(X,Y) RETURNS Y"
+* {13:0,0,0} PUSHG: X <= * in mexas_joint_test_2a = 115
+* {14:1,1,1} PUSHG: Y <= * in mexas_joint_test_2b = 287
+* {15:2,2,2} CALLG to BEGF: SELECT, ARG1=115, ARG2=287
+*** {15:1,2,3} PUSHS: * <= ARG1 = 115
+*** {16:2,1,4} RET to CALLG: SELECT, R=115
+* {16:3,1,5} TRACE: "R = SELECT(X,Y) RETURNS X"
+* {18:4,1,6} PUSHG: X <= * in mexas_joint_test_2b = 295
+* {19:5,2,7} PUSHG: Y <= * in mexas_joint_test_2a = 190
+* {20:6,3,8} CALLG to BEGF: SELECT, ARG1=295, ARG2=190
+*** {15:1,3,9} PUSHS: * <= ARG2 = 190
+*** {16:2,2,10} RET to CALLG: SELECT, R=190
+* {21:7,2,11} TRACE: "R = SELECT(X,Y) RETURNS Y"
 mexas_joint_test_2c.mex successfully compiled

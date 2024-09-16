@@ -44,26 +44,26 @@ DIV
     [28:15;3] DIV T_AOP 0 0 0; *
 TRACE_EXCEPTS
     [29:16;3] TRACE_EXCEPTS T_ALWAYS 0 0 0
-* {13:0,0,0} TRACE_EXCEPTS:
-* {14:1,0,1} PUSHI: * <= 1e+200
-* {15:2,1,2} PUSHI: * <= 1e+200
+* {14:0,0,0} TRACE_EXCEPTS:
+* {15:1,0,1} PUSHI: * <= 1e+200
+* {16:2,1,2} PUSHI: * <= 1e+200
 !!! ERROR: numeric overflow
-* {16:3,2,3} MUL: * = inf <= 1e+200 * 1e+200
-* {17:4,1,4} TRACE_EXCEPTS: INEXACT *OVERFLOW
-* {18:5,1,5} NEG: * = -inf <= - inf
+* {17:3,2,3} MUL: * = inf <= 1e+200 * 1e+200
+* {18:4,1,4} TRACE_EXCEPTS: INEXACT *OVERFLOW
+* {19:5,1,5} NEG: * = -inf <= - inf
 !!! ERROR: invalid operand(s)
-* {19:6,1,6} LOG: * = -nan <= log -inf
-* {20:7,1,7} TRACE_EXCEPTS: INEXACT *INVALID *OVERFLOW
-* {21:8,1,8} PUSHI: * <= 10
-* {22:9,2,9} PUSHI: * <= 0
+* {20:6,1,6} LOG: * = -nan <= log -inf
+* {21:7,1,7} TRACE_EXCEPTS: INEXACT *INVALID *OVERFLOW
+* {22:8,1,8} PUSHI: * <= 10
+* {23:9,2,9} PUSHI: * <= 0
 !!! ERROR: divide by zero
-* {23:10,3,10} DIV: * = inf <= 10 / 0
-* {24:11,2,11} TRACE_EXCEPTS: *DIVBYZERO INEXACT *INVALID *OVERFLOW
-* {25:12,2,12} SET_EXCEPTS: *INVALID
-* {26:13,2,13} PUSHI: * <= 10
-* {27:14,3,14} PUSHI: * <= 0
-* {28:15,4,15} DIV: * = inf <= 10 / 0
-* {29:16,3,16} TRACE_EXCEPTS: DIVBYZERO INEXACT *INVALID OVERFLOW
+* {24:10,3,10} DIV: * = inf <= 10 / 0
+* {25:11,2,11} TRACE_EXCEPTS: *DIVBYZERO INEXACT *INVALID *OVERFLOW
+* {26:12,2,12} SET_EXCEPTS: *INVALID
+* {27:13,2,13} PUSHI: * <= 10
+* {28:14,3,14} PUSHI: * <= 0
+* {29:15,4,15} DIV: * = inf <= 10 / 0
+* {30:16,3,16} TRACE_EXCEPTS: DIVBYZERO INEXACT *INVALID OVERFLOW
 PROCESS TERMINATION EXCEPTS ERROR(S): INVALID
 ERROR: module initialization process did not terminate normally at
        module end: illegal exception was raised during otherwise

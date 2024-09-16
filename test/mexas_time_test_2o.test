@@ -73,7 +73,7 @@ ENDF
     [33:18;3] BEGF T_BEGF 0 1 11; [< MAIN >]
     [41:28;0] ENDF T_ENDF 0 1 0
 mexas_time_test_2.mex successfully compiled
-*** {40:27,6,11000016} TRACE: "answer = sum i: low <= i <= high", low=1,
+*** {41:27,6,11000016} TRACE: "answer = sum i: low <= i <= high", low=1,
                               high=1000000, answer=500000500000
 Call to MAIN succeeded and executed 11.000017 million instructions
              (11.000016 million optimized) in #.### cpu seconds.
