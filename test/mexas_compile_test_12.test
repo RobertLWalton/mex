@@ -43,14 +43,14 @@ BEG
     [28:12;4] PUSHI T_PUSH 0 0 0 2000; UNUSED
 END
     [29:13;3] END T_END 1 0 0
-* {14:0,0,0} PUSHI: X <= inf
-* {15:1,1,1} PUSHI: Y <= inf
-* {16:2,2,2} PUSHI: Z <= 0
-* {17:3,3,3} BEG
-*** {18:4,3,4} PUSHS: * <= X = inf
-*** {19:5,4,5} PUSHS: * <= Y = inf
+* {14:0,1,1} PUSHI: X <= inf
+* {15:1,2,2} PUSHI: Y <= inf
+* {16:2,3,3} PUSHI: Z <= 0
+* {17:3,3,4} BEG
+*** {18:4,4,5} PUSHS: * <= X = inf
+*** {19:5,5,6} PUSHS: * <= Y = inf
 !!! FATAL ERROR:  invalid operands to a conditional jump instruction
-*** {20:6,5,6} JMPLT ITS-X with invalid operand(s)
+*** {20:6,3,7} JMPLT ITS-X with invalid operand(s)
 ERROR: module initialization process did not terminate normally at
        module end: invalid operand to JMP instruction
 exiting due to compile errors

@@ -244,7 +244,7 @@
 
 \author{Robert L. Walton}
 
-\date{September 15, 2024}
+\date{September 16, 2024}
  
 \maketitle
 
@@ -1535,9 +1535,9 @@ line containing code that generated the instruction.
 The {\em code-vector-location} is the index of the instruction
 in its code vector.
 The {\em stack-length} is the number of values in the stack
-just before the traced instruction executes.
+just \underline{after} the traced instruction executes.
 The {\em process-counter} is the number of instruction executions
-since the process was originally initialized before the traced
+since the process was originally initialized just \underline{after} the traced
 instruction executes.  The {\em op-code} is the instruction operation code.
 
 The rest of the instruction trace message is specific to the type of

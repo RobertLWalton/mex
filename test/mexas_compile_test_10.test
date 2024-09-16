@@ -45,17 +45,17 @@ WARN "X and Y differ" X Y
     [29:16;6] PUSHS T_PUSH 1 0 0; [< Y * >]
 ERROR "X and Y differ" X Y
     [29:17;4] ERROR T_ALWAYS 2 0 0; [< "X and Y differ" X Y >]
-* {15:0,0,0} PUSHI: * <= 1e+200
-* {16:1,1,1} PUSHI: * <= 1e+200
-* {17:2,2,2} MUL: * = inf <= 1e+200 * 1e+200
-* {18:3,1,3} PUSHI: * <= 100
-* {19:4,2,4} PUSHI: * <= 0
-* {20:5,3,5} DIV: * = inf <= 100 / 0
-* {24:6,2,6} SET_TRACE:
-* {27:11,6,11} TRACE: "X and Y differ", X=1, Y=2
-* {28:14,6,14} WARN: "X and Y differ", X=1, Y=2
+* {15:0,1,1} PUSHI: * <= 1e+200
+* {16:1,2,2} PUSHI: * <= 1e+200
+* {17:2,1,3} MUL: * = inf <= 1e+200 * 1e+200
+* {18:3,2,4} PUSHI: * <= 100
+* {19:4,3,5} PUSHI: * <= 0
+* {20:5,2,6} DIV: * = inf <= 100 / 0
+* {24:6,2,7} SET_TRACE:
+* {27:11,4,12} TRACE: "X and Y differ", X=1, Y=2
+* {28:14,4,15} WARN: "X and Y differ", X=1, Y=2
 !!! FATAL ERROR:
-* {29:17,6,17} ERROR: "X and Y differ", X=1, Y=2
+* {29:17,4,18} ERROR: "X and Y differ", X=1, Y=2
 ERROR: module initialization process did not terminate normally at
        module end: ERROR instruction executed
 exiting due to compile errors

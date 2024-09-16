@@ -99,40 +99,40 @@ CALL FLIP 1 Z
     [58:32;1] CALLM T_CALLM 1 1 13; [< FLIP Z >]
 POP
     [59:33;0] POPS T_POP 0 0 0; [< Z * >]
-* {14:0,0,0} BEGF
-* {27:9,0,1} PUSHI: X <= 23
-* {28:10,1,2} PUSHI: Y <= 157
-* {29:11,2,3} CALLM to BEGF: MIN, ARG1=23, ARG2=157
-*** {16:1,2,4} PUSHS: * <= ARG1 = 23
-*** {17:2,3,5} PUSHS: * <= ARG2 = 157
-*** {18:3,4,6} JMPLT ITS-ARG1 is successful: true <= 23 < 157
-*** {22:6,2,7} PUSHS: * <= ARG1 = 23
-*** {23:7,1,8} RET to CALLM: MIN, Z=23
-* {31:12,1,9} POPS: * <= Z = 23
-* {36:13,0,10} BEGF
-* {51:25,0,11} PUSHI: * <= 0
-* {52:26,1,12} CALLM to BEGF: FLIP, ARG=0
-*** {37:14,1,13} PUSHS: * <= ARG = 0
-*** {38:15,2,14} JMPF ITS-0 is successful: true <= 0
-*** {44:20,1,15} PUSHI: * <= 1
-*** {45:21,1,16} RET to CALLM: FLIP, Z=1
-* {53:27,1,17} POPS: * <= Z = 1
-* {54:28,0,18} PUSHI: * <= 1
-* {55:29,1,19} CALLM to BEGF: FLIP, ARG=1
-*** {37:14,1,20} PUSHS: * <= ARG = 1
-*** {38:15,2,21} JMPF ITS-0 is UNsuccessful: false <= 1
-*** {39:16,1,22} PUSHS: * <= ARG = 1
-*** {40:17,2,23} JMPT ITS-1 is successful: true <= 1
-*** {47:22,1,24} PUSHI: * <= 0
-*** {48:23,1,25} RET to CALLM: FLIP, Z=0
-* {56:30,1,26} POPS: * <= Z = 0
-* {57:31,0,27} PUSHI: * <= 26
-* {58:32,1,28} CALLM to BEGF: FLIP, ARG=26
-*** {37:14,1,29} PUSHS: * <= ARG = 26
-*** {38:15,2,30} JMPF ITS-0 is UNsuccessful: false <= 26
-*** {39:16,1,31} PUSHS: * <= ARG = 26
-*** {40:17,2,32} JMPT ITS-1 is successful: true <= 26
-*** {47:22,1,33} PUSHI: * <= 0
-*** {48:23,1,34} RET to CALLM: FLIP, Z=0
-* {59:33,1,35} POPS: * <= Z = 0
+* {14:0,0,1} BEGF
+* {27:9,1,2} PUSHI: X <= 23
+* {28:10,2,3} PUSHI: Y <= 157
+* {29:11,2,4} CALLM to BEGF: MIN, ARG1=23, ARG2=157
+*** {16:1,3,5} PUSHS: * <= ARG1 = 23
+*** {17:2,4,6} PUSHS: * <= ARG2 = 157
+*** {18:3,2,7} JMPLT ITS-ARG1 is successful: true <= 23 < 157
+*** {22:6,3,8} PUSHS: * <= ARG1 = 23
+*** {23:7,1,9} RET to CALLM: MIN, Z=23
+* {31:12,0,10} POPS: * <= Z = 23
+* {36:13,0,11} BEGF
+* {51:25,1,12} PUSHI: * <= 0
+* {52:26,1,13} CALLM to BEGF: FLIP, ARG=0
+*** {37:14,2,14} PUSHS: * <= ARG = 0
+*** {38:15,1,15} JMPF ITS-0 is successful: true <= 0
+*** {44:20,2,16} PUSHI: * <= 1
+*** {45:21,1,17} RET to CALLM: FLIP, Z=1
+* {53:27,0,18} POPS: * <= Z = 1
+* {54:28,1,19} PUSHI: * <= 1
+* {55:29,1,20} CALLM to BEGF: FLIP, ARG=1
+*** {37:14,2,21} PUSHS: * <= ARG = 1
+*** {38:15,1,22} JMPF ITS-0 is UNsuccessful: false <= 1
+*** {39:16,2,23} PUSHS: * <= ARG = 1
+*** {40:17,1,24} JMPT ITS-1 is successful: true <= 1
+*** {47:22,2,25} PUSHI: * <= 0
+*** {48:23,1,26} RET to CALLM: FLIP, Z=0
+* {56:30,0,27} POPS: * <= Z = 0
+* {57:31,1,28} PUSHI: * <= 26
+* {58:32,1,29} CALLM to BEGF: FLIP, ARG=26
+*** {37:14,2,30} PUSHS: * <= ARG = 26
+*** {38:15,1,31} JMPF ITS-0 is UNsuccessful: false <= 26
+*** {39:16,2,32} PUSHS: * <= ARG = 26
+*** {40:17,1,33} JMPT ITS-1 is successful: true <= 26
+*** {47:22,2,34} PUSHI: * <= 0
+*** {48:23,1,35} RET to CALLM: FLIP, Z=0
+* {59:33,0,36} POPS: * <= Z = 0
 mexas_compile_test_3.mex successfully compiled

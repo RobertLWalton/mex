@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Sep 15 08:55:37 PM EDT 2024
+// Date:	Mon Sep 16 04:08:20 AM EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1118,7 +1118,7 @@ static void check_state_infos ( void )
 inline min::printer print_header
 	( mex::process p,
 	  min::phrase_position pp,
-	  int sp_change = 0 )
+	  int sp_change )
 {
     p->printer << min::bom;
 
@@ -1143,9 +1143,9 @@ inline min::printer print_header
 
     p->printer << p->pc.index
 	       << ","
-	       << p->length
+	       << p->length + sp_change
 	       << ","
-	       << p->counter
+	       << p->counter + 1
 	       << "}";
     p->printer << min::place_indent ( 1 );
     return p->printer;
