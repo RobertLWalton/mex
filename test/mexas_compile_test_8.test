@@ -215,25 +215,25 @@ PUSHI 10
     [105:102;2] PUSHI T_PUSH 0 0 0 10; *
 CALL SUM 2
     [106:103;0] CALLM T_CALLM 2 0 76; [< SUM >]
-* {14:0,0,0} SET_TRACE: SET_OPTIMIZE
-* {15:1,0,1} SET_OPTIMIZE: OFF <= OFF
-*** {30:17,6,17} TRACE: "Z = MIN ( X, Y )", X=5.5, Y=3.4, Z=3.4
-* {36:22,0,19} SET_OPTIMIZE: ON <= OFF
-*** {30:17,6,34} TRACE: "Z = MIN ( X, Y )", X=5.5, Y=3.4, Z=3.4
-* {71:68,0,37} SET_OPTIMIZE: OFF <= ON
-*** {47:33,6,47} TRACE: "Z = X + Y", X=100, Y=200, Z=300
-*** {52:41,6,55} TRACE: "Z = X - Y", X=100, Y=200, Z=-100
-*** {57:49,6,63} TRACE: "Z = X * Y", X=100, Y=200, Z=20000
-*** {62:57,6,71} TRACE: "Z = X / Y", X=100, Y=200, Z=0.5
-*** {67:65,6,79} TRACE: "Z = X MOD Y", X=100, Y=200, Z=100
-* {75:72,0,82} SET_OPTIMIZE: ON <= OFF
-*** {47:33,6,92} TRACE: "Z = X + Y", X=100, Y=200, Z=300
-*** {52:41,6,100} TRACE: "Z = X - Y", X=100, Y=200, Z=-100
-*** {57:49,6,108} TRACE: "Z = X * Y", X=100, Y=200, Z=20000
-*** {62:57,6,116} TRACE: "Z = X / Y", X=100, Y=200, Z=0.5
-*** {67:65,6,124} TRACE: "Z = X MOD Y", X=100, Y=200, Z=100
-* {100:96,0,128} SET_OPTIMIZE: OFF <= ON
-*** {98:94,7,251} TRACE: "S = SUM I FOR X <= I <= Y", S=55, X=1, Y=10
-* {104:100,0,253} SET_OPTIMIZE: ON <= OFF
-*** {98:94,7,376} TRACE: "S = SUM I FOR X <= I <= Y", S=55, X=1, Y=10
+* {13:0,0,0} SET_TRACE: SET_OPTIMIZE
+* {14:1,0,1} SET_OPTIMIZE: OFF <= OFF
+*** {29:17,6,17} TRACE: "Z = MIN ( X, Y )", X=5.5, Y=3.4, Z=3.4
+* {35:22,0,19} SET_OPTIMIZE: ON <= OFF
+*** {29:17,6,34} TRACE: "Z = MIN ( X, Y )", X=5.5, Y=3.4, Z=3.4
+* {70:68,0,37} SET_OPTIMIZE: OFF <= ON
+*** {46:33,6,47} TRACE: "Z = X + Y", X=100, Y=200, Z=300
+*** {51:41,6,55} TRACE: "Z = X - Y", X=100, Y=200, Z=-100
+*** {56:49,6,63} TRACE: "Z = X * Y", X=100, Y=200, Z=20000
+*** {61:57,6,71} TRACE: "Z = X / Y", X=100, Y=200, Z=0.5
+*** {66:65,6,79} TRACE: "Z = X MOD Y", X=100, Y=200, Z=100
+* {74:72,0,82} SET_OPTIMIZE: ON <= OFF
+*** {46:33,6,92} TRACE: "Z = X + Y", X=100, Y=200, Z=300
+*** {51:41,6,100} TRACE: "Z = X - Y", X=100, Y=200, Z=-100
+*** {56:49,6,108} TRACE: "Z = X * Y", X=100, Y=200, Z=20000
+*** {61:57,6,116} TRACE: "Z = X / Y", X=100, Y=200, Z=0.5
+*** {66:65,6,124} TRACE: "Z = X MOD Y", X=100, Y=200, Z=100
+* {99:96,0,128} SET_OPTIMIZE: OFF <= ON
+*** {97:94,7,251} TRACE: "S = SUM I FOR X <= I <= Y", S=55, X=1, Y=10
+* {103:100,0,253} SET_OPTIMIZE: ON <= OFF
+*** {97:94,7,376} TRACE: "S = SUM I FOR X <= I <= Y", S=55, X=1, Y=10
 mexas_compile_test_8.mex successfully compiled

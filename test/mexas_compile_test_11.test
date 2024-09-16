@@ -1,19 +1,19 @@
-* {38:18,4,5} CALLM to BEGF: sum, low=4, high=10
-*** {23:7,6,12} CALLM to BEGF: sum, low=5, high=10
-***** {23:7,8,19} CALLM to BEGF: sum, low=6, high=10
-******* {23:7,10,26} CALLM to BEGF: sum, low=7, high=10
-********* {23:7,12,33} CALLM to BEGF: sum, low=8, high=10
-*********** {23:7,14,40} CALLM to BEGF: sum, low=9, high=10
-************* {23:7,16,47} CALLM to BEGF: sum, low=10, high=10
-*************** {23:7,18,54} CALLM to BEGF: sum, low=11, high=10
-***************** {31:12,17,59} RET to CALLM: sum, *=0
-*************** {28:10,15,62} RET to CALLM: sum, *=10
-************* {28:10,13,65} RET to CALLM: sum, *=19
-*********** {28:10,11,68} RET to CALLM: sum, *=27
-********* {28:10,9,71} RET to CALLM: sum, *=34
-******* {28:10,7,74} RET to CALLM: sum, *=40
-***** {28:10,5,77} RET to CALLM: sum, *=45
-*** {28:10,3,80} RET to CALLM: sum, answer=49
-* {40:22,6,84} TRACE: "answer = sum i: low <= i <= high", low=4,
+* {37:18,4,5} CALLM to BEGF: sum, low=4, high=10
+*** {22:7,6,12} CALLM to BEGF: sum, low=5, high=10
+***** {22:7,8,19} CALLM to BEGF: sum, low=6, high=10
+******* {22:7,10,26} CALLM to BEGF: sum, low=7, high=10
+********* {22:7,12,33} CALLM to BEGF: sum, low=8, high=10
+*********** {22:7,14,40} CALLM to BEGF: sum, low=9, high=10
+************* {22:7,16,47} CALLM to BEGF: sum, low=10, high=10
+*************** {22:7,18,54} CALLM to BEGF: sum, low=11, high=10
+***************** {30:12,17,59} RET to CALLM: sum, *=0
+*************** {27:10,15,62} RET to CALLM: sum, *=10
+************* {27:10,13,65} RET to CALLM: sum, *=19
+*********** {27:10,11,68} RET to CALLM: sum, *=27
+********* {27:10,9,71} RET to CALLM: sum, *=34
+******* {27:10,7,74} RET to CALLM: sum, *=40
+***** {27:10,5,77} RET to CALLM: sum, *=45
+*** {27:10,3,80} RET to CALLM: sum, answer=49
+* {39:22,6,84} TRACE: "answer = sum i: low <= i <= high", low=4,
                       high=10, answer=49
 mexas_compile_test_11.mex successfully compiled
