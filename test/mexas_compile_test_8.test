@@ -33,6 +33,7 @@ BEGF MIN X Y
         JMP DONE
     [23:10;3] JMP T_JMP 0 0 0; DONE
         LABEL ITS-Y
+    [24:11;3] LABEL ITS-Y
     [20:7;3] JMPGT T_JMPS 0 0 4; ITS-Y
         PUSH Y
     [25:11;4] PUSHS T_PUSH 1 0 0; [< Y * >]
@@ -41,6 +42,7 @@ BEGF MIN X Y
     END
     [27:13;3] END T_END 0 0 0
     LABEL DONE
+    [28:14;3] LABEL DONE
     [23:10;3] JMP T_JMP[1] 0 0 4; DONE
     [29:14;4] PUSHS T_PUSH 2 0 0; [< X * >]
     [29:15;5] PUSHS T_PUSH 2 0 0; [< Y * >]
@@ -189,6 +191,7 @@ BEGF SUM X Y
     ENDL
     [95:90;4] ENDL T_ENDL 0 2 10
     LABEL DONE
+    [96:91;4] LABEL DONE
     [87:82;4] JMPGT T_JMPS[1] 2 0 9; DONE
     [97:91;5] PUSHS T_PUSH 1 0 0; [< S * >]
     [97:92;6] PUSHS T_PUSH 4 0 0; [< X * >]

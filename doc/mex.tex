@@ -2342,7 +2342,7 @@ The instruction printout has the syntax:
 	       \{ \TT{;} {\em trace-info} \}\QMARK{} \\
     \end{tabular}
 \\[0.5ex]
-\emkey{printout-header} ::=
+\emkey{printout-header}\label{PRINTOUT-HEADER} ::=
     \TT{[}{\em line-number}\TT{:}{\em code-vector-location}%
                         \TT{,}{\em var-stack-length} \TT{]}
 \end{indpar}
@@ -2391,7 +2391,11 @@ Then push the given parts of an instruction into the corresponding
 
 Lastly call {\tt mexstack::print\_instr} with the instruction
 location and the {\tt no\_source} and {\tt stack\_offset}
-arguments.
+arguments.  For this to work, {\tt mex::var\_stack\_length}
+must be set \underline{before} {\tt push\_instr} is called
+so that it plus {\tt stack\_offset} (usually {\tt 0})
+is the variable stack length
+\underline{after} the instruction is ouput.
 \end{indpar}
 
 \verb|void mexstack:| \MEXSTACKKEY{push\_push\_instr}
@@ -2721,6 +2725,34 @@ of the {\tt JMP\ldots}~minus the current depth.
 
 Resolved jumps are removed from the list
 of pending jumps.  The number of resolved jumps is returned.
+\end{indpar}
+
+\verb|void mexstack::| \MEXCOMKEY{print\_label}\label{PRINT-LABEL} \\
+\verb|        ( min::gen name,| \\
+\verb|          const min::phrase_position & phrase_position| \\
+\verb|              min::MISSING_PHRASE_POSITION,| \\
+\verb|          bool no_source = false,| \\
+\verb|          min::int32 stack_offset = 0 )|
+\begin{indpar}
+Print a label with the given {\em name} just \underline{prior} to calling
+{\tt mexstack::jmp\_target} with that {\em name}.
+Print as per {\tt mexstack::\EOL print\_\EOL switch},
+except do not print source lines if
+{\tt no\_source} is {\tt true} or {\em phrase\_position} is missing.
+Printing is done using {\tt mexcom::\EOL input\_\EOL file} and
+{\tt mexcom::\EOL input\_\EOL file->\EOL printer}.
+
+The label printout has the syntax:
+\begin{indpar}
+\emkey{label-printout} ::=
+    {\em printout-header} \ttkey{LABEL} {\em name}
+\end{indpar}
+In {\em printout-header}\pagnote{PRINTOUT-HEADER}
+the {\em code-vector-location} is
+{\tt mexcom::ouput\_module->length} and
+the {\em var-stack-length} equals the current value of
+{\tt mexstack::var\_stack\_length}\pagnote{VAR-STACK-LENGTH}
+plus {\tt stack\_offset} (usually {\tt 0}).
 \end{indpar}
 
 \verb|min::uns32 mexstack:| \MEXSTACKKEY{jmp\_clear} \verb|( void )|

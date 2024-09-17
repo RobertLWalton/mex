@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Sep 15 06:37:51 AM EDT 2024
+// Date:	Tue Sep 17 02:21:24 AM EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1066,13 +1066,8 @@ mex::module mexas::compile ( min::file file )
 		    continue;
 		}
 
-		if ( mexstack::print_switch
-		     ==
-		     mexstack::PRINT_WITH_SOURCE )
-		    min::print_phrase_lines
-			( mexcom::input_file->printer,
-			  mexcom::input_file, pp );
-
+		mexstack::print_label
+		    ( target, pp );
 		mexstack::jmp_target ( target );
 		continue;
 	    }

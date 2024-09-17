@@ -2,7 +2,7 @@
 //
 // File:	mexstack.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Jun  6 12:10:52 EDT 2024
+// Date:	Tue Sep 17 02:18:56 AM EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -229,6 +229,11 @@ void cont ( mex::instr & instr,
 unsigned jmp_clear ( void );
 unsigned jmp_update ( void );
 unsigned jmp_target ( min::gen target );
+void print_label ( min::gen name,
+	           const min::phrase_position & pp =
+	               min::MISSING_PHRASE_POSITION,
+	           bool no_source = false,
+		   min::int32 stack_offset = 0 );
 
 } // end mexstack namespace
 

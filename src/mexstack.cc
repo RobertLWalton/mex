@@ -2,7 +2,7 @@
 //
 // File:	mexstack.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Sep 15 06:35:41 AM EDT 2024
+// Date:	Tue Sep 17 02:19:08 AM EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -266,6 +266,38 @@ unsigned mexstack::jmp_target
 	    previous = next;
     }
     return count;
+}
+
+void mexstack::print_label
+	( min::gen name,
+	  const min::phrase_position & pp,
+	  bool no_source, min::int32 stack_offset )
+{
+    mexstack::print print = mexstack::print_switch;
+    min::printer printer =
+	mexcom::input_file->printer;
+    mex::module m = mexcom::output_module;
+
+    if ( print == mexstack::NO_PRINT )
+	return;
+
+    if ( pp
+         && 
+	 print == mexstack::PRINT_WITH_SOURCE
+         &&
+	 ! no_source )
+	min::print_phrase_lines
+	    ( printer, mexcom::input_file, pp );
+
+    printer
+        << min::bol << min::bom <<"    [";
+    if ( pp ) printer << pp.end.line << ":";
+    printer
+	<< m->length
+	<< ";" <<   mexstack::var_stack_length
+	          + stack_offset
+	<< "] LABEL " << min::pgen_name ( name )
+        << min::eom;
 }
 
 void mexstack::begx ( mex::instr & instr,

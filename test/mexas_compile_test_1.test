@@ -61,12 +61,14 @@ POP // Z, but illegal as Z has same depth
 JMP DONE
     [40:16;3] JMP T_JMP 0 0 0; DONE
 LABEL ITS-X
+    [41:17;3] LABEL ITS-X
     [37:13;3] JMPLT T_JMPS 0 0 4; ITS-X
 PUSH X
     [42:17;4] PUSHS T_PUSH 2 0 0; [< X * >]
 POP // Z, but illegal as Z has same depth
     [43:18;3] POPS T_POP 0 0 0; [< * * >]
 LABEL DONE
+    [44:19;3] LABEL DONE
     [40:16;3] JMP T_JMP 0 0 3; DONE
     STACKS: VARIABLES: Z Y X
 POP
@@ -89,6 +91,7 @@ POP
 PUSH Y Z
     [57:25;3] PUSHS T_PUSH 0 0 0; [< Y Z >]
 LABEL ITS-X
+    [58:26;3] LABEL ITS-X
     [55:23;3] JMPLT T_JMPS 0 0 3; ITS-X
 POP
     [59:26;2] POPS T_POP 0 0 0; [< Z * >]
@@ -109,12 +112,14 @@ PUSH Y Z
 JMP DONE
     [70:31;3] JMP T_JMP 0 0 0; DONE
 LABEL ITS-X
+    [71:32;3] LABEL ITS-X
 ERROR: in mexas_compile_test_1.mex: line ####: code jumped over pushes of
        values into the stack; JMP unresolved:
 JMPLT ITS-X
 PUSH X Z
     [72:32;4] PUSHS T_PUSH 2 0 0; [< X Z >]
 LABEL DONE
+    [73:33;4] LABEL DONE
 ERROR: in mexas_compile_test_1.mex: line ####: code jumped over pushes of
        values into the stack; JMP unresolved:
 JMP DONE
@@ -142,6 +147,7 @@ JMPLT ITS-X
 POP
     [88:40;3] POPS T_POP 0 0 0; [< * * >]
 LABEL ITS-X
+    [89:41;3] LABEL ITS-X
 ERROR: in mexas_compile_test_1.mex: line ####: code jumped over pops of
        values from the stack; JMP unresolved:
 JMPLT ITS-X
@@ -167,6 +173,7 @@ POP
 PUSH X Z
     [103:47;3] PUSHS T_PUSH 1 0 0; [< X Z >]
 LABEL DONE
+    [104:48;3] LABEL DONE
     [101:45;3] JMPGEQ T_JMPS 0 0 3; DONE
     STACKS: VARIABLES: Z Y X
 POP
@@ -195,6 +202,7 @@ POP // Z, but illegal as Z has same depth
 JMP DONE
     [120:57;3] JMP T_JMP 0 0 0; DONE
 LABEL ITS-0
+    [121:58;3] LABEL ITS-0
     [117:54;3] JMPGEQ T_JMPS 0 0 4; ITS-0
     [115:52;3] JMPGEQ T_JMPS 0 1 6; ITS-0
 PUSHI 0
@@ -202,6 +210,7 @@ PUSHI 0
 POP // Z, but illegal as Z has same depth
     [123:59;3] POPS T_POP 0 0 0; [< * * >]
 LABEL DONE
+    [124:60;3] LABEL DONE
     [120:57;3] JMP T_JMP 0 0 3; DONE
 POP
     [125:60;2] POPS T_POP 0 0 0; [< Z * >]
@@ -228,6 +237,7 @@ POP // Z, but illegal as Z has same depth
 JMP DONE
     [139:68;3] JMP T_JMP 0 0 0; DONE
 LABEL ITS-0
+    [140:69;3] LABEL ITS-0
     [134:63;3] JMPF T_JMPS 0 0 6; ITS-0
 PUSHI 0
     [141:69;4] PUSHI T_PUSH 0 0 0 0; *
@@ -236,12 +246,14 @@ POP // Z, but illegal as Z has same depth
 JMP DONE
     [143:71;3] JMP T_JMP 0 0 0; DONE
 LABEL ITS-1
+    [144:72;3] LABEL ITS-1
     [136:65;3] JMPT T_JMPS 0 0 7; ITS-1
 PUSHI 1
     [145:72;4] PUSHI T_PUSH 0 0 0 1; *
 POP // Z, but illegal as Z has same depth
     [146:73;3] POPS T_POP 0 0 0; [< * * >]
 LABEL DONE
+    [147:74;3] LABEL DONE
     [143:71;3] JMP T_JMP 0 0 3; DONE
     [139:68;3] JMP T_JMP 0 0 6; DONE
 POP

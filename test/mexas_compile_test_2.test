@@ -32,12 +32,14 @@ BEG
     JMP DONE
     [23:9;3] JMP T_JMP 0 0 0; DONE
     LABEL ITS-X
+    [24:10;3] LABEL ITS-X
     [20:6;3] JMPLT T_JMPS 0 0 4; ITS-X
     PUSH X
     [25:10;4] PUSHS T_PUSH 2 0 0; [< X * >]
     POP Z
     [26:11;3] POPS T_POP 1 0 0; [< * Z >]
     LABEL DONE
+    [27:12;3] LABEL DONE
     [23:9;3] JMP T_JMP 0 0 3; DONE
     PUSHI 2000 UNUSED
     [28:12;4] PUSHI T_PUSH 0 0 0 2000; UNUSED
@@ -89,6 +91,7 @@ ENDL
     [54:32;3] ENDL T_ENDL 0 2 11
     STACKS: VARIABLES: I SUM LIMIT
 LABEL DONE
+    [56:33;3] LABEL DONE
     [45:23;3] JMPGT T_JMPS[1] 2 0 10; DONE
 POP
     [57:33;2] POPS T_POP 0 0 0; [< I * >]
@@ -130,6 +133,7 @@ BEGL 2
     [77:49;7] POPS T_POP 2 0 0; [< * next-COUNT >]
 
     LABEL CONTINUE
+    [79:50;7] LABEL CONTINUE
     [72:44;7] JMPGT T_JMPS 0 1 6; CONTINUE
     PUSH Y
     [80:50;8] PUSHS T_PUSH 2 0 0; [< Y * >]
@@ -143,6 +147,7 @@ ENDL
     [84:54;5] ENDL T_ENDL 0 2 12
     STACKS: VARIABLES: Y COUNT Y2 Y1 X
 LABEL DONE
+    [86:55;5] LABEL DONE
     [74:46;5] JMPGT T_JMPS[1] 2 0 9; DONE
 POP
     [87:55;4] POPS T_POP 0 0 0; [< Y * >]
@@ -245,7 +250,7 @@ POP
 * {69:41,7,67} BEGL: LOOP, COUNT=0, Y=0
 *** {70:42,8,68} PUSHS: * <= Y1 = 4
 *** {71:43,9,69} PUSHS: * <= Y = 0
-*** {72:44,7,70} JMPGT CONTINUE is successful: true <= 4 > 0
+*** {72:44,7,70} JMPGT* CONTINUE is successful: true <= 4 > 0
 *** {80:50,8,71} PUSHS: * <= Y = 0
 *** {81:51,9,72} PUSHS: * <= X = 0.3
 *** {82:52,8,73} ADD: * = 0.3 <= 0 + 0.3
@@ -253,7 +258,7 @@ POP
 *** {84:54,7,75} ENDL: LOOP, COUNT=0, Y=0.3
 *** {70:42,8,76} PUSHS: * <= Y1 = 4
 *** {71:43,9,77} PUSHS: * <= Y = 0.3
-*** {72:44,7,78} JMPGT CONTINUE is successful: true <= 4 > 0.3
+*** {72:44,7,78} JMPGT* CONTINUE is successful: true <= 4 > 0.3
 *** {80:50,8,79} PUSHS: * <= Y = 0.3
 *** {81:51,9,80} PUSHS: * <= X = 0.3
 *** {82:52,8,81} ADD: * = 0.6 <= 0.3 + 0.3
@@ -261,7 +266,7 @@ POP
 *** {84:54,7,83} ENDL: LOOP, COUNT=0, Y=0.6
 *** {70:42,8,84} PUSHS: * <= Y1 = 4
 *** {71:43,9,85} PUSHS: * <= Y = 0.6
-*** {72:44,7,86} JMPGT CONTINUE is successful: true <= 4 > 0.6
+*** {72:44,7,86} JMPGT* CONTINUE is successful: true <= 4 > 0.6
 *** {80:50,8,87} PUSHS: * <= Y = 0.6
 *** {81:51,9,88} PUSHS: * <= X = 0.3
 *** {82:52,8,89} ADD: * = 0.9 <= 0.6 + 0.3
@@ -269,7 +274,7 @@ POP
 *** {84:54,7,91} ENDL: LOOP, COUNT=0, Y=0.9
 *** {70:42,8,92} PUSHS: * <= Y1 = 4
 *** {71:43,9,93} PUSHS: * <= Y = 0.9
-*** {72:44,7,94} JMPGT CONTINUE is successful: true <= 4 > 0.9
+*** {72:44,7,94} JMPGT* CONTINUE is successful: true <= 4 > 0.9
 *** {80:50,8,95} PUSHS: * <= Y = 0.9
 *** {81:51,9,96} PUSHS: * <= X = 0.3
 *** {82:52,8,97} ADD: * = 1.2 <= 0.9 + 0.3
@@ -277,7 +282,7 @@ POP
 *** {84:54,7,99} ENDL: LOOP, COUNT=0, Y=1.2
 *** {70:42,8,100} PUSHS: * <= Y1 = 4
 *** {71:43,9,101} PUSHS: * <= Y = 1.2
-*** {72:44,7,102} JMPGT CONTINUE is successful: true <= 4 > 1.2
+*** {72:44,7,102} JMPGT* CONTINUE is successful: true <= 4 > 1.2
 *** {80:50,8,103} PUSHS: * <= Y = 1.2
 *** {81:51,9,104} PUSHS: * <= X = 0.3
 *** {82:52,8,105} ADD: * = 1.5 <= 1.2 + 0.3
@@ -285,7 +290,7 @@ POP
 *** {84:54,7,107} ENDL: LOOP, COUNT=0, Y=1.5
 *** {70:42,8,108} PUSHS: * <= Y1 = 4
 *** {71:43,9,109} PUSHS: * <= Y = 1.5
-*** {72:44,7,110} JMPGT CONTINUE is successful: true <= 4 > 1.5
+*** {72:44,7,110} JMPGT* CONTINUE is successful: true <= 4 > 1.5
 *** {80:50,8,111} PUSHS: * <= Y = 1.5
 *** {81:51,9,112} PUSHS: * <= X = 0.3
 *** {82:52,8,113} ADD: * = 1.8 <= 1.5 + 0.3
@@ -293,7 +298,7 @@ POP
 *** {84:54,7,115} ENDL: LOOP, COUNT=0, Y=1.8
 *** {70:42,8,116} PUSHS: * <= Y1 = 4
 *** {71:43,9,117} PUSHS: * <= Y = 1.8
-*** {72:44,7,118} JMPGT CONTINUE is successful: true <= 4 > 1.8
+*** {72:44,7,118} JMPGT* CONTINUE is successful: true <= 4 > 1.8
 *** {80:50,8,119} PUSHS: * <= Y = 1.8
 *** {81:51,9,120} PUSHS: * <= X = 0.3
 *** {82:52,8,121} ADD: * = 2.1 <= 1.8 + 0.3
@@ -301,7 +306,7 @@ POP
 *** {84:54,7,123} ENDL: LOOP, COUNT=0, Y=2.1
 *** {70:42,8,124} PUSHS: * <= Y1 = 4
 *** {71:43,9,125} PUSHS: * <= Y = 2.1
-*** {72:44,7,126} JMPGT CONTINUE is successful: true <= 4 > 2.1
+*** {72:44,7,126} JMPGT* CONTINUE is successful: true <= 4 > 2.1
 *** {80:50,8,127} PUSHS: * <= Y = 2.1
 *** {81:51,9,128} PUSHS: * <= X = 0.3
 *** {82:52,8,129} ADD: * = 2.4 <= 2.1 + 0.3
@@ -309,7 +314,7 @@ POP
 *** {84:54,7,131} ENDL: LOOP, COUNT=0, Y=2.4
 *** {70:42,8,132} PUSHS: * <= Y1 = 4
 *** {71:43,9,133} PUSHS: * <= Y = 2.4
-*** {72:44,7,134} JMPGT CONTINUE is successful: true <= 4 > 2.4
+*** {72:44,7,134} JMPGT* CONTINUE is successful: true <= 4 > 2.4
 *** {80:50,8,135} PUSHS: * <= Y = 2.4
 *** {81:51,9,136} PUSHS: * <= X = 0.3
 *** {82:52,8,137} ADD: * = 2.7 <= 2.4 + 0.3
@@ -317,7 +322,7 @@ POP
 *** {84:54,7,139} ENDL: LOOP, COUNT=0, Y=2.7
 *** {70:42,8,140} PUSHS: * <= Y1 = 4
 *** {71:43,9,141} PUSHS: * <= Y = 2.7
-*** {72:44,7,142} JMPGT CONTINUE is successful: true <= 4 > 2.7
+*** {72:44,7,142} JMPGT* CONTINUE is successful: true <= 4 > 2.7
 *** {80:50,8,143} PUSHS: * <= Y = 2.7
 *** {81:51,9,144} PUSHS: * <= X = 0.3
 *** {82:52,8,145} ADD: * = 3 <= 2.7 + 0.3
@@ -325,7 +330,7 @@ POP
 *** {84:54,7,147} ENDL: LOOP, COUNT=0, Y=3
 *** {70:42,8,148} PUSHS: * <= Y1 = 4
 *** {71:43,9,149} PUSHS: * <= Y = 3
-*** {72:44,7,150} JMPGT CONTINUE is successful: true <= 4 > 3
+*** {72:44,7,150} JMPGT* CONTINUE is successful: true <= 4 > 3
 *** {80:50,8,151} PUSHS: * <= Y = 3
 *** {81:51,9,152} PUSHS: * <= X = 0.3
 *** {82:52,8,153} ADD: * = 3.3 <= 3 + 0.3
@@ -333,7 +338,7 @@ POP
 *** {84:54,7,155} ENDL: LOOP, COUNT=0, Y=3.3
 *** {70:42,8,156} PUSHS: * <= Y1 = 4
 *** {71:43,9,157} PUSHS: * <= Y = 3.3
-*** {72:44,7,158} JMPGT CONTINUE is successful: true <= 4 > 3.3
+*** {72:44,7,158} JMPGT* CONTINUE is successful: true <= 4 > 3.3
 *** {80:50,8,159} PUSHS: * <= Y = 3.3
 *** {81:51,9,160} PUSHS: * <= X = 0.3
 *** {82:52,8,161} ADD: * = 3.6 <= 3.3 + 0.3
@@ -341,7 +346,7 @@ POP
 *** {84:54,7,163} ENDL: LOOP, COUNT=0, Y=3.6
 *** {70:42,8,164} PUSHS: * <= Y1 = 4
 *** {71:43,9,165} PUSHS: * <= Y = 3.6
-*** {72:44,7,166} JMPGT CONTINUE is successful: true <= 4 > 3.6
+*** {72:44,7,166} JMPGT* CONTINUE is successful: true <= 4 > 3.6
 *** {80:50,8,167} PUSHS: * <= Y = 3.6
 *** {81:51,9,168} PUSHS: * <= X = 0.3
 *** {82:52,8,169} ADD: * = 3.9 <= 3.6 + 0.3
@@ -349,7 +354,7 @@ POP
 *** {84:54,7,171} ENDL: LOOP, COUNT=0, Y=3.9
 *** {70:42,8,172} PUSHS: * <= Y1 = 4
 *** {71:43,9,173} PUSHS: * <= Y = 3.9
-*** {72:44,7,174} JMPGT CONTINUE is successful: true <= 4 > 3.9
+*** {72:44,7,174} JMPGT* CONTINUE is successful: true <= 4 > 3.9
 *** {80:50,8,175} PUSHS: * <= Y = 3.9
 *** {81:51,9,176} PUSHS: * <= X = 0.3
 *** {82:52,8,177} ADD: * = 4.2 <= 3.9 + 0.3
@@ -357,7 +362,7 @@ POP
 *** {84:54,7,179} ENDL: LOOP, COUNT=0, Y=4.2
 *** {70:42,8,180} PUSHS: * <= Y1 = 4
 *** {71:43,9,181} PUSHS: * <= Y = 4.2
-*** {72:44,8,182} JMPGT CONTINUE is UNsuccessful: false <= 4 > 4.2
+*** {72:44,8,182} JMPGT* CONTINUE is UNsuccessful: false <= 4 > 4.2
 *** {73:45,9,183} PUSHS: * <= Y2 = 6.2
 *** {74:46,7,184} JMPGT DONE is UNsuccessful: false <= 4.2 > 6.2
 *** {75:47,8,185} PUSHS: * <= COUNT = 0
@@ -370,7 +375,7 @@ POP
 *** {84:54,7,192} ENDL: LOOP, COUNT=1, Y=4.5
 *** {70:42,8,193} PUSHS: * <= Y1 = 4
 *** {71:43,9,194} PUSHS: * <= Y = 4.5
-*** {72:44,8,195} JMPGT CONTINUE is UNsuccessful: false <= 4 > 4.5
+*** {72:44,8,195} JMPGT* CONTINUE is UNsuccessful: false <= 4 > 4.5
 *** {73:45,9,196} PUSHS: * <= Y2 = 6.2
 *** {74:46,7,197} JMPGT DONE is UNsuccessful: false <= 4.5 > 6.2
 *** {75:47,8,198} PUSHS: * <= COUNT = 1
@@ -383,7 +388,7 @@ POP
 *** {84:54,7,205} ENDL: LOOP, COUNT=2, Y=4.8
 *** {70:42,8,206} PUSHS: * <= Y1 = 4
 *** {71:43,9,207} PUSHS: * <= Y = 4.8
-*** {72:44,8,208} JMPGT CONTINUE is UNsuccessful: false <= 4 > 4.8
+*** {72:44,8,208} JMPGT* CONTINUE is UNsuccessful: false <= 4 > 4.8
 *** {73:45,9,209} PUSHS: * <= Y2 = 6.2
 *** {74:46,7,210} JMPGT DONE is UNsuccessful: false <= 4.8 > 6.2
 *** {75:47,8,211} PUSHS: * <= COUNT = 2
@@ -396,7 +401,7 @@ POP
 *** {84:54,7,218} ENDL: LOOP, COUNT=3, Y=5.1
 *** {70:42,8,219} PUSHS: * <= Y1 = 4
 *** {71:43,9,220} PUSHS: * <= Y = 5.1
-*** {72:44,8,221} JMPGT CONTINUE is UNsuccessful: false <= 4 > 5.1
+*** {72:44,8,221} JMPGT* CONTINUE is UNsuccessful: false <= 4 > 5.1
 *** {73:45,9,222} PUSHS: * <= Y2 = 6.2
 *** {74:46,7,223} JMPGT DONE is UNsuccessful: false <= 5.1 > 6.2
 *** {75:47,8,224} PUSHS: * <= COUNT = 3
@@ -409,7 +414,7 @@ POP
 *** {84:54,7,231} ENDL: LOOP, COUNT=4, Y=5.4
 *** {70:42,8,232} PUSHS: * <= Y1 = 4
 *** {71:43,9,233} PUSHS: * <= Y = 5.4
-*** {72:44,8,234} JMPGT CONTINUE is UNsuccessful: false <= 4 > 5.4
+*** {72:44,8,234} JMPGT* CONTINUE is UNsuccessful: false <= 4 > 5.4
 *** {73:45,9,235} PUSHS: * <= Y2 = 6.2
 *** {74:46,7,236} JMPGT DONE is UNsuccessful: false <= 5.4 > 6.2
 *** {75:47,8,237} PUSHS: * <= COUNT = 4
@@ -422,7 +427,7 @@ POP
 *** {84:54,7,244} ENDL: LOOP, COUNT=5, Y=5.7
 *** {70:42,8,245} PUSHS: * <= Y1 = 4
 *** {71:43,9,246} PUSHS: * <= Y = 5.7
-*** {72:44,8,247} JMPGT CONTINUE is UNsuccessful: false <= 4 > 5.7
+*** {72:44,8,247} JMPGT* CONTINUE is UNsuccessful: false <= 4 > 5.7
 *** {73:45,9,248} PUSHS: * <= Y2 = 6.2
 *** {74:46,7,249} JMPGT DONE is UNsuccessful: false <= 5.7 > 6.2
 *** {75:47,8,250} PUSHS: * <= COUNT = 5
@@ -435,7 +440,7 @@ POP
 *** {84:54,7,257} ENDL: LOOP, COUNT=6, Y=6
 *** {70:42,8,258} PUSHS: * <= Y1 = 4
 *** {71:43,9,259} PUSHS: * <= Y = 6
-*** {72:44,8,260} JMPGT CONTINUE is UNsuccessful: false <= 4 > 6
+*** {72:44,8,260} JMPGT* CONTINUE is UNsuccessful: false <= 4 > 6
 *** {73:45,9,261} PUSHS: * <= Y2 = 6.2
 *** {74:46,7,262} JMPGT DONE is UNsuccessful: false <= 6 > 6.2
 *** {75:47,8,263} PUSHS: * <= COUNT = 6
@@ -448,7 +453,7 @@ POP
 *** {84:54,7,270} ENDL: LOOP, COUNT=7, Y=6.3
 *** {70:42,8,271} PUSHS: * <= Y1 = 4
 *** {71:43,9,272} PUSHS: * <= Y = 6.3
-*** {72:44,8,273} JMPGT CONTINUE is UNsuccessful: false <= 4 > 6.3
+*** {72:44,8,273} JMPGT* CONTINUE is UNsuccessful: false <= 4 > 6.3
 *** {73:45,9,274} PUSHS: * <= Y2 = 6.2
 *** {74:46,5,275} JMPGT DONE is successful: true <= 6.3 > 6.2
 * {87:55,4,276} POPS: * <= Y = 6.3

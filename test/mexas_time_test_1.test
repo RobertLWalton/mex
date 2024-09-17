@@ -39,6 +39,7 @@ BEGF sum low high
     RET 1
     [26:10;2] RET T_RET 0 1 1
     LABEL EXIT
+    [27:11;2] LABEL EXIT
     [16:3;2] JMPGT T_JMPS 0 0 8; EXIT
     PUSHI 0
     [28:11;3] PUSHI T_PUSH 0 0 0 0; *
