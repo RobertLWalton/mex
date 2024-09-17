@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Sep 17 12:16:29 AM EDT 2024
+// Date:	Tue Sep 17 12:59:06 AM EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1724,6 +1724,8 @@ bool mex::run_process ( mex::process p )
 
 		print_header ( p, pp, sp_change )
 		    << " " << op_info->name;
+		if ( (& m[index])->immedB )
+		    p->printer << "*";
 
 		min::gen trace_info = min::MISSING();
 		if ( m->trace_info != min::NULL_STUB

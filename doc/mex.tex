@@ -1600,6 +1600,12 @@ If \TT{module->\EOL trace\_\EOL info[i]} is not a MIN string or label,
 {\em target-index} is the index of the target instruction in its
 module's code vector.
 
+For the comparison jump instructions (\TT{JMPGT}, etc.), a \TT{*}
+is appended to the {\em op-code} name if the instruction's
+\TT{immedB} is non-zero (so that for an unsuccessful jump,
+the first value popped is
+pushed back into the stack).
+
 \subsubsection{Push/Pop Tracing}
 \label{PUSH/POP-TRACING}
 
