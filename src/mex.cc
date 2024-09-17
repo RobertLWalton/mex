@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Sep 16 04:08:20 AM EDT 2024
+// Date:	Tue Sep 17 12:16:29 AM EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1716,26 +1716,31 @@ bool mex::run_process ( mex::process p )
 			   " instruction"
 			<< min::eol;
 
+		min::uns32 index = p->pc.index;
 		min::phrase_position pp =
-		    p->pc.index < m->position->length ?
-		    m->position[p->pc.index] :
+		    index < m->position->length ?
+		    m->position[index] :
 		    min::MISSING_PHRASE_POSITION;
 
 		print_header ( p, pp, sp_change )
 		    << " " << op_info->name;
 
+		min::gen trace_info = min::MISSING();
 		if ( m->trace_info != min::NULL_STUB
 		     &&
-		       p->pc.index
-		     < m->trace_info->length )
-		{
-		    min::gen trace_info =
-		        m->trace_info[p->pc.index];
+		     index < m->trace_info->length )
+		    trace_info = m->trace_info[index];
+		if ( min::is_name ( trace_info )
+		     &&
+		     ! min::is_num ( trace_info ) )
 		    p->printer << " "
 			       << ::pvar ( trace_info );
-		}
 		else
-		    p->printer << " *";
+		    p->printer
+		        << " location "
+		        << index
+			   +
+			   (& m[index])->immedC;
 
 		if ( bad_jmp )
 		{

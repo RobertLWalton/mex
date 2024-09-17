@@ -244,7 +244,7 @@
 
 \author{Robert L. Walton}
 
-\date{September 16, 2024}
+\date{September 17, 2024}
  
 \maketitle
 
@@ -1594,9 +1594,11 @@ or for a plain unconditional \TT{JMP} instruction, just:
 
 For a jump instruction the value of
 \TT{module->\EOL trace\_\EOL info[i]} is {\em jmp-target}
-as a MIN string or number.
-If \TT{module->\EOL trace\_\EOL info[i]} is not a MIN string or number,
-\TT{*} is used as {\em jump-target}.
+as a MIN string or label.
+If \TT{module->\EOL trace\_\EOL info[i]} is not a MIN string or label,
+`\TT{location} {\em target-index}' is used as {\em jump-target}, where
+{\em target-index} is the index of the target instruction in its
+module's code vector.
 
 \subsubsection{Push/Pop Tracing}
 \label{PUSH/POP-TRACING}
@@ -1852,13 +1854,13 @@ The process \TT{length} member (stack size) is set to \TT{0}
 and its \TT{max\_length} member (maximum stack size) is set to the
 value of the global variable:
 \begin{indpar}
-\verb|min::uns32 mex::|\MEXKEY{stack\_limit}\verb|    // Default == 16384.|
+\verb|min::uns32 mex::|\MEXKEY{run\_stack\_limit}\verb|    // Default == 16384.|
 \end{indpar}
 
 An empty \TT{return\_stack} vector is created and its \TT{max\_size}
 is set to the value of the global variable:
 \begin{indpar}
-\verb|min::uns32 mex::|\MEXKEY{return\_stack\_limit}%
+\verb|min::uns32 mex::|\MEXKEY{run\_return\_stack\_limit}%
             \verb|    // Default == 4096.|
 \end{indpar}
 
