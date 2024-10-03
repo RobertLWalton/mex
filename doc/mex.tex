@@ -1156,11 +1156,10 @@ the logical values `true' and `false':
     & illegal for \TT{immedC} = 0 (\TT{JMP} would jump to itself).
 \\\hline
 \ttkey{JMPEQ}/\ttkey{JMPNEQ}
-    & Pop 2 values and compare them.  If they are equal/not-equal \\
-    & continue as per the \TT{JMP} instruction.  Otherwise if
-      \TT{immedB} == 0, \\
-    & do nothing more, but if \TT{immedB} == 1, push the first value \\
-    & popped back into the stack.
+    & Pop 2 values and arithmetically compare them.  If they are \\
+    & equal/not-equal continue as per the \TT{JMP} instruction.  Otherwise if \\
+    & \TT{immedB} == 0, do nothing more, but if \TT{immedB} == 1, push the \\
+    & first value popped back into the stack.
 \\\hline
 \ttkey{JMPLT}/\ttkey{JMPLEQ}
     & Ditto, but \TT{JMP} if the second popped is \\
@@ -1174,6 +1173,11 @@ the logical values `true' and `false':
     & Pop 1 value and test whether it equals \TT{mex::ZERO} or \\
     & \TT{mex::FALSE}, or is a MIN object with 0 vector elements.  \\
     & Continue as per \TT{JMP} if yes, but otherwise do nothing more.
+\\\hline
+\ttkey{JMPCNT}
+    & Test whether \TT{sp[- immedB - 1]} is arithmetically $\leq 0$, \\
+    & and if yes, continue as per \TT{JMP}.  Otherwise subtract \\
+    & \TT{immedD} from \TT{sp[ - immedB - 1]}.
 \\\hline
 \ttkey{BEG}/\ttkey{END}
     & Subtract \TT{immedA} from
@@ -2984,20 +2988,34 @@ Thus when we say that the assembler does nothing for {\tt NOP}, {\tt TRACE},
 we mean nothing but outputting instructions to the module code vector.
 \end{enumerate}
 
-\needspace{15\baselineskip}
 
 Given the above notes, the instruction descriptions are:
 
 {\em aop} ~ {\em new-variable-name}\QMARK{}
 \begin{indpar}
-Here {\em aop} is any arithmetic operation code from
-Figure~\itemref{ARITHMETIC-INSTRUCTIONS}, except {\tt POWI},
-and the run-time
+Here {\em aop} is any non-immediate
+arithmetic operation code (e.g. {\tt ADD} but not {\tt ADDI}) from
+Figure~\itemref{ARITHMETIC-INSTRUCTIONS}.
+The run-time
 action of the instruction is specified in that figure.
 
 At assembly-time the same number of elements are popped from the variable stack
 as are popped from the process stack during run-time.
 Then one element is pushed to the variable stack with
+{\em new-variable-name} as its name.
+\end{indpar}
+
+{\em aop}\TT{I} ~ {\em number} ~ {\em new-variable-name}\QMARK{}
+\begin{indpar}
+Here {\em aop}\TT{I} is any immediate arithmetic operation code from
+Figure~\itemref{ARITHMETIC-INSTRUCTIONS} (e.g., {\tt ADDI}), except {\tt POWI},
+with \TT{immedD} is set to {\tt number}.
+The run-time
+action of the instruction is specified in
+Figure~\ref{ARITHMETIC-INSTRUCTIONS}.
+
+At assembly-time one element is popped from the variable stack and then
+one element is pushed to the variable stack with
 {\em new-variable-name} as its name.
 \end{indpar}
 

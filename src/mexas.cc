@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Sep 17 02:21:24 AM EDT 2024
+// Date:	Thu Oct  3 05:19:04 AM EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -182,6 +182,54 @@ bool mexas::check_new_name
 	  min::pgen ( name ),
 	  " improperly hides previous variable" );
     return false;
+}
+
+min::uns32 mexas::local_search
+    ( min::gen name,
+      min::phrase_position pp )
+{
+    min::uns32 j = search ( name, SP );
+    if ( j == mexas::NOT_FOUND )
+    {
+	mexcom::compile_error
+	    ( pp, "variable named ",
+		  min::pgen ( name ),
+		  " not defined within"
+		  " module; instruction"
+		  " ignored" );
+	return mexas::NOT_FOUND;
+    }
+    mexas::variable_element * ve =
+	~ ( mexas::variables + j );
+    if ( ve->level < L )
+    {
+	mexcom::compile_error
+	    ( pp, "variable named ",
+		  min::pgen ( name ),
+		  " is of lower than"
+		  " current lexical"
+		  " level, and"
+		  " as such cannot"
+		  " legally be written;"
+		  " instruction"
+		  " ignored" );
+	return mexas::NOT_FOUND;
+    }
+    if ( j < mexstack::fp[L] )
+    {
+	mexcom::compile_error
+	    ( pp, "variable named ",
+		  min::pgen ( name ),
+		  " is an argument to"
+		  " the current"
+		  " function, and"
+		  " as such cannot"
+		  " legally be written;"
+		  " instruction"
+		  " ignored" );
+	return mexas::NOT_FOUND;
+    }
+    return j;
 }
 
 min::uns32 mexas::global_search
@@ -735,6 +783,35 @@ mex::module mexas::compile ( min::file file )
 	    mexstack::var_stack_length -= 1;
 	    goto JUMP;
 
+	case mex::JS:
+	    {
+		min::gen name =
+		    mexas::get_name ( index );
+		if ( name == min::NONE() )
+		{
+		    mexcom::compile_error
+			( pp, "no variable name:"
+			      " instruction ignored" );
+		    continue;
+		}
+		min::uns32 j = mexas::local_search
+				( name, pp );
+		if ( j == mexas::NOT_FOUND )
+		    continue;
+		instr.immedA = SP - j - 1;
+
+		instr.immedD = mexas::get_num ( index );
+		if ( instr.immedD == min::NONE() )
+		{
+		    mexcom::compile_error
+			( pp, "no immediate value"
+			      " given; 1 assumed" );
+		    instr.immedD ==
+		        min::new_num_gen ( 1 );
+		}
+	    }
+	    goto JUMP;
+
 	case mex::J2:
 	    if ( SP < mexstack::stack_limit + 2 )
 	        goto STACK_TOO_SHORT;
@@ -972,47 +1049,13 @@ mex::module mexas::compile ( min::file file )
 		    name = mexas::star;
 		if ( name != mexas::star )
 		{
-		    min::uns32 j = search ( name, SP );
+		    min::uns32 j =
+		        local_search ( name, pp );
 		    if ( j == mexas::NOT_FOUND )
-		    {
-			mexcom::compile_error
-			    ( pp, "variable named ",
-				  min::pgen ( name ),
-				  " not defined within"
-				  " module; instruction"
-				  " ignored" );
-			continue;
-		    }
+		        continue;
+
 		    mexas::variable_element * ve =
 		        ~ ( mexas::variables + j );
-		    if ( ve->level < L )
-		    {
-			mexcom::compile_error
-			    ( pp, "variable named ",
-				  min::pgen ( name ),
-				  " is of lower than"
-				  " current lexical"
-				  " level, and"
-				  " as such cannot"
-				  " legally be written;"
-				  " instruction"
-				  " ignored" );
-			continue;
-		    }
-		    if ( j < mexstack::fp[L] )
-		    {
-			mexcom::compile_error
-			    ( pp, "variable named ",
-				  min::pgen ( name ),
-				  " is an argument to"
-				  " the current"
-				  " function, and"
-				  " as such cannot"
-				  " legally be written;"
-				  " instruction"
-				  " ignored" );
-			continue;
-		    }
 		    if (    ve->depth
 		         == mexstack::depth[L] )
 		    {
