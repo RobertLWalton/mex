@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Sep 17 12:59:06 AM EDT 2024
+// Date:	Wed Oct  2 07:47:53 PM EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -518,6 +518,7 @@ static bool optimized_run_process ( mex::process p )
 	case mex::JMPGEQ:
 	case mex::JMPF:
 	case mex::JMPT:
+	case mex::JMPCNT:
 	{
 	    min::uns32 immedA = pc->immedA;
 	    min::uns32 immedB = 0;
@@ -525,10 +526,29 @@ static bool optimized_run_process ( mex::process p )
 	    min::uns32 immedC = pc->immedC;
 	    min::gen * new_sp = sp;
 	    bool execute_jmp = true;
-	    if ( op_code == mex::JMPF
-	         ||
-		 op_code == mex::JMPT )
+	    if ( op_code == mex::JMPCNT )
 	    {
+		min::uns32 i = pc->immedB;
+		if ( i >= sp - spbegin )
+		    goto ERROR_EXIT;
+		min::float64 arg = FG ( sp[-(int)i-1] );
+		if ( std::isnan ( arg )
+		     ||
+		     std::isinf ( arg ) )
+		    goto ERROR_EXIT;
+		if ( arg > 0 )
+		{
+		    execute_jmp = false;
+		    sp[-(int)i-1] = min::new_num_gen
+		        ( arg - FG ( pc->immedD ) );
+		}
+	    }
+	    else if ( op_code == mex::JMPF
+	              ||
+		      op_code == mex::JMPT )
+	    {
+		if ( sp < spbegin + 1 )
+		    goto ERROR_EXIT;
 	        new_sp -= 1;
 		min::gen arg = new_sp[0];
 		if ( arg == mex::ZERO
@@ -957,6 +977,7 @@ mex::op_info mex::op_infos [ mex::NUMBER_OF_OP_CODES ] =
     { mex::JMPGEQ, J2, T_JMPS, "JMPGEQ", ">=" },
     { mex::JMPF, J1, T_JMPS, "JMPF", NULL },
     { mex::JMPT, J1, T_JMPS, "JMPT", NULL },
+    { mex::JMPCNT, JS, T_JMPS, "JMPCNT", NULL },
     { mex::BEG, NONA, T_BEG, "BEG", NULL },
     { mex::NOP, NONA, T_NOP, "NOP", NULL },
     { mex::END, NONA, T_END, "END", NULL },
@@ -1349,6 +1370,11 @@ bool mex::run_process ( mex::process p )
 	        goto STACK_TOO_SMALL;
 	    arg = sp[-1];
 	    goto JUMP;
+	case JS:
+	    if ( pc->immedB >= sp - spbegin )
+	        goto STACK_TOO_SMALL;
+	    arg1 = FG ( sp[-(int)pc->immedB-1] );
+	    goto JUMP;
 	case J2:
 	    sp_change = -2;
 	    if ( sp - 2 < spbegin )
@@ -1589,7 +1615,7 @@ bool mex::run_process ( mex::process p )
 
 	    min::uns32 immedA = pc->immedA;
 	    min::uns32 immedB = 0;
-	        // Left 0 for JMP, JMPF, JMPT.
+	        // Left 0 for JMP, JMPF, JMPT, JMPCNT
 	    min::uns32 immedC = pc->immedC;
 
 	    if ( immedA > ( sp + sp_change ) - spbegin )
@@ -1612,9 +1638,29 @@ bool mex::run_process ( mex::process p )
 
 	    bool bad_jmp = false;
 	    bool execute_jmp = true;
-	    if ( op_code == mex::JMPF
-	         ||
-		 op_code == mex::JMPT )
+	    if ( op_code == mex::JMPCNT )
+	    {
+		min::uns32 i = pc->immedB;
+		if ( std::isnan ( arg1 )
+		     ||
+		     std::isinf ( arg1 ) )
+		{
+		    message = "JMPCNT counter is not a"
+		              " finite floating point"
+			      " number";
+		    goto INNER_FATAL;
+		}
+		if ( arg1 > 0 )
+		{
+		    execute_jmp = false;
+		    sp[-(int)i-1] = min::new_num_gen
+		        ( arg1 - MUP::direct_float_of
+		                    ( pc->immedD ) );
+		}
+	    }
+	    else if ( op_code == mex::JMPF
+	              ||
+		      op_code == mex::JMPT )
 	    {
 		if ( arg == mex::ZERO
 		     ||
@@ -1764,7 +1810,12 @@ bool mex::run_process ( mex::process p )
 			       " false";
 		    p->printer << " <= ";
 
-		    if ( op_info->oper == NULL )
+		    if ( op_code == mex::JMPCNT )
+		        p->printer
+			    << min::pfloat
+			           ( arg1, "%.15g" )
+			    << " <= 0";
+		    else if ( op_info->oper == NULL )
 		        p->printer << min::pgen ( arg );
 		    else
 		    {
