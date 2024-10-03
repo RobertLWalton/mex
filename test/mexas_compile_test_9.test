@@ -213,7 +213,7 @@ BEGF AOP-IMMED-TEST
     PUSH X
     [96:116;12] PUSHS T_PUSH 0 0 0; [< X * >]
     POWI 3 Z
-    [97:117;12] POWI T_AOP 3 0 0; Z
+    [97:117;12] POWI T_AOP 0 0 0 3; Z
     [98:118;13] PUSHS T_PUSH 1 0 0; [< X * >]
     [98:119;14] PUSHS T_PUSH 1 0 0; [< Z * >]
     TRACE 'Z = X^3' X Z
@@ -223,7 +223,7 @@ BEGF AOP-IMMED-TEST
     PUSH X
     [100:122;14] PUSHS T_PUSH 0 0 0; [< X * >]
     POWI 10 Z
-    [101:123;14] POWI T_AOP 10 0 0; Z
+    [101:123;14] POWI T_AOP 0 0 0 10; Z
     [102:124;15] PUSHS T_PUSH 1 0 0; [< X * >]
     [102:125;16] PUSHS T_PUSH 1 0 0; [< Z * >]
     TRACE 'Z = X^10' X Z

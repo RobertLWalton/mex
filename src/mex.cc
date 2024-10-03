@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Oct  2 07:47:53 PM EDT 2024
+// Date:	Thu Oct  3 08:07:03 AM EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -133,23 +133,6 @@ inline min::printer operator <<
         return p << "*";
     else
         return p << min::pgen_name ( pvar.value );
-}
-
-static min::float64 powi ( min::float64 x, unsigned i )
-{
-    min::float64 r = 1, z = x;
-    unsigned j = 1 << 0;
-    while ( i != 0 )
-    {
-        if ( j & i )
-	{
-	    i -= j;
-	    r *= z;
-	}
-	j <<= 1;
-	z = z * z;
-    }
-    return r;
 }
 
 void mex::print_excepts
@@ -339,6 +322,32 @@ static bool optimized_run_process ( mex::process p )
 	        ( fmod ( FG ( pc->immedD ),
 		         FG ( sp[-1] ) ) );
 	    break;
+	case mex::POW:
+	    CHECK2;
+	    sp[-2] = GF
+	        ( pow ( FG ( sp[-2] ),
+		        FG ( sp[-1] ) ) );
+	    -- sp;
+	    break;
+	case mex::POWI:
+	    CHECK1;
+	    sp[-1] = GF
+	        ( pow ( FG ( sp[-1] ),
+		        FG ( pc->immedD ) ) );
+	    break;
+	case mex::POWR:
+	    CHECK2;
+	    sp[-2] = GF
+	        ( pow ( FG ( sp[-1] ),
+		        FG ( sp[-2] ) ) );
+	    -- sp;
+	    break;
+	case mex::POWRI:
+	    CHECK1;
+	    sp[-1] = GF
+	        ( pow ( FG ( pc->immedD ),
+		        FG ( sp[-1] ) ) );
+	    break;
 	case mex::FLOOR:
 	    A1F ( floor );
 	case mex::CEIL:
@@ -386,11 +395,6 @@ static bool optimized_run_process ( mex::process p )
 	        ( atan2 ( FG ( sp[-1] ),
 		          FG ( sp[-2] ) ) );
 	    -- sp;
-	    break;
-	case mex::POWI:
-	    CHECK1;
-	    sp[-1] = GF
-	        ( powi ( FG ( sp[-1] ), pc->immedA ) );
 	    break;
 	case mex::PUSHS:
 	{
@@ -944,6 +948,10 @@ mex::op_info mex::op_infos [ mex::NUMBER_OF_OP_CODES ] =
     { mex::MODR, A2R, T_AOP, "MODR", "fmod" },
     { mex::MODI, A2I, T_AOP, "MODI", "fmod" },
     { mex::MODRI, A2RI, T_AOP, "MODRI", "fmod" },
+    { mex::POW, A2, T_AOP, "POW", "pow" },
+    { mex::POWR, A2R, T_AOP, "POWR", "pow" },
+    { mex::POWI, A2I, T_AOP, "POWI", "pow" },
+    { mex::POWRI, A2RI, T_AOP, "POWRI", "pow" },
     { mex::FLOOR, A1, T_AOP, "FLOOR", "floor" },
     { mex::CEIL, A1, T_AOP, "CEIL", "ceil" },
     { mex::TRUNC, A1, T_AOP, "TRUNC", "trunc" },
@@ -962,7 +970,6 @@ mex::op_info mex::op_infos [ mex::NUMBER_OF_OP_CODES ] =
     { mex::ATAN, A1, T_AOP, "ATAN", "atan" },
     { mex::ATAN2, A2, T_AOP, "ATAN2", "atan2" },
     { mex::ATAN2R, A2R, T_AOP, "ATAN2R", "atan2" },
-    { mex::POWI, A1, T_AOP, "POWI", "pow" },
     { mex::PUSHS, NONA, T_PUSH, "PUSHS", NULL },
     { mex::PUSHL, NONA, T_PUSH, "PUSHL", NULL },
     { mex::PUSHI, NONA, T_PUSH, "PUSHI", NULL },
@@ -1428,6 +1435,12 @@ bool mex::run_process ( mex::process p )
 	    case mex::MODRI:
 	        result = fmod ( arg1, arg2 );
 		break;
+	    case mex::POW:
+	    case mex::POWI:
+	    case mex::POWR:
+	    case mex::POWRI:
+	        result = pow ( arg1, arg2 );
+		break;
 	    case mex::FLOOR:
 	        result = floor ( arg1 );
 		break;
@@ -1479,9 +1492,6 @@ bool mex::run_process ( mex::process p )
 	    case mex::ATAN2:
 	    case mex::ATAN2R:
 	        result = atan2 ( arg1, arg2 );
-		break;
-	    case mex::POWI:
-	        result = powi ( arg1, pc->immedA );
 		break;
 	    case mex::PUSHV:
 	    {
@@ -1568,15 +1578,7 @@ bool mex::run_process ( mex::process p )
 		    p->printer << "*";
 
 		char buffer[200];
-		if ( op_code == mex::POWI )
-		    sprintf
-			( buffer,
-			  " = %.15g <= %s %.15g %u",
-			  result,
-			  op_info->oper, arg1,
-			  pc->immedA );
-
-		else if ( op_code == mex::PUSHV )
+		if ( op_code == mex::PUSHV )
 		    sprintf
 			( buffer,
 			  " <= sp[fp[%u]"

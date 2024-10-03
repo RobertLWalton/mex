@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Oct  3 07:32:19 AM EDT 2024
+// Date:	Thu Oct  3 08:07:52 AM EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -757,21 +757,6 @@ mex::module mexas::compile ( min::file file )
 	        goto NON_ARITHMETIC;
 		    // PUSHV executes as A1 and
 		    // compiles mostly as NONA.
-	    else if ( op_code == mex::POWI )
-	    {
-	        min::gen en = mexas::get_num ( index );
-		if ( en == min::NONE() )
-		{
-		    mexcom::compile_error
-			( pp, "no exponent parameter;"
-			      " instruction ignored" );
-		    continue;
-		}
-		if ( !  mexas::check_parameter
-		            ( instr.immedA, en,
-			      pp, "exponent" ) )
-		    continue;
-	    }
 	    min::pop ( variables );
 	    mexstack::var_stack_length -= 1;
 	    goto ARITHMETIC;

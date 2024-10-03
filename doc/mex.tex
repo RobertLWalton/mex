@@ -1035,7 +1035,7 @@ the logical values `true' and `false':
 \pagebreak
 
 
-\begin{boxedfigure}
+\begin{boxedfigure}{p!}
 
 \begin{center}
 \begin{tabular}{|l|l|}
@@ -1082,6 +1082,17 @@ the logical values `true' and `false':
     & Replace the top value by the round-toward-minus-infinity \\
     & remainder of \TT{immedD} divided by the top value.
 \\\hline
+\ttkey{POW}/\ttkey{POWR}
+    & Pop 2 values, then push the first/second popped to the \\
+    & second/first power.
+\\\hline
+\ttkey{POWI}
+    & Replace the top value by the the top value to the \\
+    & \TT{immedD} power.
+\\\hline
+\ttkey{POWRI}
+    & Replace the top value by \TT{immedD} to the top value power.
+\\\hline
 \ttkey{FLOOR}/\ttkey{CEIL}
     & Replace the top value by the an integer equal to the \\
     & top value rounded toward minus/plus infinity.
@@ -1110,9 +1121,6 @@ the logical values `true' and `false':
     & Pop 2 values, then push the arc-tangent of the first/second \\
     & popped (x value) divided by the second/first popped \\
     & (y value).
-\\\hline
-\ttkey{POWI}
-    & Replace the top value by the top value to the \TT{immedA} power.
 \\\hline
 \end{tabular}
 \end{center}
@@ -1560,11 +1568,6 @@ The trace message of an arithmetic instruction has the form:
 {\em trace-header}\TT{:} {\em new-variable-name} \TT{=} {\em value}
                     \TT{<=} {\em value}\QMARK{}
                     {\em operator} {\em value}
-\end{center}
-except for the \TT{POWI} instruction whose trace message has the form:
-\begin{center}
-{\em trace-header}\TT{:} {\em new-variable-name} \TT{=} {\em value}
-                    \TT{<=} \TT{pow} {\em exponent} {\em value}
 \end{center}
 If {\em new-variable-name} is not given in the instruction,
 \TT{*} is used instead.
@@ -3008,7 +3011,7 @@ Then one element is pushed to the variable stack with
 {\em aop}\TT{I} ~ {\em number} ~ {\em new-variable-name}\QMARK{}
 \begin{indpar}
 Here {\em aop}\TT{I} is any immediate arithmetic operation code from
-Figure~\itemref{ARITHMETIC-INSTRUCTIONS} (e.g., {\tt ADDI}), except {\tt POWI},
+Figure~\itemref{ARITHMETIC-INSTRUCTIONS} (e.g., {\tt ADDI})
 with \TT{immedD} is set to {\tt number}.
 The run-time
 action of the instruction is specified in
@@ -3016,19 +3019,6 @@ Figure~\ref{ARITHMETIC-INSTRUCTIONS}.
 
 At assembly-time one element is popped from the variable stack and then
 one element is pushed to the variable stack with
-{\em new-variable-name} as its name.
-\end{indpar}
-
-\ttkey{POWI} ~ {\em exponent} ~
-              {\em new-variable-name}\QMARK{}
-\begin{indpar}
-At run time, performs as indicated in
-Figure~\itemref{ARITHMETIC-INSTRUCTIONS}.
-Here {\em exponent} is stored in the instruction's \TT{immedA}
-member and must be an integer in the range $[0,2^{32})$.
-
-At assembly-time pops one element from the variable stack
-Then one element is pushed to the variable stack with
 {\em new-variable-name} as its name.
 \end{indpar}
 

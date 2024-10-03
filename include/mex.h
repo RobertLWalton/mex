@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Oct  2 08:56:25 PM EDT 2024
+// Date:	Thu Oct  3 08:03:46 AM EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -54,6 +54,7 @@ enum op_code {
     SUB, SUBR, SUBI, SUBRI,
     DIV, DIVR, DIVI, DIVRI,
     MOD, MODR, MODI, MODRI,
+    POW, POWR, POWI, POWRI,
     FLOOR, CEIL, TRUNC, ROUND,
     NEG, ABS,
     LOG, LOG10, EXP, EXP10,
@@ -61,7 +62,6 @@ enum op_code {
     COS, ACOS,
     TAN, ATAN,
     ATAN2, ATAN2R,
-    POWI,
     PUSHS, PUSHL, PUSHI, PUSHG,
     POPS,
     JMP,
