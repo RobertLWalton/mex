@@ -244,7 +244,7 @@
 
 \author{Robert L. Walton}
 
-\date{September 17, 2024}
+\date{October 3, 2024}
  
 \maketitle
 
@@ -3147,6 +3147,18 @@ Note that
 the pending jump list element
 $S$ value is the length of the variable stack \underline{after}
 the one element is popped.
+\end{indpar}
+
+\ttkey{JMPCNT} ~ {\em variable-name} ~ {\em number}\QMARK{} ~ {\em jmp-target}
+\begin{indpar}
+At run-time this instruction's actions are as described in
+Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}, where {\em variable-name}
+names the stack location affected and {\em number} (defaults to
+{\tt 1}) is the value of {\tt immedD}.
+At assembly-time,
+these instructions
+call {\tt mexstack::\EOL push\_\EOL jmp\_instr}\pagnote{PUSH-JMP-INSTR}
+to add an element to the pending jump list.
 \end{indpar}
 
 \ttkey{BEG} ~ {\em trace-packet}\QMARK{}

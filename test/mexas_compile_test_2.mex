@@ -2,7 +2,7 @@
 //
 // File:	mexas_compile_test_2.mex
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Aug 26 03:27:53 PM EDT 2024
+// Date:	Thu Oct  3 07:43:52 AM EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -87,6 +87,21 @@ LABEL DONE
 POP
 POP
 POP
+POP
+POP
+
+// BEGL ... ENDL and JMPCNT * TEST
+// DIVIDE BY 10 ROUNDING UP
+//
+PUSHI 125 X
+PUSHI 0 Y
+BEGL 1
+    JMPCNT X 10 DONE
+    PUSH Y
+    ADDI 1
+    POP next-Y
+ENDL
+LABEL DONE
 POP
 POP
 

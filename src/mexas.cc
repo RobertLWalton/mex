@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Oct  3 05:19:04 AM EDT 2024
+// Date:	Thu Oct  3 07:32:19 AM EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -798,17 +798,12 @@ mex::module mexas::compile ( min::file file )
 				( name, pp );
 		if ( j == mexas::NOT_FOUND )
 		    continue;
-		instr.immedA = SP - j - 1;
+		instr.immedB = SP - j - 1;
 
 		instr.immedD = mexas::get_num ( index );
 		if ( instr.immedD == min::NONE() )
-		{
-		    mexcom::compile_error
-			( pp, "no immediate value"
-			      " given; 1 assumed" );
 		    instr.immedD ==
 		        min::new_num_gen ( 1 );
-		}
 	    }
 	    goto JUMP;
 

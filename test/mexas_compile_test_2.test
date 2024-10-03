@@ -2,7 +2,7 @@
 //
 // File:        mexas_compile_test_2.mex
 // Author:      Bob Walton (walton@acm.org)
-// Date:        Mon Aug 26 03:27:53 PM EDT 2024
+// Date:        Thu Oct  3 07:43:52 AM EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -160,27 +160,54 @@ POP
 POP
     [91:59;0] POPS T_POP 0 0 0; [< X * >]
 
+// BEGL ... ENDL and JMPCNT * TEST
+// DIVIDE BY 10 ROUNDING UP
+//
+PUSHI 125 X
+    [96:60;1] PUSHI T_PUSH 0 0 0 125; X
+PUSHI 0 Y
+    [97:61;2] PUSHI T_PUSH 0 0 0 0; Y
+BEGL 1
+    [98:62;3] BEGL T_BEGL 0 1 0; [< LOOP Y >]
+    JMPCNT X 10 DONE
+    [99:63;3] JMPCNT T_JMPS 0 2 0 10; DONE
+    PUSH Y
+    [100:64;4] PUSHS T_PUSH 1 0 0; [< Y * >]
+    ADDI 1
+    [101:65;4] ADDI T_AOP 0 0 0 1; *
+    POP next-Y
+    [102:66;3] POPS T_POP 1 0 0; [< * next-Y >]
+ENDL
+    [103:67;2] ENDL T_ENDL 0 1 4
+LABEL DONE
+    [104:68;2] LABEL DONE
+    [99:63;2] JMPCNT T_JMPS[1] 1 2 5 10; DONE
+POP
+    [105:68;1] POPS T_POP 0 0 0; [< Y * >]
+POP
+    [106:69;0] POPS T_POP 0 0 0; [< X * >]
+
 // DEPTH TEST
 //
 PUSHI 1 X
-    [95:60;1] PUSHI T_PUSH 0 0 0 1; X
+    [110:70;1] PUSHI T_PUSH 0 0 0 1; X
 BEG
-    [96:61;1] BEG T_BEG 0 0 0
+    [111:71;1] BEG T_BEG 0 0 0
 PUSHI 2 Y
-    [97:62;2] PUSHI T_PUSH 0 0 0 2; Y
+    [112:72;2] PUSHI T_PUSH 0 0 0 2; Y
 BEG
-    [98:63;2] BEG T_BEG 0 0 0
+    [113:73;2] BEG T_BEG 0 0 0
 PUSHI 3 Z
-    [99:64;3] PUSHI T_PUSH 0 0 0 3; Z
+    [114:74;3] PUSHI T_PUSH 0 0 0 3; Z
     STACKS: VARIABLES: Z ; Y ; X
 END
-    [101:65;2] END T_END 1 0 0
+    [116:75;2] END T_END 1 0 0
     STACKS: VARIABLES: Y ; X
 END
-    [103:66;1] END T_END 1 0 0
+    [118:76;1] END T_END 1 0 0
     STACKS: VARIABLES: X
 POP
-    [105:67;0] POPS T_POP 0 0 0; [< X * >]
+    [120:77;0] POPS T_POP 0 0 0; [< X * >]
 * {14:0,1,1} PUSHI: X <= 295
 * {15:1,2,2} PUSHI: Y <= 196
 * {16:2,3,3} PUSHI: Z <= 0
@@ -461,12 +488,83 @@ POP
 * {89:57,2,278} POPS: * <= Y2 = 6.2
 * {90:58,1,279} POPS: * <= Y1 = 4
 * {91:59,0,280} POPS: * <= X = 0.3
-* {95:60,1,281} PUSHI: X <= 1
-* {96:61,1,282} BEG
-*** {97:62,2,283} PUSHI: Y <= 2
-*** {98:63,2,284} BEG
-***** {99:64,3,285} PUSHI: Z <= 3
-***** {101:65,2,286} END
-*** {103:66,1,287} END
-* {105:67,0,288} POPS: * <= X = 1
+* {96:60,1,281} PUSHI: X <= 125
+* {97:61,2,282} PUSHI: Y <= 0
+* {98:62,3,283} BEGL: LOOP, Y=0
+*** {99:63,3,284} JMPCNT* DONE is UNsuccessful: false <= 125 <= 0
+*** {100:64,4,285} PUSHS: * <= Y = 0
+*** {101:65,4,286} ADDI: * = 1 <= 0 + 1
+*** {102:66,3,287} POPS: next-Y <= * = 1
+*** {103:67,3,288} ENDL: LOOP, Y=1
+*** {99:63,3,289} JMPCNT* DONE is UNsuccessful: false <= 115 <= 0
+*** {100:64,4,290} PUSHS: * <= Y = 1
+*** {101:65,4,291} ADDI: * = 2 <= 1 + 1
+*** {102:66,3,292} POPS: next-Y <= * = 2
+*** {103:67,3,293} ENDL: LOOP, Y=2
+*** {99:63,3,294} JMPCNT* DONE is UNsuccessful: false <= 105 <= 0
+*** {100:64,4,295} PUSHS: * <= Y = 2
+*** {101:65,4,296} ADDI: * = 3 <= 2 + 1
+*** {102:66,3,297} POPS: next-Y <= * = 3
+*** {103:67,3,298} ENDL: LOOP, Y=3
+*** {99:63,3,299} JMPCNT* DONE is UNsuccessful: false <= 95 <= 0
+*** {100:64,4,300} PUSHS: * <= Y = 3
+*** {101:65,4,301} ADDI: * = 4 <= 3 + 1
+*** {102:66,3,302} POPS: next-Y <= * = 4
+*** {103:67,3,303} ENDL: LOOP, Y=4
+*** {99:63,3,304} JMPCNT* DONE is UNsuccessful: false <= 85 <= 0
+*** {100:64,4,305} PUSHS: * <= Y = 4
+*** {101:65,4,306} ADDI: * = 5 <= 4 + 1
+*** {102:66,3,307} POPS: next-Y <= * = 5
+*** {103:67,3,308} ENDL: LOOP, Y=5
+*** {99:63,3,309} JMPCNT* DONE is UNsuccessful: false <= 75 <= 0
+*** {100:64,4,310} PUSHS: * <= Y = 5
+*** {101:65,4,311} ADDI: * = 6 <= 5 + 1
+*** {102:66,3,312} POPS: next-Y <= * = 6
+*** {103:67,3,313} ENDL: LOOP, Y=6
+*** {99:63,3,314} JMPCNT* DONE is UNsuccessful: false <= 65 <= 0
+*** {100:64,4,315} PUSHS: * <= Y = 6
+*** {101:65,4,316} ADDI: * = 7 <= 6 + 1
+*** {102:66,3,317} POPS: next-Y <= * = 7
+*** {103:67,3,318} ENDL: LOOP, Y=7
+*** {99:63,3,319} JMPCNT* DONE is UNsuccessful: false <= 55 <= 0
+*** {100:64,4,320} PUSHS: * <= Y = 7
+*** {101:65,4,321} ADDI: * = 8 <= 7 + 1
+*** {102:66,3,322} POPS: next-Y <= * = 8
+*** {103:67,3,323} ENDL: LOOP, Y=8
+*** {99:63,3,324} JMPCNT* DONE is UNsuccessful: false <= 45 <= 0
+*** {100:64,4,325} PUSHS: * <= Y = 8
+*** {101:65,4,326} ADDI: * = 9 <= 8 + 1
+*** {102:66,3,327} POPS: next-Y <= * = 9
+*** {103:67,3,328} ENDL: LOOP, Y=9
+*** {99:63,3,329} JMPCNT* DONE is UNsuccessful: false <= 35 <= 0
+*** {100:64,4,330} PUSHS: * <= Y = 9
+*** {101:65,4,331} ADDI: * = 10 <= 9 + 1
+*** {102:66,3,332} POPS: next-Y <= * = 10
+*** {103:67,3,333} ENDL: LOOP, Y=10
+*** {99:63,3,334} JMPCNT* DONE is UNsuccessful: false <= 25 <= 0
+*** {100:64,4,335} PUSHS: * <= Y = 10
+*** {101:65,4,336} ADDI: * = 11 <= 10 + 1
+*** {102:66,3,337} POPS: next-Y <= * = 11
+*** {103:67,3,338} ENDL: LOOP, Y=11
+*** {99:63,3,339} JMPCNT* DONE is UNsuccessful: false <= 15 <= 0
+*** {100:64,4,340} PUSHS: * <= Y = 11
+*** {101:65,4,341} ADDI: * = 12 <= 11 + 1
+*** {102:66,3,342} POPS: next-Y <= * = 12
+*** {103:67,3,343} ENDL: LOOP, Y=12
+*** {99:63,3,344} JMPCNT* DONE is UNsuccessful: false <= 5 <= 0
+*** {100:64,4,345} PUSHS: * <= Y = 12
+*** {101:65,4,346} ADDI: * = 13 <= 12 + 1
+*** {102:66,3,347} POPS: next-Y <= * = 13
+*** {103:67,3,348} ENDL: LOOP, Y=13
+*** {99:63,2,349} JMPCNT* DONE is successful: true <= -5 <= 0
+* {105:68,1,350} POPS: * <= Y = 13
+* {106:69,0,351} POPS: * <= X = -5
+* {110:70,1,352} PUSHI: X <= 1
+* {111:71,1,353} BEG
+*** {112:72,2,354} PUSHI: Y <= 2
+*** {113:73,2,355} BEG
+***** {114:74,3,356} PUSHI: Z <= 3
+***** {116:75,2,357} END
+*** {118:76,1,358} END
+* {120:77,0,359} POPS: * <= X = 1
 mexas_compile_test_2.mex successfully compiled
