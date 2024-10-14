@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Oct  3 08:07:03 AM EDT 2024
+// Date:	Mon Oct 14 03:17:52 AM EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -208,12 +208,50 @@ static bool optimized_run_process ( mex::process p )
     bool result = true;
     feclearexcept ( FE_ALL_EXCEPT );
 
+    min::gen arg1, arg2;
+
 #   define CHECK1 \
 	    if ( sp < spbegin + 1 ) \
+	        goto ERROR_EXIT; \
+	    arg1 = sp[-1]; \
+	    if ( ! min::is_num ( arg1 ) ) \
+	        goto ERROR_EXIT
+
+#   define CHECK1I \
+	    if ( sp < spbegin + 1 ) \
+	        goto ERROR_EXIT; \
+	    arg1 = sp[-1]; \
+	    arg2 = pc->immedD; \
+	    if ( ! min::is_num ( arg1 ) ) \
+	        goto ERROR_EXIT; \
+	    if ( ! min::is_num ( arg2 ) ) \
+	        goto ERROR_EXIT
+
+#   define CHECK1RI \
+	    if ( sp < spbegin + 1 ) \
+	        goto ERROR_EXIT; \
+	    arg1 = pc->immedD; \
+	    arg2 = sp[-1]; \
+	    if ( ! min::is_num ( arg1 ) ) \
+	        goto ERROR_EXIT; \
+	    if ( ! min::is_num ( arg2 ) ) \
 	        goto ERROR_EXIT
 
 #   define CHECK2 \
 	    if ( sp < spbegin + 2 ) \
+	        goto ERROR_EXIT; \
+	    arg1 = sp[-2]; arg2 = sp[-1]; \
+	    if ( ! min::is_num ( arg1 ) ) \
+	        goto ERROR_EXIT; \
+	    if ( ! min::is_num ( arg2 ) ) \
+	        goto ERROR_EXIT
+#   define CHECK2R \
+	    if ( sp < spbegin + 2 ) \
+	        goto ERROR_EXIT; \
+	    arg1 = sp[-1]; arg2 = sp[-2]; \
+	    if ( ! min::is_num ( arg1 ) ) \
+	        goto ERROR_EXIT; \
+	    if ( ! min::is_num ( arg2 ) ) \
 	        goto ERROR_EXIT
 #   define GF(x) min::new_direct_float_gen ( x )
 #   define FG(x) MUP::direct_float_of ( x )
@@ -232,121 +270,101 @@ static bool optimized_run_process ( mex::process p )
 	{
 	case mex::ADD:
 	    CHECK2;
-	    sp[-2] = GF
-	        ( FG ( sp[-2] ) + FG ( sp[-1] ) );
+	    sp[-2] = GF ( FG ( arg1 ) + FG ( arg2 ) );
 	    -- sp;
 	    break;
 	case mex::ADDI:
-	    CHECK1;
-	    sp[-1] = GF
-	        ( FG ( sp[-1] ) + FG ( pc->immedD ) );
+	    CHECK1I;
+	    sp[-1] = GF ( FG ( arg1 ) + FG ( arg2 ) );
 	    break;
 	case mex::MUL:
 	    CHECK2;
-	    sp[-2] = GF
-	        ( FG ( sp[-2] ) * FG ( sp[-1] ) );
+	    sp[-2] = GF ( FG ( arg1 ) * FG ( arg2 ) );
 	    -- sp;
 	    break;
 	case mex::MULI:
-	    CHECK1;
-	    sp[-1] = GF
-	        ( FG ( sp[-1] ) * FG ( pc->immedD ) );
+	    CHECK1I;
+	    sp[-1] = GF ( FG ( arg1 ) * FG ( arg2 ) );
 	    break;
 	case mex::SUB:
 	    CHECK2;
-	    sp[-2] = GF
-	        ( FG ( sp[-2] ) - FG ( sp[-1] ) );
+	    sp[-2] = GF ( FG ( arg1 ) - FG ( arg2 ) );
 	    -- sp;
 	    break;
 	case mex::SUBI:
-	    CHECK1;
-	    sp[-1] = GF
-	        ( FG ( sp[-1] ) - FG ( pc->immedD ) );
+	    CHECK1I;
+	    sp[-1] = GF ( FG ( arg1 ) - FG ( arg2 ) );
 	    break;
 	case mex::SUBR:
-	    CHECK2;
-	    sp[-2] = GF
-	        ( FG ( sp[-1] ) - FG ( sp[-2] ) );
+	    CHECK2R;
+	    sp[-2] = GF ( FG ( arg1 ) - FG ( arg2 ) );
 	    -- sp;
 	    break;
 	case mex::SUBRI:
-	    CHECK1;
-	    sp[-1] = GF
-	        ( FG ( pc->immedD ) - FG ( sp[-1] ) );
+	    CHECK1RI;
+	    sp[-1] = GF ( FG ( arg1 ) - FG ( arg2 ) );
 	    break;
 	case mex::DIV:
 	    CHECK2;
-	    sp[-2] = GF
-	        ( FG ( sp[-2] ) / FG ( sp[-1] ) );
+	    sp[-2] = GF ( FG ( arg1 ) / FG ( arg2 ) );
 	    -- sp;
 	    break;
 	case mex::DIVI:
-	    CHECK1;
-	    sp[-1] = GF
-	        ( FG ( sp[-1] ) / FG ( pc->immedD ) );
+	    CHECK1I;
+	    sp[-1] = GF ( FG ( arg1 ) / FG ( arg2 ) );
 	    break;
 	case mex::DIVR:
-	    CHECK2;
-	    sp[-2] = GF
-	        ( FG ( sp[-1] ) / FG ( sp[-2] ) );
+	    CHECK2R;
+	    sp[-2] = GF ( FG ( arg1 ) / FG ( arg2 ) );
 	    -- sp;
 	    break;
 	case mex::DIVRI:
-	    CHECK1;
-	    sp[-1] = GF
-	        ( FG ( pc->immedD ) / FG ( sp[-1] ) );
+	    CHECK1RI;
+	    sp[-1] = GF ( FG ( arg1 ) / FG ( arg2 ) );
 	    break;
 	case mex::MOD:
 	    CHECK2;
-	    sp[-2] = GF
-	        ( fmod ( FG ( sp[-2] ),
-		         FG ( sp[-1] ) ) );
+	    sp[-2] = GF ( fmod ( FG ( arg1 ),
+		                 FG ( arg2 ) ) );
 	    -- sp;
 	    break;
 	case mex::MODI:
-	    CHECK1;
-	    sp[-1] = GF
-	        ( fmod ( FG ( sp[-1] ),
-		         FG ( pc->immedD ) ) );
+	    CHECK1I;
+	    sp[-1] = GF ( fmod ( FG ( arg1 ),
+		                 FG ( arg2 ) ) );
 	    break;
 	case mex::MODR:
-	    CHECK2;
-	    sp[-2] = GF
-	        ( fmod ( FG ( sp[-1] ),
-		         FG ( sp[-2] ) ) );
+	    CHECK2R;
+	    sp[-2] = GF ( fmod ( FG ( arg1 ),
+		                 FG ( arg2 ) ) );
 	    -- sp;
 	    break;
 	case mex::MODRI:
-	    CHECK1;
-	    sp[-1] = GF
-	        ( fmod ( FG ( pc->immedD ),
-		         FG ( sp[-1] ) ) );
+	    CHECK1RI;
+	    sp[-1] = GF ( fmod ( FG ( arg1 ),
+		                 FG ( arg2 ) ) );
 	    break;
 	case mex::POW:
 	    CHECK2;
-	    sp[-2] = GF
-	        ( pow ( FG ( sp[-2] ),
-		        FG ( sp[-1] ) ) );
+	    sp[-2] = GF ( pow ( FG ( arg1 ),
+	                        FG ( arg2 ) ) );
 	    -- sp;
 	    break;
 	case mex::POWI:
-	    CHECK1;
-	    sp[-1] = GF
-	        ( pow ( FG ( sp[-1] ),
-		        FG ( pc->immedD ) ) );
+	    CHECK1I;
+	    sp[-1] = GF ( pow ( FG ( arg1 ),
+	                        FG ( arg2 ) ) );
 	    break;
 	case mex::POWR:
-	    CHECK2;
-	    sp[-2] = GF
-	        ( pow ( FG ( sp[-1] ),
-		        FG ( sp[-2] ) ) );
+	    CHECK2R;
+	    sp[-2] = GF ( pow ( FG ( arg1 ),
+	                        FG ( arg2 ) ) );
 	    -- sp;
 	    break;
 	case mex::POWRI:
-	    CHECK1;
-	    sp[-1] = GF
-	        ( pow ( FG ( pc->immedD ),
-		        FG ( sp[-1] ) ) );
+	    CHECK1RI;
+	    sp[-1] = GF ( pow ( FG ( arg1 ),
+	                        FG ( arg2 ) ) );
 	    break;
 	case mex::FLOOR:
 	    A1F ( floor );
@@ -358,7 +376,7 @@ static bool optimized_run_process ( mex::process p )
 	    A1F ( trunc );
 	case mex::NEG:
 	    CHECK1;
-	    sp[-1] = GF ( - FG ( sp[-1] ) );
+	    sp[-1] = GF ( - FG ( arg1 ) );
 	    break;
 	case mex::ABS:
 	    A1F ( fabs );
@@ -384,16 +402,14 @@ static bool optimized_run_process ( mex::process p )
 	    A1F ( atan );
 	case mex::ATAN2:
 	    CHECK2;
-	    sp[-2] = GF
-	        ( atan2 ( FG ( sp[-2] ),
-		          FG ( sp[-1] ) ) );
+	    sp[-2] = GF ( atan2 ( FG ( arg1 ),
+	                          FG ( arg2 ) ) );
 	    -- sp;
 	    break;
 	case mex::ATAN2R:
-	    CHECK2;
-	    sp[-2] = GF
-	        ( atan2 ( FG ( sp[-1] ),
-		          FG ( sp[-2] ) ) );
+	    CHECK2R;
+	    sp[-2] = GF ( atan2 ( FG ( arg1 ),
+	                          FG ( arg2 ) ) );
 	    -- sp;
 	    break;
 	case mex::PUSHS:
@@ -530,7 +546,64 @@ static bool optimized_run_process ( mex::process p )
 	    min::uns32 immedC = pc->immedC;
 	    min::gen * new_sp = sp;
 	    bool execute_jmp = true;
-	    if ( op_code == mex::JMPCNT )
+	    if ( op_code == mex::JMP )
+	        /* do nothing */;
+	    else if ( op_code == mex::JMPEQ )
+	    {
+		if ( sp < spbegin + 2 )
+		    goto ERROR_EXIT;
+		immedB = pc->immedB;
+		new_sp -= 2;
+		execute_jmp = ( sp[-2] == sp[-1] );
+	    }
+	    else if ( op_code == mex::JMPNEQ )
+	    {
+		if ( sp < spbegin + 2 )
+		    goto ERROR_EXIT;
+		immedB = pc->immedB;
+		new_sp -= 2;
+		execute_jmp = ( sp[-2] != sp[-1] );
+	    }
+	    else if ( op_code == mex::JMPLT
+	              ||
+		      op_code == mex::JMPLEQ
+		      ||
+		      op_code == mex::JMPGT
+		      ||
+		      op_code == mex::JMPGEQ )
+	    {
+	        CHECK2;
+		immedB = pc->immedB;
+		new_sp -= 2;
+
+		min::float64 farg1 = FG ( arg1 );
+		min::float64 farg2 = FG ( arg2 );
+		if ( std::isnan ( farg1 )
+		     ||
+		     std::isnan ( farg2 )
+		     ||
+		     (    std::isinf ( farg1 )
+		       && std::isinf ( farg2 )
+		       && farg1 * farg2 > 0 ) )
+		    goto ERROR_EXIT;
+
+		switch ( op_code )
+		{
+		case mex::JMPLT:
+		    execute_jmp = ( farg1 < farg2 );
+		    break;
+		case mex::JMPLEQ:
+		    execute_jmp = ( farg1 <= farg2 );
+		    break;
+		case mex::JMPGT:
+		    execute_jmp = ( farg1 > farg2 );
+		    break;
+		case mex::JMPGEQ:
+		    execute_jmp = ( farg1 >= farg2 );
+		    break;
+		}
+	    }
+	    else if ( op_code == mex::JMPCNT )
 	    {
 		min::uns32 i = pc->immedB;
 		if ( i >= sp - spbegin )
@@ -575,47 +648,6 @@ static bool optimized_run_process ( mex::process p )
 		if ( op_code == mex::JMPT )
 		    execute_jmp = false;
 		goto JMP_EXECUTE;
-	    }
-	    else if ( op_code != mex::JMP )
-	    {
-		immedB = pc->immedB;
-
-		min::float64 arg1, arg2;
-		if ( sp < spbegin + 2 )
-		    goto ERROR_EXIT;
-		new_sp -= 2;
-		arg1 = FG ( new_sp[0] );
-		arg2 = FG ( new_sp[1] );
-		if ( std::isnan ( arg1 )
-		     ||
-		     std::isnan ( arg2 )
-		     ||
-		     (    std::isinf ( arg1 )
-		       && std::isinf ( arg2 )
-		       && arg1 * arg2 > 0 ) )
-		    goto ERROR_EXIT;
-
-		switch ( op_code )
-		{
-		case mex::JMPEQ:
-		    execute_jmp = ( arg1 == arg2 );
-		    break;
-		case mex::JMPNEQ:
-		    execute_jmp = ( arg1 != arg2 );
-		    break;
-		case mex::JMPLT:
-		    execute_jmp = ( arg1 < arg2 );
-		    break;
-		case mex::JMPLEQ:
-		    execute_jmp = ( arg1 <= arg2 );
-		    break;
-		case mex::JMPGT:
-		    execute_jmp = ( arg1 > arg2 );
-		    break;
-		case mex::JMPGEQ:
-		    execute_jmp = ( arg1 >= arg2 );
-		    break;
-		}
 	    }
 
 	JMP_EXECUTE:
