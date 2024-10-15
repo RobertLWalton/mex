@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Oct 15 03:54:12 AM EDT 2024
+// Date:	Tue Oct 15 08:00:51 AM EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1575,7 +1575,7 @@ bool mex::run_process ( mex::process p )
 		     ||
 		     ff < 1 || ff > p->nargs[j] )
 		{
-		    fresult = NAN;
+		    result = NOT_A_NUMBER;
 		    feraiseexcept ( FE_INVALID );
 		}
 		else
@@ -1583,14 +1583,14 @@ bool mex::run_process ( mex::process p )
 		    min::uns32 i = (min::uns32) ff;
 		    min::uns32 k =
 		        p->fp[j] - p->nargs[j];
-		    fresult = MUP::direct_float_of
-		                ( spbegin[k + i - 1] );
+		    result = spbegin[k + i - 1];
 		}
 		break;
 	    }
 	    } // end switch ( op_code )
 
-	    result = min::new_num_gen ( fresult );
+	    if ( op_code != mex::PUSHV )
+		result = min::new_num_gen ( fresult );
 
 	    int excepts =
 	        fetestexcept ( FE_ALL_EXCEPT );
