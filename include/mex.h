@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Oct  3 08:03:46 AM EDT 2024
+// Date:	Mon Oct 14 10:36:16 PM EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -30,6 +30,7 @@
 namespace mex {
 
 extern min::locatable_gen ZERO;
+extern min::locatable_gen NOT_A_NUMBER;
 extern min::locatable_gen FALSE;
 extern min::locatable_gen TRUE;
 
@@ -139,6 +140,9 @@ enum op_type
     J =   10,	// JMP, no arithmetic operands.
 };
 
+typedef min::gen (* op_func )
+	( min::gen arg1, min::gen arg2 );
+extern mex::op_func error_func;
 struct op_info
 {
     min::uns8 op_code;
@@ -149,6 +153,9 @@ struct op_info
         // See above.
     min::uns8 trace_class;
         // Trace class of op_code.
+    mex::op_func op_func;
+    	// Used to execute arithmetic or comparison
+	// op when an argument is not a min::is_num.
     const char * name;
         // Name of op_code: e.g, "POP".
     const char * oper;
