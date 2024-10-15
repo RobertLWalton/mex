@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Oct 15 03:17:21 AM EDT 2024
+// Date:	Tue Oct 15 03:54:12 AM EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1252,7 +1252,7 @@ bool mex::run_process ( mex::process p )
     min::uns8 op_code;
     min::uns8 trace_class;
     op_info * op_info;
-    min::gen arg1, arg2;
+    min::gen arg1, arg2, result;
     int sp_change;
     min::uns32 trace_flags; 
 
@@ -1465,7 +1465,7 @@ bool mex::run_process ( mex::process p )
 	    // Process arithmetic operator, excluding
 	    // JMPs.
 
-	    min::float64 result;
+	    min::float64 fresult;
 
 	    min::float64 farg1 = FG ( arg1 );
 	    min::float64 farg2 = FG ( arg2 );
@@ -1476,87 +1476,87 @@ bool mex::run_process ( mex::process p )
 	    {
 	    case mex::ADD:
 	    case mex::ADDI:
-	        result = farg1 + farg2;
+	        fresult = farg1 + farg2;
 		break;
 	    case mex::MUL:
 	    case mex::MULI:
-	        result = farg1 * farg2;
+	        fresult = farg1 * farg2;
 		break;
 	    case mex::SUB:
 	    case mex::SUBI:
 	    case mex::SUBR:
 	    case mex::SUBRI:
-	        result = farg1 - farg2;
+	        fresult = farg1 - farg2;
 		break;
 	    case mex::DIV:
 	    case mex::DIVI:
 	    case mex::DIVR:
 	    case mex::DIVRI:
-	        result = farg1 / farg2;
+	        fresult = farg1 / farg2;
 		break;
 	    case mex::MOD:
 	    case mex::MODI:
 	    case mex::MODR:
 	    case mex::MODRI:
-	        result = fmod ( farg1, farg2 );
+	        fresult = fmod ( farg1, farg2 );
 		break;
 	    case mex::POW:
 	    case mex::POWI:
 	    case mex::POWR:
 	    case mex::POWRI:
-	        result = pow ( farg1, farg2 );
+	        fresult = pow ( farg1, farg2 );
 		break;
 	    case mex::FLOOR:
-	        result = floor ( farg1 );
+	        fresult = floor ( farg1 );
 		break;
 	    case mex::CEIL:
-	        result = ceil ( farg1 );
+	        fresult = ceil ( farg1 );
 		break;
 	    case mex::ROUND:
-	        result = rint ( farg1 );
+	        fresult = rint ( farg1 );
 		break;
 	    case mex::TRUNC:
-	        result = trunc ( farg1 );
+	        fresult = trunc ( farg1 );
 		break;
 	    case mex::NEG:
-	        result = - farg1;
+	        fresult = - farg1;
 		break;
 	    case mex::ABS:
-	        result = fabs ( farg1 );
+	        fresult = fabs ( farg1 );
 		break;
 	    case mex::LOG:
-	        result = log ( farg1 );
+	        fresult = log ( farg1 );
 		break;
 	    case mex::LOG10:
-	        result = log10 ( farg1 );
+	        fresult = log10 ( farg1 );
 		break;
 	    case mex::EXP:
-	        result = exp ( farg1 );
+	        fresult = exp ( farg1 );
 		break;
 	    case mex::EXP10:
-	        result = exp10 ( farg1 );
+	        fresult = exp10 ( farg1 );
 		break;
 	    case mex::SIN:
-	        result = sin ( farg1 );
+	        fresult = sin ( farg1 );
 		break;
 	    case mex::COS:
-	        result = cos ( farg1 );
+	        fresult = cos ( farg1 );
 		break;
 	    case mex::TAN:
-	        result = tan ( farg1 );
+	        fresult = tan ( farg1 );
 		break;
 	    case mex::ASIN:
-	        result = asin ( farg1 );
+	        fresult = asin ( farg1 );
 		break;
 	    case mex::ACOS:
-	        result = acos ( farg1 );
+	        fresult = acos ( farg1 );
 		break;
 	    case mex::ATAN:
-	        result = atan ( farg1 );
+	        fresult = atan ( farg1 );
 		break;
 	    case mex::ATAN2:
 	    case mex::ATAN2R:
-	        result = atan2 ( farg1, farg2 );
+	        fresult = atan2 ( farg1, farg2 );
 		break;
 	    case mex::PUSHV:
 	    {
@@ -1575,7 +1575,7 @@ bool mex::run_process ( mex::process p )
 		     ||
 		     ff < 1 || ff > p->nargs[j] )
 		{
-		    result = NAN;
+		    fresult = NAN;
 		    feraiseexcept ( FE_INVALID );
 		}
 		else
@@ -1583,12 +1583,14 @@ bool mex::run_process ( mex::process p )
 		    min::uns32 i = (min::uns32) ff;
 		    min::uns32 k =
 		        p->fp[j] - p->nargs[j];
-		    result = MUP::direct_float_of
+		    fresult = MUP::direct_float_of
 		                ( spbegin[k + i - 1] );
 		}
 		break;
 	    }
 	    } // end switch ( op_code )
+
+	    result = min::new_num_gen ( fresult );
 
 	    int excepts =
 	        fetestexcept ( FE_ALL_EXCEPT );
@@ -1642,37 +1644,42 @@ bool mex::run_process ( mex::process p )
 		else
 		    p->printer << "*";
 
-		char buffer[200];
 		if ( op_code == mex::PUSHV )
-		    sprintf
-			( buffer,
-			  " <= sp[fp[%u]"
-			  "-nargs[%u]+%.15g-1]"
-			  " = %.15g",
-			  pc->immedB, pc->immedB, farg1,
-			  result );
+		    p->printer
+		        << " <= sp[fp["
+			<< pc->immedB
+			<< "]-nargs["
+			<< pc->immedB
+			<< "]+"
+			<< min::pgen ( arg1 )
+			<< "-1] = "
+			<< min::pgen ( result );
 
 		else if ( op_info->op_type == mex::A1 )
-		    sprintf
-			( buffer,
-			  " = %.15g <= %s %.15g",
-			  result, op_info->oper,
-			  farg1 );
+		    p->printer
+		        << " = "
+			<< min::pgen ( result )
+			<< " <= "
+			<< op_info->oper
+			<< " "
+			<< min::pgen ( arg1 );
 
 		else
-		    sprintf
-			( buffer,
-			  " = %.15g <= %.15g %s %.15g",
-			  result,
-			  farg1, op_info->oper, farg2 );
-
-		p->printer << buffer << min::eom;
+		    p->printer
+		        << " = "
+			<< min::pgen ( result )
+			<< " <= "
+			<< min::pgen ( arg1 )
+			<< " "
+			<< op_info->oper
+			<< " "
+			<< min::pgen ( arg2 );
 
 	        RESTORE;
 	    }
 
 	    sp += sp_change;
-	    sp[-1] = min::new_num_gen ( result );
+	    sp[-1] = result;
 
 	    goto LOOP;
 	}
