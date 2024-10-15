@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Oct 14 11:09:41 PM EDT 2024
+// Date:	Tue Oct 15 03:17:21 AM EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1249,6 +1249,13 @@ bool mex::run_process ( mex::process p )
     const char * message;
     min::uns32 limit;
 
+    min::uns8 op_code;
+    min::uns8 trace_class;
+    op_info * op_info;
+    min::gen arg1, arg2;
+    int sp_change;
+    min::uns32 trace_flags; 
+
     if ( m == min::NULL_STUB && i != 0 )
     {
 	message = "Illegal PC: no module and index > 0";
@@ -1310,6 +1317,7 @@ bool mex::run_process ( mex::process p )
         limit = p->counter_limit - p->counter;
 
     p->state = mex::RUNNING;
+
     while ( true ) // Inner loop.
     {
         if ( pc == pcend )
@@ -1371,13 +1379,10 @@ bool mex::run_process ( mex::process p )
 	    RESTORE;
 	}
 
-        min::uns8 op_code = pc->op_code;
-	min::uns8 trace_class = pc->trace_class;
-	op_info * op_info;
-	min::float64 arg1, arg2;
-	min::gen arg;
-	int sp_change = 0;
-	min::uns32 trace_flags = p->trace_flags; 
+        op_code = pc->op_code;
+	trace_class = pc->trace_class;
+	sp_change = 0;
+	trace_flags = p->trace_flags; 
 
 	if ( op_code >= mex::NUMBER_OF_OP_CODES )
 	{
@@ -1400,51 +1405,52 @@ bool mex::run_process ( mex::process p )
 	    sp_change = -1;
 	    if ( sp - 2 < spbegin )
 	        goto STACK_TOO_SMALL;
-	    arg1 = FG ( sp[-2] );
-	    arg2 = FG ( sp[-1] );
+	    arg1 = sp[-2];
+	    arg2 = sp[-1];
 	    goto ARITHMETIC;
 	case A2R:
 	    sp_change = -1;
 	    if ( sp - 2 < spbegin )
 	        goto STACK_TOO_SMALL;
-	    arg1 = FG ( sp[-1] );
-	    arg2 = FG ( sp[-2] );
+	    arg1 = sp[-1];
+	    arg2 = sp[-2];
 	    goto ARITHMETIC;
 	case A2I:
 	    if ( sp - 1 < spbegin )
 	        goto STACK_TOO_SMALL;
-	    arg1 = FG ( sp[-1] );
-	    arg2 = FG ( pc->immedD );
+	    arg1 = sp[-1];
+	    arg2 = pc->immedD;
 	    goto ARITHMETIC;
 	case A2RI:
 	    if ( sp - 1 < spbegin )
 	        goto STACK_TOO_SMALL;
-	    arg1 = FG ( pc->immedD );
-	    arg2 = FG ( sp[-1] );
+	    arg1 = pc->immedD;
+	    arg2 = sp[-1];
 	    goto ARITHMETIC;
 	case A1:
 	    if ( sp - 1 < spbegin )
 	        goto STACK_TOO_SMALL;
-	    arg1 = FG ( sp[-1] );
-	    arg2 = 0; // To avoid error detector.
+	    arg1 = sp[-1];
+	    arg2 = mex::ZERO;
+	        // To avoid error detector.
 	    goto ARITHMETIC;
 	case J1:
 	    sp_change = -1;
 	    if ( sp - 1 < spbegin )
 	        goto STACK_TOO_SMALL;
-	    arg = sp[-1];
+	    arg1 = sp[-1];
 	    goto JUMP;
 	case JS:
 	    if ( pc->immedB >= sp - spbegin )
 	        goto STACK_TOO_SMALL;
-	    arg1 = FG ( sp[-(int)pc->immedB-1] );
+	    arg1 = sp[-(int)pc->immedB-1];
 	    goto JUMP;
 	case J2:
 	    sp_change = -2;
 	    if ( sp - 2 < spbegin )
 	        goto STACK_TOO_SMALL;
-	    arg1 = FG ( sp[-2] );
-	    arg2 = FG ( sp[-1] );
+	    arg1 = sp[-2];
+	    arg2 = sp[-1];
 	    goto JUMP;
 	case J:
 	    goto JUMP;
@@ -1453,7 +1459,6 @@ bool mex::run_process ( mex::process p )
 	              " bad op_type";
 	    goto INNER_FATAL;
 	}
-#	undef FG
 
 	ARITHMETIC:
 	{
@@ -1462,93 +1467,96 @@ bool mex::run_process ( mex::process p )
 
 	    min::float64 result;
 
+	    min::float64 farg1 = FG ( arg1 );
+	    min::float64 farg2 = FG ( arg2 );
+
 	    feclearexcept ( FE_ALL_EXCEPT );
 
 	    switch ( op_code )
 	    {
 	    case mex::ADD:
 	    case mex::ADDI:
-	        result = arg1 + arg2;
+	        result = farg1 + farg2;
 		break;
 	    case mex::MUL:
 	    case mex::MULI:
-	        result = arg1 * arg2;
+	        result = farg1 * farg2;
 		break;
 	    case mex::SUB:
 	    case mex::SUBI:
 	    case mex::SUBR:
 	    case mex::SUBRI:
-	        result = arg1 - arg2;
+	        result = farg1 - farg2;
 		break;
 	    case mex::DIV:
 	    case mex::DIVI:
 	    case mex::DIVR:
 	    case mex::DIVRI:
-	        result = arg1 / arg2;
+	        result = farg1 / farg2;
 		break;
 	    case mex::MOD:
 	    case mex::MODI:
 	    case mex::MODR:
 	    case mex::MODRI:
-	        result = fmod ( arg1, arg2 );
+	        result = fmod ( farg1, farg2 );
 		break;
 	    case mex::POW:
 	    case mex::POWI:
 	    case mex::POWR:
 	    case mex::POWRI:
-	        result = pow ( arg1, arg2 );
+	        result = pow ( farg1, farg2 );
 		break;
 	    case mex::FLOOR:
-	        result = floor ( arg1 );
+	        result = floor ( farg1 );
 		break;
 	    case mex::CEIL:
-	        result = ceil ( arg1 );
+	        result = ceil ( farg1 );
 		break;
 	    case mex::ROUND:
-	        result = rint ( arg1 );
+	        result = rint ( farg1 );
 		break;
 	    case mex::TRUNC:
-	        result = trunc ( arg1 );
+	        result = trunc ( farg1 );
 		break;
 	    case mex::NEG:
-	        result = - arg1;
+	        result = - farg1;
 		break;
 	    case mex::ABS:
-	        result = fabs ( arg1 );
+	        result = fabs ( farg1 );
 		break;
 	    case mex::LOG:
-	        result = log ( arg1 );
+	        result = log ( farg1 );
 		break;
 	    case mex::LOG10:
-	        result = log10 ( arg1 );
+	        result = log10 ( farg1 );
 		break;
 	    case mex::EXP:
-	        result = exp ( arg1 );
+	        result = exp ( farg1 );
 		break;
 	    case mex::EXP10:
-	        result = exp10 ( arg1 );
+	        result = exp10 ( farg1 );
 		break;
 	    case mex::SIN:
-	        result = sin ( arg1 );
+	        result = sin ( farg1 );
 		break;
 	    case mex::COS:
-	        result = cos ( arg1 );
+	        result = cos ( farg1 );
 		break;
 	    case mex::TAN:
-	        result = tan ( arg1 );
+	        result = tan ( farg1 );
 		break;
 	    case mex::ASIN:
-	        result = asin ( arg1 );
+	        result = asin ( farg1 );
 		break;
 	    case mex::ACOS:
-	        result = acos ( arg1 );
+	        result = acos ( farg1 );
 		break;
 	    case mex::ATAN:
-	        result = atan ( arg1 );
+	        result = atan ( farg1 );
 		break;
 	    case mex::ATAN2:
 	    case mex::ATAN2R:
-	        result = atan2 ( arg1, arg2 );
+	        result = atan2 ( farg1, farg2 );
 		break;
 	    case mex::PUSHV:
 	    {
@@ -1560,10 +1568,10 @@ bool mex::run_process ( mex::process p )
 			      " lexical level";
 		    goto INNER_FATAL;
 		}
-		min::float64 ff = floor ( arg1 );
+		min::float64 ff = floor ( farg1 );
 		if ( std::isnan ( ff )
 		     ||
-		     arg1 != ff
+		     farg1 != ff
 		     ||
 		     ff < 1 || ff > p->nargs[j] )
 		{
@@ -1641,21 +1649,22 @@ bool mex::run_process ( mex::process p )
 			  " <= sp[fp[%u]"
 			  "-nargs[%u]+%.15g-1]"
 			  " = %.15g",
-			  pc->immedB, pc->immedB, arg1,
+			  pc->immedB, pc->immedB, farg1,
 			  result );
 
 		else if ( op_info->op_type == mex::A1 )
 		    sprintf
 			( buffer,
 			  " = %.15g <= %s %.15g",
-			  result, op_info->oper, arg1 );
+			  result, op_info->oper,
+			  farg1 );
 
 		else
 		    sprintf
 			( buffer,
 			  " = %.15g <= %.15g %s %.15g",
 			  result,
-			  arg1, op_info->oper, arg2 );
+			  farg1, op_info->oper, farg2 );
 
 		p->printer << buffer << min::eom;
 
@@ -1699,21 +1708,22 @@ bool mex::run_process ( mex::process p )
 	    bool execute_jmp = true;
 	    if ( op_code == mex::JMPCNT )
 	    {
+		min::float64 farg1 = FG ( arg1 );
 		min::uns32 i = pc->immedB;
-		if ( std::isnan ( arg1 )
+		if ( std::isnan ( farg1 )
 		     ||
-		     std::isinf ( arg1 ) )
+		     std::isinf ( farg1 ) )
 		{
 		    message = "JMPCNT counter is not a"
 		              " finite floating point"
 			      " number";
 		    goto INNER_FATAL;
 		}
-		if ( arg1 > 0 )
+		if ( farg1 > 0 )
 		{
 		    execute_jmp = false;
 		    sp[-(int)i-1] = min::new_num_gen
-		        ( arg1 - MUP::direct_float_of
+		        ( farg1 - MUP::direct_float_of
 		                    ( pc->immedD ) );
 		}
 	    }
@@ -1721,13 +1731,13 @@ bool mex::run_process ( mex::process p )
 	              ||
 		      op_code == mex::JMPT )
 	    {
-		if ( arg == mex::ZERO
+		if ( arg1 == mex::ZERO
 		     ||
-		     arg == mex::FALSE )
+		     arg1 == mex::FALSE )
 		    goto FALSE_FOUND;
-		if ( min::is_obj ( arg ) )
+		if ( min::is_obj ( arg1 ) )
 		{
-		    min::obj_vec_ptr vp = arg;
+		    min::obj_vec_ptr vp = arg1;
 		    if ( min::size_of ( vp ) == 0 )
 		        goto FALSE_FOUND;
 		}
@@ -1744,6 +1754,9 @@ bool mex::run_process ( mex::process p )
 	    }
 	    else if ( op_code != mex::JMP )
 	    {
+		min::float64 farg1 = FG ( arg1 );
+		min::float64 farg2 = FG ( arg2 );
+
 		immedB = pc->immedB;
 		if ( immedB > 1 )
 		{
@@ -1752,33 +1765,33 @@ bool mex::run_process ( mex::process p )
 		    goto INNER_FATAL;
 		}
 
-		if ( std::isnan ( arg1 )
+		if ( std::isnan ( farg1 )
 		     ||
-		     std::isnan ( arg2 )
+		     std::isnan ( farg2 )
 		     ||
-		     (    std::isinf ( arg1 )
-		       && std::isinf ( arg2 )
-		       && arg1 * arg2 > 0 ) )
+		     (    std::isinf ( farg1 )
+		       && std::isinf ( farg2 )
+		       && farg1 * farg2 > 0 ) )
 		    bad_jmp = true;
 		else switch ( op_code )
 		{
 		case mex::JMPEQ:
-		    execute_jmp = ( arg1 == arg2 );
+		    execute_jmp = ( farg1 == farg2 );
 		    break;
 		case mex::JMPNEQ:
-		    execute_jmp = ( arg1 != arg2 );
+		    execute_jmp = ( farg1 != farg2 );
 		    break;
 		case mex::JMPLT:
-		    execute_jmp = ( arg1 < arg2 );
+		    execute_jmp = ( farg1 < farg2 );
 		    break;
 		case mex::JMPLEQ:
-		    execute_jmp = ( arg1 <= arg2 );
+		    execute_jmp = ( farg1 <= farg2 );
 		    break;
 		case mex::JMPGT:
-		    execute_jmp = ( arg1 > arg2 );
+		    execute_jmp = ( farg1 > farg2 );
 		    break;
 		case mex::JMPGEQ:
-		    execute_jmp = ( arg1 >= arg2 );
+		    execute_jmp = ( farg1 >= farg2 );
 		    break;
 		}
 	    }
@@ -1871,20 +1884,19 @@ bool mex::run_process ( mex::process p )
 
 		    if ( op_code == mex::JMPCNT )
 		        p->printer
-			    << min::pfloat
-			           ( arg1, "%.15g" )
+			    << min::pgen ( arg1 )
 			    << " <= 0";
 		    else if ( op_info->oper == NULL )
-		        p->printer << min::pgen ( arg );
+		        p->printer
+			    << min::pgen ( arg1 );
 		    else
 		    {
-			char buffer[200];
-			sprintf
-			    ( buffer,
-			      "%.15g %s %.15g",
-			      arg1, op_info->oper,
-			      arg2 );
-			p->printer << buffer;
+			p->printer
+			    << min::pgen ( arg1 )
+			    << " "
+			    << op_info->oper
+			    << " "
+			    << min::pgen ( arg2 );
 		    }
 		}
 
@@ -2748,6 +2760,8 @@ bool mex::run_process ( mex::process p )
 	    SAVE;
 	    goto FATAL;
 
+#	undef FG
+
     } // end loop
 
 // Come here with fatal error `message'.  At this point
@@ -2770,8 +2784,8 @@ FATAL:
     {
         const mex::instr * instr =
 	    ~ ( p->pc.module + p->pc.index );
-	min::uns8 op_code = instr->op_code;
-	op_info * op_info =
+	op_code = instr->op_code;
+	op_info =
 	    ( op_code < NUMBER_OF_OP_CODES ?
 	      op_infos + op_code : NULL );
 	if ( op_info != NULL )
