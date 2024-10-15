@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Oct 14 03:17:52 AM EDT 2024
+// Date:	Mon Oct 14 08:53:12 PM EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -530,153 +530,103 @@ static bool optimized_run_process ( mex::process p )
 	    break;
 	}
 	case mex::JMP:
+	    goto EXECUTE_JMP;
 	case mex::JMPEQ:
+	    if ( sp < spbegin + 2 )
+		goto ERROR_EXIT;
+	    sp -= 2;
+	    if ( sp[-2] == sp[-1] ) goto EXECUTE_JMP;
+	    if ( pc->immedB > 0 )
+	    {
+	    	sp[0] = sp[1];
+		++ sp;
+	    }
+	    break;
 	case mex::JMPNEQ:
+	    if ( sp < spbegin + 2 )
+		goto ERROR_EXIT;
+	    sp -= 2;
+	    if ( sp[-2] != sp[-1] ) goto EXECUTE_JMP;
+	    if ( pc->immedB > 0 )
+	    {
+	    	sp[0] = sp[1];
+		++ sp;
+	    }
+	    break;
 	case mex::JMPLT:
 	case mex::JMPLEQ:
 	case mex::JMPGT:
 	case mex::JMPGEQ:
-	case mex::JMPF:
-	case mex::JMPT:
-	case mex::JMPCNT:
 	{
-	    min::uns32 immedA = pc->immedA;
-	    min::uns32 immedB = 0;
-	        // Left 0 for JMP, JMPF, JMPT.
-	    min::uns32 immedC = pc->immedC;
-	    min::gen * new_sp = sp;
-	    bool execute_jmp = true;
-	    if ( op_code == mex::JMP )
-	        /* do nothing */;
-	    else if ( op_code == mex::JMPEQ )
-	    {
-		if ( sp < spbegin + 2 )
-		    goto ERROR_EXIT;
-		immedB = pc->immedB;
-		new_sp -= 2;
-		execute_jmp = ( sp[-2] == sp[-1] );
-	    }
-	    else if ( op_code == mex::JMPNEQ )
-	    {
-		if ( sp < spbegin + 2 )
-		    goto ERROR_EXIT;
-		immedB = pc->immedB;
-		new_sp -= 2;
-		execute_jmp = ( sp[-2] != sp[-1] );
-	    }
-	    else if ( op_code == mex::JMPLT
-	              ||
-		      op_code == mex::JMPLEQ
-		      ||
-		      op_code == mex::JMPGT
-		      ||
-		      op_code == mex::JMPGEQ )
-	    {
-	        CHECK2;
-		immedB = pc->immedB;
-		new_sp -= 2;
+	    CHECK2;
+	    sp -= 2;
 
-		min::float64 farg1 = FG ( arg1 );
-		min::float64 farg2 = FG ( arg2 );
-		if ( std::isnan ( farg1 )
-		     ||
-		     std::isnan ( farg2 )
-		     ||
-		     (    std::isinf ( farg1 )
-		       && std::isinf ( farg2 )
-		       && farg1 * farg2 > 0 ) )
-		    goto ERROR_EXIT;
-
-		switch ( op_code )
-		{
-		case mex::JMPLT:
-		    execute_jmp = ( farg1 < farg2 );
-		    break;
-		case mex::JMPLEQ:
-		    execute_jmp = ( farg1 <= farg2 );
-		    break;
-		case mex::JMPGT:
-		    execute_jmp = ( farg1 > farg2 );
-		    break;
-		case mex::JMPGEQ:
-		    execute_jmp = ( farg1 >= farg2 );
-		    break;
-		}
-	    }
-	    else if ( op_code == mex::JMPCNT )
-	    {
-		min::uns32 i = pc->immedB;
-		if ( i >= sp - spbegin )
-		    goto ERROR_EXIT;
-		min::float64 arg = FG ( sp[-(int)i-1] );
-		if ( std::isnan ( arg )
-		     ||
-		     std::isinf ( arg ) )
-		    goto ERROR_EXIT;
-		if ( arg > 0 )
-		{
-		    execute_jmp = false;
-		    sp[-(int)i-1] = min::new_num_gen
-		        ( arg - FG ( pc->immedD ) );
-		}
-	    }
-	    else if ( op_code == mex::JMPF
-	              ||
-		      op_code == mex::JMPT )
-	    {
-		if ( sp < spbegin + 1 )
-		    goto ERROR_EXIT;
-	        new_sp -= 1;
-		min::gen arg = new_sp[0];
-		if ( arg == mex::ZERO
-		     ||
-		     arg == mex::FALSE )
-		    goto FALSE_FOUND;
-		if ( min::is_obj ( arg ) )
-		{
-		    min::obj_vec_ptr vp = arg;
-		    if ( min::size_of ( vp ) == 0 )
-		        goto FALSE_FOUND;
-		}
-		// TRUE found.
-		//
-		if ( op_code == mex::JMPF )
-		    execute_jmp = false;
-		goto JMP_EXECUTE;
-
-	    FALSE_FOUND:
-		if ( op_code == mex::JMPT )
-		    execute_jmp = false;
-		goto JMP_EXECUTE;
-	    }
-
-	JMP_EXECUTE:
-	    if ( immedA > new_sp - spbegin
+	    min::float64 farg1 = FG ( arg1 );
+	    min::float64 farg2 = FG ( arg2 );
+	    if ( std::isnan ( farg1 )
 		 ||
-		 immedC > pcend - pc
+		 std::isnan ( farg2 )
 		 ||
-		 immedC == 0 )
-	        goto ERROR_EXIT;
+		 (    std::isinf ( farg1 )
+		   && std::isinf ( farg2 )
+		   && farg1 * farg2 > 0 ) )
+		goto ERROR_EXIT;
 
-	    if ( ! execute_jmp )
+	    switch ( op_code )
 	    {
-	        if ( immedB == 1 )
-		{
-		    new_sp[0] = new_sp[1];
-		    ++ new_sp;
-		}
-	        sp = new_sp;
+	    case mex::JMPLT:
+		if ( farg1 < farg2 ) goto EXECUTE_JMP;
+		break;
+	    case mex::JMPLEQ:
+		if ( farg1 <= farg2 ) goto EXECUTE_JMP;
+		break;
+	    case mex::JMPGT:
+		if ( farg1 > farg2 ) goto EXECUTE_JMP;
+		break;
+	    case mex::JMPGEQ:
+		if ( farg1 >= farg2 ) goto EXECUTE_JMP;
 		break;
 	    }
-
-	    if ( pc->trace_depth > p->trace_depth )
-	        goto ERROR_EXIT;
-
-	    p->trace_depth -= pc->trace_depth;
-	    sp = new_sp - (int) immedA;
-	    pc += immedC;
-	    -- pc;
+	    if ( pc->immedB > 0 )
+	    {
+	    	sp[0] = sp[1];
+		++ sp;
+	    }
 	    break;
+	}
+	case mex::JMPF:
+	{
+	    if ( sp < spbegin + 1 )
+		goto ERROR_EXIT;
+	    min::gen arg = * -- sp;
+	    if ( arg == mex::ZERO
+		 ||
+		 arg == mex::FALSE )
+		goto EXECUTE_JMP;
+	    if ( min::is_obj ( arg ) )
+	    {
+		min::obj_vec_ptr vp = arg;
+		if ( min::size_of ( vp ) == 0 )
+		    goto EXECUTE_JMP;
+	    }
+	    break;
+	}
+	case mex::JMPT:
+	{
+	    if ( sp < spbegin + 1 )
+		goto ERROR_EXIT;
+	    min::gen arg = * -- sp;
+	    if ( arg == mex::ZERO
+		 ||
+		 arg == mex::FALSE )
+		break;
+	    if ( min::is_obj ( arg ) )
+	    {
+		min::obj_vec_ptr vp = arg;
+		if ( min::size_of ( vp ) == 0 )
+		    break;
+	    }
+	    goto EXECUTE_JMP;
 	}
 	case mex::BEG:
 	    ++ p->trace_depth;
@@ -922,10 +872,32 @@ static bool optimized_run_process ( mex::process p )
 	    ++ p->trace_depth;
 	    break;
 	}
+	default:
+	    goto ERROR_EXIT;
 
 	} // end switch ( op_code )
 
 	++ pc, -- limit;
+	continue;
+
+    EXECUTE_JMP:
+        {
+	    min::uns32 immedA = pc->immedA;
+	    min::uns32 immedC = pc->immedC;
+	    if ( immedA > sp - spbegin
+		 ||
+		 immedC > pcend - pc
+		 ||
+		 immedC == 0 )
+	        goto ERROR_EXIT;
+
+	    if ( pc->trace_depth > p->trace_depth )
+	        goto ERROR_EXIT;
+
+	    p->trace_depth -= pc->trace_depth;
+	    sp = sp - (int) immedA;
+	    pc += immedC; -- limit;
+	}
     }
 
 ERROR_EXIT:
