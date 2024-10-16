@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Oct 16 03:03:14 AM EDT 2024
+// Date:	Wed Oct 16 04:13:02 PM EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1800,9 +1800,15 @@ bool mex::run_process ( mex::process p )
 		    execute_jmp = ( arg1 != arg2 );
 		else
 		{
-		    message = "invalid argument to"
-		              " JMP...";
-		    goto INNER_FATAL;
+		    min::gen r =
+		        ( mex::op_infos[op_code]
+			      .op_func )
+			( arg1, arg2 );
+		    if ( r == mex::TRUE )
+		        execute_jmp = true;
+		    else if ( r == mex::FALSE )
+		        execute_jmp = false;
+		    else bad_jmp = true;
 		}
 	    }
 	    else
