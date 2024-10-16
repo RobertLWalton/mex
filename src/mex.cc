@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Oct 15 08:00:51 AM EDT 2024
+// Date:	Wed Oct 16 03:03:14 AM EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -542,27 +542,49 @@ static bool optimized_run_process ( mex::process p )
 	case mex::JMP:
 	    goto EXECUTE_JMP;
 	case mex::JMPEQ:
+	{
 	    if ( sp < spbegin + 2 )
 		goto ERROR_EXIT;
+	    arg1 = sp[-2]; arg2 = sp[-1];
 	    sp -= 2;
-	    if ( sp[-2] == sp[-1] ) goto EXECUTE_JMP;
+	    if ( min::is_num ( arg1 )
+	         &&
+		 min::is_num ( arg2 ) )
+	    {
+	        if ( FG ( arg1 ) == FG ( arg2 ) )
+		    goto EXECUTE_JMP;
+		    // So +0.00 == -0.00
+	    }
+	    else if ( arg1 == arg2 ) goto EXECUTE_JMP;
 	    if ( pc->immedB > 0 )
 	    {
 	    	sp[0] = sp[1];
 		++ sp;
 	    }
 	    break;
+	}
 	case mex::JMPNEQ:
+	{
 	    if ( sp < spbegin + 2 )
 		goto ERROR_EXIT;
+	    arg1 = sp[-2]; arg2 = sp[-1];
 	    sp -= 2;
-	    if ( sp[-2] != sp[-1] ) goto EXECUTE_JMP;
+	    if ( min::is_num ( arg1 )
+	         &&
+		 min::is_num ( arg2 ) )
+	    {
+	        if ( FG ( arg1 ) != FG ( arg2 ) )
+		    goto EXECUTE_JMP;
+		    // So +0.00 == -0.00
+	    }
+	    else if ( arg1 != arg2 ) goto EXECUTE_JMP;
 	    if ( pc->immedB > 0 )
 	    {
 	    	sp[0] = sp[1];
 		++ sp;
 	    }
 	    break;
+	}
 	case mex::JMPLT:
 	case mex::JMPLEQ:
 	case mex::JMPGT:
@@ -1713,7 +1735,9 @@ bool mex::run_process ( mex::process p )
 
 	    bool bad_jmp = false;
 	    bool execute_jmp = true;
-	    if ( op_code == mex::JMPCNT )
+	    if ( op_code == mex::JMP )
+	        /* do nothing */;
+	    else if ( op_code == mex::JMPCNT )
 	    {
 		min::float64 farg1 = FG ( arg1 );
 		min::uns32 i = pc->immedB;
@@ -1759,7 +1783,29 @@ bool mex::run_process ( mex::process p )
 		    execute_jmp = false;
 		goto JMP_EXECUTE;
 	    }
-	    else if ( op_code != mex::JMP )
+	    else if ( ! min::is_num ( arg1 )
+	              ||
+		      ! min::is_num ( arg2 ) )
+	    {
+		immedB = pc->immedB;
+		if ( immedB > 1 )
+		{
+		    message = "JMP immedB != 0 or 1;"
+		              " illegal ";
+		    goto INNER_FATAL;
+		}
+	        if ( op_code == mex::JMPEQ )
+		    execute_jmp = ( arg1 == arg2 );
+	        else if ( op_code == mex::JMPNEQ )
+		    execute_jmp = ( arg1 != arg2 );
+		else
+		{
+		    message = "invalid argument to"
+		              " JMP...";
+		    goto INNER_FATAL;
+		}
+	    }
+	    else
 	    {
 		min::float64 farg1 = FG ( arg1 );
 		min::float64 farg2 = FG ( arg2 );
