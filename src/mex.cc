@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Oct 16 04:13:02 PM EDT 2024
+// Date:	Wed Oct 16 08:18:00 PM EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1274,7 +1274,8 @@ bool mex::run_process ( mex::process p )
     min::uns8 op_code;
     min::uns8 trace_class;
     op_info * op_info;
-    min::gen arg1, arg2, result;
+    min::gen arg1, arg2;
+    min::locatable_gen result;
     int sp_change;
     min::uns32 trace_flags; 
 
@@ -1483,16 +1484,26 @@ bool mex::run_process ( mex::process p )
 	}
 
 	ARITHMETIC:
-	{
 	    // Process arithmetic operator, excluding
 	    // JMPs.
 
+	    feclearexcept ( FE_ALL_EXCEPT );
+
+	    if ( ! min::is_num ( arg1 )
+	         ||
+		 ! min::is_num ( arg2 ) )
+	    {
+	        result = mex::op_infos[op_code].op_func
+			    ( arg1, arg2 );
+		goto ARITHMETIC_TRACE;
+	    }
+
+	{
 	    min::float64 fresult;
 
 	    min::float64 farg1 = FG ( arg1 );
 	    min::float64 farg2 = FG ( arg2 );
 
-	    feclearexcept ( FE_ALL_EXCEPT );
 
 	    switch ( op_code )
 	    {
@@ -1613,7 +1624,11 @@ bool mex::run_process ( mex::process p )
 
 	    if ( op_code != mex::PUSHV )
 		result = min::new_num_gen ( fresult );
+	}
 
+	ARITHMETIC_TRACE:
+
+	{
 	    int excepts =
 	        fetestexcept ( FE_ALL_EXCEPT );
 	    p->excepts_accumulator |= excepts;
