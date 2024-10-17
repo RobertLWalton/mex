@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Oct 14 10:36:16 PM EDT 2024
+// Date:	Thu Oct 17 02:58:06 AM EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -69,7 +69,10 @@ enum op_code {
     JMPEQ, JMPNEQ,
     JMPLT, JMPLEQ,
     JMPGT, JMPGEQ,
-    JMPF, JMPT, JMPCNT,
+    JMPCNT,
+    JMPTRUE,
+    JMPINT, JMPFIN, JMPINF, JMPNUM,
+    JMPSTR,
     BEG, NOP,
     END,
     BEGL,

@@ -2,7 +2,7 @@
 //
 // File:        mexas_compile_test_1.mex
 // Author:      Bob Walton (walton@acm.org)
-// Date:        Tue Aug 27 09:38:25 PM EDT 2024
+// Date:        Thu Oct 17 03:15:18 AM EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -224,12 +224,12 @@ PUSHI 1 Z
     STACKS: VARIABLES: Z Y X
 PUSH Z
     [133:62;4] PUSHS T_PUSH 0 0 0; [< Z * >]
-JMPF ITS-0
-    [134:63;3] JMPF T_JMPS 0 0 0; ITS-0
+JMPTRUE * ITS-0
+    [134:63;3] JMPTRUE T_JMPS 0 1 0; ITS-0
 PUSH Z
     [135:64;4] PUSHS T_PUSH 0 0 0; [< Z * >]
-JMPT ITS-1
-    [136:65;3] JMPT T_JMPS 0 0 0; ITS-1
+JMPTRUE ITS-1
+    [136:65;3] JMPTRUE T_JMPS 0 0 0; ITS-1
 PUSHI 10
     [137:66;4] PUSHI T_PUSH 0 0 0 10; *
 POP // Z, but illegal as Z has same depth
@@ -238,7 +238,7 @@ JMP DONE
     [139:68;3] JMP T_JMP 0 0 0; DONE
 LABEL ITS-0
     [140:69;3] LABEL ITS-0
-    [134:63;3] JMPF T_JMPS 0 0 6; ITS-0
+    [134:63;3] JMPTRUE T_JMPS 0 1 6; ITS-0
 PUSHI 0
     [141:69;4] PUSHI T_PUSH 0 0 0 0; *
 POP // Z, but illegal as Z has same depth
@@ -247,7 +247,7 @@ JMP DONE
     [143:71;3] JMP T_JMP 0 0 0; DONE
 LABEL ITS-1
     [144:72;3] LABEL ITS-1
-    [136:65;3] JMPT T_JMPS 0 0 7; ITS-1
+    [136:65;3] JMPTRUE T_JMPS 0 0 7; ITS-1
 PUSHI 1
     [145:72;4] PUSHI T_PUSH 0 0 0 1; *
 POP // Z, but illegal as Z has same depth

@@ -2,7 +2,7 @@
 //
 // File:        mexas_compile_test_3.mex
 // Author:      Bob Walton (walton@acm.org)
-// Date:        Mon Aug 26 03:37:50 PM EDT 2024
+// Date:        Thu Oct 17 03:16:11 AM EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -49,33 +49,33 @@ CALL MIN 2 Z
 POP
     [31:12;0] POPS T_POP 0 0 0; [< Z * >]
 
-// BEGF ... ENDF and JMPF/JMPT Test
+// BEGF ... ENDF and JMPTRUE Test
 // RESULT = 1 IF ARG == 0 AND 0 IF ARG != 0
 //
 BEGF FLIP ARG
     [36:13;1] BEGF T_BEGF 1 1 0; [< FLIP ARG >]
     PUSH ARG
     [37:14;2] PUSHS T_PUSH 0 0 0; [< ARG * >]
-    JMPF ITS-0
-    [38:15;1] JMPF T_JMPS 0 0 0; ITS-0
+    JMPTRUE * ITS-0
+    [38:15;1] JMPTRUE T_JMPS 0 1 0; ITS-0
     PUSH ARG
     [39:16;2] PUSHS T_PUSH 0 0 0; [< ARG * >]
-    JMPT ITS-1
-    [40:17;1] JMPT T_JMPS 0 0 0; ITS-1
+    JMPTRUE ITS-1
+    [40:17;1] JMPTRUE T_JMPS 0 0 0; ITS-1
     PUSHI 555
     [41:18;2] PUSHI T_PUSH 0 0 0 555; *
     RET 1
     [42:19;1] RET T_RET 0 1 1
     LABEL ITS-0
     [43:20;1] LABEL ITS-0
-    [38:15;1] JMPF T_JMPS 0 0 5; ITS-0
+    [38:15;1] JMPTRUE T_JMPS 0 1 5; ITS-0
     PUSHI 1
     [44:20;2] PUSHI T_PUSH 0 0 0 1; *
     RET 1
     [45:21;1] RET T_RET 0 1 1
     LABEL ITS-1
     [46:22;1] LABEL ITS-1
-    [40:17;1] JMPT T_JMPS 0 0 5; ITS-1
+    [40:17;1] JMPTRUE T_JMPS 0 0 5; ITS-1
     PUSHI 0
     [47:22;2] PUSHI T_PUSH 0 0 0 0; *
     RET 1
@@ -116,25 +116,25 @@ POP
 * {51:25,1,12} PUSHI: * <= 0
 * {52:26,1,13} CALLM to BEGF: FLIP, ARG=0
 *** {37:14,2,14} PUSHS: * <= ARG = 0
-*** {38:15,1,15} JMPF ITS-0 is successful: true <= 0
+*** {38:15,1,15} JMPTRUE* ITS-0 is successful: true <= 0
 *** {44:20,2,16} PUSHI: * <= 1
 *** {45:21,1,17} RET to CALLM: FLIP, Z=1
 * {53:27,0,18} POPS: * <= Z = 1
 * {54:28,1,19} PUSHI: * <= 1
 * {55:29,1,20} CALLM to BEGF: FLIP, ARG=1
 *** {37:14,2,21} PUSHS: * <= ARG = 1
-*** {38:15,1,22} JMPF ITS-0 is UNsuccessful: false <= 1
+*** {38:15,1,22} JMPTRUE* ITS-0 is UNsuccessful: false <= 1
 *** {39:16,2,23} PUSHS: * <= ARG = 1
-*** {40:17,1,24} JMPT ITS-1 is successful: true <= 1
+*** {40:17,1,24} JMPTRUE ITS-1 is successful: true <= 1
 *** {47:22,2,25} PUSHI: * <= 0
 *** {48:23,1,26} RET to CALLM: FLIP, Z=0
 * {56:30,0,27} POPS: * <= Z = 0
 * {57:31,1,28} PUSHI: * <= 26
 * {58:32,1,29} CALLM to BEGF: FLIP, ARG=26
 *** {37:14,2,30} PUSHS: * <= ARG = 26
-*** {38:15,1,31} JMPF ITS-0 is UNsuccessful: false <= 26
+*** {38:15,1,31} JMPTRUE* ITS-0 is UNsuccessful: false <= 26
 *** {39:16,2,32} PUSHS: * <= ARG = 26
-*** {40:17,1,33} JMPT ITS-1 is successful: true <= 26
+*** {40:17,1,33} JMPTRUE ITS-1 is successful: true <= 26
 *** {47:22,2,34} PUSHI: * <= 0
 *** {48:23,1,35} RET to CALLM: FLIP, Z=0
 * {59:33,0,36} POPS: * <= Z = 0

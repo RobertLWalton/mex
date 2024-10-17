@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Oct 17 02:10:24 AM EDT 2024
+// Date:	Thu Oct 17 03:10:36 AM EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -626,7 +626,7 @@ static bool optimized_run_process ( mex::process p )
 	    }
 	    break;
 	}
-	case mex::JMPF:
+	case mex::JMPTRUE:
 	{
 	    if ( sp < spbegin + 1 )
 		goto ERROR_EXIT;
@@ -634,31 +634,22 @@ static bool optimized_run_process ( mex::process p )
 	    if ( arg == mex::ZERO
 		 ||
 		 arg == mex::FALSE )
-		goto EXECUTE_JMP;
-	    if ( min::is_obj ( arg ) )
 	    {
-		min::obj_vec_ptr vp = arg;
-		if ( min::size_of ( vp ) == 0 )
+	        if ( pc->immedB > 0 )
 		    goto EXECUTE_JMP;
 	    }
-	    break;
-	}
-	case mex::JMPT:
-	{
-	    if ( sp < spbegin + 1 )
-		goto ERROR_EXIT;
-	    min::gen arg = * -- sp;
-	    if ( arg == mex::ZERO
-		 ||
-		 arg == mex::FALSE )
-		break;
 	    if ( min::is_obj ( arg ) )
 	    {
 		min::obj_vec_ptr vp = arg;
 		if ( min::size_of ( vp ) == 0 )
-		    break;
+		{
+		    if ( pc->immedB > 0 )
+			goto EXECUTE_JMP;
+		}
 	    }
-	    goto EXECUTE_JMP;
+	    if ( pc->immedB == 0 )
+		goto EXECUTE_JMP;
+	    break;
 	}
 	case mex::BEG:
 	    ++ p->trace_depth;
@@ -1060,9 +1051,13 @@ mex::op_info mex::op_infos [ mex::NUMBER_OF_OP_CODES ] =
       "JMPGT", ">" },
     { mex::JMPGEQ, J2, T_JMPS, mex::error_func,
       "JMPGEQ", ">=" },
-    { mex::JMPF, J1, T_JMPS, NULL, "JMPF", NULL },
-    { mex::JMPT, J1, T_JMPS, NULL, "JMPT", NULL },
     { mex::JMPCNT, JS, T_JMPS, NULL, "JMPCNT", NULL },
+    { mex::JMPTRUE, J1, T_JMPS, NULL, "JMPTRUE", NULL },
+    { mex::JMPINT, J1, T_JMPS, NULL, "JMPINT", NULL },
+    { mex::JMPFIN, J1, T_JMPS, NULL, "JMPFIN", NULL },
+    { mex::JMPINF, J1, T_JMPS, NULL, "JMPINF", NULL },
+    { mex::JMPNUM, J1, T_JMPS, NULL, "JMPNUM", NULL },
+    { mex::JMPSTR, J1, T_JMPS, NULL, "JMPSTR", NULL },
     { mex::BEG, NONA, T_BEG, NULL, "BEG", NULL },
     { mex::NOP, NONA, T_NOP, NULL, "NOP", NULL },
     { mex::END, NONA, T_END, NULL, "END", NULL },
@@ -1727,7 +1722,7 @@ bool mex::run_process ( mex::process p )
 
 	    min::uns32 immedA = pc->immedA;
 	    min::uns32 immedB = 0;
-	        // Left 0 for JMP, JMPF, JMPT, JMPCNT
+	        // Left 0 for JMP, JMPTRUE, ..., JMPCNT
 	    min::uns32 immedC = pc->immedC;
 
 	    if ( immedA > ( sp + sp_change ) - spbegin )
@@ -1773,9 +1768,7 @@ bool mex::run_process ( mex::process p )
 		                    ( pc->immedD ) );
 		}
 	    }
-	    else if ( op_code == mex::JMPF
-	              ||
-		      op_code == mex::JMPT )
+	    else if ( op_code == mex::JMPTRUE )
 	    {
 		if ( arg1 == mex::ZERO
 		     ||
@@ -1789,12 +1782,12 @@ bool mex::run_process ( mex::process p )
 		}
 		// TRUE found.
 		//
-		if ( op_code == mex::JMPF )
+		if ( pc->immedB > 0 )
 		    execute_jmp = false;
 		goto JMP_EXECUTE;
 
 	    FALSE_FOUND:
-		if ( op_code == mex::JMPT )
+		if ( pc->immedB == 0 )
 		    execute_jmp = false;
 		goto JMP_EXECUTE;
 	    }

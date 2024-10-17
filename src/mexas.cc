@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Oct 17 02:43:41 AM EDT 2024
+// Date:	Thu Oct 17 03:26:36 AM EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -764,6 +764,10 @@ mex::module mexas::compile ( min::file file )
 	case mex::J1:
 	    if ( SP < mexstack::stack_limit + 1 )
 	        goto STACK_TOO_SHORT;
+	    if ( mexas::get_star ( index )
+	         ==
+		 mexas::star )
+		instr.immedB = 1;
 	    min::pop ( variables, 1 );
 	    mexstack::var_stack_length -= 1;
 	    goto JUMP;
