@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Oct 17 03:10:36 AM EDT 2024
+// Date:	Thu Oct 17 03:32:17 AM EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -624,6 +624,21 @@ static bool optimized_run_process ( mex::process p )
 	    	sp[0] = sp[1];
 		++ sp;
 	    }
+	    break;
+	}
+	case mex::JMPCNT:
+	{
+	    if ( pc->immedB >= sp - spbegin )
+	        goto ERROR_EXIT;
+	    min::gen & arg = sp[-(int)pc->immedB-1];
+	    min::float64 farg = FG ( arg );
+	    if ( ! std::isfinite ( farg ) )
+	        goto ERROR_EXIT;
+	    if ( farg <= 0 )
+	        goto EXECUTE_JMP;
+	    arg = min::new_num_gen
+		( farg - MUP::direct_float_of
+			    ( pc->immedD ) );
 	    break;
 	}
 	case mex::JMPTRUE:
