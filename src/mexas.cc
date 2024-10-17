@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Oct  3 08:07:52 AM EDT 2024
+// Date:	Thu Oct 17 02:43:41 AM EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -994,10 +994,13 @@ mex::module mexas::compile ( min::file file )
 	    {
 	        min::gen D = mexas::get_num ( index );
 		if ( D == min::NONE() )
+		    D = mexas::get_str ( index );
+		if ( D == min::NONE() )
 		{
 		    mexcom::compile_error
-			( pp, "no number to push:"
-			      " instruction ignored" );
+			( pp, "no number or string to"
+			      " push: instruction"
+			      " ignored" );
 		    continue;
 		}
 		instr.immedD = D;

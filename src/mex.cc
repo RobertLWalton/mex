@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Oct 16 08:18:00 PM EDT 2024
+// Date:	Thu Oct 17 02:10:24 AM EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -2947,6 +2947,12 @@ FATAL:
     if ( instr_buffer_2[0] != 0 )
 	p->printer << min::indent << instr_buffer_2;
     p->printer << min::indent
+    	       << "ARG1 = " << min::pgen ( arg1 )
+	       << min::indent
+    	       << "ARG2 = " << min::pgen ( arg2 )
+	       << min::indent
+    	       << "RESULT = " << min::pgen ( result )
+	       << min::indent
 	       << "STACK POINTER = " << p->length
 	       << ", PROCESS MAX_LENGTH = "
 	       << p->max_length

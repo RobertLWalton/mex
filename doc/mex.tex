@@ -244,7 +244,7 @@
 
 \author{Robert L. Walton}
 
-\date{October 3, 2024}
+\date{October 17, 2024}
  
 \maketitle
 
@@ -3068,10 +3068,11 @@ or \TT{PUSHA}, depending on the location of the variable.
 is called.  Otherwise {\tt PUSHG} is used.)
 \end{indpar}
 
-\ttkey{PUSHI} ~ {\em number} ~ {\em new-variable-name}\QMARK{}
+\ttkey{PUSHI} ~ {\em number} ~ {\em new-variable-name}\QMARK{} \\
+\ttkey{PUSHI} ~ {\em string} ~ {\em new-variable-name}\QMARK{}
 \begin{indpar}
 At run-time, pushes into the process stack a copy of
-the {\em number}\pagnote{NUMBER}.
+the {\em number}\pagnote{NUMBER} or {\em string}\pagnote{STRING}.
 At assembly time, pushes into the variable stack an
 element with {\em new-variable-name} as its name.
 \end{indpar}

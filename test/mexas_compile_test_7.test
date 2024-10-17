@@ -2,7 +2,7 @@
 //
 // File:        mexas_compile_test_7.mex
 // Author:      Bob Walton (walton@acm.org)
-// Date:        Sun Aug 27 13:03:12 EDT 2023
+// Date:        Thu Oct 17 02:44:33 AM EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -44,6 +44,12 @@ DIV
     [28:15;3] DIV T_AOP 0 0 0; *
 TRACE_EXCEPTS
     [29:16;3] TRACE_EXCEPTS T_ALWAYS 0 0 0
+PUSHI "A String"
+    [30:17;4] PUSHI T_PUSH 0 0 0 "A String"; *
+PUSHI 10
+    [31:18;5] PUSHI T_PUSH 0 0 0 10; *
+ADD
+    [32:19;4] ADD T_AOP 0 0 0; *
 * {13:0,0,1} TRACE_EXCEPTS:
 * {14:1,1,2} PUSHI: * <= 1e+200
 * {15:2,2,3} PUSHI: * <= 1e+200
@@ -64,6 +70,10 @@ TRACE_EXCEPTS
 * {27:14,4,15} PUSHI: * <= 0
 * {28:15,3,16} DIV: * = inf <= 10 / 0
 * {29:16,3,17} TRACE_EXCEPTS: DIVBYZERO INEXACT *INVALID OVERFLOW
+* {30:17,4,18} PUSHI: * <= "A String"
+* {31:18,5,19} PUSHI: * <= 10
+!!! ERROR: invalid operand(s)
+* {32:19,4,20} ADD: * = nan <= "A String" + 10
 PROCESS TERMINATION EXCEPTS ERROR(S): INVALID
 ERROR: module initialization process did not terminate normally at
        module end: illegal exception was raised during otherwise
