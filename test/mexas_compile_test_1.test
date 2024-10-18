@@ -2,7 +2,7 @@
 //
 // File:        mexas_compile_test_1.mex
 // Author:      Bob Walton (walton@acm.org)
-// Date:        Thu Oct 17 03:15:18 AM EDT 2024
+// Date:        Fri Oct 18 07:41:36 AM EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -217,15 +217,15 @@ POP
     STACKS: VARIABLES: Y X
 
 // JMP TEST 7
-// Z = 1 if Z == 0 else 0 if Z == 1 else 10
+// Z = 1 if Z == FALSE else 0 if Z == TRUE else 10
 //
 PUSHI 1 Z
     [131:61;3] PUSHI T_PUSH 0 0 0 1; Z
     STACKS: VARIABLES: Z Y X
 PUSH Z
     [133:62;4] PUSHS T_PUSH 0 0 0; [< Z * >]
-JMPTRUE * ITS-0
-    [134:63;3] JMPTRUE T_JMPS 0 1 0; ITS-0
+JMPFALSE ITS-0
+    [134:63;3] JMPFALSE T_JMPS 0 0 0; ITS-0
 PUSH Z
     [135:64;4] PUSHS T_PUSH 0 0 0; [< Z * >]
 JMPTRUE ITS-1
@@ -238,7 +238,7 @@ JMP DONE
     [139:68;3] JMP T_JMP 0 0 0; DONE
 LABEL ITS-0
     [140:69;3] LABEL ITS-0
-    [134:63;3] JMPTRUE T_JMPS 0 1 6; ITS-0
+    [134:63;3] JMPFALSE T_JMPS 0 0 6; ITS-0
 PUSHI 0
     [141:69;4] PUSHI T_PUSH 0 0 0 0; *
 POP // Z, but illegal as Z has same depth

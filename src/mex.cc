@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Oct 18 01:59:53 AM EDT 2024
+// Date:	Fri Oct 18 07:37:13 AM EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -647,18 +647,31 @@ static bool optimized_run_process ( mex::process p )
 	    if ( sp < spbegin + 1 )
 		goto ERROR_EXIT;
 	    min::gen arg = * -- sp;
-	    if ( arg != mex::TRUE
-		 &&
-		 arg != mex::FALSE )
-	        goto ERROR_EXIT;
-	    if ( pc->immedB == 0 )
+	    if ( arg == mex::TRUE )
 	    {
-	        if ( arg == mex::TRUE )
+		if ( pc->immedB == 0 )
 		    goto EXECUTE_JMP;
 	    }
 	    else
 	    {
-	        if ( arg == mex::FALSE )
+		if ( pc->immedB > 0 )
+		    goto EXECUTE_JMP;
+	    }
+	    break;
+	}
+	case mex::JMPFALSE:
+	{
+	    if ( sp < spbegin + 1 )
+		goto ERROR_EXIT;
+	    min::gen arg = * -- sp;
+	    if ( arg == mex::FALSE )
+	    {
+		if ( pc->immedB == 0 )
+		    goto EXECUTE_JMP;
+	    }
+	    else
+	    {
+		if ( pc->immedB > 0 )
 		    goto EXECUTE_JMP;
 	    }
 	    break;
@@ -1173,6 +1186,8 @@ mex::op_info mex::op_infos [ mex::NUMBER_OF_OP_CODES ] =
       "JMPGEQ", ">=" },
     { mex::JMPCNT, JS, T_JMPS, NULL, "JMPCNT", NULL },
     { mex::JMPTRUE, J1, T_JMPS, NULL, "JMPTRUE", NULL },
+    { mex::JMPFALSE, J1, T_JMPS, NULL,
+      "JMPFALSE", NULL },
     { mex::JMPINT, J1, T_JMPS, NULL, "JMPINT", NULL },
     { mex::JMPFIN, J1, T_JMPS, NULL, "JMPFIN", NULL },
     { mex::JMPINF, J1, T_JMPS, NULL, "JMPINF", NULL },
@@ -1893,16 +1908,13 @@ bool mex::run_process ( mex::process p )
 	        switch ( op_code )
 		{
 		case mex::JMPTRUE:
-		{
-		    if ( arg1 != mex::TRUE
-		         &&
-			 arg1 != mex::FALSE )
-		        bad_jmp = true;
-		    else
-		        execute_jmp =
-			    ( arg1 == mex::TRUE );
+		    execute_jmp =
+		        ( arg1 == mex::TRUE );
 		    break;
-		}
+		case mex::JMPFALSE:
+		    execute_jmp =
+		        ( arg1 == mex::FALSE );
+		    break;
 		case mex::JMPINT:
 		{
 		    min::float64 farg = FG ( arg1 );

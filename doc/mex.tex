@@ -1179,6 +1179,8 @@ the logical values `true' and `false':
 \\\hline
 \ttkey{JMPTRUE}
     & Pop 1 value and respectively test whether it equals \TT{mex::TRUE}, \\
+\ttkey{JMPFALSE}
+    & equals \TT{mex::FALSE}, \\
 \ttkey{JMPINT}
     & is an integer in the range (-1e15,+1e15), \\
 \ttkey{JMPFIN}/\ttkey{JMPINF}
@@ -1189,9 +1191,7 @@ the logical values `true' and `false':
     & is a MIN string, or is a MIN object. \\
     & If yes, continue as per \TT{JMP}, and if no, do nothing, \\
     & provided \TT{immedB} = 0.  However if \TT{immedB} != 0, reverse \\
-    & the test, so `no' jumps and `yes' does not.  For \TT{JMPTRUE} it is \\
-    & a run-time error if the popped value does not equal \\
-    & \TT{mex::TRUE} or \TT{mex::FALSE}.
+    & the test, so `no' jumps and `yes' does not.
 \\\hline
 \ttkey{JMPCNT}
     & Test whether \TT{sp[- immedB - 1]} is arithmetically $\leq 0$, \\
@@ -3135,7 +3135,8 @@ $S$ value is the length of the variable stack \underline{after}
 the two elements are popped (and before any element is pushed back).
 \end{indpar}
 
-\ttkey{JMPTRUE}/\ttkey{JMPINT}/\ttkey{JMPFIN}/\ttkey{JMPINF}/\ttkey{JMPNUM}/%
+\ttkey{JMPTRUE}/\ttkey{JMPFALSE}/\ttkey{JMPINT}/\ttkey{JMPFIN}/%
+    \ttkey{JMPINF}/\ttkey{JMPNUM}/%
     \ttkey{JMPSTR}/\ttkey{JMPOBJ} ~ \ttkey{*}\QMARK{} {\em jmp-target}
 \begin{indpar}
 At run-time these instructions' actions are as described in
