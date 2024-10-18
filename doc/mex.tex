@@ -244,7 +244,7 @@
 
 \author{Robert L. Walton}
 
-\date{October 17, 2024}
+\date{October 18, 2024}
  
 \maketitle
 
@@ -1160,14 +1160,14 @@ the logical values `true' and `false':
     & Subtract \TT{immedA} from \TT{sp} (popping the stack \TT{immedA} times),
       \\
     & then add \TT{immedC} to the \TT{pc} (skipping \TT{immedC} instructions).
-      It is \\
-    & illegal for \TT{immedC} = 0 (\TT{JMP} would jump to itself).
+      \\
+    & It is illegal for \TT{immedC} = 0 (\TT{JMP} would jump to itself).
 \\\hline
 \ttkey{JMPEQ}/\ttkey{JMPNEQ}
     & Pop 2 values and arithmetically compare them.  If they are \\
-    & equal/not-equal continue as per the \TT{JMP} instruction.  Otherwise if \\
-    & \TT{immedB} == 0, do nothing more, but if \TT{immedB} == 1, push the \\
-    & first value popped back into the stack.
+    & equal/not-equal continue as per the \TT{JMP} instruction.  Otherwise \\
+    & if \TT{immedB} == 0, do nothing more, but if \TT{immedB} == 1, \\
+    & push the first value popped back into the stack.
 \\\hline
 \ttkey{JMPLT}/\ttkey{JMPLEQ}
     & Ditto, but \TT{JMP} if the second popped is \\
@@ -1178,16 +1178,25 @@ the logical values `true' and `false':
     & greater-than/greater-than-or-equal-to the first popped.
 \\\hline
 \ttkey{JMPTRUE}
-    & Pop 1 value and test whether it equals \TT{mex::ZERO} or \\
-    & \TT{mex::FALSE}, or is a MIN object with 0 vector elements.  \\
-    & If \TT{immedB} = 0, continue as per \TT{JMP} if no, but otherwise \\
-    & do nothing more.  Else if \TT{immedB} > 0, continue as per \\
-    & \TT{JMP} if yes, but otherwise do nothing more.
+    & Pop 1 value and respectively test whether it equals \TT{mex::TRUE}, \\
+\ttkey{JMPINT}
+    & is an integer in the range (-1e15,+1e15), \\
+\ttkey{JMPFIN}/\ttkey{JMPINF}
+    & is a finite number, is an infinite number, \\
+\ttkey{JMPNUM}
+    & is a MIN number (includes NaNs), \\
+\ttkey{JMPSTR}/\ttkey{JMPOBJ}
+    & is a MIN string, or is a MIN object. \\
+    & If yes, continue as per \TT{JMP}, and if no, do nothing, \\
+    & provided \TT{immedB} = 0.  However if \TT{immedB} != 0, reverse \\
+    & the test, so `no' jumps and `yes' does not.  For \TT{JMPTRUE} it is \\
+    & a run-time error if the popped value does not equal \\
+    & \TT{mex::TRUE} or \TT{mex::FALSE}.
 \\\hline
 \ttkey{JMPCNT}
     & Test whether \TT{sp[- immedB - 1]} is arithmetically $\leq 0$, \\
-    & and if yes, continue as per \TT{JMP}.  Otherwise subtract \\
-    & \TT{immedD} from \TT{sp[ - immedB - 1]}.
+    & and if yes, continue as per \TT{JMP}.  Otherwise subtract \TT{immedD} \\
+    & (must be a finite number) from \TT{sp[ - immedB - 1]}.
 \\\hline
 \end{tabular}
 \end{center}
@@ -3108,10 +3117,9 @@ calls {\tt mexstack::push\_\EOL jmp\_instr}\pagnote{PUSH-JMP-INSTR}
 to add an element to the pending jump list.
 \end{indpar}
 
-\ttkey{JMP\ldots} ~ \TT{*}\QMARK{} {\em jmp-target}
+\ttkey{JMPEQ}/\ttkey{JMPNEQ}/\ttkey{JMPLT}/\ttkey{JMPLEQ}/%
+     \ttkey{JMPGT}/\ttkey{JMPGEQ} ~ \TT{*}\QMARK{} {\em jmp-target}
 \begin{indpar}
-Here \ldots~denotes one of \TT{EQ}, \TT{NE}, etc.
-
 At run-time these instruction's actions are as described in
 Figure~\itemref{STACK-AND-FLOW-CONTROL-INSTRUCTIONS}, where the \TT{*}
 option sets \TT{immedB} = 1 (otherwise it is 0).  At assembly-time,
@@ -3127,9 +3135,10 @@ $S$ value is the length of the variable stack \underline{after}
 the two elements are popped (and before any element is pushed back).
 \end{indpar}
 
-\ttkey{JMPTRUE} ~ \TT{*}\QMARK{} {\em jmp-target}
+\ttkey{JMPTRUE}/\ttkey{JMPINT}/\ttkey{JMPFIN}/\ttkey{JMPINF}/\ttkey{JMPNUM}/%
+    \ttkey{JMPSTR}/\ttkey{JMPOBJ} ~ \ttkey{*}\QMARK{} {\em jmp-target}
 \begin{indpar}
-At run-time this instruction's actions are as described in
+At run-time these instructions' actions are as described in
 Figure~\itemref{STACK-AND-FLOW-CONTROL-INSTRUCTIONS}, where the \TT{*}
 option sets \TT{immedB} = 1 (otherwise it is 0).  At assembly-time,
 these instructions first pop one element from the variable stack and

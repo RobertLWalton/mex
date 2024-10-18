@@ -2,7 +2,7 @@
 //
 // File:	mexas_compile_test_3.mex
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Oct 17 03:16:11 AM EDT 2024
+// Date:	Fri Oct 18 02:59:26 AM EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -31,7 +31,7 @@ STACKS
 POP
 
 // BEGF ... ENDF and JMPTRUE Test
-// RESULT = 1 IF ARG == 0 AND 0 IF ARG != 0
+// RESULT = 1 IF ARG == TRUE AND 0 IF ARG == FALSE
 //
 BEGF FLIP ARG
     PUSH ARG
@@ -48,12 +48,9 @@ BEGF FLIP ARG
     RET 1
 ENDF
 
-PUSHI 0
+PUSHI "FALSE"
 CALL FLIP 1 Z
 POP
-PUSHI 1
-CALL FLIP 1 Z
-POP
-PUSHI 26
+PUSHI "TRUE"
 CALL FLIP 1 Z
 POP

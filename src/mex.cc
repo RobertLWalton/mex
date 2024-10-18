@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Oct 17 03:32:17 AM EDT 2024
+// Date:	Fri Oct 18 01:59:53 AM EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -634,11 +634,12 @@ static bool optimized_run_process ( mex::process p )
 	    min::float64 farg = FG ( arg );
 	    if ( ! std::isfinite ( farg ) )
 	        goto ERROR_EXIT;
+	    min::float64 immedD = FG ( pc->immedD );
+	    if ( ! std::isfinite ( immedD ) )
+	        goto ERROR_EXIT;
 	    if ( farg <= 0 )
 	        goto EXECUTE_JMP;
-	    arg = min::new_num_gen
-		( farg - MUP::direct_float_of
-			    ( pc->immedD ) );
+	    arg = min::new_num_gen ( farg - immedD );
 	    break;
 	}
 	case mex::JMPTRUE:
@@ -646,24 +647,128 @@ static bool optimized_run_process ( mex::process p )
 	    if ( sp < spbegin + 1 )
 		goto ERROR_EXIT;
 	    min::gen arg = * -- sp;
-	    if ( arg == mex::ZERO
-		 ||
-		 arg == mex::FALSE )
+	    if ( arg != mex::TRUE
+		 &&
+		 arg != mex::FALSE )
+	        goto ERROR_EXIT;
+	    if ( pc->immedB == 0 )
 	    {
-	        if ( pc->immedB > 0 )
+	        if ( arg == mex::TRUE )
 		    goto EXECUTE_JMP;
 	    }
+	    else
+	    {
+	        if ( arg == mex::FALSE )
+		    goto EXECUTE_JMP;
+	    }
+	    break;
+	}
+	case mex::JMPINT:
+	{
+	    if ( sp < spbegin + 1 )
+		goto ERROR_EXIT;
+	    min::float64 farg = FG ( * -- sp );
+	    if ( std::isfinite ( farg )
+		 &&
+		 farg < +1e15
+		 &&
+		 farg > -1e15
+		 &&
+		 (min::int64) farg == farg )
+	    {
+		if ( pc->immedB == 0 )
+		    goto EXECUTE_JMP;
+	    }
+	    else
+	    {
+		if ( pc->immedB > 0 )
+		    goto EXECUTE_JMP;
+	    }
+	    break;
+	}
+	case mex::JMPFIN:
+	{
+	    if ( sp < spbegin + 1 )
+		goto ERROR_EXIT;
+	    min::float64 farg = FG ( * -- sp );
+	    if ( std::isfinite ( farg ) )
+	    {
+		if ( pc->immedB == 0 )
+		    goto EXECUTE_JMP;
+	    }
+	    else
+	    {
+		if ( pc->immedB > 0 )
+		    goto EXECUTE_JMP;
+	    }
+	    break;
+	}
+	case mex::JMPINF:
+	{
+	    if ( sp < spbegin + 1 )
+		goto ERROR_EXIT;
+	    min::float64 farg = FG ( * -- sp );
+	    if ( std::isinf ( farg ) )
+	    {
+		if ( pc->immedB == 0 )
+		    goto EXECUTE_JMP;
+	    }
+	    else
+	    {
+		if ( pc->immedB > 0 )
+		    goto EXECUTE_JMP;
+	    }
+	    break;
+	}
+	case mex::JMPNUM:
+	{
+	    if ( sp < spbegin + 1 )
+		goto ERROR_EXIT;
+	    min::gen arg = * -- sp;
+	    if ( min::is_num ( arg ) )
+	    {
+		if ( pc->immedB == 0 )
+		    goto EXECUTE_JMP;
+	    }
+	    else
+	    {
+		if ( pc->immedB > 0 )
+		    goto EXECUTE_JMP;
+	    }
+	    break;
+	}
+	case mex::JMPSTR:
+	{
+	    if ( sp < spbegin + 1 )
+		goto ERROR_EXIT;
+	    min::gen arg = * -- sp;
+	    if ( min::is_str ( arg ) )
+	    {
+		if ( pc->immedB == 0 )
+		    goto EXECUTE_JMP;
+	    }
+	    else
+	    {
+		if ( pc->immedB > 0 )
+		    goto EXECUTE_JMP;
+	    }
+	    break;
+	}
+	case mex::JMPOBJ:
+	{
+	    if ( sp < spbegin + 1 )
+		goto ERROR_EXIT;
+	    min::gen arg = * -- sp;
 	    if ( min::is_obj ( arg ) )
 	    {
-		min::obj_vec_ptr vp = arg;
-		if ( min::size_of ( vp ) == 0 )
-		{
-		    if ( pc->immedB > 0 )
-			goto EXECUTE_JMP;
-		}
+		if ( pc->immedB == 0 )
+		    goto EXECUTE_JMP;
 	    }
-	    if ( pc->immedB == 0 )
-		goto EXECUTE_JMP;
+	    else
+	    {
+		if ( pc->immedB > 0 )
+		    goto EXECUTE_JMP;
+	    }
 	    break;
 	}
 	case mex::BEG:
@@ -1073,6 +1178,7 @@ mex::op_info mex::op_infos [ mex::NUMBER_OF_OP_CODES ] =
     { mex::JMPINF, J1, T_JMPS, NULL, "JMPINF", NULL },
     { mex::JMPNUM, J1, T_JMPS, NULL, "JMPNUM", NULL },
     { mex::JMPSTR, J1, T_JMPS, NULL, "JMPSTR", NULL },
+    { mex::JMPOBJ, J1, T_JMPS, NULL, "JMPOBJ", NULL },
     { mex::BEG, NONA, T_BEG, NULL, "BEG", NULL },
     { mex::NOP, NONA, T_NOP, NULL, "NOP", NULL },
     { mex::END, NONA, T_END, NULL, "END", NULL },
@@ -1764,47 +1870,72 @@ bool mex::run_process ( mex::process p )
 	        /* do nothing */;
 	    else if ( op_code == mex::JMPCNT )
 	    {
-		min::float64 farg1 = FG ( arg1 );
-		min::uns32 i = pc->immedB;
-		if ( std::isnan ( farg1 )
-		     ||
-		     std::isinf ( farg1 ) )
+		min::float64 immedD = FG ( pc->immedD );
+		if ( ! std::isfinite ( immedD ) )
 		{
-		    message = "JMPCNT counter is not a"
-		              " finite floating point"
-			      " number";
+		    message = "JMPCNT immedD is not"
+			      " a finite number";
 		    goto INNER_FATAL;
 		}
-		if ( farg1 > 0 )
+		min::float64 farg1 = FG ( arg1 );
+		min::uns32 i = pc->immedB;
+		if ( ! std::isfinite ( farg1 ) )
+		    bad_jmp = true;
+		else if ( farg1 > 0 )
 		{
 		    execute_jmp = false;
 		    sp[-(int)i-1] = min::new_num_gen
-		        ( farg1 - MUP::direct_float_of
-		                    ( pc->immedD ) );
+		        ( farg1 - immedD );
 		}
 	    }
-	    else if ( op_code == mex::JMPTRUE )
+	    else if ( op_info->op_type == mex::J1 )
 	    {
-		if ( arg1 == mex::ZERO
-		     ||
-		     arg1 == mex::FALSE )
-		    goto FALSE_FOUND;
-		if ( min::is_obj ( arg1 ) )
+	        switch ( op_code )
 		{
-		    min::obj_vec_ptr vp = arg1;
-		    if ( min::size_of ( vp ) == 0 )
-		        goto FALSE_FOUND;
+		case mex::JMPTRUE:
+		{
+		    if ( arg1 != mex::TRUE
+		         &&
+			 arg1 != mex::FALSE )
+		        bad_jmp = true;
+		    else
+		        execute_jmp =
+			    ( arg1 == mex::TRUE );
+		    break;
 		}
-		// TRUE found.
-		//
+		case mex::JMPINT:
+		{
+		    min::float64 farg = FG ( arg1 );
+		    execute_jmp =
+		        ( std::isfinite ( farg )
+			  &&
+			  farg < +1e15
+			  &&
+			  farg > -1e15
+			  &&
+			  (min::int64) farg == farg );
+		    break;
+		}
+		case mex::JMPFIN:
+		    execute_jmp =
+		        std::isfinite ( FG ( arg1 ) );
+		    break;
+		case mex::JMPINF:
+		    execute_jmp =
+		        std::isinf ( FG ( arg1 ) );
+		    break;
+		case mex::JMPNUM:
+		    execute_jmp = min::is_num ( arg1 );
+		    break;
+		case mex::JMPSTR:
+		    execute_jmp = min::is_str ( arg1 );
+		    break;
+		case mex::JMPOBJ:
+		    execute_jmp = min::is_obj ( arg1 );
+		    break;
+		}
 		if ( pc->immedB > 0 )
-		    execute_jmp = false;
-		goto JMP_EXECUTE;
-
-	    FALSE_FOUND:
-		if ( pc->immedB == 0 )
-		    execute_jmp = false;
-		goto JMP_EXECUTE;
+		    execute_jmp = ! execute_jmp;
 	    }
 	    else if ( ! min::is_num ( arg1 )
 	              ||
@@ -1877,8 +2008,6 @@ bool mex::run_process ( mex::process p )
 		    break;
 		}
 	    }
-
-	JMP_EXECUTE:
 
 	    if ( execute_jmp
 	         &&

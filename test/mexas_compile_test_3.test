@@ -2,7 +2,7 @@
 //
 // File:        mexas_compile_test_3.mex
 // Author:      Bob Walton (walton@acm.org)
-// Date:        Thu Oct 17 03:16:11 AM EDT 2024
+// Date:        Fri Oct 18 02:59:26 AM EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -50,7 +50,7 @@ POP
     [31:12;0] POPS T_POP 0 0 0; [< Z * >]
 
 // BEGF ... ENDF and JMPTRUE Test
-// RESULT = 1 IF ARG == 0 AND 0 IF ARG != 0
+// RESULT = 1 IF ARG == TRUE AND 0 IF ARG == FALSE
 //
 BEGF FLIP ARG
     [36:13;1] BEGF T_BEGF 1 1 0; [< FLIP ARG >]
@@ -84,24 +84,18 @@ ENDF
     [36:13;1] BEGF T_BEGF 1 1 12; [< FLIP ARG >]
     [49:24;0] ENDF T_ENDF 0 1 0
 
-PUSHI 0
-    [51:25;1] PUSHI T_PUSH 0 0 0 0; *
+PUSHI "FALSE"
+    [51:25;1] PUSHI T_PUSH 0 0 0 FALSE; *
 CALL FLIP 1 Z
     [52:26;1] CALLM T_CALLM 1 1 13; [< FLIP Z >]
 POP
     [53:27;0] POPS T_POP 0 0 0; [< Z * >]
-PUSHI 1
-    [54:28;1] PUSHI T_PUSH 0 0 0 1; *
+PUSHI "TRUE"
+    [54:28;1] PUSHI T_PUSH 0 0 0 TRUE; *
 CALL FLIP 1 Z
     [55:29;1] CALLM T_CALLM 1 1 13; [< FLIP Z >]
 POP
     [56:30;0] POPS T_POP 0 0 0; [< Z * >]
-PUSHI 26
-    [57:31;1] PUSHI T_PUSH 0 0 0 26; *
-CALL FLIP 1 Z
-    [58:32;1] CALLM T_CALLM 1 1 13; [< FLIP Z >]
-POP
-    [59:33;0] POPS T_POP 0 0 0; [< Z * >]
 * {14:0,0,1} BEGF
 * {27:9,1,2} PUSHI: X <= 23
 * {28:10,2,3} PUSHI: Y <= 157
@@ -113,29 +107,20 @@ POP
 *** {23:7,1,9} RET to CALLM: MIN, Z=23
 * {31:12,0,10} POPS: * <= Z = 23
 * {36:13,0,11} BEGF
-* {51:25,1,12} PUSHI: * <= 0
-* {52:26,1,13} CALLM to BEGF: FLIP, ARG=0
-*** {37:14,2,14} PUSHS: * <= ARG = 0
-*** {38:15,1,15} JMPTRUE* ITS-0 is successful: true <= 0
+* {51:25,1,12} PUSHI: * <= FALSE
+* {52:26,1,13} CALLM to BEGF: FLIP, ARG=FALSE
+*** {37:14,2,14} PUSHS: * <= ARG = FALSE
+*** {38:15,1,15} JMPTRUE* ITS-0 is successful: true <= FALSE
 *** {44:20,2,16} PUSHI: * <= 1
 *** {45:21,1,17} RET to CALLM: FLIP, Z=1
 * {53:27,0,18} POPS: * <= Z = 1
-* {54:28,1,19} PUSHI: * <= 1
-* {55:29,1,20} CALLM to BEGF: FLIP, ARG=1
-*** {37:14,2,21} PUSHS: * <= ARG = 1
-*** {38:15,1,22} JMPTRUE* ITS-0 is UNsuccessful: false <= 1
-*** {39:16,2,23} PUSHS: * <= ARG = 1
-*** {40:17,1,24} JMPTRUE ITS-1 is successful: true <= 1
+* {54:28,1,19} PUSHI: * <= TRUE
+* {55:29,1,20} CALLM to BEGF: FLIP, ARG=TRUE
+*** {37:14,2,21} PUSHS: * <= ARG = TRUE
+*** {38:15,1,22} JMPTRUE* ITS-0 is UNsuccessful: false <= TRUE
+*** {39:16,2,23} PUSHS: * <= ARG = TRUE
+*** {40:17,1,24} JMPTRUE ITS-1 is successful: true <= TRUE
 *** {47:22,2,25} PUSHI: * <= 0
 *** {48:23,1,26} RET to CALLM: FLIP, Z=0
 * {56:30,0,27} POPS: * <= Z = 0
-* {57:31,1,28} PUSHI: * <= 26
-* {58:32,1,29} CALLM to BEGF: FLIP, ARG=26
-*** {37:14,2,30} PUSHS: * <= ARG = 26
-*** {38:15,1,31} JMPTRUE* ITS-0 is UNsuccessful: false <= 26
-*** {39:16,2,32} PUSHS: * <= ARG = 26
-*** {40:17,1,33} JMPTRUE ITS-1 is successful: true <= 26
-*** {47:22,2,34} PUSHI: * <= 0
-*** {48:23,1,35} RET to CALLM: FLIP, Z=0
-* {59:33,0,36} POPS: * <= Z = 0
 mexas_compile_test_3.mex successfully compiled
