@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Oct 17 03:26:36 AM EDT 2024
+// Date:	Fri Oct 18 08:08:37 AM EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -138,6 +138,9 @@ static min::locatable_gen backslash;
 static min::locatable_gen on;
 static min::locatable_gen off;
 static min::locatable_gen loop;
+static min::locatable_gen TRUE;
+static min::locatable_gen FALSE;
+static min::locatable_gen OBJ;
 
 static void initialize ( void )
 {
@@ -150,6 +153,9 @@ static void initialize ( void )
     ::on = min::new_str_gen ( "ON" );
     ::off = min::new_str_gen ( "OFF" );
     ::loop = min::new_str_gen ( "LOOP" );
+    ::TRUE = min::new_str_gen ( "TRUE" );
+    ::FALSE = min::new_str_gen ( "FALSE" );
+    ::OBJ = min::new_str_gen ( "OBJ" );
 
     ::init_op_code_table();
 
@@ -996,16 +1002,28 @@ mex::module mexas::compile ( min::file file )
 	    }
 	    case mex::PUSHI:
 	    {
-	        min::gen D = mexas::get_num ( index );
+	        min::locatable_gen D;
+		D = mexas::get_num ( index );
 		if ( D == min::NONE() )
 		    D = mexas::get_str ( index );
 		if ( D == min::NONE() )
 		{
-		    mexcom::compile_error
-			( pp, "no number or string to"
-			      " push: instruction"
-			      " ignored" );
-		    continue;
+		    D = mexas::get_name ( index );
+		    if ( D == ::TRUE )
+		        D = mex::TRUE;
+		    else if ( D == ::FALSE )
+		        D = mex::FALSE;
+		    else if ( D == ::OBJ )
+			D = min::new_obj_gen ( 32, 8 );
+		    else
+		    {
+			mexcom::compile_error
+			    ( pp, "cannot understand"
+				  " first argument to"
+				  " PUSHI: instruction"
+				  " ignored" );
+			continue;
+		    }
 		}
 		instr.immedD = D;
 

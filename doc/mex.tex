@@ -3080,10 +3080,14 @@ is called.  Otherwise {\tt PUSHG} is used.)
 \end{indpar}
 
 \ttkey{PUSHI} ~ {\em number} ~ {\em new-variable-name}\QMARK{} \\
-\ttkey{PUSHI} ~ {\em string} ~ {\em new-variable-name}\QMARK{}
+\ttkey{PUSHI} ~ {\em string} ~ {\em new-variable-name}\QMARK{} \\
+\ttkey{PUSHI} ~ \TT{TRUE} ~ {\em new-variable-name}\QMARK{} \\
+\ttkey{PUSHI} ~ \TT{FALSE} ~ {\em new-variable-name}\QMARK{} \\
+\ttkey{PUSHI} ~ \TT{OBJ} ~ {\em new-variable-name}\QMARK{}
 \begin{indpar}
 At run-time, pushes into the process stack a copy of
-the {\em number}\pagnote{NUMBER} or {\em string}\pagnote{STRING}.
+the {\em number}\pagnote{NUMBER}, or the {\em string}\pagnote{STRING},
+or \TT{mex::TRUE}, or \TT{mex::FALSE}, or an empty MIN object.
 At assembly time, pushes into the variable stack an
 element with {\em new-variable-name} as its name.
 \end{indpar}
