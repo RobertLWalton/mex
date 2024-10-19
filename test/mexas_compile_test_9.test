@@ -2,7 +2,7 @@
 //
 // File:        mexas_compile_test_8.mex
 // Author:      Bob Walton (walton@acm.org)
-// Date:        Tue Aug 29 22:27:30 EDT 2023
+// Date:        Sat Oct 19 02:23:37 AM EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -121,312 +121,348 @@ BEGF AOP-2ARG-TEST
     [57:64;19] PUSHS T_PUSH 2 0 0; [< Z * >]
     TRACE 'Z = Y MOD X' X Y Z
     [57:65;16] TRACE T_ALWAYS 3 0 0; [< "Z = Y MOD X" X Y Z >]
+    PUSHI 2 X
+    [58:66;17] PUSHI T_PUSH 0 0 0 2; X
+    PUSHI 10 Y
+    [59:67;18] PUSHI T_PUSH 0 0 0 10; Y
+    PUSH X
+    [60:68;19] PUSHS T_PUSH 1 0 0; [< X * >]
+    PUSH Y
+    [61:69;20] PUSHS T_PUSH 1 0 0; [< Y * >]
+    POW Z
+    [62:70;19] POW T_AOP 0 0 0; Z
+    [63:71;20] PUSHS T_PUSH 2 0 0; [< X * >]
+    [63:72;21] PUSHS T_PUSH 2 0 0; [< Y * >]
+    [63:73;22] PUSHS T_PUSH 2 0 0; [< Z * >]
+    TRACE 'Z = X^Y' X Y Z
+    [63:74;19] TRACE T_ALWAYS 3 0 0; [< "Z = X^Y" X Y Z >]
+    PUSH X
+    [64:75;20] PUSHS T_PUSH 2 0 0; [< X * >]
+    PUSH Y
+    [65:76;21] PUSHS T_PUSH 2 0 0; [< Y * >]
+    POWR Z
+    [66:77;20] POWR T_AOP 0 0 0; Z
+    [67:78;21] PUSHS T_PUSH 3 0 0; [< X * >]
+    [67:79;22] PUSHS T_PUSH 3 0 0; [< Y * >]
+    [67:80;23] PUSHS T_PUSH 2 0 0; [< Z * >]
+    TRACE 'Z = Y^X' X Y Z
+    [67:81;20] TRACE T_ALWAYS 3 0 0; [< "Z = Y^X" X Y Z >]
     NOP 'Only Traced if Optimize is OFF'
-    [58:66;16] NOP T_NOP 0 0 0; [< "Only Traced if Optimize is OFF" >]
+    [68:82;20] NOP T_NOP 0 0 0; [< "Only Traced if Optimize is OFF" >]
 ENDF
-    [17:1;16] BEGF T_BEGF 0 1 67; [< AOP-2ARG-TEST >]
-    [59:67;0] ENDF T_ENDF 0 1 0
+    [17:1;20] BEGF T_BEGF 0 1 83; [< AOP-2ARG-TEST >]
+    [69:83;0] ENDF T_ENDF 0 1 0
 
 SET_OPTIMIZE OFF
-    [61:68;0] SET_OPTIMIZE T_SET_OPTIMIZE 0 0 0
+    [71:84;0] SET_OPTIMIZE T_SET_OPTIMIZE 0 0 0
 CALL AOP-2ARG-TEST 0
-    [62:69;0] CALLM T_CALLM 0 0 1; [< AOP-2ARG-TEST >]
+    [72:85;0] CALLM T_CALLM 0 0 1; [< AOP-2ARG-TEST >]
 SET_OPTIMIZE ON
-    [63:70;0] SET_OPTIMIZE T_SET_OPTIMIZE 1 0 0
+    [73:86;0] SET_OPTIMIZE T_SET_OPTIMIZE 1 0 0
 CALL AOP-2ARG-TEST 0
-    [64:71;0] CALLM T_CALLM 0 0 1; [< AOP-2ARG-TEST >]
+    [74:87;0] CALLM T_CALLM 0 0 1; [< AOP-2ARG-TEST >]
 
 BEGF AOP-IMMED-TEST
-    [66:72;0] BEGF T_BEGF 0 1 0; [< AOP-IMMED-TEST >]
+    [76:88;0] BEGF T_BEGF 0 1 0; [< AOP-IMMED-TEST >]
     PUSHI 1.2345 X
-    [67:73;1] PUSHI T_PUSH 0 0 0 1.2345; X
+    [77:89;1] PUSHI T_PUSH 0 0 0 1.2345; X
     PUSH X
-    [68:74;2] PUSHS T_PUSH 0 0 0; [< X * >]
+    [78:90;2] PUSHS T_PUSH 0 0 0; [< X * >]
     ADDI 0.0005 Z
-    [69:75;2] ADDI T_AOP 0 0 0 0.0005; Z
-    [70:76;3] PUSHS T_PUSH 1 0 0; [< X * >]
-    [70:77;4] PUSHS T_PUSH 1 0 0; [< Z * >]
+    [79:91;2] ADDI T_AOP 0 0 0 0.0005; Z
+    [80:92;3] PUSHS T_PUSH 1 0 0; [< X * >]
+    [80:93;4] PUSHS T_PUSH 1 0 0; [< Z * >]
     TRACE 'Z = X + 0.0005' X Z
-    [70:78;2] TRACE T_ALWAYS 2 0 0; [< "Z = X + 0.0005" X Z >]
+    [80:94;2] TRACE T_ALWAYS 2 0 0; [< "Z = X + 0.0005" X Z >]
     PUSH X
-    [71:79;3] PUSHS T_PUSH 1 0 0; [< X * >]
+    [81:95;3] PUSHS T_PUSH 1 0 0; [< X * >]
     SUBI 0.03 Z
-    [72:80;3] SUBI T_AOP 0 0 0 0.03; Z
-    [73:81;4] PUSHS T_PUSH 2 0 0; [< X * >]
-    [73:82;5] PUSHS T_PUSH 1 0 0; [< Z * >]
+    [82:96;3] SUBI T_AOP 0 0 0 0.03; Z
+    [83:97;4] PUSHS T_PUSH 2 0 0; [< X * >]
+    [83:98;5] PUSHS T_PUSH 1 0 0; [< Z * >]
     TRACE 'Z = X - 0.03' X Z
-    [73:83;3] TRACE T_ALWAYS 2 0 0; [< "Z = X - 0.03" X Z >]
+    [83:99;3] TRACE T_ALWAYS 2 0 0; [< "Z = X - 0.03" X Z >]
     PUSH X
-    [74:84;4] PUSHS T_PUSH 2 0 0; [< X * >]
+    [84:100;4] PUSHS T_PUSH 2 0 0; [< X * >]
     SUBRI 0.23 Z
-    [75:85;4] SUBRI T_AOP 0 0 0 0.23; Z
-    [76:86;5] PUSHS T_PUSH 3 0 0; [< X * >]
-    [76:87;6] PUSHS T_PUSH 1 0 0; [< Z * >]
+    [85:101;4] SUBRI T_AOP 0 0 0 0.23; Z
+    [86:102;5] PUSHS T_PUSH 3 0 0; [< X * >]
+    [86:103;6] PUSHS T_PUSH 1 0 0; [< Z * >]
     TRACE 'Z = 0.23 - X' X Z
-    [76:88;4] TRACE T_ALWAYS 2 0 0; [< "Z = 0.23 - X" X Z >]
+    [86:104;4] TRACE T_ALWAYS 2 0 0; [< "Z = 0.23 - X" X Z >]
     PUSH X
-    [77:89;5] PUSHS T_PUSH 3 0 0; [< X * >]
+    [87:105;5] PUSHS T_PUSH 3 0 0; [< X * >]
     MULI 3 Z
-    [78:90;5] MULI T_AOP 0 0 0 3; Z
-    [79:91;6] PUSHS T_PUSH 4 0 0; [< X * >]
-    [79:92;7] PUSHS T_PUSH 1 0 0; [< Z * >]
+    [88:106;5] MULI T_AOP 0 0 0 3; Z
+    [89:107;6] PUSHS T_PUSH 4 0 0; [< X * >]
+    [89:108;7] PUSHS T_PUSH 1 0 0; [< Z * >]
     TRACE 'Z = 3 * X' X Z
-    [79:93;5] TRACE T_ALWAYS 2 0 0; [< "Z = 3 * X" X Z >]
+    [89:109;5] TRACE T_ALWAYS 2 0 0; [< "Z = 3 * X" X Z >]
 
     PUSHI 5 X
-    [81:94;6] PUSHI T_PUSH 0 0 0 5; X
+    [91:110;6] PUSHI T_PUSH 0 0 0 5; X
     PUSH X
-    [82:95;7] PUSHS T_PUSH 0 0 0; [< X * >]
+    [92:111;7] PUSHS T_PUSH 0 0 0; [< X * >]
     DIVI 2 Z
-    [83:96;7] DIVI T_AOP 0 0 0 2; Z
-    [84:97;8] PUSHS T_PUSH 1 0 0; [< X * >]
-    [84:98;9] PUSHS T_PUSH 1 0 0; [< Z * >]
+    [93:112;7] DIVI T_AOP 0 0 0 2; Z
+    [94:113;8] PUSHS T_PUSH 1 0 0; [< X * >]
+    [94:114;9] PUSHS T_PUSH 1 0 0; [< Z * >]
     TRACE 'Z = X / 2' X Z
-    [84:99;7] TRACE T_ALWAYS 2 0 0; [< "Z = X / 2" X Z >]
+    [94:115;7] TRACE T_ALWAYS 2 0 0; [< "Z = X / 2" X Z >]
     PUSH X
-    [85:100;8] PUSHS T_PUSH 1 0 0; [< X * >]
+    [95:116;8] PUSHS T_PUSH 1 0 0; [< X * >]
     DIVRI 2 Z
-    [86:101;8] DIVRI T_AOP 0 0 0 2; Z
-    [87:102;9] PUSHS T_PUSH 2 0 0; [< X * >]
-    [87:103;10] PUSHS T_PUSH 1 0 0; [< Z * >]
+    [96:117;8] DIVRI T_AOP 0 0 0 2; Z
+    [97:118;9] PUSHS T_PUSH 2 0 0; [< X * >]
+    [97:119;10] PUSHS T_PUSH 1 0 0; [< Z * >]
     TRACE 'Z = 2 / X' X Z
-    [87:104;8] TRACE T_ALWAYS 2 0 0; [< "Z = 2 / X" X Z >]
+    [97:120;8] TRACE T_ALWAYS 2 0 0; [< "Z = 2 / X" X Z >]
     PUSH X
-    [88:105;9] PUSHS T_PUSH 2 0 0; [< X * >]
+    [98:121;9] PUSHS T_PUSH 2 0 0; [< X * >]
     MODI 2 Z
-    [89:106;9] MODI T_AOP 0 0 0 2; Z
-    [90:107;10] PUSHS T_PUSH 3 0 0; [< X * >]
-    [90:108;11] PUSHS T_PUSH 1 0 0; [< Z * >]
+    [99:122;9] MODI T_AOP 0 0 0 2; Z
+    [100:123;10] PUSHS T_PUSH 3 0 0; [< X * >]
+    [100:124;11] PUSHS T_PUSH 1 0 0; [< Z * >]
     TRACE 'Z = X MOD 2' X Z
-    [90:109;9] TRACE T_ALWAYS 2 0 0; [< "Z = X MOD 2" X Z >]
+    [100:125;9] TRACE T_ALWAYS 2 0 0; [< "Z = X MOD 2" X Z >]
     PUSH X
-    [91:110;10] PUSHS T_PUSH 3 0 0; [< X * >]
+    [101:126;10] PUSHS T_PUSH 3 0 0; [< X * >]
     MODRI 12 Z
-    [92:111;10] MODRI T_AOP 0 0 0 12; Z
-    [93:112;11] PUSHS T_PUSH 4 0 0; [< X * >]
-    [93:113;12] PUSHS T_PUSH 1 0 0; [< Z * >]
+    [102:127;10] MODRI T_AOP 0 0 0 12; Z
+    [103:128;11] PUSHS T_PUSH 4 0 0; [< X * >]
+    [103:129;12] PUSHS T_PUSH 1 0 0; [< Z * >]
     TRACE 'Z = 12 MOD X' X Z
-    [93:114;10] TRACE T_ALWAYS 2 0 0; [< "Z = 12 MOD X" X Z >]
+    [103:130;10] TRACE T_ALWAYS 2 0 0; [< "Z = 12 MOD X" X Z >]
 
     PUSHI 3 X
-    [95:115;11] PUSHI T_PUSH 0 0 0 3; X
+    [105:131;11] PUSHI T_PUSH 0 0 0 3; X
     PUSH X
-    [96:116;12] PUSHS T_PUSH 0 0 0; [< X * >]
+    [106:132;12] PUSHS T_PUSH 0 0 0; [< X * >]
     POWI 3 Z
-    [97:117;12] POWI T_AOP 0 0 0 3; Z
-    [98:118;13] PUSHS T_PUSH 1 0 0; [< X * >]
-    [98:119;14] PUSHS T_PUSH 1 0 0; [< Z * >]
+    [107:133;12] POWI T_AOP 0 0 0 3; Z
+    [108:134;13] PUSHS T_PUSH 1 0 0; [< X * >]
+    [108:135;14] PUSHS T_PUSH 1 0 0; [< Z * >]
     TRACE 'Z = X^3' X Z
-    [98:120;12] TRACE T_ALWAYS 2 0 0; [< "Z = X^3" X Z >]
+    [108:136;12] TRACE T_ALWAYS 2 0 0; [< "Z = X^3" X Z >]
     PUSHI 0.5 X
-    [99:121;13] PUSHI T_PUSH 0 0 0 0.5; X
+    [109:137;13] PUSHI T_PUSH 0 0 0 0.5; X
     PUSH X
-    [100:122;14] PUSHS T_PUSH 0 0 0; [< X * >]
+    [110:138;14] PUSHS T_PUSH 0 0 0; [< X * >]
     POWI 10 Z
-    [101:123;14] POWI T_AOP 0 0 0 10; Z
-    [102:124;15] PUSHS T_PUSH 1 0 0; [< X * >]
-    [102:125;16] PUSHS T_PUSH 1 0 0; [< Z * >]
+    [111:139;14] POWI T_AOP 0 0 0 10; Z
+    [112:140;15] PUSHS T_PUSH 1 0 0; [< X * >]
+    [112:141;16] PUSHS T_PUSH 1 0 0; [< Z * >]
     TRACE 'Z = X^10' X Z
-    [102:126;14] TRACE T_ALWAYS 2 0 0; [< "Z = X^10" X Z >]
+    [112:142;14] TRACE T_ALWAYS 2 0 0; [< "Z = X^10" X Z >]
     PUSH Z
-    [103:127;15] PUSHS T_PUSH 0 0 0; [< Z * >]
+    [113:143;15] PUSHS T_PUSH 0 0 0; [< Z * >]
     MULI 1024 W
-    [104:128;15] MULI T_AOP 0 0 0 1024; W
-    [105:129;16] PUSHS T_PUSH 1 0 0; [< Z * >]
-    [105:130;17] PUSHS T_PUSH 1 0 0; [< W * >]
+    [114:144;15] MULI T_AOP 0 0 0 1024; W
+    [115:145;16] PUSHS T_PUSH 1 0 0; [< Z * >]
+    [115:146;17] PUSHS T_PUSH 1 0 0; [< W * >]
     TRACE 'W = 1024 * Z' Z W
-    [105:131;15] TRACE T_ALWAYS 2 0 0; [< "W = 1024 * Z" Z W >]
+    [115:147;15] TRACE T_ALWAYS 2 0 0; [< "W = 1024 * Z" Z W >]
+    PUSHI 10 X
+    [116:148;16] PUSHI T_PUSH 0 0 0 10; X
+    PUSH X
+    [117:149;17] PUSHS T_PUSH 0 0 0; [< X * >]
+    POWRI 2 Z
+    [118:150;17] POWRI T_AOP 0 0 0 2; Z
+    [119:151;18] PUSHS T_PUSH 0 0 0; [< Z * >]
+    [119:152;19] PUSHS T_PUSH 2 0 0; [< X * >]
+    TRACE 'Z = 2^X' Z X
+    [119:153;17] TRACE T_ALWAYS 2 0 0; [< "Z = 2^X" Z X >]
 
     NOP 'Only Traced if Optimize is OFF'
-    [107:132;15] NOP T_NOP 0 0 0; [< "Only Traced if Optimize is OFF" >]
+    [121:154;17] NOP T_NOP 0 0 0; [< "Only Traced if Optimize is OFF" >]
 ENDF
-    [66:72;15] BEGF T_BEGF 0 1 62; [< AOP-IMMED-TEST >]
-    [108:133;0] ENDF T_ENDF 0 1 0
+    [76:88;17] BEGF T_BEGF 0 1 68; [< AOP-IMMED-TEST >]
+    [122:155;0] ENDF T_ENDF 0 1 0
 
 SET_OPTIMIZE OFF
-    [110:134;0] SET_OPTIMIZE T_SET_OPTIMIZE 0 0 0
+    [124:156;0] SET_OPTIMIZE T_SET_OPTIMIZE 0 0 0
 CALL AOP-IMMED-TEST 0
-    [111:135;0] CALLM T_CALLM 0 0 72; [< AOP-IMMED-TEST >]
+    [125:157;0] CALLM T_CALLM 0 0 88; [< AOP-IMMED-TEST >]
 SET_OPTIMIZE ON
-    [112:136;0] SET_OPTIMIZE T_SET_OPTIMIZE 1 0 0
+    [126:158;0] SET_OPTIMIZE T_SET_OPTIMIZE 1 0 0
 CALL AOP-IMMED-TEST 0
-    [113:137;0] CALLM T_CALLM 0 0 72; [< AOP-IMMED-TEST >]
+    [127:159;0] CALLM T_CALLM 0 0 88; [< AOP-IMMED-TEST >]
 
 BEGF AOP-1ARG-TEST
-    [115:138;0] BEGF T_BEGF 0 1 0; [< AOP-1ARG-TEST >]
+    [129:160;0] BEGF T_BEGF 0 1 0; [< AOP-1ARG-TEST >]
     PUSHI -53 X
-    [116:139;1] PUSHI T_PUSH 0 0 0 -53; X
+    [130:161;1] PUSHI T_PUSH 0 0 0 -53; X
     PUSH X
-    [117:140;2] PUSHS T_PUSH 0 0 0; [< X * >]
+    [131:162;2] PUSHS T_PUSH 0 0 0; [< X * >]
     NEG Z
-    [118:141;2] NEG T_AOP 0 0 0; Z
-    [119:142;3] PUSHS T_PUSH 1 0 0; [< X * >]
-    [119:143;4] PUSHS T_PUSH 1 0 0; [< Z * >]
+    [132:163;2] NEG T_AOP 0 0 0; Z
+    [133:164;3] PUSHS T_PUSH 1 0 0; [< X * >]
+    [133:165;4] PUSHS T_PUSH 1 0 0; [< Z * >]
     TRACE 'Z = - X' X Z
-    [119:144;2] TRACE T_ALWAYS 2 0 0; [< "Z = - X" X Z >]
+    [133:166;2] TRACE T_ALWAYS 2 0 0; [< "Z = - X" X Z >]
     PUSH X
-    [120:145;3] PUSHS T_PUSH 1 0 0; [< X * >]
+    [134:167;3] PUSHS T_PUSH 1 0 0; [< X * >]
     ABS Z
-    [121:146;3] ABS T_AOP 0 0 0; Z
-    [122:147;4] PUSHS T_PUSH 2 0 0; [< X * >]
-    [122:148;5] PUSHS T_PUSH 1 0 0; [< Z * >]
+    [135:168;3] ABS T_AOP 0 0 0; Z
+    [136:169;4] PUSHS T_PUSH 2 0 0; [< X * >]
+    [136:170;5] PUSHS T_PUSH 1 0 0; [< Z * >]
     TRACE 'Z = ABS ( X )' X Z
-    [122:149;3] TRACE T_ALWAYS 2 0 0; [< "Z = ABS ( X )" X Z >]
+    [136:171;3] TRACE T_ALWAYS 2 0 0; [< "Z = ABS ( X )" X Z >]
 
     PUSHI 1 X
-    [124:150;4] PUSHI T_PUSH 0 0 0 1; X
+    [138:172;4] PUSHI T_PUSH 0 0 0 1; X
     PUSH X
-    [125:151;5] PUSHS T_PUSH 0 0 0; [< X * >]
+    [139:173;5] PUSHS T_PUSH 0 0 0; [< X * >]
     EXP Z
-    [126:152;5] EXP T_AOP 0 0 0; Z
-    [127:153;6] PUSHS T_PUSH 1 0 0; [< X * >]
-    [127:154;7] PUSHS T_PUSH 1 0 0; [< Z * >]
+    [140:174;5] EXP T_AOP 0 0 0; Z
+    [141:175;6] PUSHS T_PUSH 1 0 0; [< X * >]
+    [141:176;7] PUSHS T_PUSH 1 0 0; [< Z * >]
     TRACE 'Z = EXP ( X )' X Z
-    [127:155;5] TRACE T_ALWAYS 2 0 0; [< "Z = EXP ( X )" X Z >]
+    [141:177;5] TRACE T_ALWAYS 2 0 0; [< "Z = EXP ( X )" X Z >]
     PUSH Z
-    [128:156;6] PUSHS T_PUSH 0 0 0; [< Z * >]
+    [142:178;6] PUSHS T_PUSH 0 0 0; [< Z * >]
     LOG W
-    [129:157;6] LOG T_AOP 0 0 0; W
-    [130:158;7] PUSHS T_PUSH 1 0 0; [< Z * >]
-    [130:159;8] PUSHS T_PUSH 1 0 0; [< W * >]
+    [143:179;6] LOG T_AOP 0 0 0; W
+    [144:180;7] PUSHS T_PUSH 1 0 0; [< Z * >]
+    [144:181;8] PUSHS T_PUSH 1 0 0; [< W * >]
     TRACE 'W = LOG ( Z )' Z W
-    [130:160;6] TRACE T_ALWAYS 2 0 0; [< "W = LOG ( Z )" Z W >]
+    [144:182;6] TRACE T_ALWAYS 2 0 0; [< "W = LOG ( Z )" Z W >]
 
     PUSHI 3 X
-    [132:161;7] PUSHI T_PUSH 0 0 0 3; X
+    [146:183;7] PUSHI T_PUSH 0 0 0 3; X
     PUSH X
-    [133:162;8] PUSHS T_PUSH 0 0 0; [< X * >]
+    [147:184;8] PUSHS T_PUSH 0 0 0; [< X * >]
     EXP10 Z
-    [134:163;8] EXP10 T_AOP 0 0 0; Z
-    [135:164;9] PUSHS T_PUSH 1 0 0; [< X * >]
-    [135:165;10] PUSHS T_PUSH 1 0 0; [< Z * >]
+    [148:185;8] EXP10 T_AOP 0 0 0; Z
+    [149:186;9] PUSHS T_PUSH 1 0 0; [< X * >]
+    [149:187;10] PUSHS T_PUSH 1 0 0; [< Z * >]
     TRACE 'Z = EXP10 ( X )' X Z
-    [135:166;8] TRACE T_ALWAYS 2 0 0; [< "Z = EXP10 ( X )" X Z >]
+    [149:188;8] TRACE T_ALWAYS 2 0 0; [< "Z = EXP10 ( X )" X Z >]
     PUSH Z
-    [136:167;9] PUSHS T_PUSH 0 0 0; [< Z * >]
+    [150:189;9] PUSHS T_PUSH 0 0 0; [< Z * >]
     LOG10 W
-    [137:168;9] LOG10 T_AOP 0 0 0; W
-    [138:169;10] PUSHS T_PUSH 1 0 0; [< Z * >]
-    [138:170;11] PUSHS T_PUSH 1 0 0; [< W * >]
+    [151:190;9] LOG10 T_AOP 0 0 0; W
+    [152:191;10] PUSHS T_PUSH 1 0 0; [< Z * >]
+    [152:192;11] PUSHS T_PUSH 1 0 0; [< W * >]
     TRACE 'W = LOG10 ( Z )' Z W
-    [138:171;9] TRACE T_ALWAYS 2 0 0; [< "W = LOG10 ( Z )" Z W >]
+    [152:193;9] TRACE T_ALWAYS 2 0 0; [< "W = LOG10 ( Z )" Z W >]
 
     PUSHI 3.141592653589793238462643383279502884197 PI
-    [140:172;10] PUSHI T_PUSH 0 0 0 3.14159265358979; PI
+    [154:194;10] PUSHI T_PUSH 0 0 0 3.14159265358979; PI
     PUSH PI
-    [141:173;11] PUSHS T_PUSH 0 0 0; [< PI * >]
+    [155:195;11] PUSHS T_PUSH 0 0 0; [< PI * >]
     DIVI 6 X
-    [142:174;11] DIVI T_AOP 0 0 0 6; X
+    [156:196;11] DIVI T_AOP 0 0 0 6; X
     PUSH X
-    [143:175;12] PUSHS T_PUSH 0 0 0; [< X * >]
+    [157:197;12] PUSHS T_PUSH 0 0 0; [< X * >]
     SIN Z
-    [144:176;12] SIN T_AOP 0 0 0; Z
-    [145:177;13] PUSHS T_PUSH 1 0 0; [< X * >]
-    [145:178;14] PUSHS T_PUSH 1 0 0; [< Z * >]
+    [158:198;12] SIN T_AOP 0 0 0; Z
+    [159:199;13] PUSHS T_PUSH 1 0 0; [< X * >]
+    [159:200;14] PUSHS T_PUSH 1 0 0; [< Z * >]
     TRACE 'Z = SIN (X = PI/6 )' X Z
-    [145:179;12] TRACE T_ALWAYS 2 0 0; [< "Z = SIN (X = PI/6 )" X Z >]
+    [159:201;12] TRACE T_ALWAYS 2 0 0; [< "Z = SIN (X = PI/6 )" X Z >]
     PUSH Z
-    [146:180;13] PUSHS T_PUSH 0 0 0; [< Z * >]
+    [160:202;13] PUSHS T_PUSH 0 0 0; [< Z * >]
     ASIN W
-    [147:181;13] ASIN T_AOP 0 0 0; W
-    [148:182;14] PUSHS T_PUSH 1 0 0; [< Z * >]
-    [148:183;15] PUSHS T_PUSH 1 0 0; [< W * >]
+    [161:203;13] ASIN T_AOP 0 0 0; W
+    [162:204;14] PUSHS T_PUSH 1 0 0; [< Z * >]
+    [162:205;15] PUSHS T_PUSH 1 0 0; [< W * >]
     TRACE 'W = ASIN ( Z )' Z W
-    [148:184;13] TRACE T_ALWAYS 2 0 0; [< "W = ASIN ( Z )" Z W >]
+    [162:206;13] TRACE T_ALWAYS 2 0 0; [< "W = ASIN ( Z )" Z W >]
 
     PUSH PI
-    [150:185;14] PUSHS T_PUSH 3 0 0; [< PI * >]
+    [164:207;14] PUSHS T_PUSH 3 0 0; [< PI * >]
     DIVI 3 X
-    [151:186;14] DIVI T_AOP 0 0 0 3; X
+    [165:208;14] DIVI T_AOP 0 0 0 3; X
     PUSH X
-    [152:187;15] PUSHS T_PUSH 0 0 0; [< X * >]
+    [166:209;15] PUSHS T_PUSH 0 0 0; [< X * >]
     COS Z
-    [153:188;15] COS T_AOP 0 0 0; Z
-    [154:189;16] PUSHS T_PUSH 1 0 0; [< X * >]
-    [154:190;17] PUSHS T_PUSH 1 0 0; [< Z * >]
+    [167:210;15] COS T_AOP 0 0 0; Z
+    [168:211;16] PUSHS T_PUSH 1 0 0; [< X * >]
+    [168:212;17] PUSHS T_PUSH 1 0 0; [< Z * >]
     TRACE 'Z = COS (X = PI/3 )' X Z
-    [154:191;15] TRACE T_ALWAYS 2 0 0; [< "Z = COS (X = PI/3 )" X Z >]
+    [168:213;15] TRACE T_ALWAYS 2 0 0; [< "Z = COS (X = PI/3 )" X Z >]
     PUSH Z
-    [155:192;16] PUSHS T_PUSH 0 0 0; [< Z * >]
+    [169:214;16] PUSHS T_PUSH 0 0 0; [< Z * >]
     ACOS W
-    [156:193;16] ACOS T_AOP 0 0 0; W
-    [157:194;17] PUSHS T_PUSH 1 0 0; [< Z * >]
-    [157:195;18] PUSHS T_PUSH 1 0 0; [< W * >]
+    [170:215;16] ACOS T_AOP 0 0 0; W
+    [171:216;17] PUSHS T_PUSH 1 0 0; [< Z * >]
+    [171:217;18] PUSHS T_PUSH 1 0 0; [< W * >]
     TRACE 'W = ACOS ( Z )' Z W
-    [157:196;16] TRACE T_ALWAYS 2 0 0; [< "W = ACOS ( Z )" Z W >]
+    [171:218;16] TRACE T_ALWAYS 2 0 0; [< "W = ACOS ( Z )" Z W >]
 
     PUSH PI
-    [159:197;17] PUSHS T_PUSH 6 0 0; [< PI * >]
+    [173:219;17] PUSHS T_PUSH 6 0 0; [< PI * >]
     DIVI 4 X
-    [160:198;17] DIVI T_AOP 0 0 0 4; X
+    [174:220;17] DIVI T_AOP 0 0 0 4; X
     PUSH X
-    [161:199;18] PUSHS T_PUSH 0 0 0; [< X * >]
+    [175:221;18] PUSHS T_PUSH 0 0 0; [< X * >]
     TAN Z
-    [162:200;18] TAN T_AOP 0 0 0; Z
-    [163:201;19] PUSHS T_PUSH 1 0 0; [< X * >]
-    [163:202;20] PUSHS T_PUSH 1 0 0; [< Z * >]
+    [176:222;18] TAN T_AOP 0 0 0; Z
+    [177:223;19] PUSHS T_PUSH 1 0 0; [< X * >]
+    [177:224;20] PUSHS T_PUSH 1 0 0; [< Z * >]
     TRACE 'Z = TAN (X = PI/4 )' X Z
-    [163:203;18] TRACE T_ALWAYS 2 0 0; [< "Z = TAN (X = PI/4 )" X Z >]
+    [177:225;18] TRACE T_ALWAYS 2 0 0; [< "Z = TAN (X = PI/4 )" X Z >]
     PUSH Z
-    [164:204;19] PUSHS T_PUSH 0 0 0; [< Z * >]
+    [178:226;19] PUSHS T_PUSH 0 0 0; [< Z * >]
     ATAN W
-    [165:205;19] ATAN T_AOP 0 0 0; W
-    [166:206;20] PUSHS T_PUSH 1 0 0; [< Z * >]
-    [166:207;21] PUSHS T_PUSH 1 0 0; [< W * >]
+    [179:227;19] ATAN T_AOP 0 0 0; W
+    [180:228;20] PUSHS T_PUSH 1 0 0; [< Z * >]
+    [180:229;21] PUSHS T_PUSH 1 0 0; [< W * >]
     TRACE 'W = ATAN ( Z )' Z W
-    [166:208;19] TRACE T_ALWAYS 2 0 0; [< "W = ATAN ( Z )" Z W >]
+    [180:230;19] TRACE T_ALWAYS 2 0 0; [< "W = ATAN ( Z )" Z W >]
 
     PUSHI -1
-    [168:209;20] PUSHI T_PUSH 0 0 0 -1; *
+    [182:231;20] PUSHI T_PUSH 0 0 0 -1; *
     PUSHI +1
-    [169:210;21] PUSHI T_PUSH 0 0 0 1; *
+    [183:232;21] PUSHI T_PUSH 0 0 0 1; *
     ATAN2 Z
-    [170:211;20] ATAN2 T_AOP 0 0 0; Z
-    [171:212;21] PUSHS T_PUSH 0 0 0; [< Z * >]
+    [184:233;20] ATAN2 T_AOP 0 0 0; Z
+    [185:234;21] PUSHS T_PUSH 0 0 0; [< Z * >]
     TRACE 'Z = ATAN2 ( -1, +1 )' Z
-    [171:213;20] TRACE T_ALWAYS 1 0 0; [< "Z = ATAN2 ( -1, +1 )" Z >]
+    [185:235;20] TRACE T_ALWAYS 1 0 0; [< "Z = ATAN2 ( -1, +1 )" Z >]
     PUSH PI
-    [172:214;21] PUSHS T_PUSH 10 0 0; [< PI * >]
+    [186:236;21] PUSHS T_PUSH 10 0 0; [< PI * >]
     DIVI 4 X
-    [173:215;21] DIVI T_AOP 0 0 0 4; X
-    [174:216;22] PUSHS T_PUSH 0 0 0; [< X * >]
+    [187:237;21] DIVI T_AOP 0 0 0 4; X
+    [188:238;22] PUSHS T_PUSH 0 0 0; [< X * >]
     TRACE 'X = PI/4' X
-    [174:217;21] TRACE T_ALWAYS 1 0 0; [< "X = PI/4" X >]
+    [188:239;21] TRACE T_ALWAYS 1 0 0; [< "X = PI/4" X >]
     PUSHI -1
-    [175:218;22] PUSHI T_PUSH 0 0 0 -1; *
+    [189:240;22] PUSHI T_PUSH 0 0 0 -1; *
     PUSHI +1
-    [176:219;23] PUSHI T_PUSH 0 0 0 1; *
+    [190:241;23] PUSHI T_PUSH 0 0 0 1; *
     ATAN2R Z
-    [177:220;22] ATAN2R T_AOP 0 0 0; Z
-    [178:221;23] PUSHS T_PUSH 0 0 0; [< Z * >]
+    [191:242;22] ATAN2R T_AOP 0 0 0; Z
+    [192:243;23] PUSHS T_PUSH 0 0 0; [< Z * >]
     TRACE 'Z = ATAN2R ( -1, +1 )' Z
-    [178:222;22] TRACE T_ALWAYS 1 0 0; [< "Z = ATAN2R ( -1, +1 )" Z >]
+    [192:244;22] TRACE T_ALWAYS 1 0 0; [< "Z = ATAN2R ( -1, +1 )" Z >]
     PUSH PI
-    [179:223;23] PUSHS T_PUSH 12 0 0; [< PI * >]
+    [193:245;23] PUSHS T_PUSH 12 0 0; [< PI * >]
     DIVI 4
-    [180:224;23] DIVI T_AOP 0 0 0 4; *
+    [194:246;23] DIVI T_AOP 0 0 0 4; *
     MULI 3 X
-    [181:225;23] MULI T_AOP 0 0 0 3; X
-    [182:226;24] PUSHS T_PUSH 0 0 0; [< X * >]
+    [195:247;23] MULI T_AOP 0 0 0 3; X
+    [196:248;24] PUSHS T_PUSH 0 0 0; [< X * >]
     TRACE 'X = 3*PI/4' X
-    [182:227;23] TRACE T_ALWAYS 1 0 0; [< "X = 3*PI/4" X >]
+    [196:249;23] TRACE T_ALWAYS 1 0 0; [< "X = 3*PI/4" X >]
 
     NOP 'Only Traced if Optimize is OFF'
-    [184:228;23] NOP T_NOP 0 0 0; [< "Only Traced if Optimize is OFF" >]
+    [198:250;23] NOP T_NOP 0 0 0; [< "Only Traced if Optimize is OFF" >]
 ENDF
-    [115:138;23] BEGF T_BEGF 0 1 92; [< AOP-1ARG-TEST >]
-    [185:229;0] ENDF T_ENDF 0 1 0
+    [129:160;23] BEGF T_BEGF 0 1 92; [< AOP-1ARG-TEST >]
+    [199:251;0] ENDF T_ENDF 0 1 0
 
 SET_OPTIMIZE OFF
-    [187:230;0] SET_OPTIMIZE T_SET_OPTIMIZE 0 0 0
+    [201:252;0] SET_OPTIMIZE T_SET_OPTIMIZE 0 0 0
 CALL AOP-1ARG-TEST 0
-    [188:231;0] CALLM T_CALLM 0 0 138; [< AOP-1ARG-TEST >]
+    [202:253;0] CALLM T_CALLM 0 0 160; [< AOP-1ARG-TEST >]
 SET_OPTIMIZE ON
-    [189:232;0] SET_OPTIMIZE T_SET_OPTIMIZE 1 0 0
+    [203:254;0] SET_OPTIMIZE T_SET_OPTIMIZE 1 0 0
 CALL AOP-1ARG-TEST 0
-    [190:233;0] CALLM T_CALLM 0 0 138; [< AOP-1ARG-TEST >]
+    [204:255;0] CALLM T_CALLM 0 0 160; [< AOP-1ARG-TEST >]
 * {13:0,0,1} SET_TRACE: NOP SET_OPTIMIZE
-* {61:68,0,3} SET_OPTIMIZE: OFF <= OFF
+* {71:84,0,3} SET_OPTIMIZE: OFF <= OFF
 *** {23:10,3,13} TRACE: "Z = X + Y", X=4.321, Y=-0.002, Z=4.319
 *** {27:17,4,20} TRACE: "Z = X - Y", X=4.321, Y=-0.002, Z=4.323
 *** {31:24,5,27} TRACE: "Z = - X + Y", X=4.321, Y=-0.002, Z=-4.323
@@ -435,80 +471,86 @@ CALL AOP-1ARG-TEST 0
 *** {45:47,10,50} TRACE: "Z = Y / X", X=4.321, Y=43.21, Z=10
 *** {51:56,13,59} TRACE: "Z = X MOD Y", X=4.321, Y=2, Z=0.321
 *** {57:65,16,68} TRACE: "Z = Y MOD X", X=2, Y=5.321, Z=1.321
-*** {58:66,16,69} NOP: "Only Traced if Optimize is OFF"
-* {63:70,0,71} SET_OPTIMIZE: ON <= OFF
-*** {23:10,3,81} TRACE: "Z = X + Y", X=4.321, Y=-0.002, Z=4.319
-*** {27:17,4,88} TRACE: "Z = X - Y", X=4.321, Y=-0.002, Z=4.323
-*** {31:24,5,95} TRACE: "Z = - X + Y", X=4.321, Y=-0.002, Z=-4.323
-*** {35:31,6,102} TRACE: "Z = X * Y", X=4.321, Y=-0.002, Z=-0.008642
-*** {41:40,9,111} TRACE: "Z = X / Y", X=4.321, Y=43.21, Z=0.1
-*** {45:47,10,118} TRACE: "Z = Y / X", X=4.321, Y=43.21, Z=10
-*** {51:56,13,127} TRACE: "Z = X MOD Y", X=4.321, Y=2, Z=0.321
-*** {57:65,16,136} TRACE: "Z = Y MOD X", X=2, Y=5.321, Z=1.321
-* {110:134,0,140} SET_OPTIMIZE: OFF <= ON
-*** {70:78,2,147} TRACE: "Z = X + 0.0005", X=1.2345, Z=1.235
-*** {73:83,3,152} TRACE: "Z = X - 0.03", X=1.2345, Z=1.2045
-*** {76:88,4,157} TRACE: "Z = 0.23 - X", X=1.2345, Z=-1.0045
-*** {79:93,5,162} TRACE: "Z = 3 * X", X=1.2345, Z=3.7035
-*** {84:99,7,168} TRACE: "Z = X / 2", X=5, Z=2.5
-*** {87:104,8,173} TRACE: "Z = 2 / X", X=5, Z=0.4
-*** {90:109,9,178} TRACE: "Z = X MOD 2", X=5, Z=1
-*** {93:114,10,183} TRACE: "Z = 12 MOD X", X=5, Z=2
-*** {98:120,12,189} TRACE: "Z = X^3", X=3, Z=27
-*** {102:126,14,195} TRACE: "Z = X^10", X=0.5, Z=0.0009765625
-*** {105:131,15,200} TRACE: "W = 1024 * Z", Z=0.0009765625, W=1
-*** {107:132,15,201} NOP: "Only Traced if Optimize is OFF"
-* {112:136,0,203} SET_OPTIMIZE: ON <= OFF
-*** {70:78,2,210} TRACE: "Z = X + 0.0005", X=1.2345, Z=1.235
-*** {73:83,3,215} TRACE: "Z = X - 0.03", X=1.2345, Z=1.2045
-*** {76:88,4,220} TRACE: "Z = 0.23 - X", X=1.2345, Z=-1.0045
-*** {79:93,5,225} TRACE: "Z = 3 * X", X=1.2345, Z=3.7035
-*** {84:99,7,231} TRACE: "Z = X / 2", X=5, Z=2.5
-*** {87:104,8,236} TRACE: "Z = 2 / X", X=5, Z=0.4
-*** {90:109,9,241} TRACE: "Z = X MOD 2", X=5, Z=1
-*** {93:114,10,246} TRACE: "Z = 12 MOD X", X=5, Z=2
-*** {98:120,12,252} TRACE: "Z = X^3", X=3, Z=27
-*** {102:126,14,258} TRACE: "Z = X^10", X=0.5, Z=0.0009765625
-*** {105:131,15,263} TRACE: "W = 1024 * Z", Z=0.0009765625, W=1
-* {187:230,0,267} SET_OPTIMIZE: OFF <= ON
-*** {119:144,2,274} TRACE: "Z = - X", X=-53, Z=53
-*** {122:149,3,279} TRACE: "Z = ABS ( X )", X=-53, Z=53
-*** {127:155,5,285} TRACE: "Z = EXP ( X )", X=1, Z=2.71828182845905
-*** {130:160,6,290} TRACE: "W = LOG ( Z )", Z=2.71828182845905, W=1
-*** {135:166,8,296} TRACE: "Z = EXP10 ( X )", X=3, Z=1000
-*** {138:171,9,301} TRACE: "W = LOG10 ( Z )", Z=1000, W=3
-*** {145:179,12,309} TRACE: "Z = SIN (X = PI/6 )", X=0.523598775598299,
+*** {63:74,19,77} TRACE: "Z = X^Y", X=2, Y=10, Z=1024
+*** {67:81,20,84} TRACE: "Z = Y^X", X=2, Y=10, Z=100
+*** {68:82,20,85} NOP: "Only Traced if Optimize is OFF"
+* {73:86,0,87} SET_OPTIMIZE: ON <= OFF
+*** {23:10,3,97} TRACE: "Z = X + Y", X=4.321, Y=-0.002, Z=4.319
+*** {27:17,4,104} TRACE: "Z = X - Y", X=4.321, Y=-0.002, Z=4.323
+*** {31:24,5,111} TRACE: "Z = - X + Y", X=4.321, Y=-0.002, Z=-4.323
+*** {35:31,6,118} TRACE: "Z = X * Y", X=4.321, Y=-0.002, Z=-0.008642
+*** {41:40,9,127} TRACE: "Z = X / Y", X=4.321, Y=43.21, Z=0.1
+*** {45:47,10,134} TRACE: "Z = Y / X", X=4.321, Y=43.21, Z=10
+*** {51:56,13,143} TRACE: "Z = X MOD Y", X=4.321, Y=2, Z=0.321
+*** {57:65,16,152} TRACE: "Z = Y MOD X", X=2, Y=5.321, Z=1.321
+*** {63:74,19,161} TRACE: "Z = X^Y", X=2, Y=10, Z=1024
+*** {67:81,20,168} TRACE: "Z = Y^X", X=2, Y=10, Z=100
+* {124:156,0,172} SET_OPTIMIZE: OFF <= ON
+*** {80:94,2,179} TRACE: "Z = X + 0.0005", X=1.2345, Z=1.235
+*** {83:99,3,184} TRACE: "Z = X - 0.03", X=1.2345, Z=1.2045
+*** {86:104,4,189} TRACE: "Z = 0.23 - X", X=1.2345, Z=-1.0045
+*** {89:109,5,194} TRACE: "Z = 3 * X", X=1.2345, Z=3.7035
+*** {94:115,7,200} TRACE: "Z = X / 2", X=5, Z=2.5
+*** {97:120,8,205} TRACE: "Z = 2 / X", X=5, Z=0.4
+*** {100:125,9,210} TRACE: "Z = X MOD 2", X=5, Z=1
+*** {103:130,10,215} TRACE: "Z = 12 MOD X", X=5, Z=2
+*** {108:136,12,221} TRACE: "Z = X^3", X=3, Z=27
+*** {112:142,14,227} TRACE: "Z = X^10", X=0.5, Z=0.0009765625
+*** {115:147,15,232} TRACE: "W = 1024 * Z", Z=0.0009765625, W=1
+*** {119:153,17,238} TRACE: "Z = 2^X", Z=1024, X=10
+*** {121:154,17,239} NOP: "Only Traced if Optimize is OFF"
+* {126:158,0,241} SET_OPTIMIZE: ON <= OFF
+*** {80:94,2,248} TRACE: "Z = X + 0.0005", X=1.2345, Z=1.235
+*** {83:99,3,253} TRACE: "Z = X - 0.03", X=1.2345, Z=1.2045
+*** {86:104,4,258} TRACE: "Z = 0.23 - X", X=1.2345, Z=-1.0045
+*** {89:109,5,263} TRACE: "Z = 3 * X", X=1.2345, Z=3.7035
+*** {94:115,7,269} TRACE: "Z = X / 2", X=5, Z=2.5
+*** {97:120,8,274} TRACE: "Z = 2 / X", X=5, Z=0.4
+*** {100:125,9,279} TRACE: "Z = X MOD 2", X=5, Z=1
+*** {103:130,10,284} TRACE: "Z = 12 MOD X", X=5, Z=2
+*** {108:136,12,290} TRACE: "Z = X^3", X=3, Z=27
+*** {112:142,14,296} TRACE: "Z = X^10", X=0.5, Z=0.0009765625
+*** {115:147,15,301} TRACE: "W = 1024 * Z", Z=0.0009765625, W=1
+*** {119:153,17,307} TRACE: "Z = 2^X", Z=1024, X=10
+* {201:252,0,311} SET_OPTIMIZE: OFF <= ON
+*** {133:166,2,318} TRACE: "Z = - X", X=-53, Z=53
+*** {136:171,3,323} TRACE: "Z = ABS ( X )", X=-53, Z=53
+*** {141:177,5,329} TRACE: "Z = EXP ( X )", X=1, Z=2.71828182845905
+*** {144:182,6,334} TRACE: "W = LOG ( Z )", Z=2.71828182845905, W=1
+*** {149:188,8,340} TRACE: "Z = EXP10 ( X )", X=3, Z=1000
+*** {152:193,9,345} TRACE: "W = LOG10 ( Z )", Z=1000, W=3
+*** {159:201,12,353} TRACE: "Z = SIN (X = PI/6 )", X=0.523598775598299,
                             Z=0.5
-*** {148:184,13,314} TRACE: "W = ASIN ( Z )", Z=0.5, W=0.523598775598299
-*** {154:191,15,321} TRACE: "Z = COS (X = PI/3 )", X=1.0471975511966,
+*** {162:206,13,358} TRACE: "W = ASIN ( Z )", Z=0.5, W=0.523598775598299
+*** {168:213,15,365} TRACE: "Z = COS (X = PI/3 )", X=1.0471975511966,
                             Z=0.5
-*** {157:196,16,326} TRACE: "W = ACOS ( Z )", Z=0.5, W=1.0471975511966
-*** {163:203,18,333} TRACE: "Z = TAN (X = PI/4 )", X=0.785398163397448,
+*** {171:218,16,370} TRACE: "W = ACOS ( Z )", Z=0.5, W=1.0471975511966
+*** {177:225,18,377} TRACE: "Z = TAN (X = PI/4 )", X=0.785398163397448,
                             Z=1
-*** {166:208,19,338} TRACE: "W = ATAN ( Z )", Z=1, W=0.785398163397448
-*** {171:213,20,343} TRACE: "Z = ATAN2 ( -1, +1 )", Z=-0.785398163397448
-*** {174:217,21,347} TRACE: "X = PI/4", X=0.785398163397448
-*** {178:222,22,352} TRACE: "Z = ATAN2R ( -1, +1 )", Z=2.35619449019234
-*** {182:227,23,357} TRACE: "X = 3*PI/4", X=2.35619449019234
-*** {184:228,23,358} NOP: "Only Traced if Optimize is OFF"
-* {189:232,0,360} SET_OPTIMIZE: ON <= OFF
-*** {119:144,2,367} TRACE: "Z = - X", X=-53, Z=53
-*** {122:149,3,372} TRACE: "Z = ABS ( X )", X=-53, Z=53
-*** {127:155,5,378} TRACE: "Z = EXP ( X )", X=1, Z=2.71828182845905
-*** {130:160,6,383} TRACE: "W = LOG ( Z )", Z=2.71828182845905, W=1
-*** {135:166,8,389} TRACE: "Z = EXP10 ( X )", X=3, Z=1000
-*** {138:171,9,394} TRACE: "W = LOG10 ( Z )", Z=1000, W=3
-*** {145:179,12,402} TRACE: "Z = SIN (X = PI/6 )", X=0.523598775598299,
+*** {180:230,19,382} TRACE: "W = ATAN ( Z )", Z=1, W=0.785398163397448
+*** {185:235,20,387} TRACE: "Z = ATAN2 ( -1, +1 )", Z=-0.785398163397448
+*** {188:239,21,391} TRACE: "X = PI/4", X=0.785398163397448
+*** {192:244,22,396} TRACE: "Z = ATAN2R ( -1, +1 )", Z=2.35619449019234
+*** {196:249,23,401} TRACE: "X = 3*PI/4", X=2.35619449019234
+*** {198:250,23,402} NOP: "Only Traced if Optimize is OFF"
+* {203:254,0,404} SET_OPTIMIZE: ON <= OFF
+*** {133:166,2,411} TRACE: "Z = - X", X=-53, Z=53
+*** {136:171,3,416} TRACE: "Z = ABS ( X )", X=-53, Z=53
+*** {141:177,5,422} TRACE: "Z = EXP ( X )", X=1, Z=2.71828182845905
+*** {144:182,6,427} TRACE: "W = LOG ( Z )", Z=2.71828182845905, W=1
+*** {149:188,8,433} TRACE: "Z = EXP10 ( X )", X=3, Z=1000
+*** {152:193,9,438} TRACE: "W = LOG10 ( Z )", Z=1000, W=3
+*** {159:201,12,446} TRACE: "Z = SIN (X = PI/6 )", X=0.523598775598299,
                             Z=0.5
-*** {148:184,13,407} TRACE: "W = ASIN ( Z )", Z=0.5, W=0.523598775598299
-*** {154:191,15,414} TRACE: "Z = COS (X = PI/3 )", X=1.0471975511966,
+*** {162:206,13,451} TRACE: "W = ASIN ( Z )", Z=0.5, W=0.523598775598299
+*** {168:213,15,458} TRACE: "Z = COS (X = PI/3 )", X=1.0471975511966,
                             Z=0.5
-*** {157:196,16,419} TRACE: "W = ACOS ( Z )", Z=0.5, W=1.0471975511966
-*** {163:203,18,426} TRACE: "Z = TAN (X = PI/4 )", X=0.785398163397448,
+*** {171:218,16,463} TRACE: "W = ACOS ( Z )", Z=0.5, W=1.0471975511966
+*** {177:225,18,470} TRACE: "Z = TAN (X = PI/4 )", X=0.785398163397448,
                             Z=1
-*** {166:208,19,431} TRACE: "W = ATAN ( Z )", Z=1, W=0.785398163397448
-*** {171:213,20,436} TRACE: "Z = ATAN2 ( -1, +1 )", Z=-0.785398163397448
-*** {174:217,21,440} TRACE: "X = PI/4", X=0.785398163397448
-*** {178:222,22,445} TRACE: "Z = ATAN2R ( -1, +1 )", Z=2.35619449019234
-*** {182:227,23,450} TRACE: "X = 3*PI/4", X=2.35619449019234
+*** {180:230,19,475} TRACE: "W = ATAN ( Z )", Z=1, W=0.785398163397448
+*** {185:235,20,480} TRACE: "Z = ATAN2 ( -1, +1 )", Z=-0.785398163397448
+*** {188:239,21,484} TRACE: "X = PI/4", X=0.785398163397448
+*** {192:244,22,489} TRACE: "Z = ATAN2R ( -1, +1 )", Z=2.35619449019234
+*** {196:249,23,494} TRACE: "X = 3*PI/4", X=2.35619449019234
 mexas_compile_test_9.mex successfully compiled
