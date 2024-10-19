@@ -1,0 +1,136 @@
+// MEXAS Compile Test 15 Input
+//
+// File:	mexas_compile_test_15.mex
+// Author:	Bob Walton (walton@acm.org)
+// Date:	Sat Oct 19 02:29:46 AM EDT 2024
+//
+// The authors have placed this program in the public
+// domain; they make no warranty and accept no liability
+// for this program.
+
+// JMP Optimize Test
+//
+SET_TRACE SET_OPTIMIZE NOP
+
+BEGF JMP-2ARG-TEST
+    PUSHI 1
+    PUSHI 2
+    JMPEQ BAD
+    JMP GOOD
+    LABEL BAD
+    TRACE 'JMPEQ: WRONG JMP'
+    LABEL GOOD
+
+    PUSHI 1
+    PUSHI 1
+    JMPEQ GOOD
+    TRACE 'JMPEQ: WRONG NO-JMP'
+    LABEL GOOD
+
+    PUSHI 1
+    PUSHI 2
+    JMPNEQ GOOD
+    TRACE 'JMPNEQ: WRONG NO-JMP'
+    LABEL GOOD
+
+    PUSHI 1
+    PUSHI 1
+    JMPNEQ BAD
+    JMP GOOD
+    LABEL BAD
+    TRACE 'JMPNEQ: WRONG JMP'
+    LABEL GOOD
+
+    PUSHI -10
+    PUSHI 0
+    JMPGEQ * BAD1
+    PUSHI +10
+    JMPGEQ BAD2
+    JMP GOOD
+    LABEL BAD1
+    TRACE 'JMPGEQ *: WRONG JMP'
+    JMP GOOD
+    LABEL BAD2
+    TRACE 'JMPGEQ: WRONG JMP'
+    LABEL GOOD
+
+    PUSHI -10
+    PUSHI -15
+    JMPGEQ * GOOD
+    PUSHI +10
+    JMPGEQ BAD
+    JMP GOOD
+    LABEL BAD
+    TRACE 'JMPGEQ: WRONG JMP'
+    JMP GOOD
+
+    PUSHI -10
+    PUSHI +15
+    JMPGEQ * BAD
+    PUSHI +10
+    JMPGEQ GOOD
+    TRACE 'JMPGEQ: WRONG NO-JMP'
+    JMP GOOD
+    LABEL BAD
+    TRACE 'JMPGEQ *: WRONG JMP'
+    JMP GOOD
+
+    PUSHI 1
+    PUSHI 1
+    JMPGT BAD
+    JMP GOOD
+    LABEL BAD
+    TRACE 'JMPGT: WRONG JMP'
+    LABEL GOOD
+
+    PUSHI 1
+    PUSHI -1
+    JMPGT GOOD
+    TRACE 'JMPGT: WRONG NO-JMP'
+    LABEL GOOD
+
+    PUSHI 1
+    PUSHI 1
+    JMPLT BAD
+    JMP GOOD
+    LABEL BAD
+    TRACE 'JMPLT: WRONG JMP'
+    LABEL GOOD
+
+    PUSHI -1
+    PUSHI 1
+    JMPLT GOOD
+    TRACE 'JMPLT: WRONG NO-JMP'
+    LABEL GOOD
+
+    PUSHI 1
+    PUSHI 0
+    JMPLEQ BAD
+    JMP GOOD
+    LABEL BAD
+    TRACE 'JMPLEQ: WRONG JMP'
+    LABEL GOOD
+
+    PUSHI 0
+    PUSHI 0
+    JMPLEQ GOOD
+    TRACE 'JMPLEQ: WRONG NO-JMP'
+    LABEL GOOD
+
+
+    NOP 'Only Traced if Optimize is OFF'
+ENDF
+
+SET_OPTIMIZE OFF
+CALL JMP-2ARG-TEST 0
+SET_OPTIMIZE ON
+CALL JMP-2ARG-TEST 0
+
+BEGF JMP-1ARG-TEST
+    NOP 'Only Traced if Optimize is OFF'
+ENDF
+
+SET_OPTIMIZE OFF
+CALL JMP-1ARG-TEST 0
+SET_OPTIMIZE ON
+CALL JMP-1ARG-TEST 0
