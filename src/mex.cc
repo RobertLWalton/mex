@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Oct 18 07:37:13 AM EDT 2024
+// Date:	Sun Oct 20 03:33:32 AM EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -513,7 +513,7 @@ static bool optimized_run_process ( mex::process p )
 	        goto ERROR_EXIT;
 	    min::float64 f = FG ( sp[-1] );
 	    min::float64 ff = floor ( f );
-	    if ( std::isnan ( ff )
+	    if ( mex::isnan ( ff )
 	         ||
 	         f != ff
 		 ||
@@ -595,12 +595,12 @@ static bool optimized_run_process ( mex::process p )
 
 	    min::float64 farg1 = FG ( arg1 );
 	    min::float64 farg2 = FG ( arg2 );
-	    if ( std::isnan ( farg1 )
+	    if ( mex::isnan ( farg1 )
 		 ||
-		 std::isnan ( farg2 )
+		 mex::isnan ( farg2 )
 		 ||
-		 (    std::isinf ( farg1 )
-		   && std::isinf ( farg2 )
+		 (    mex::isinf ( farg1 )
+		   && mex::isinf ( farg2 )
 		   && farg1 * farg2 > 0 ) )
 		goto ERROR_EXIT;
 
@@ -632,10 +632,10 @@ static bool optimized_run_process ( mex::process p )
 	        goto ERROR_EXIT;
 	    min::gen & arg = sp[-(int)pc->immedB-1];
 	    min::float64 farg = FG ( arg );
-	    if ( ! std::isfinite ( farg ) )
+	    if ( ! mex::isfinite ( farg ) )
 	        goto ERROR_EXIT;
 	    min::float64 immedD = FG ( pc->immedD );
-	    if ( ! std::isfinite ( immedD ) )
+	    if ( ! mex::isfinite ( immedD ) )
 	        goto ERROR_EXIT;
 	    if ( farg <= 0 )
 	        goto EXECUTE_JMP;
@@ -681,7 +681,7 @@ static bool optimized_run_process ( mex::process p )
 	    if ( sp < spbegin + 1 )
 		goto ERROR_EXIT;
 	    min::float64 farg = FG ( * -- sp );
-	    if ( std::isfinite ( farg )
+	    if ( mex::isfinite ( farg )
 		 &&
 		 farg < +1e15
 		 &&
@@ -704,7 +704,7 @@ static bool optimized_run_process ( mex::process p )
 	    if ( sp < spbegin + 1 )
 		goto ERROR_EXIT;
 	    min::float64 farg = FG ( * -- sp );
-	    if ( std::isfinite ( farg ) )
+	    if ( mex::isfinite ( farg ) )
 	    {
 		if ( pc->immedB == 0 )
 		    goto EXECUTE_JMP;
@@ -721,7 +721,7 @@ static bool optimized_run_process ( mex::process p )
 	    if ( sp < spbegin + 1 )
 		goto ERROR_EXIT;
 	    min::float64 farg = FG ( * -- sp );
-	    if ( std::isinf ( farg ) )
+	    if ( mex::isinf ( farg ) )
 	    {
 		if ( pc->immedB == 0 )
 		    goto EXECUTE_JMP;
@@ -1733,7 +1733,7 @@ bool mex::run_process ( mex::process p )
 		    goto INNER_FATAL;
 		}
 		min::float64 ff = floor ( farg1 );
-		if ( std::isnan ( ff )
+		if ( mex::isnan ( ff )
 		     ||
 		     farg1 != ff
 		     ||
@@ -1886,7 +1886,7 @@ bool mex::run_process ( mex::process p )
 	    else if ( op_code == mex::JMPCNT )
 	    {
 		min::float64 immedD = FG ( pc->immedD );
-		if ( ! std::isfinite ( immedD ) )
+		if ( ! mex::isfinite ( immedD ) )
 		{
 		    message = "JMPCNT immedD is not"
 			      " a finite number";
@@ -1894,7 +1894,7 @@ bool mex::run_process ( mex::process p )
 		}
 		min::float64 farg1 = FG ( arg1 );
 		min::uns32 i = pc->immedB;
-		if ( ! std::isfinite ( farg1 ) )
+		if ( ! mex::isfinite ( farg1 ) )
 		    bad_jmp = true;
 		else if ( farg1 > 0 )
 		{
@@ -1919,7 +1919,7 @@ bool mex::run_process ( mex::process p )
 		{
 		    min::float64 farg = FG ( arg1 );
 		    execute_jmp =
-		        ( std::isfinite ( farg )
+		        ( mex::isfinite ( farg )
 			  &&
 			  farg < +1e15
 			  &&
@@ -1930,11 +1930,11 @@ bool mex::run_process ( mex::process p )
 		}
 		case mex::JMPFIN:
 		    execute_jmp =
-		        std::isfinite ( FG ( arg1 ) );
+		        mex::isfinite ( FG ( arg1 ) );
 		    break;
 		case mex::JMPINF:
 		    execute_jmp =
-		        std::isinf ( FG ( arg1 ) );
+		        mex::isinf ( FG ( arg1 ) );
 		    break;
 		case mex::JMPNUM:
 		    execute_jmp = min::is_num ( arg1 );
@@ -1990,12 +1990,12 @@ bool mex::run_process ( mex::process p )
 		    goto INNER_FATAL;
 		}
 
-		if ( std::isnan ( farg1 )
+		if ( mex::isnan ( farg1 )
 		     ||
-		     std::isnan ( farg2 )
+		     mex::isnan ( farg2 )
 		     ||
-		     (    std::isinf ( farg1 )
-		       && std::isinf ( farg2 )
+		     (    mex::isinf ( farg1 )
+		       && mex::isinf ( farg2 )
 		       && farg1 * farg2 > 0 ) )
 		    bad_jmp = true;
 		else switch ( op_code )

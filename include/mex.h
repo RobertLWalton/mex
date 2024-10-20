@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Oct 18 07:32:02 AM EDT 2024
+// Date:	Sun Oct 20 02:58:59 AM EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -11,6 +11,7 @@
 // Table of Contents:
 //
 //	Setup
+//	Helpers
 //	Program Instructions
 //	Modules
 //	Processes
@@ -33,6 +34,35 @@ extern min::locatable_gen ZERO;
 extern min::locatable_gen NOT_A_NUMBER;
 extern min::locatable_gen FALSE;
 extern min::locatable_gen TRUE;
+
+
+// Helpers
+// -------
+
+// std::isfinite and std::isinf raise the INVALID
+// exception when passed a NaN.  This seems to happen
+// when executing (long long unsigned) v if v is a
+// double NaN.  To get around this we convert addresses
+// and not values.
+//
+inline int isfinite ( const min::float64 & v )
+{
+    min::uns64 & u = * (min::uns64 *) & v;
+    return   (u & 0x7FFFFFFFFFFFFFFFull)
+           < 0x7FF0000000000000ull;
+}
+inline int isinf ( const min::float64 & v )
+{
+    min::uns64 & u = * (min::uns64 *) & v;
+    return    (u & 0x7FFFFFFFFFFFFFFFull)
+           == 0x7FF0000000000000ull;
+}
+inline int isnan ( const min::float64 & v )
+{
+    min::uns64 & u = * (min::uns64 *) & v;
+    return   (u & 0x7FFFFFFFFFFFFFFFull)
+           > 0x7FF0000000000000ull;
+}
 
 
 // Program Instructions
