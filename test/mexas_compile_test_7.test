@@ -74,9 +74,5 @@ ADD
 * {31:18,5,19} PUSHI: * <= 10
 !!! ERROR: invalid operand(s)
 * {32:19,4,20} ADD: * = nan <= "A String" + 10
-PROCESS TERMINATION EXCEPTS ERROR(S): INVALID
-ERROR: module initialization process did not terminate normally at
-       module end: illegal exception was raised during otherwise
-       successful program execution; exceptions are: DIVBYZERO INEXACT
-       *INVALID OVERFLOW
-exiting due to compile errors
+!!! WARNING: TERMINATED PROCESS HAD EXCEPTS ERROR(S): INVALID
+mexas_compile_test_7.mex successfully compiled

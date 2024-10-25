@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Oct 20 03:33:32 AM EDT 2024
+// Date:	Fri Oct 25 06:17:54 AM EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -164,18 +164,18 @@ void mex::print_excepts
     }
 }
 
-static bool excepts_test ( mex::process p )
+bool mex::excepts_check ( mex::process p )
 {
     int flags =
         p->excepts_mask & p->excepts_accumulator;
     if ( flags == 0 ) return true;
     p->printer
         << min::bom
-        << "PROCESS TERMINATION EXCEPTS ERROR(S): "
+        << "!!! WARNING: TERMINATED PROCESS HAD"
+	   " EXCEPTS ERROR(S): "
         << min::place_indent ( 0 );
     mex::print_excepts ( p->printer, flags );
     p->printer << min::eom;
-    p->state = mex::EXCEPTS_ERROR;
     return false;
 }
         
@@ -1288,11 +1288,7 @@ mex::state_info mex::state_infos
     { JMP_ERROR, "JMP_ERROR",
                  "invalid operand to JMP instruction" },
     { FORMAT_ERROR, "FORMAT_ERROR",
-                    "bad program format" },
-    { EXCEPTS_ERROR, "EXCEPTS_ERROR",
-                     "illegal exception was raised"
-		     " during otherwise successful"
-		     " program execution" }
+                    "bad program format" }
 };
 
 static void check_op_infos ( void )
@@ -1478,7 +1474,7 @@ bool mex::run_process ( mex::process p )
 	{
 	    SAVE;
 	    p->state = mex::MODULE_END;
-	    return excepts_test ( p );
+	    return true;
 	}
 	if ( limit == 0 )
 	{
@@ -1496,7 +1492,7 @@ bool mex::run_process ( mex::process p )
 		    p->state = mex::CALL_END;
 		else
 		    p->state = mex::MODULE_END;
-	        return excepts_test ( p );
+	        return true;
 	    }
 	    min::interrupt();
 	    mex::module om = p->pc.module;
@@ -1506,7 +1502,7 @@ bool mex::run_process ( mex::process p )
 		if ( oi == 0 )
 		{
 		    p->state = mex::CALL_END;
-		    return excepts_test ( p );
+		    return true;
 		}
 		message = "Illegal PC: no module and"
 		          " index > 0";
@@ -1517,7 +1513,7 @@ bool mex::run_process ( mex::process p )
 		if ( oi == m->length )
 		{
 		    p->state = mex::MODULE_END;
-		    return excepts_test ( p );
+		    return true;
 		}
 		message = "Illegal PC: PC index greater"
 			  " than module length";
@@ -2899,7 +2895,7 @@ bool mex::run_process ( mex::process p )
 		{
 		    RET_SAVE;
 		    p->state = mex::CALL_END;
-		    return excepts_test ( p );
+		    return true;
 		}
 
 		pcbegin = ~ min::begin_ptr_of ( m );

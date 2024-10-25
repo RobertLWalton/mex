@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Oct 20 02:58:59 AM EDT 2024
+// Date:	Fri Oct 25 06:18:55 AM EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -313,7 +313,6 @@ enum state
     ERROR_STOP,
     JMP_ERROR,
     FORMAT_ERROR,
-    EXCEPTS_ERROR,
     NUMBER_OF_STATES
 };
 
@@ -420,6 +419,8 @@ inline void set_saved_pc
 // ---------
 
 bool run_process ( mex::process p );
+
+bool excepts_check ( mex::process p );
 
 mex::module create_module ( min::file f );
 

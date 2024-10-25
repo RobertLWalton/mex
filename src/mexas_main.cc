@@ -2,7 +2,7 @@
 //
 // File:	mexas_main.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Jun  3 04:43:10 EDT 2024
+// Date:	Fri Oct 25 06:27:14 AM EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -189,18 +189,8 @@ int main ( int argc, char * argv[] )
 			<< ": "
 			<< mex::state_infos
 			       [process->state]
-			       .description;
-		    if (    process->state
-		         == mex::EXCEPTS_ERROR )
-		    {
-			printer << "; exceptions are: ";
-			mex::print_excepts
-			    ( process->printer,
-			      process->
-			          excepts_accumulator,
-			      process->excepts_mask );
-		    }
-		    printer << min::eom;
+			       .description
+		        << min::eom;
 		}
 		else
 		{
@@ -230,6 +220,8 @@ int main ( int argc, char * argv[] )
 			        ( cpu_time, "%.3f" )
 			    << " cpu seconds."
 			    << min::eom;
+
+		     mex::excepts_check ( process );
 		}
 	    }
 	}

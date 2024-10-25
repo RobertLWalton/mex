@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Oct 18 08:08:37 AM EDT 2024
+// Date:	Fri Oct 25 06:34:42 AM EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1996,18 +1996,11 @@ mex::module mexas::compile ( min::file file )
 	    << "module initialization process did not"
 	       " terminate normally at module end: "
 	    << mex::state_infos[process->state]
-	    	    .description;
-        if ( process->state == mex::EXCEPTS_ERROR )
-	{
-	    process->printer << "; exceptions are: ";
-	    mex::print_excepts
-	        ( process->printer,
-		  process->excepts_accumulator,
-		  process->excepts_mask );
-	}
-	process->printer << min::eom;
+	    	    .description
+	    << min::eom;
         return min::NULL_STUB;
     }
+    mex::excepts_check ( process );
 
     min::packed_vec_insptr<min::gen> g =
         (min::packed_vec_insptr<min::gen>)
