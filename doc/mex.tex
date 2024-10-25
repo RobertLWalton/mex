@@ -244,7 +244,7 @@
 
 \author{Robert L. Walton}
 
-\date{October 18, 2024}
+\date{October 25, 2024}
  
 \maketitle
 
@@ -882,7 +882,6 @@ a return stack, and other parameters.  Specifically:
 \verb|mex::| & \TTMKEY{ERROR\_STOP}{in {\tt mex::state}} \\
 \verb|mex::| & \TTMKEY{JMP\_ERROR}{in {\tt mex::state}} \\
 \verb|mex::| & \TTMKEY{FORMAT\_ERROR}{in {\tt mex::state}} \\
-\verb|mex::| & \TTMKEY{EXCEPTS\_ERROR}{in {\tt mex::state}} \\
 \verb|}                 | \\
 \end{tabular}
 
@@ -1997,11 +1996,6 @@ set as follows to indicate cause of termination:
 \verb|mex::|\MEXKEY{FORMAT\_ERROR}
     & program formatting error \\
     & (likely a compiler error) \\
-\verb|mex::|\MEXKEY{EXCEPTS\_ERROR}
-    & program terminated successfully \\
-    & (as per \TT{MODULE\_END} or \TT{CALL\_END}) \\
-    & but with some excepts bit on in both \\
-    & \TT{p->excepts\_mask} and \TT{p->excepts\_accumulator} \\
 \end{tabular}
 \end{center}
 
@@ -2009,7 +2003,7 @@ Notes:
 \begin{enumerate}
 \item For cases where \TT{false} is returned by \TT{mex::run\_process},
 the process stops \underline{before} executing the instruction which
-would violate the condition (except for \TT{mex::\EOL EXCEPTS\_\EOL ERROR}).
+would violate the condition.
 Thus the process will stop before executing an instruction that would
 violate one of the limits, trigger a programming format error, etc.
 The \TT{ERROR} instruction stops the process with the program counter
@@ -2024,6 +2018,16 @@ you can add to the end of \TT{m}
 and call \TT{run\_process} again to continue the execution of the code
 of \TT{m} (i.e., execute the added code).
 \end{enumerate}
+
+{\tt bool mex::}\MEXKEY{excepts\_check} \verb|( mex::process p )|%
+\label{MEX::EXCEPTS_CHECK}
+\begin{indpar}
+If \hspace*{0.5in}
+\TT{flags = p->excepts\_mask \& p->excepts\_accumulator} \\
+is zero,
+returns \TT{true}.  Otherwise prints a WARNING message listing
+the bits of \TT{flags} that are on and returns \TT{false}.
+\end{indpar}
 
 \section{MEX Compiler Components}
 \label{MEX-COMPILER-COMPONENTS}
