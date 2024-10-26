@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Oct 25 06:17:54 AM EDT 2024
+// Date:	Fri Oct 25 02:32:48 PM EDT 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1838,6 +1838,7 @@ bool mex::run_process ( mex::process p )
 			<< op_info->oper
 			<< " "
 			<< min::pgen ( arg2 );
+		p->printer << min::eol;
 
 	        RESTORE;
 	    }
