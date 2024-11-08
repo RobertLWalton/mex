@@ -2,7 +2,7 @@
 //
 // File:	mexas_compile_test_15.mex
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Oct 20 03:28:33 AM EDT 2024
+// Date:	Fri Nov  8 02:33:26 AM EST 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -221,6 +221,32 @@ BEGF JMP-1ARG-TEST
     JMP GOOD
     LABEL BAD
     TRACE 'JMPINF: WRONG JMP'
+    LABEL GOOD
+
+    PUSHI nan
+    JMPNAN GOOD
+    TRACE 'JMPNAN: WRONG NO-JMP'
+    LABEL GOOD
+
+    PUSHI 1
+    JMPNAN BAD
+    JMP GOOD
+    LABEL BAD
+    TRACE 'JMPNAN: WRONG JMP'
+    LABEL GOOD
+
+    PUSHI +inf
+    JMPNAN BAD
+    JMP GOOD
+    LABEL BAD
+    TRACE 'JMPNAN: WRONG JMP'
+    LABEL GOOD
+
+    PUSHI OBJ
+    JMPNAN BAD
+    JMP GOOD
+    LABEL BAD
+    TRACE 'JMPNAN: WRONG JMP'
     LABEL GOOD
 
     PUSHI 1e600

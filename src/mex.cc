@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Oct 25 02:32:48 PM EDT 2024
+// Date:	Fri Nov  8 02:25:55 AM EST 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -733,6 +733,26 @@ static bool optimized_run_process ( mex::process p )
 	    }
 	    break;
 	}
+	case mex::JMPNAN:
+	{
+	    if ( sp < spbegin + 1 )
+		goto ERROR_EXIT;
+	    min::gen arg = * -- sp;
+	    min::float64 farg = FG ( arg );
+	    if ( mex::isnan ( farg )
+	         &&
+		 min::is_direct_float ( arg ) )
+	    {
+		if ( pc->immedB == 0 )
+		    goto EXECUTE_JMP;
+	    }
+	    else
+	    {
+		if ( pc->immedB > 0 )
+		    goto EXECUTE_JMP;
+	    }
+	    break;
+	}
 	case mex::JMPNUM:
 	{
 	    if ( sp < spbegin + 1 )
@@ -1191,6 +1211,7 @@ mex::op_info mex::op_infos [ mex::NUMBER_OF_OP_CODES ] =
     { mex::JMPINT, J1, T_JMPS, NULL, "JMPINT", NULL },
     { mex::JMPFIN, J1, T_JMPS, NULL, "JMPFIN", NULL },
     { mex::JMPINF, J1, T_JMPS, NULL, "JMPINF", NULL },
+    { mex::JMPNAN, J1, T_JMPS, NULL, "JMPNAN", NULL },
     { mex::JMPNUM, J1, T_JMPS, NULL, "JMPNUM", NULL },
     { mex::JMPSTR, J1, T_JMPS, NULL, "JMPSTR", NULL },
     { mex::JMPOBJ, J1, T_JMPS, NULL, "JMPOBJ", NULL },
@@ -1932,6 +1953,12 @@ bool mex::run_process ( mex::process p )
 		case mex::JMPINF:
 		    execute_jmp =
 		        mex::isinf ( FG ( arg1 ) );
+		    break;
+		case mex::JMPNAN:
+		    execute_jmp =
+		        mex::isnan ( FG ( arg1 ) )
+			&&
+			min::is_direct_float ( arg1 );
 		    break;
 		case mex::JMPNUM:
 		    execute_jmp = min::is_num ( arg1 );
