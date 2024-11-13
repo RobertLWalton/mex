@@ -2,7 +2,7 @@
 //
 // File:        mexas_compile_test_3.mex
 // Author:      Bob Walton (walton@acm.org)
-// Date:        Fri Oct 18 07:43:55 AM EDT 2024
+// Date:        Wed Nov 13 02:15:42 AM EST 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -85,14 +85,14 @@ ENDF
     [37:13;1] BEGF T_BEGF 1 1 12; [< FLIP ARG >]
     [50:24;0] ENDF T_ENDF 0 1 0
 
-PUSHI "FALSE"
-    [52:25;1] PUSHI T_PUSH 0 0 0 FALSE; *
+PUSHI FALSE
+    [52:25;1] PUSHI T_PUSH 0 0 0 *FALSE*; *
 CALL FLIP 1 Z
     [53:26;1] CALLM T_CALLM 1 1 13; [< FLIP Z >]
 POP
     [54:27;0] POPS T_POP 0 0 0; [< Z * >]
-PUSHI "TRUE"
-    [55:28;1] PUSHI T_PUSH 0 0 0 TRUE; *
+PUSHI TRUE
+    [55:28;1] PUSHI T_PUSH 0 0 0 *TRUE*; *
 CALL FLIP 1 Z
     [56:29;1] CALLM T_CALLM 1 1 13; [< FLIP Z >]
 POP
@@ -114,19 +114,19 @@ POP
 *** {23:7,1,9} RET to CALLM: MIN, Z=23
 * {31:12,0,10} POPS: * <= Z = 23
 * {37:13,0,11} BEGF
-* {52:25,1,12} PUSHI: * <= FALSE
-* {53:26,1,13} CALLM to BEGF: FLIP, ARG=FALSE
-*** {38:14,2,14} PUSHS: * <= ARG = FALSE
-*** {39:15,1,15} JMPFALSE ITS-0 is successful: true <= FALSE
+* {52:25,1,12} PUSHI: * <= *FALSE*
+* {53:26,1,13} CALLM to BEGF: FLIP, ARG=*FALSE*
+*** {38:14,2,14} PUSHS: * <= ARG = *FALSE*
+*** {39:15,1,15} JMPFALSE ITS-0 is successful: true <= *FALSE*
 *** {45:20,2,16} PUSHI: * <= 1
 *** {46:21,1,17} RET to CALLM: FLIP, Z=1
 * {54:27,0,18} POPS: * <= Z = 1
-* {55:28,1,19} PUSHI: * <= TRUE
-* {56:29,1,20} CALLM to BEGF: FLIP, ARG=TRUE
-*** {38:14,2,21} PUSHS: * <= ARG = TRUE
-*** {39:15,1,22} JMPFALSE ITS-0 is UNsuccessful: false <= TRUE
-*** {40:16,2,23} PUSHS: * <= ARG = TRUE
-*** {41:17,1,24} JMPTRUE ITS-1 is successful: true <= TRUE
+* {55:28,1,19} PUSHI: * <= *TRUE*
+* {56:29,1,20} CALLM to BEGF: FLIP, ARG=*TRUE*
+*** {38:14,2,21} PUSHS: * <= ARG = *TRUE*
+*** {39:15,1,22} JMPFALSE ITS-0 is UNsuccessful: false <= *TRUE*
+*** {40:16,2,23} PUSHS: * <= ARG = *TRUE*
+*** {41:17,1,24} JMPTRUE ITS-1 is successful: true <= *TRUE*
 *** {48:22,2,25} PUSHI: * <= 0
 *** {49:23,1,26} RET to CALLM: FLIP, Z=0
 * {57:30,0,27} POPS: * <= Z = 0

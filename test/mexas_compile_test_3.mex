@@ -2,7 +2,7 @@
 //
 // File:	mexas_compile_test_3.mex
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Oct 18 07:43:55 AM EDT 2024
+// Date:	Wed Nov 13 02:15:42 AM EST 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -49,10 +49,10 @@ BEGF FLIP ARG
     RET 1
 ENDF
 
-PUSHI "FALSE"
+PUSHI FALSE
 CALL FLIP 1 Z
 POP
-PUSHI "TRUE"
+PUSHI TRUE
 CALL FLIP 1 Z
 POP
 PUSHI 26

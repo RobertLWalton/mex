@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Nov  8 02:25:55 AM EST 2024
+// Date:	Wed Nov 13 02:12:10 AM EST 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -118,8 +118,8 @@ static void initialize ( void )
 {
     mex::ZERO = min::new_num_gen ( 0 );
     mex::NOT_A_NUMBER = min::new_num_gen ( NAN );
-    mex::FALSE = min::new_str_gen ( "FALSE" );
-    mex::TRUE = min::new_str_gen ( "TRUE" );
+    mex::FALSE = min::FALSE();
+    mex::TRUE = min::TRUE();
     ::STAR = min::new_str_gen ( "*" );
 
     check_op_infos();
