@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Nov 13 02:12:10 AM EST 2024
+// Date:	Thu Nov 14 06:47:36 PM EST 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1836,29 +1836,29 @@ bool mex::run_process ( mex::process p )
 			<< "]-nargs["
 			<< pc->immedB
 			<< "]+"
-			<< min::pgen ( arg1 )
+			<< min::pgen_quote ( arg1 )
 			<< "-1] = "
-			<< min::pgen ( result );
+			<< min::pgen_quote ( result );
 
 		else if ( op_info->op_type == mex::A1 )
 		    p->printer
 		        << " = "
-			<< min::pgen ( result )
+			<< min::pgen_quote ( result )
 			<< " <= "
 			<< op_info->oper
 			<< " "
-			<< min::pgen ( arg1 );
+			<< min::pgen_quote ( arg1 );
 
 		else
 		    p->printer
 		        << " = "
-			<< min::pgen ( result )
+			<< min::pgen_quote ( result )
 			<< " <= "
-			<< min::pgen ( arg1 )
+			<< min::pgen_quote ( arg1 )
 			<< " "
 			<< op_info->oper
 			<< " "
-			<< min::pgen ( arg2 );
+			<< min::pgen_quote ( arg2 );
 		p->printer << min::eol;
 
 	        RESTORE;
@@ -2131,19 +2131,19 @@ bool mex::run_process ( mex::process p )
 
 		    if ( op_code == mex::JMPCNT )
 		        p->printer
-			    << min::pgen ( arg1 )
+			    << min::pgen_quote ( arg1 )
 			    << " <= 0";
 		    else if ( op_info->oper == NULL )
 		        p->printer
-			    << min::pgen ( arg1 );
+			    << min::pgen_quote ( arg1 );
 		    else
 		    {
 			p->printer
-			    << min::pgen ( arg1 )
+			    << min::pgen_quote ( arg1 )
 			    << " "
 			    << op_info->oper
 			    << " "
-			    << min::pgen ( arg2 );
+			    << min::pgen_quote ( arg2 );
 		    }
 		}
 
@@ -2691,7 +2691,9 @@ bool mex::run_process ( mex::process p )
 		    }
 		    else
 		        p->printer << " * <= * =";
-		    p->printer << " " << value;
+		    p->printer << " "
+		               << min::pgen_quote
+			              ( value );
 		    break;
 		}
 		case mex::PUSHI:
@@ -2704,7 +2706,9 @@ bool mex::run_process ( mex::process p )
 		        p->printer << " nargs["
 			           << immedB
 				   << "] =";
-		    p->printer << " " << value;
+		    p->printer << " "
+		               << min::pgen_quote
+			              ( value );
 		    break;
 		}
 		case mex::SET_TRACE:
@@ -2797,7 +2801,8 @@ bool mex::run_process ( mex::process p )
 				<< "=";
 			    if ( j <= p->length )
 			        p->printer
-				    << p[p->length-j];
+				  << min::pgen_quote
+				   ( p[p->length-j] );
 			    else
 			        p->printer << "?";
 			}
@@ -3120,11 +3125,12 @@ FATAL:
     if ( instr_buffer_2[0] != 0 )
 	p->printer << min::indent << instr_buffer_2;
     p->printer << min::indent
-    	       << "ARG1 = " << min::pgen ( arg1 )
+    	       << "ARG1 = " << min::pgen_quote ( arg1 )
 	       << min::indent
-    	       << "ARG2 = " << min::pgen ( arg2 )
+    	       << "ARG2 = " << min::pgen_quote ( arg2 )
 	       << min::indent
-    	       << "RESULT = " << min::pgen ( result )
+    	       << "RESULT = "
+	       << min::pgen_quote ( result )
 	       << min::indent
 	       << "STACK POINTER = " << p->length
 	       << ", PROCESS MAX_LENGTH = "
