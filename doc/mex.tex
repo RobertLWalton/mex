@@ -244,7 +244,7 @@
 
 \author{Robert L. Walton}
 
-\date{October 25, 2024}
+\date{November 16, 2024}
  
 \maketitle
 
@@ -1186,6 +1186,8 @@ the logical values `true' and `false':
     & is a finite number, is an infinite number, \\
 \ttkey{JMPNUM}
     & is a MIN number (includes NaNs), \\
+\ttkey{JMPTRUTH}
+    & equals mex::TRUE or mex::FALSE, \\
 \ttkey{JMPSTR}/\ttkey{JMPOBJ}
     & is a MIN string, or is a MIN object. \\
     & If yes, continue as per \TT{JMP}, and if no, do nothing, \\
@@ -3144,8 +3146,9 @@ the two elements are popped (and before any element is pushed back).
 \end{indpar}
 
 \ttkey{JMPTRUE}/\ttkey{JMPFALSE}/\ttkey{JMPINT}/\ttkey{JMPFIN}/%
-    \ttkey{JMPINF}/\ttkey{JMPNUM}/%
-    \ttkey{JMPSTR}/\ttkey{JMPOBJ} ~ \ttkey{*}\QMARK{} {\em jmp-target}
+    \ttkey{JMPINF}/\ttkey{JMPNUM}/\ttkey{JMPTRUTH}/%
+    \ttkey{JMPSTR}/\ttkey{JMPOBJ} \\
+\hspace*{1in}\ttkey{*}\QMARK{} {\em jmp-target}
 \begin{indpar}
 At run-time these instructions' actions are as described in
 Figure~\itemref{STACK-AND-FLOW-CONTROL-INSTRUCTIONS}, where the \TT{*}
