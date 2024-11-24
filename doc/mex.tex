@@ -244,7 +244,7 @@
 
 \author{Robert L. Walton}
 
-\date{November 16, 2024}
+\date{November 24, 2024}
  
 \maketitle
 
@@ -1034,7 +1034,7 @@ the logical values `true' and `false':
 \pagebreak
 
 
-\begin{boxedfigure}{p!}
+\begin{boxedfigure}[p!]
 
 \begin{center}
 \begin{tabular}{|l|l|}
@@ -1091,6 +1091,10 @@ the logical values `true' and `false':
 \\\hline
 \ttkey{POWRI}
     & Replace the top value by \TT{immedD} to the top value power.
+\\\hline
+\ttkey{LSH}/\ttkey{LSHI}/\ttkey{RSH}/\ttkey{RSHI}
+    & Pop 2 values, then push the first times 2 to the \\
+    & second/\TT{immedD}/minus-second/minus-\TT{immedD} power.
 \\\hline
 \ttkey{FLOOR}/\ttkey{CEIL}
     & Replace the top value by the an integer equal to the \\
