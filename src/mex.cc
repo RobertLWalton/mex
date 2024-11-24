@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat Nov 23 07:01:32 PM EST 2024
+// Date:	Sun Nov 24 02:13:26 AM EST 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -271,6 +271,18 @@ static bool optimized_run_process ( mex::process p )
 	    sp[-1] = GF ( f ( FG ( sp[-1] ) ) ); \
 	    break;
 
+#   define SHIFT_CHECK \
+	    min::float64 farg2 = FG ( arg2 ); \
+	    if ( ! mex::isfinite ( farg2 ) \
+		 || \
+		 farg2 >= +1e15 \
+		 || \
+		 farg2 <= -1e15 ) \
+	        goto ERROR_EXIT; \
+	    int shift = (int) farg2; \
+	    if ( shift != farg2 ) \
+	        goto ERROR_EXIT;
+
     while ( true )
     {
         if ( pc == pcend ) goto EXIT;
@@ -376,6 +388,40 @@ static bool optimized_run_process ( mex::process p )
 	    sp[-1] = GF ( pow ( FG ( arg1 ),
 	                        FG ( arg2 ) ) );
 	    break;
+	case mex::LSH:
+	{
+	    CHECK2;
+	    SHIFT_CHECK;
+	    sp[-2] =
+	        GF ( ldexp ( FG ( arg1 ), shift ) );
+	    -- sp;
+	    break;
+	}
+	case mex::LSHI:
+	{
+	    CHECK1I;
+	    SHIFT_CHECK;
+	    sp[-1] =
+	        GF ( ldexp ( FG ( arg1 ), shift ) );
+	    break;
+	}
+	case mex::RSH:
+	{
+	    CHECK2;
+	    SHIFT_CHECK;
+	    sp[-2] =
+	        GF ( ldexp ( FG ( arg1 ), - shift ) );
+	    -- sp;
+	    break;
+	}
+	case mex::RSHI:
+	{
+	    CHECK1I;
+	    SHIFT_CHECK;
+	    sp[-1] =
+	        GF ( ldexp ( FG ( arg1 ), - shift ) );
+	    break;
+	}
 	case mex::FLOOR:
 	    A1F ( floor );
 	case mex::CEIL:
@@ -1109,10 +1155,14 @@ RET_EXIT:
     return result;
 
 #   undef CHECK1
+#   undef CHECK1I
+#   undef CHECK1RI
 #   undef CHECK2
+#   undef CHECK2R
 #   undef FG
 #   undef GF
 #   undef A1F
+#   undef SHIFT_CHECK
 }
 
 
@@ -1171,6 +1221,14 @@ mex::op_info mex::op_infos [ mex::NUMBER_OF_OP_CODES ] =
       "POWI", "pow" },
     { mex::POWRI, A2RI, T_AOP, mex::error_func,
       "POWRI", "pow" },
+    { mex::LSH, A2, T_AOP, mex::error_func,
+      "LSH", "<<" },
+    { mex::LSHI, A2I, T_AOP, mex::error_func,
+      "LSHI", "<<" },
+    { mex::RSH, A2, T_AOP, mex::error_func,
+      "RSH", ">>" },
+    { mex::RSHI, A2I, T_AOP, mex::error_func,
+      "RSHI", ">>" },
     { mex::FLOOR, A1, T_AOP, mex::error_func,
       "FLOOR", "floor" },
     { mex::CEIL, A1, T_AOP, mex::error_func,
@@ -1707,6 +1765,35 @@ bool mex::run_process ( mex::process p )
 	    case mex::POWRI:
 	        fresult = pow ( farg1, farg2 );
 		break;
+	    case mex::LSH:
+	    case mex::LSHI:
+	    case mex::RSH:
+	    case mex::RSHI:
+	    {
+		if ( ! mex::isfinite ( farg2 )
+		     ||
+		     farg2 >= +1e15
+		     ||
+		     farg2 <= -1e15
+		     ||
+		     (int) farg2 != farg2 )
+		{
+		    std::feraiseexcept ( FE_INVALID );
+		    fresult = NAN;
+		}
+
+		else
+		{
+		    int shift = (int) farg2;
+		    if ( op_code == RSH
+		         ||
+			 op_code == RSHI )
+		        shift = - shift;
+		    fresult = ldexp ( farg1, shift );
+		}
+
+		break;
+	    }
 	    case mex::FLOOR:
 	        fresult = floor ( farg1 );
 		break;

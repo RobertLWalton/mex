@@ -2,7 +2,7 @@
 //
 // File:	mexas_compile_test_9.mex
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat Oct 19 02:23:37 AM EDT 2024
+// Date:	Sun Nov 24 03:11:39 AM EST 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -65,6 +65,18 @@ BEGF AOP-2ARG-TEST
     PUSH Y
     POWR Z
     TRACE 'Z = Y^X' X Y Z
+    PUSHI 1 X
+    PUSHI 10 Y
+    PUSH X
+    PUSH Y
+    LSH Z
+    TRACE 'Z = X<<Y' X Y Z
+    PUSHI 1024 X
+    PUSHI 10 Y
+    PUSH X
+    PUSH Y
+    RSH Z
+    TRACE 'Z = X>>Y' X Y Z
     NOP 'Only Traced if Optimize is OFF'
 ENDF
 
@@ -117,6 +129,15 @@ BEGF AOP-IMMED-TEST
     PUSH X
     POWRI 2 Z
     TRACE 'Z = 2^X' Z X 
+
+    PUSHI 1 X
+    PUSH X
+    LSHI 10 Z
+    TRACE 'Z = X<<10' X Z
+    PUSHI 1024 X
+    PUSH X
+    RSHI 10 Z
+    TRACE 'Z = X>>10' X Z
 
     NOP 'Only Traced if Optimize is OFF'
 ENDF

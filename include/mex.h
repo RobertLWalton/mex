@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat Nov 16 06:04:57 PM EST 2024
+// Date:	Sun Nov 24 02:13:00 AM EST 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -86,6 +86,7 @@ enum op_code {
     DIV, DIVR, DIVI, DIVRI,
     MOD, MODR, MODI, MODRI,
     POW, POWR, POWI, POWRI,
+    LSH, LSHI, RSH, RSHI,
     FLOOR, CEIL, TRUNC, ROUND,
     NEG, ABS,
     LOG, LOG10, EXP, EXP10,
