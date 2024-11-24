@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat Nov 16 06:06:08 PM EST 2024
+// Date:	Sat Nov 23 07:01:32 PM EST 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1412,9 +1412,8 @@ inline min::printer print_header
     if ( pp )
 	p->printer
 	    << pp.end.line
-	           // First line is 1 because
-		   // pp.end.line is line after
-		   // phrase.
+	       +
+	       ( pp.end.offset != 0 )
 	    << ":";
 
     p->printer << p->pc.index

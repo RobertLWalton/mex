@@ -2,7 +2,7 @@
 //
 // File:	mexstack.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Nov 14 07:04:54 PM EST 2024
+// Date:	Sat Nov 23 07:14:33 PM EST 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -115,6 +115,8 @@ void mexstack::print_instr
     printer
         << min::bol << min::bom <<"    "
 	<< "[" << pp.end.line
+		  +
+		  ( pp.end.offset != 0 )
 	<< ":" << location
 	<< ";" <<   mexstack::var_stack_length
 	          + stack_offset
@@ -292,7 +294,10 @@ void mexstack::print_label
 
     printer
         << min::bol << min::bom <<"    [";
-    if ( pp ) printer << pp.end.line << ":";
+    if ( pp ) printer << pp.end.line
+                         +
+			 ( pp.end.offset != 0 )
+                      << ":";
     printer
 	<< m->length
 	<< ";" <<   mexstack::var_stack_length
