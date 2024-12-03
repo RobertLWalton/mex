@@ -2582,7 +2582,9 @@ the {\tt loop\_depth}'th {\tt BEGL} description and uses it
 to fill in parts of the {\tt CONT} instruction.  The {\tt cont} instruction
 also increments {\tt instr.trace\_depth} (assumed initially {\tt 0})
 once for very block description
-it skips over in this search.
+it skips over in this search.  This function returns {\tt true} on success,
+but if it cannot find {\tt loop\_depth} {\tt BEGL} descriptions, it does
+nothing but return {\tt false}.
 
 {\tt Begx} and {\tt endx} also adjust the current lexical level and
 depth as required by the {\tt BEG\ldots}~and {\tt END\ldots}~instructions
