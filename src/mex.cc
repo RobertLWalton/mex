@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Nov 24 02:13:26 AM EST 2024
+// Date:	Tue Dec  3 12:01:27 AM EST 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -909,6 +909,10 @@ static bool optimized_run_process ( mex::process p )
 	{
 	    if ( min::pending() )
 	        goto ERROR_EXIT;
+
+	    if ( pc->trace_depth > p->trace_depth )
+	        goto ERROR_EXIT;
+
 	    min::uns32 immedA = pc->immedA;
 	    min::uns32 immedB = pc->immedB;
 	    min::uns32 immedC = pc->immedC;
@@ -922,6 +926,7 @@ static bool optimized_run_process ( mex::process p )
 	    sp -= (int) immedA;
 	    for ( int i = immedB; 0 < i; -- i )
 	        sp[-(int)immedB-i] = sp[-i];
+	    p->trace_depth -= pc->trace_depth;
 	    pc -= immedC;
 	    -- pc;
 	    break;
@@ -2517,6 +2522,15 @@ bool mex::run_process ( mex::process p )
 		    goto INNER_FATAL;
 		}
 
+		if ( pc->trace_depth > p->trace_depth )
+		{
+		    message = "CONT: trace depth would"
+		              " become negative if"
+			      " instruction was"
+			      " executed";
+		    goto INNER_FATAL;
+		}
+
 		// ENDL/CONT uses BEGL trace_info.
 		//
 		if (   immedC
@@ -2989,6 +3003,7 @@ bool mex::run_process ( mex::process p )
 		    min::interrupt();
 		    RESTORE;
 		}
+		p->trace_depth -= pc->trace_depth;
 		pc -= immedC;
 		-- pc;
 		break;

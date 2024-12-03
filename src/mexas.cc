@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Oct 25 06:34:42 AM EDT 2024
+// Date:	Mon Dec  2 07:08:24 PM EST 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1488,8 +1488,25 @@ mex::module mexas::compile ( min::file file )
 	    }
 	    case mex::CONT:
 	    {
-		mexstack::cont
-		    ( instr, 0, min::MISSING(), pp );
+	        min::gen nn =
+		    mexas::get_num ( index );
+		min::uns32 loop_depth;
+		if ( nn == min::NONE() )
+		    loop_depth = 1;
+		else if ( ! mexas::check_parameter
+		                ( loop_depth, nn,
+			          pp, "loop_depth" ) )
+		    continue;
+		if ( ! mexstack::cont
+		           ( instr, loop_depth, 0,
+		             min::MISSING(), pp ) )
+		    mexcom::compile_error
+			( pp, "CONT is not inside ",
+			      min::puns
+			          ( loop_depth, "%d" ),
+			      " nested BEGL ... ENDL"
+			      " loops; instruction"
+			      " ignored" );
 		break;
 	    }
 	    case mex::BEGF:

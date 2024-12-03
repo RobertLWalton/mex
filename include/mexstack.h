@@ -2,7 +2,7 @@
 //
 // File:	mexstack.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Sep 17 02:18:56 AM EDT 2024
+// Date:	Mon Dec  2 06:52:40 PM EST 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -220,7 +220,8 @@ unsigned endx ( mex::instr & instr,
 	        min::gen trace_info = min::MISSING(),
                 const min::phrase_position & pp =
 	            min::MISSING_PHRASE_POSITION );
-void cont ( mex::instr & instr,
+bool cont ( mex::instr & instr,
+	    min::uns32 loop_depth,
 	    min::uns32 tvars,
 	    min::gen trace_info = min::MISSING(),
             const min::phrase_position & pp =

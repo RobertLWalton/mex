@@ -2,7 +2,7 @@
 //
 // File:	mexstack.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat Nov 23 07:14:33 PM EST 2024
+// Date:	Mon Dec  2 07:00:15 PM EST 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -490,27 +490,25 @@ unsigned mexstack::endx ( mex::instr & instr,
     return 0;
 }
 
-void mexstack::cont ( mex::instr & instr,
-		   min::uns32 tvars,
-	           min::gen trace_info,
-                   const min::phrase_position & pp )
+bool mexstack::cont ( mex::instr & instr,
+		      min::uns32 loop_depth,
+		      min::uns32 tvars,
+	              min::gen trace_info,
+                      const min::phrase_position & pp )
 {
-    if ( mexstack::blocks->length == 0 )
+    min::uns32 i = mexstack::blocks->length;
+    min::ptr<mexstack::block_element> bp;
+    while ( true )
     {
-	mexcom::compile_error
-	    ( pp, "not in a BEGL ... ENDL block;"
-	          " instruction ignored" );
-	return;
-    }
-    min::ptr<mexstack::block_element> bp =
-          mexstack::blocks
-	+ ( mexstack::blocks->length - 1 );
-    if ( bp->begin_op_code != mex::BEGL )
-    {
-	mexcom::compile_error
-	    ( pp, "not in a BEGL ... ENDL block;"
-	          " instruction ignored" );
-	return;
+        if ( i == 0 ) return false;
+	bp = mexstack::blocks + ( -- i );
+	if ( bp->begin_op_code != mex::BEGL )
+	{
+	    ++ instr.trace_depth;
+	    continue;
+	}
+        if ( -- loop_depth == 0 ) break;
+	++ instr.trace_depth;
     }
 
     instr.immedA = mexstack::var_stack_length
@@ -520,6 +518,7 @@ void mexstack::cont ( mex::instr & instr,
 		 - bp->begin_location - 1;
 
     mexstack::push_instr ( instr, pp, trace_info );
+    return true;
 }
 
 
