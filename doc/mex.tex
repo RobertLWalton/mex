@@ -244,7 +244,7 @@
 
 \author{Robert L. Walton}
 
-\date{November 24, 2024}
+\date{December 3, 2024}
  
 \maketitle
 
@@ -1235,7 +1235,7 @@ the logical values `true' and `false':
     & then take the top \TT{immedB} values in the stack and copy them \\
     & to the next lower \TT{immedB} values in the stack, then subtract \\
     & \TT{immedC} from the \TT{pc} (jumping backwards to just after \\
-    & the associated \TT{BEGL}).
+    & the appropriate \TT{BEGL}).
 \\\hline
 \ttkey{BEGF}
     & Add \TT{immedC} to the \TT{pc} (skipping \TT{immedC} instructions).
@@ -1820,11 +1820,11 @@ by the following instructions:
 \begin{tabular}{l@{~~~~}l}
 \TT{BEG} ~ \TT{BEGL} ~ \TT{CALL}+\TT{BEGF} & Increment by 1. \\
 \TT{END} ~ \TT{ENDF} ~ \TT{RET} & Decrement by 1. \\
-\TT{JMP\ldots} & Decrement by the instruction's \\
+\TT{JMP\ldots} ~ \TT{CONT} & Decrement by the instruction's \\
                & \TT{trace\_depth} member. \\
 \end{tabular}
 \end{center}
-Note: \TT{JMP\ldots} is the only way to exit a loop (\TT{ENDL} and
+Note: \TT{JMP\ldots} is the only way to exit the current loop (\TT{ENDL} and
 \TT{CONT} start a new iteration).
 
 A process's \TT{trace\_depth} is maintained even when the process's
@@ -2513,8 +2513,9 @@ the compiler must call one of these functions.
 \verb|      const min::phrase_position & pp =| \\
 \verb|          min::MISSING_PHRASE_POSITION )|
 \\[0.5ex]
-\verb|void mexstack:| \MEXSTACKKEY{cont} \label{CONT} \\
+\verb|bool mexstack:| \MEXSTACKKEY{cont} \label{CONT} \\
 \verb|    ( mex::instr & instr,| \\
+\verb|      min::uns32 loop_depth,| \\
 \verb|      min::uns32 tvars,| \\
 \verb|      min::gen trace_info = min::MISSING(),| \\
 \verb|      const min::phrase_position & pp =| \\
@@ -2575,8 +2576,13 @@ and {\tt stack\_limit} for {\tt END}), {\tt func\_stack\_length},
 and {\tt func\_var\_stack\_length} (by calling the
 {\tt mexstack::pop\_\EOL stacks}
 function provided by the compiler).
-The block description is also used
-by the {\tt cont} function to fill in parts of the {\tt CONT} instruction.
+
+The {\tt cont} function searches back through block descriptions to find
+the {\tt loop\_depth}'th {\tt BEGL} description and uses it
+to fill in parts of the {\tt CONT} instruction.  The {\tt cont} instruction
+also increments {\tt instr.trace\_depth} (assumed initially {\tt 0})
+once for very block description
+it skips over in this search.
 
 {\tt Begx} and {\tt endx} also adjust the current lexical level and
 depth as required by the {\tt BEG\ldots}~and {\tt END\ldots}~instructions
@@ -3236,13 +3242,21 @@ Figure~\itemref{BLOCK-AND-FUNCTION-INSTRUCTIONS}.  At assembly-time,
 \TT{ENDL} does the same thing as \TT{END}.
 \end{indpar}
 
-\ttkey{CONT}
+\ttkey{CONT} ~ {\em loop\_depth}\QMARK{}
 \begin{indpar}
 At run-time this instruction's actions are as described in
 Figure~\itemref{BLOCK-AND-FUNCTION-INSTRUCTIONS}.  At assembly-time,
 this instruction does nothing (i.e., it calls {\tt mexstack::cont}\pagnote{CONT}
 which does nothing but fill in instruction fields and push the instruction
 into the module code vector).
+
+The {\tt mexstack::cont} function
+searches the block stack for the {\tt loop\_depth}'th {\tt BEGL ...~ENDL}
+loop block and uses that to create an appropriate instruction.
+{\tt Loop\_depth} defaults to {\tt 1}, which continues the innermost
+loop (exiting any non-loop blocks inside the innermost loop).
+A value of {\tt 2} would exit the innermost loop and continue
+the next to innermost loop, etc.
 \end{indpar}
 
 \ttkey{BEGF}\label{BEGF} ~ {\em function-name} ~ {\em variable-name}\STAR{} ~
