@@ -239,7 +239,7 @@
 
 \begin{document}
         
-\title{Minimal Runtime System\\[2ex]Execution Engine\\[2ex]MEX\\[2ex]
+\title{Minimal Run-time System\\[2ex]Execution Engine\\[2ex]MEX\\[2ex]
        (Version 2)}
 
 \author{Robert L. Walton}
@@ -261,9 +261,9 @@
 \section{Introduction}
 
 This document describes MEX,
-the Minimal Runtime System Execution Engine.
+the Minimal Run-time System Execution Engine.
 
-MEX is layered on top of the Minimal Runtime System.
+MEX is layered on top of the Minimal Run-time System.
 
 MEX is stack-oriented and block-oriented.  It computes with
 \ttkey{min::gen} values.
@@ -290,7 +290,7 @@ and the corresponding code:
 \end{tabular}
 \end{indpar}
 
-In addition abbreviations of the MIN Runtime System are used
+In addition abbreviations of the MIN Run-time System are used
 in names of types and functions of that system.
 
 \section{C++ Interfaces}
@@ -314,7 +314,7 @@ directories:
 \end{tabular}
 \end{center}
 
-MEX is layered on top of MIN, the Minimal Runtime System, and
+MEX is layered on top of MIN, the Minimal Run-time System, and
 includes \ttkey{min.h}.
 
 The C++ data and functions described in this document can be
@@ -1310,51 +1310,56 @@ the logical values `true' and `false':
 \\\hline
 \ttkey{VPUSH}
     & Push the value of the top of the stack to the end of the vector of \\
-    & the object pointed at by \TT{sp[- immedA -1]}. However, if the value \\
-    & at the top of the stack itself an object with 
-                    \TT{.initializor == immedD}, \\
-    & push instead the vector elements of this object.  After finishing \\
+    & the object pointed at by \TT{sp[- immedA - 1]}. However, if the value \\
+    & at the top of the stack is itself an object with 
+                    \TT{.initiator == immedD}, \\
+    & push instead all the vector elements of this object.  After finishing \\
     & adding to the vector of the object, pop the execution stack once. 
 \\\hline
 \ttkey{VPOP}
     & Pop one value from the end of the vector of the object pointed at by \\
-    & \TT{sp[- immedA -1]} and then push that value into the stack.  However, \\
-    & if the vector object is empty, push \TT{min::NONE()} instead.
+    & \TT{sp[- immedA - 1]} and then push that value into the stack.
+        However, \\
+    & if the vector is empty, push \TT{min::NONE()} instead.
 \\\hline
 \ttkey{GET}
-    & Read the attribute named by the value X of \TT{sp[- immedC -1]} from \\
-    & the object pointed to by \TT{sp[- immedA -1]} and then push that value \\
+    & Read the attribute labelled by the value X
+        of \TT{sp[- immedC - 1]} from \\
+    & the object pointed to by \TT{sp[- immedA - 1]} and then push that value \\
     & into the stack.  If X is an integer, read the X+1'st element of the \\
     & vector of the object, while if X is a string or MIN label, read the \\
-    & named attribute of the object.  If the value to be read does not exist, \\
+    & labelled attribute of the object.  If the value to be read does not
+    		exist, \\
     & push \TT{min::NONE()} into the stack instead.  If \TT{immedB}
     	is non-zero, \\
     & \TT{immedC} is required to be zero, and the value X is popped from \\
     & the stack after it is read, before the value read is pushed.
 \\\hline
 \ttkey{GETI}
-    & Read the attribute named by \TT{immedD}, which must be a string \\
-    & or MIN label, from the object pointed to by \TT{sp[- immedA -1]}, \\
+    & Read the attribute labelled by \TT{immedD}, which must be a string \\
+    & or MIN label, from the object pointed to by \TT{sp[- immedA - 1]}, \\
     & and then push that value into the stack.  If the value to be read does \\
     & not exist, push \TT{min::NONE()} into the stack instead.
 \\\hline
 \ttkey{SET}
-    & Write the top value in the stack to the attribute named by the value \\
-    & X of \TT{sp[- immedC -1]} in the object pointed to by
-    	\TT{sp[- immedA -1]}. \\
+    & Write the top value in the stack to the attribute labelled by the value \\
+    & X of \TT{sp[- immedC - 1]} in the object pointed to by
+    	\TT{sp[- immedA - 1]}. \\
     & If X is an integer, write the X+1'st element of the vector of the \\
-    & object, while if X is a string or MIN label, write to the named \\
+    & object, while if X is a string or MIN label, write to the labelled \\
     & attribute in the object.  If X is an integer, the vector element is \\
     & required to exist; otherwise if the attribute does not have a previous \\
     & value, the attribute is created.  After the write, pop one value from \\
-    & the stack (the value written), and then if \TT{immedB} is non-zero, \\
-    & require \TT{immedC} to equal \TT{1} and pop a second value (X) \\
-    & from the stack.
+    & the stack (the value written), and then if \TT{immedB} is non-zero, 
+        require \\
+    & \TT{immedC} to equal \TT{1} and pop a second value (X)
+	    from the stack.
 \\\hline
 \ttkey{SETI}
-    & Write the top value in the stack to the attribute named by \TT{immedD}, \\
+    & Write the top value in the stack to the attribute labelled
+        by \TT{immedD}, \\
     & which must be a string or MIN label, in the object pointed to by \\
-    & \TT{sp[- immedA -1]}.  Then pop one value (the value written) from the \\
+    & \TT{sp[- immedA - 1]}.  Then pop one value (the value written) from the \\
     & stack.
 \\\hline
 \end{tabular}
@@ -2135,7 +2140,7 @@ pointing at the \TT{ERROR} instruction.
 \item \label{LIMIT-STOP-NOTE}
 On \TT{\ldots\_LIMIT\_STOP}, you can increase the limit
 and call \TT{run\_process} again to continue execution.
-For stacks you must resize the stack (as per \TT{min::\EOL resize}).
+For stacks you must re-size the stack (as per \TT{min::\EOL resize}).
 \item You can use \TT{init\_process ( m )} followed by \TT{run\_process}
 to run the code of \TT{m}.  Then after \TT{MODULE\_END},
 you can add to the end of \TT{m}
@@ -3064,11 +3069,11 @@ the top of the stack hides the element lower down.
 If two elements have the same {\em function-name}, the element nearer
 the top of the stack hides the element lower down.
 \item Stack searches always proceed from the topmost stack element
-to the bottommost, and accept the first element found with the desired name.
+to the bottom-most, and accept the first element found with the desired name.
 \item Modules are named by the name of the file assembled to produce
 the module, with the suffix \TT{.mex} deleted.  Such a name is
 a \emkey{module-name}.
-\item Some instructions have an optional {\em new-variable-name} argument
+\item Some instructions have an optional \emkey{new-variable-name} argument
 that names an element being pushed to the variables stack.
 The {\em new-variable-name}
 must \underline{not} be the same as the name of any variable of
@@ -3092,21 +3097,21 @@ or has depth equal to the writing instruction.
 range $[0,2^{32})$ (so they will fit into \TT{immedA}, \TT{immedB},
 or \TT{immedC} instruction
 members).
-\item Some instructions have a {\em level}\label{LEVEL} argument, which must
+\item Some instructions have a \emkey{level}\label{LEVEL} argument, which must
 specify a lexical level in the range [1,$L$], where $L$ is the lexical
 level of the instruction.  If the argument is missing or \TT{0},
 the specified lexical level is $L$.
 If the argument is a positive integer, it is the specified lexical level
 (and must be in range).  If the argument is a negative integer -$i$,
 the specified lexical level is $L-i$ (and must be in range).
-\item Some instructions have an {\em attribute-label}\label{ATTRIBUTE-LABEL}
+\item Some instructions have an \emkey{attribute-label}\label{ATTRIBUTE-LABEL}
 argument which may be a {\em string} or may have the form
 \begin{indpar}
 \TT{[} {\em string}\PLUS{} \TT{]}
 \end{indpar}
-This latter form specfies a MIN label whose elements are the {\em string}s.
-\item Some instructions have a {\em trace-message} argument
-and some have {\em trace-packet} arguments, where:
+This latter form specifies a MIN label whose elements are the {\em string}s.
+\item Some instructions have a \emkey{trace-message} argument
+and some have \emkey{trace-packet} arguments, where:
 \begin{indpar}
 \emkey{trace-message} ::= {\em string}
 \\[0.5ex]
@@ -3213,7 +3218,7 @@ The search for {\em variable-name} begins with the entire variable
 stack and proceeds through the variable stacks of previously assembled modules
 in most recently assembled first order.
 \TT{PUSH} assembles
-to the runtime instruction \TT{PUSHS}, \TT{PUSHL}, \TT{PUSHG},
+to the run-time instruction \TT{PUSHS}, \TT{PUSHL}, \TT{PUSHG},
 or \TT{PUSHA}, depending on the location of the variable.
 
 (If the variable name is in the variable stack,
@@ -3496,7 +3501,8 @@ element with {\em new-variable-name} as its name.
 At run-time this instruction's actions are as described in
 Figure~\itemref{OBJECT-INSTRUCTIONS}, where {\em object-variable-name}
 specifies the variable containing the object pointer, and
-{\em string} specifies the MIN string that is the \TT{immedD} value.
+{\em string} specifies the MIN string that is the \TT{immedD} value
+(default, \TT{min::NONE()}).
 
 At assembly time, pops the variable stack.
 
@@ -3524,7 +3530,7 @@ At run-time this instruction's actions are as described in
 Figure~\itemref{OBJECT-INSTRUCTIONS}, where {\em object-variable-name}
 specifies the variable containing the object pointer (\TT{immedA} value), and
 {\em attribute-label-variable-name} specifies the variable containing the
-attribute name value \EOL (\TT{immedC} value).
+attribute label value \EOL (\TT{immedC} value).
 If {\em attribute-label-variable-name}
 is \TT{*}, the attribute name is popped from the stack
 (\TT{immedB} != 0, \TT{immedC} == 0).
@@ -3748,7 +3754,7 @@ until an \TT{-o:off} is encountered.
 
 Details are:
 \begin{indpar}\begin{tabular}{p{1.3in}p{4.4in}}
-{\em mexas-filname} & Name of file, usually ending in \TT{.mex}, containing
+{\em mexas-filename} & Name of file, usually ending in \TT{.mex}, containing
                       instructions as described in
                       MEXAS Instructions, \itemref{MEXAS-INSTRUCTIONS}.
 		      The file is assembled as a module and given the
