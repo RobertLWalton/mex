@@ -244,7 +244,7 @@
 
 \author{Robert L. Walton}
 
-\date{December 7, 2024}
+\date{December 8, 2024}
  
 \maketitle
 
@@ -1319,7 +1319,7 @@ the logical values `true' and `false':
 \ttkey{VPOP}
     & Pop one value from the end of the vector of the object pointed at by \\
     & \TT{sp[- immedA -1]} and then push that value into the stack.  However, \\
-    & if the vector object is empty, push \TT{min::NONE} instead.
+    & if the vector object is empty, push \TT{min::NONE()} instead.
 \\\hline
 \ttkey{GET}
     & Read the attribute named by the value X of \TT{sp[- immedC -1]} from \\
@@ -1327,8 +1327,8 @@ the logical values `true' and `false':
     & into the stack.  If X is an integer, read the X+1'st element of the \\
     & vector of the object, while if X is a string or MIN label, read the \\
     & named attribute of the object.  If the value to be read does not exist, \\
-    & push \TT{mex::NONE} into the stack instead.  If \TT{immedB} is non-zero,
-                                                                     \\
+    & push \TT{min::NONE()} into the stack instead.  If \TT{immedB}
+    	is non-zero, \\
     & \TT{immedC} is required to be zero, and the value X is popped from \\
     & the stack after it is read, before the value read is pushed.
 \\\hline
@@ -1336,7 +1336,7 @@ the logical values `true' and `false':
     & Read the attribute named by \TT{immedD}, which must be a string \\
     & or MIN label, from the object pointed to by \TT{sp[- immedA -1]}, \\
     & and then push that value into the stack.  If the value to be read does \\
-    & not exist, push \TT{mex::NONE} into the stack instead.
+    & not exist, push \TT{min::NONE()} into the stack instead.
 \\\hline
 \ttkey{SET}
     & Write the top value in the stack to the attribute named by the value \\
@@ -1348,12 +1348,12 @@ the logical values `true' and `false':
     & required to exist; otherwise if the attribute does not have a previous \\
     & value, the attribute is created.  After the write, pop one value from \\
     & the stack (the value written), and then if \TT{immedB} is non-zero, \\
-    & require \TT{immedC} to be zero, and pop a second value (X) from the \\
-    & stack.
+    & require \TT{immedC} to equal \TT{1} and pop a second value (X) \\
+    & from the stack.
 \\\hline
 \ttkey{SETI}
     & Write the top value in the stack to the attribute named by \TT{immedD}, \\
-    & which must be a string or MIN label,  in the object pointed to by \\
+    & which must be a string or MIN label, in the object pointed to by \\
     & \TT{sp[- immedA -1]}.  Then pop one value (the value written) from the \\
     & stack.
 \\\hline
@@ -1748,6 +1748,48 @@ and $V$ is the value at the top of the stack
 \end{center}
 If \TT{module->\EOL trace\_\EOL info[i]} is not a MIN string,
 {\em to-variable} is taken to be \TT{*}.
+
+\subsubsection{Object Instruction Tracing}
+\label{OBJECT-INSTRUCTION-TRACING}
+
+The trace messages for the object instructions in
+Figure~\itemref{OBJECT-INSTRUCTIONS} are:
+\begin{center}
+\begin{tabular}{l@{~~~~~}l}
+\TT{NEW\_OBJ} &
+{\em trace-header}\TT{:} {\em to-variable}
+                    \TT{<=} \TT{OBJ (}{\em unused-size}\TT{,}
+		                      {\em hash-size}\TT{)}
+\\[1ex]
+\TT{VPUSH} &
+{\em trace-header}\TT{:} \TT{PUSHED} {\em object-variable}
+                    \TT{<=} {\em from-variable}
+		    \TT{=} {\em value}
+\\[1ex]
+\TT{VPOP} &
+{\em trace-header}\TT{:} {\em to-variable}
+                    \TT{<= POPPED} {\em object-variable}
+		    \TT{=} {\em value}
+\\[1ex]
+\TT{GET}/\TT{GETI} &
+{\em trace-header}\TT{:} {\em to-variable}
+                    \TT{<=} {\em object-variable}\TT{[}{\em label-value}\TT{]}
+		    \TT{=} {\em value}
+\\[1ex]
+\TT{SET}/\TT{SETI} &
+{\em trace-header}\TT{:} {\em object-variable}\TT{[}{\em label-value}\TT{]}
+		    \TT{<=} {\em from-variable} \TT{=} {\em value}
+\end{tabular}
+\end{center}
+
+For \TT{NEW\_OB},
+\TT{module->\EOL trace\_\EOL info[i]} is the {\em to-variable} label.
+For the other instructions,
+\TT{module->\EOL trace\_\EOL info[i]} is the MIN label
+\TT{[<} {\em from-variable} ~ {\em to-variable} \TT{>]},
+where one of the two variables is {\em object-variable}.
+If \TT{module->\EOL trace\_\EOL info[i]} does not have the right form,
+{\em from-variable} and {\em to-variable} are taken to be \TT{*}.
 
 
 \subsubsection{Trace-Packet Based Trace Messages}
@@ -3057,6 +3099,12 @@ the specified lexical level is $L$.
 If the argument is a positive integer, it is the specified lexical level
 (and must be in range).  If the argument is a negative integer -$i$,
 the specified lexical level is $L-i$ (and must be in range).
+\item Some instructions have an {\em attribute-label}\label{ATTRIBUTE-LABEL}
+argument which may be a {\em string} or may have the form
+\begin{indpar}
+\TT{[} {\em string}\PLUS{} \TT{]}
+\end{indpar}
+This latter form specfies a MIN label whose elements are the {\em string}s.
 \item Some instructions have a {\em trace-message} argument
 and some have {\em trace-packet} arguments, where:
 \begin{indpar}
@@ -3432,6 +3480,112 @@ At run-time this instruction's actions are as described in
 Figure~\itemref{BLOCK-AND-FUNCTION-INSTRUCTIONS}.  At assembly-time,
 this instruction pops {\em nresults} elements from the
 variables stack.
+\end{indpar}
+
+\ttkey{NEW\_OBJ} ~ {\em unused-size} ~ {\em hash-size} ~
+                   {\em new-variable-name}\QMARK{}
+\begin{indpar}
+At run-time this instruction's actions are as described in
+Figure~\itemref{OBJECT-INSTRUCTIONS}.
+At assembly time, pushes into the variable stack an
+element with {\em new-variable-name} as its name.
+\end{indpar}
+
+\ttkey{VPUSH} ~ {\em object-variable-name} {\em string}\QMARK{}
+\begin{indpar}
+At run-time this instruction's actions are as described in
+Figure~\itemref{OBJECT-INSTRUCTIONS}, where {\em object-variable-name}
+specifies the variable containing the object pointer, and
+{\em string} specifies the MIN string that is the \TT{immedD} value.
+
+At assembly time, pops the variable stack.
+
+The variable stack search for {\em object-variable-name} is restricted to
+elements with the same lexical level as the \TT{VPUSH} instruction.
+\end{indpar}
+
+\ttkey{VPOP} ~ {\em object-variable-name} {\em new-variable-name}\QMARK{}
+\begin{indpar}
+At run-time this instruction's actions are as described in
+Figure~\itemref{OBJECT-INSTRUCTIONS}, where {\em object-variable-name}
+specifies the variable containing the object pointer.
+
+At assembly time, pushes into the variable stack an
+element with {\em new-variable-name} as its name.
+
+The variable stack search for {\em object-variable-name} is restricted to
+elements with the same lexical level as the \TT{VPOP} instruction.
+\end{indpar}
+
+\ttkey{GET} ~ {\em object-variable-name} {\em attribute-label-variable-name}
+	      {\em new-variable-name}\QMARK{}
+\begin{indpar}
+At run-time this instruction's actions are as described in
+Figure~\itemref{OBJECT-INSTRUCTIONS}, where {\em object-variable-name}
+specifies the variable containing the object pointer (\TT{immedA} value), and
+{\em attribute-label-variable-name} specifies the variable containing the
+attribute name value \EOL (\TT{immedC} value).
+If {\em attribute-label-variable-name}
+is \TT{*}, the attribute name is popped from the stack
+(\TT{immedB} != 0, \TT{immedC} == 0).
+
+At assembly time, pushes into the variable stack an
+element with {\em new-variable-name} as its name.
+
+The variable stack searches for {\em object-variable-name} 
+and {\em attribute-label-variable-name} are restricted to
+elements with the same lexical level as the \TT{GET} instruction.
+\end{indpar}
+
+\ttkey{GETI} ~ {\em object-variable-name} {\em attribute-label}
+	       {\em new-variable-name}\QMARK{}
+\begin{indpar}
+At run-time this instruction's actions are as described in
+Figure~\itemref{OBJECT-INSTRUCTIONS}, where {\em object-variable-name}
+specifies the variable containing the object pointer (\TT{immedA} value), and
+{\em attribute-label}\pagnote{ATTRIBUTE-LABEL}
+names the attribute (\TT{immedD} value).
+
+At assembly time, pushes into the variable stack an
+element with {\em new-variable-name} as its name.
+
+The variable stack search for {\em object-variable-name} 
+is restricted to
+elements with the same lexical level as the \TT{GETI} instruction.
+\end{indpar}
+
+\ttkey{SET} ~ {\em object-variable-name} {\em attribute-label-variable-name}
+\begin{indpar}
+At run-time this instruction's actions are as described in
+Figure~\itemref{OBJECT-INSTRUCTIONS}, where {\em object-variable-name}
+specifies the variable containing the object pointer (\TT{immedA} value), and
+{\em attribute-label-variable-name} specifies the variable containing the
+attribute label value \EOL (\TT{immedC} value).
+If {\em attribute-label-variable-name} is \TT{*},
+the attribute label is popped from the stack
+(\TT{immedB} != 0, \TT{immedC} == 1).
+
+At assembly time, pops the variable stack twice if
+{\tt attribute-label-variable-name} is \TT{*}, or once otherwise.
+
+The variable stack searches for {\em object-variable-name} 
+and {\em attribute-label-variable-name} are restricted to
+elements with the same lexical level as the \TT{SET} instruction.
+\end{indpar}
+
+\ttkey{SETI} ~ {\em object-variable-name} {\em attribute-label}
+\begin{indpar}
+At run-time this instruction's actions are as described in
+Figure~\itemref{OBJECT-INSTRUCTIONS}, where {\em object-variable-name}
+specifies the variable containing the object pointer (\TT{immedA} value), and
+{\em attribute-label} names the attribute being written
+(\TT{immedD} value).
+
+At assembly time, pops the variable stack once.
+
+The variable stack search for {\em object-variable-name} 
+is restricted to
+elements with the same lexical level as the \TT{SETI} instruction.
 \end{indpar}
 
 \ttkey{PUSHNARGS} ~ {\em level}\QMARK{} ~ {\em new-variable-name}\QMARK{}
