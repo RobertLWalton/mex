@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Nov 24 02:13:00 AM EST 2024
+// Date:	Sat Dec  7 06:25:33 PM EST 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -119,6 +119,13 @@ enum op_code {
     SET_EXCEPTS,
     TRACE_EXCEPTS,
     SET_OPTIMIZE,
+    NEW_OBJ,
+    VPUSH,
+    VPOP,
+    SET,
+    SETI,
+    GET,
+    GETI,
     NUMBER_OF_OP_CODES
 };
 
@@ -149,6 +156,8 @@ enum trace_class
     T_NOP,
     T_SET_EXCEPTS,
     T_SET_OPTIMIZE,
+    T_GET,
+    T_SET,
     NUMBER_OF_TRACE_CLASSES
 };
 

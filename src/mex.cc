@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Dec  3 12:01:27 AM EST 2024
+// Date:	Sat Dec  7 06:28:36 PM EST 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1325,6 +1325,14 @@ mex::op_info mex::op_infos [ mex::NUMBER_OF_OP_CODES ] =
                           NULL, "TRACE_EXCEPTS", NULL },
     { mex::SET_OPTIMIZE, NONA, T_SET_OPTIMIZE,
                          NULL, "SET_OPTIMIZE", NULL },
+    { mex::NEW_OBJ, NONA, T_SET,
+                    NULL, "NEW_OBJ", NULL },
+    { mex::VPUSH, NONA, T_SET, NULL, "VPUSH", NULL },
+    { mex::VPOP, NONA, T_GET, NULL, "VPOP", NULL },
+    { mex::SET, NONA, T_SET, NULL, "SET", NULL },
+    { mex::SETI, NONA, T_SET, NULL, "SETI", NULL },
+    { mex::GET, NONA, T_GET, NULL, "SET", NULL },
+    { mex::GETI, NONA, T_GET, NULL, "GETI", NULL },
 };
 
 // Trace Class Information Table.
@@ -1353,6 +1361,8 @@ mex::trace_class_info mex::trace_class_infos
     { T_NOP, "NOP" },
     { T_SET_EXCEPTS, "SET_EXCEPTS" },
     { T_SET_OPTIMIZE, "SET_OPTIMIZE" },
+    { T_GET, "GET" },
+    { T_SET, "SET" },
 };
 
 // Excepts Information Table.

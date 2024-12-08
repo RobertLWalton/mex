@@ -1,4 +1,4 @@
-% Minimal Runtime System
+% Minimal Runtime System Execution Engine
 %
 % File:         mex.tex
 % Author:       Bob Walton (walton@acm.org)
@@ -244,7 +244,7 @@
 
 \author{Robert L. Walton}
 
-\date{December 3, 2024}
+\date{December 7, 2024}
  
 \maketitle
 
@@ -1304,6 +1304,74 @@ the logical values `true' and `false':
 \small
 \begin{tabular}{|l|l|}
 \hline
+\ttkey{NEW\_OBJ}
+    & Push a pointer to a new object with \TT{immedA} unused size and \\
+    & \TT{immedB} hash size into the stack.
+\\\hline
+\ttkey{VPUSH}
+    & Push the value of the top of the stack to the end of the vector of \\
+    & the object pointed at by \TT{sp[- immedA -1]}. However, if the value \\
+    & at the top of the stack itself an object with 
+                    \TT{.initializor == immedD}, \\
+    & push instead the vector elements of this object.  After finishing \\
+    & adding to the vector of the object, pop the execution stack once. 
+\\\hline
+\ttkey{VPOP}
+    & Pop one value from the end of the vector of the object pointed at by \\
+    & \TT{sp[- immedA -1]} and then push that value into the stack.  However, \\
+    & if the vector object is empty, push \TT{min::NONE} instead.
+\\\hline
+\ttkey{GET}
+    & Read the attribute named by the value X of \TT{sp[- immedC -1]} from \\
+    & the object pointed to by \TT{sp[- immedA -1]} and then push that value \\
+    & into the stack.  If X is an integer, read the X+1'st element of the \\
+    & vector of the object, while if X is a string or MIN label, read the \\
+    & named attribute of the object.  If the value to be read does not exist, \\
+    & push \TT{mex::NONE} into the stack instead.  If \TT{immedB} is non-zero,
+                                                                     \\
+    & \TT{immedC} is required to be zero, and the value X is popped from \\
+    & the stack after it is read, before the value read is pushed.
+\\\hline
+\ttkey{GETI}
+    & Read the attribute named by \TT{immedD}, which must be a string \\
+    & or MIN label, from the object pointed to by \TT{sp[- immedA -1]}, \\
+    & and then push that value into the stack.  If the value to be read does \\
+    & not exist, push \TT{mex::NONE} into the stack instead.
+\\\hline
+\ttkey{SET}
+    & Write the top value in the stack to the attribute named by the value \\
+    & X of \TT{sp[- immedC -1]} in the object pointed to by
+    	\TT{sp[- immedA -1]}. \\
+    & If X is an integer, write the X+1'st element of the vector of the \\
+    & object, while if X is a string or MIN label, write to the named \\
+    & attribute in the object.  If X is an integer, the vector element is \\
+    & required to exist; otherwise if the attribute does not have a previous \\
+    & value, the attribute is created.  After the write, pop one value from \\
+    & the stack (the value written), and then if \TT{immedB} is non-zero, \\
+    & require \TT{immedC} to be zero, and pop a second value (X) from the \\
+    & stack.
+\\\hline
+\ttkey{SETI}
+    & Write the top value in the stack to the attribute named by \TT{immedD}, \\
+    & which must be a string or MIN label,  in the object pointed to by \\
+    & \TT{sp[- immedA -1]}.  Then pop one value (the value written) from the \\
+    & stack.
+\\\hline
+\end{tabular}
+\end{center}
+\vspace*{-3ex}
+\caption{Object Instructions}
+\label{OBJECT-INSTRUCTIONS}
+\end{boxedfigure}
+
+\clearpage
+
+\begin{boxedfigure}
+
+\begin{center}
+\small
+\begin{tabular}{|l|l|}
+\hline
 \ttkey{PUSHA}
     & Push the stack vector value with index \TT{fp[immedB] - immedA}. \\
     & \TT{immedA} must be 
@@ -1477,7 +1545,7 @@ the \TT{mex::T\_XX} constant.  Thus the trace class of \TT{ADD}
 is \TT{mex::T\_AOP}.
 
 
-\begin{boxedfigure}[t]
+\begin{boxedfigure}[!h]
 
 \begin{center}
 
@@ -1518,6 +1586,14 @@ is \TT{mex::T\_AOP}.
 		the jump test fails (there is no actual jump),
 		the effective trace class is changed
 		to \TT{JMPF}.
+\\\hline
+\ttmkey{SET}{trace class} & The \TT{NEW\_OBJ}, \TT{VPUSH}, \TT{SET},
+                            and \TT{SETI} instructions in Figure
+                            \itemref{OBJECT-INSTRUCTIONS}.
+\\\hline
+\ttmkey{GET}{trace class} & The \TT{VPOP}, \TT{GET},
+                            and \TT{GETI} instructions in Figure
+                            \itemref{OBJECT-INSTRUCTIONS}.
 \\\hline
 \ttmkey{XXX}{trace class} & Instruction with operation code \TT{XXX},
                             for instructions not mentioned above
