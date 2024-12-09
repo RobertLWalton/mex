@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat Dec  7 06:28:36 PM EST 2024
+// Date:	Mon Dec  9 07:49:03 AM EST 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -583,6 +583,137 @@ static bool optimized_run_process ( mex::process p )
 	        goto ERROR_EXIT;
 	    -- sp;
 	    sp[-(int)i] = * sp;
+	    break;
+	}
+	case mex::GET:
+	{
+	    if ( sp <= spbegin || sp >= spend )
+	        goto ERROR_EXIT;
+	    min::uns32 i = pc->immedA;
+	    min::uns32 j = pc->immedC;
+	    min::uns32 k = sp - spbegin;
+	    if ( i >= k || j >= k )
+	        goto ERROR_EXIT;
+	    min::gen label = sp[-(int)j-1];
+
+	    min::gen * new_sp = sp;
+	    if ( pc->immedB != 0 )
+	    {
+		if ( j != 0 )
+		    goto ERROR_EXIT;
+	        -- new_sp;
+	    }
+
+	    if ( min::is_num ( label ) )
+	    {
+		min::obj_vec_ptr vp = sp[-(int)i-1];
+		if ( vp == min::NULL_STUB )
+		    goto ERROR_EXIT;
+		min::uns32 s = min::size_of ( vp );
+
+		min::float64 flabel = FG ( label );
+		if ( ! mex::isfinite ( flabel )
+		     ||
+		     flabel <= -1e9
+		     ||
+		     flabel >= +1e9
+		     ||
+		     floor ( flabel ) != flabel )
+		    goto ERROR_EXIT;
+		* new_sp ++ =
+		    ( ( flabel < 0 || flabel >= s ) ?
+		      min::NONE() :
+		      vp[(int)flabel] );
+	    }
+	    else if ( min::is_name ( label ) )
+	    {
+		min::gen obj = sp[-(int)i-1];
+		if ( ! min::is_obj ( obj ) )
+		    goto ERROR_EXIT;
+		* new_sp ++ = min::get ( obj, label );
+	    }
+	    else
+	        goto ERROR_EXIT;
+
+	    sp = new_sp;
+	    break;
+	}
+	case mex::GETI:
+	{
+	    if ( sp <= spbegin || sp >= spend )
+	        goto ERROR_EXIT;
+	    min::uns32 i = pc->immedA;
+	    min::uns32 k = sp - spbegin;
+	    if ( i >= k )
+	        goto ERROR_EXIT;
+	    min::gen obj = sp[-(int)i-1];
+	    min::gen label = pc->immedD;
+	    if ( ! min::is_obj ( obj ) )
+	        goto ERROR_EXIT;
+	    if ( min::is_num ( label )
+	         ||
+		 ! min::is_name ( label ) )
+	        goto ERROR_EXIT;
+	    * sp ++ = min::get ( obj, pc->immedD );
+	    break;
+	}
+	case mex::SET:
+	{
+	    bool pop_two = ( pc->immedB != 0 );
+	    if ( sp <= spbegin + 1 + pop_two )
+	        goto ERROR_EXIT;
+	    min::uns32 i = pc->immedA;
+	    min::uns32 j = pc->immedC;
+	    min::uns32 k = sp - spbegin;
+	    if ( i >= k || j >= k )
+	        goto ERROR_EXIT;
+	    if ( pop_two && j != 1 )
+	        goto ERROR_EXIT;
+	    min::gen label = sp[-(int)j-1];
+	    if ( min::is_num ( label ) )
+	    {
+		min::obj_vec_updptr vp = sp[-(int)i-1];
+		if ( vp == min::NULL_STUB )
+		    goto ERROR_EXIT;
+		min::uns32 s = min::size_of ( vp );
+
+		min::float64 flabel = FG ( label );
+		if ( ! mex::isfinite ( flabel )
+		     ||
+		     flabel <= -1e9
+		     ||
+		     flabel >= +1e9 )
+		    goto ERROR_EXIT;
+		if ( floor ( flabel ) != flabel )
+		    goto ERROR_EXIT;
+		if ( flabel < 0 || flabel >= s )
+		    goto ERROR_EXIT;
+		vp[(int)flabel] = * -- sp;
+	    }
+	    else if ( min::is_name ( label ) )
+	    {
+		min::gen obj = sp[-(int)i-1];
+		if ( ! min::is_obj ( obj ) )
+		    goto ERROR_EXIT;
+		min::set ( obj, label, * -- sp );
+	    }
+	    else
+	        goto ERROR_EXIT;
+
+	    break;
+	}
+	case mex::SETI:
+	{
+	    if ( sp <= spbegin + 1 )
+	        goto ERROR_EXIT;
+	    min::uns32 i = pc->immedA;
+	    min::uns32 k = sp - spbegin;
+	    if ( i >= k )
+	        goto ERROR_EXIT;
+	    min::gen obj = sp[-(int)i-1];
+	    if ( ! min::is_obj ( obj ) )
+	        goto ERROR_EXIT;
+	    min::set ( obj, pc->immedD, * -- sp );
 	    break;
 	}
 	case mex::JMP:
@@ -1325,8 +1456,6 @@ mex::op_info mex::op_infos [ mex::NUMBER_OF_OP_CODES ] =
                           NULL, "TRACE_EXCEPTS", NULL },
     { mex::SET_OPTIMIZE, NONA, T_SET_OPTIMIZE,
                          NULL, "SET_OPTIMIZE", NULL },
-    { mex::NEW_OBJ, NONA, T_SET,
-                    NULL, "NEW_OBJ", NULL },
     { mex::VPUSH, NONA, T_SET, NULL, "VPUSH", NULL },
     { mex::VPOP, NONA, T_GET, NULL, "VPOP", NULL },
     { mex::SET, NONA, T_SET, NULL, "SET", NULL },
@@ -1515,7 +1644,7 @@ bool mex::run_process ( mex::process p )
     min::uns8 op_code;
     min::uns8 trace_class;
     op_info * op_info;
-    min::gen arg1, arg2;
+    min::gen arg1, arg2, obj, label;
     min::locatable_gen result;
     int sp_change;
     min::uns32 trace_flags; 
@@ -2468,6 +2597,151 @@ bool mex::run_process ( mex::process p )
 		value = sp[-1];
 		sp_change = -1;
 		break;
+	    case mex::GET:
+		if ( sp >= spend )
+		    goto STACK_LIMIT_STOP;
+		if ( sp <= spbegin
+		     ||
+		     immedA >= sp - spbegin
+		     ||
+		     immedC >= sp - spbegin )
+		    goto STACK_TOO_SMALL;
+
+		obj = sp[-(int)immedA-1];
+		label = sp[-(int)immedC-1];
+		if ( min::is_num ( label ) )
+		{
+		    min::obj_vec_ptr vp = obj;
+		    if ( vp == min::NULL_STUB )
+		        goto NOT_AN_OBJECT;
+		    min::uns32 s = min::size_of ( vp );
+
+		    min::float64 flabel = FG ( label );
+		    if ( ! mex::isfinite ( flabel )
+			 ||
+			 flabel <= -1e9
+			 ||
+			 flabel >= +1e9
+			 ||
+		         floor ( flabel ) != flabel )
+		    {
+		        message = "GET: numeric label"
+			          " is not integer in"
+				  " range (-1e9, +1e9)";
+			goto INNER_FATAL;
+		    }
+		    value =
+		      ( ( flabel < 0 || flabel >= s ) ?
+		        vp[(int)flabel] : min::NONE() );
+
+		}
+		else if ( min::is_name ( label ) )
+		{
+		    if ( ! min::is_obj ( obj ) )
+			goto NOT_AN_OBJECT;
+		    value = min::get ( obj, label );
+		}
+		else
+		    goto NOT_A_LABEL;
+
+		sp_change = +1;
+		break;
+	    case mex::GETI:
+		if ( sp >= spend )
+		    goto STACK_LIMIT_STOP;
+		if ( sp <= spbegin
+		     ||
+		     immedA >= sp - spbegin )
+		    goto STACK_TOO_SMALL;
+
+		label = immedD;
+		obj = sp[-(int)immedA-1];
+		if ( ! min::is_obj ( obj ) )
+		    goto NOT_AN_OBJECT;
+		if (    ! min::is_name ( label )
+		     || min::is_num ( label ) )
+		    goto NOT_A_LABEL;
+		value = min::get ( obj, label );
+		sp_change = +1;
+		break;
+	    case mex::SET:
+		sp_change = -1;
+		if ( immedB != 0 )
+		{
+		    sp_change = -2;
+		    if ( immedC != 1 )
+		    {
+		        message = "SET: immedB != 0 but"
+			          " immedC != 1";
+			goto INNER_FATAL;
+		    }
+		}
+		if ( sp + sp_change <= spbegin
+		     ||
+		     immedA >= sp - spbegin
+		     ||
+		     immedC >= sp - spbegin )
+		    goto STACK_TOO_SMALL;
+		value = sp[-1];
+
+		obj = sp[-(int)immedA-1];
+		label = sp[-(int)immedC-1];
+		if ( min::is_num ( label ) )
+		{
+		    min::obj_vec_updptr vp = obj;
+		    if ( vp == min::NULL_STUB )
+		        goto NOT_AN_OBJECT;
+		    min::uns32 s = min::size_of ( vp );
+
+		    min::float64 flabel = FG ( label );
+		    if ( ! mex::isfinite ( flabel )
+			 ||
+			 flabel <= -1e9
+			 ||
+			 flabel >= +1e9
+			 ||
+		         floor ( flabel ) != flabel )
+		    {
+		        message = "GET: numeric label"
+			          " is not integer in"
+				  " range (-1e9, +1e9)";
+			goto INNER_FATAL;
+		    }
+		    if ( flabel < 0 || flabel >= s )
+		    {
+		        message = "GET: vector element"
+			          " does not exist";
+			goto INNER_FATAL;
+		    }
+		    vp[(int)flabel] = value;
+		}
+		else if ( min::is_name ( label ) )
+		{
+		    if ( ! min::is_obj ( obj ) )
+			goto NOT_AN_OBJECT;
+		    min::set ( obj, label, value );
+		}
+		else
+		    goto NOT_A_LABEL;
+
+		break;
+	    case mex::SETI:
+		if ( sp <= spbegin
+		     ||
+		     immedA >= sp - spbegin )
+		    goto STACK_TOO_SMALL;
+		sp_change = -1;
+		value = sp[-1];
+
+		label = immedD;
+		obj = sp[-(int)immedA-1];
+		if ( ! min::is_obj ( obj ) )
+		    goto NOT_AN_OBJECT;
+		if (    ! min::is_name ( label )
+		     || min::is_num ( label ) )
+		    goto NOT_A_LABEL;
+		min::set ( obj, label, value );
+		break;
 	    case mex::END:
 	        if ( p->trace_depth == 0 )
 		{
@@ -3142,6 +3416,16 @@ bool mex::run_process ( mex::process p )
 	STACK_TOO_SMALL:
 	    message = "illegal SP: stack to small"
 		      " for instruction";
+	    goto INNER_FATAL;
+
+	NOT_AN_OBJECT:
+	    message =
+	        "object argument is not an object";
+	    goto INNER_FATAL;
+
+	NOT_A_LABEL:
+	    message =
+	        "label argument is not a label";
 	    goto INNER_FATAL;
 
 	// Fatal error discovered in loop.

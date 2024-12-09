@@ -1304,10 +1304,6 @@ the logical values `true' and `false':
 \small
 \begin{tabular}{|l|l|}
 \hline
-\ttkey{NEW\_OBJ}
-    & Push a pointer to a new object with \TT{immedA} unused size and \\
-    & \TT{immedB} hash size into the stack.
-\\\hline
 \ttkey{VPUSH}
     & Push the value of the top of the stack to the end of the vector of \\
     & the object pointed at by \TT{sp[- immedA - 1]}. However, if the value \\
@@ -1592,7 +1588,7 @@ is \TT{mex::T\_AOP}.
 		the effective trace class is changed
 		to \TT{JMPF}.
 \\\hline
-\ttmkey{SET}{trace class} & The \TT{NEW\_OBJ}, \TT{VPUSH}, \TT{SET},
+\ttmkey{SET}{trace class} & The \TT{VPUSH}, \TT{SET},
                             and \TT{SETI} instructions in Figure
                             \itemref{OBJECT-INSTRUCTIONS}.
 \\\hline
@@ -1761,11 +1757,6 @@ The trace messages for the object instructions in
 Figure~\itemref{OBJECT-INSTRUCTIONS} are:
 \begin{center}
 \begin{tabular}{l@{~~~~~}l}
-\TT{NEW\_OBJ} &
-{\em trace-header}\TT{:} {\em to-variable}
-                    \TT{<=} \TT{OBJ (}{\em unused-size}\TT{,}
-		                      {\em hash-size}\TT{)}
-\\[1ex]
 \TT{VPUSH} &
 {\em trace-header}\TT{:} \TT{PUSHED} {\em object-variable}
                     \TT{<=} {\em from-variable}
@@ -1787,9 +1778,7 @@ Figure~\itemref{OBJECT-INSTRUCTIONS} are:
 \end{tabular}
 \end{center}
 
-For \TT{NEW\_OB},
-\TT{module->\EOL trace\_\EOL info[i]} is the {\em to-variable} label.
-For the other instructions,
+For these instructions,
 \TT{module->\EOL trace\_\EOL info[i]} is the MIN label
 \TT{[<} {\em from-variable} ~ {\em to-variable} \TT{>]},
 where one of the two variables is {\em object-variable}.
@@ -3485,15 +3474,6 @@ At run-time this instruction's actions are as described in
 Figure~\itemref{BLOCK-AND-FUNCTION-INSTRUCTIONS}.  At assembly-time,
 this instruction pops {\em nresults} elements from the
 variables stack.
-\end{indpar}
-
-\ttkey{NEW\_OBJ} ~ {\em unused-size} ~ {\em hash-size} ~
-                   {\em new-variable-name}\QMARK{}
-\begin{indpar}
-At run-time this instruction's actions are as described in
-Figure~\itemref{OBJECT-INSTRUCTIONS}.
-At assembly time, pushes into the variable stack an
-element with {\em new-variable-name} as its name.
 \end{indpar}
 
 \ttkey{VPUSH} ~ {\em object-variable-name} {\em string}\QMARK{}
