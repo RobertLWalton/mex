@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Dec  9 07:49:03 AM EST 2024
+// Date:	Mon Dec  9 12:25:58 PM EST 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -587,7 +587,7 @@ static bool optimized_run_process ( mex::process p )
 	}
 	case mex::GET:
 	{
-	    if ( sp <= spbegin || sp >= spend )
+	    if ( sp <= spbegin )
 	        goto ERROR_EXIT;
 	    min::uns32 i = pc->immedA;
 	    min::uns32 j = pc->immedC;
@@ -603,6 +603,8 @@ static bool optimized_run_process ( mex::process p )
 		    goto ERROR_EXIT;
 	        -- new_sp;
 	    }
+	    if ( new_sp >= spend )
+	        goto ERROR_EXIT;
 
 	    if ( min::is_num ( label ) )
 	    {
@@ -654,20 +656,25 @@ static bool optimized_run_process ( mex::process p )
 	         ||
 		 ! min::is_name ( label ) )
 	        goto ERROR_EXIT;
-	    * sp ++ = min::get ( obj, pc->immedD );
+	    * sp ++ = min::get ( obj, label );
 	    break;
 	}
 	case mex::SET:
 	{
-	    bool pop_two = ( pc->immedB != 0 );
-	    if ( sp <= spbegin + 1 + pop_two )
-	        goto ERROR_EXIT;
 	    min::uns32 i = pc->immedA;
 	    min::uns32 j = pc->immedC;
 	    min::uns32 k = sp - spbegin;
 	    if ( i >= k || j >= k )
 	        goto ERROR_EXIT;
-	    if ( pop_two && j != 1 )
+
+	    min::gen * new_sp = sp;
+	    if ( pc->immedB != 0 )
+	    {
+	    	if ( j != 1 )
+		    goto ERROR_EXIT;
+		-- new_sp;
+	    }
+	    if ( new_sp < spbegin )
 	        goto ERROR_EXIT;
 	    min::gen label = sp[-(int)j-1];
 	    if ( min::is_num ( label ) )
@@ -682,9 +689,9 @@ static bool optimized_run_process ( mex::process p )
 		     ||
 		     flabel <= -1e9
 		     ||
-		     flabel >= +1e9 )
-		    goto ERROR_EXIT;
-		if ( floor ( flabel ) != flabel )
+		     flabel >= +1e9
+		     ||
+		     floor ( flabel ) != flabel )
 		    goto ERROR_EXIT;
 		if ( flabel < 0 || flabel >= s )
 		    goto ERROR_EXIT;
@@ -700,6 +707,8 @@ static bool optimized_run_process ( mex::process p )
 	    else
 	        goto ERROR_EXIT;
 
+	    sp = -- new_sp;
+
 	    break;
 	}
 	case mex::SETI:
@@ -711,9 +720,14 @@ static bool optimized_run_process ( mex::process p )
 	    if ( i >= k )
 	        goto ERROR_EXIT;
 	    min::gen obj = sp[-(int)i-1];
+	    min::gen label = pc->immedD;
 	    if ( ! min::is_obj ( obj ) )
 	        goto ERROR_EXIT;
-	    min::set ( obj, pc->immedD, * -- sp );
+	    if ( min::is_num ( label )
+	         ||
+		 ! min::is_name ( label ) )
+	        goto ERROR_EXIT;
+	    min::set ( obj, label, * -- sp );
 	    break;
 	}
 	case mex::JMP:
