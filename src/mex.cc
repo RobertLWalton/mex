@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Dec  9 12:25:58 PM EST 2024
+// Date:	Mon Dec  9 07:11:28 PM EST 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -2612,14 +2612,26 @@ bool mex::run_process ( mex::process p )
 		sp_change = -1;
 		break;
 	    case mex::GET:
-		if ( sp >= spend )
-		    goto STACK_LIMIT_STOP;
 		if ( sp <= spbegin
 		     ||
 		     immedA >= sp - spbegin
 		     ||
 		     immedC >= sp - spbegin )
 		    goto STACK_TOO_SMALL;
+
+		sp_change = +1;
+		if ( immedB != 0 )
+		{
+		    if ( immedC != 0 )
+		    {
+		        message = "GET: immedB !=0 but"
+			          " immedC != 0";
+			goto INNER_FATAL;
+		    }
+		    sp_change = 0;
+		}
+		if ( sp + sp_change > spend )
+		    goto STACK_LIMIT_STOP;
 
 		obj = sp[-(int)immedA-1];
 		label = sp[-(int)immedC-1];
@@ -2646,7 +2658,7 @@ bool mex::run_process ( mex::process p )
 		    }
 		    value =
 		      ( ( flabel < 0 || flabel >= s ) ?
-		        vp[(int)flabel] : min::NONE() );
+		        min::NONE() : vp[(int)flabel] );
 
 		}
 		else if ( min::is_name ( label ) )
@@ -2658,7 +2670,6 @@ bool mex::run_process ( mex::process p )
 		else
 		    goto NOT_A_LABEL;
 
-		sp_change = +1;
 		break;
 	    case mex::GETI:
 		if ( sp >= spend )
@@ -2690,14 +2701,14 @@ bool mex::run_process ( mex::process p )
 			goto INNER_FATAL;
 		    }
 		}
-		if ( sp + sp_change <= spbegin
+		if ( sp + sp_change < spbegin
 		     ||
 		     immedA >= sp - spbegin
 		     ||
 		     immedC >= sp - spbegin )
 		    goto STACK_TOO_SMALL;
-		value = sp[-1];
 
+		value = sp[-1];
 		obj = sp[-(int)immedA-1];
 		label = sp[-(int)immedC-1];
 		if ( min::is_num ( label ) )
@@ -2728,12 +2739,14 @@ bool mex::run_process ( mex::process p )
 			goto INNER_FATAL;
 		    }
 		    vp[(int)flabel] = value;
+		        // Executed before trace.
 		}
 		else if ( min::is_name ( label ) )
 		{
 		    if ( ! min::is_obj ( obj ) )
 			goto NOT_AN_OBJECT;
 		    min::set ( obj, label, value );
+		        // Executed before trace.
 		}
 		else
 		    goto NOT_A_LABEL;
@@ -2745,8 +2758,8 @@ bool mex::run_process ( mex::process p )
 		     immedA >= sp - spbegin )
 		    goto STACK_TOO_SMALL;
 		sp_change = -1;
-		value = sp[-1];
 
+		value = sp[-1];
 		label = immedD;
 		obj = sp[-(int)immedA-1];
 		if ( ! min::is_obj ( obj ) )
@@ -2755,6 +2768,7 @@ bool mex::run_process ( mex::process p )
 		     || min::is_num ( label ) )
 		    goto NOT_A_LABEL;
 		min::set ( obj, label, value );
+		    // Executed before trace.
 		break;
 	    case mex::END:
 	        if ( p->trace_depth == 0 )
@@ -3121,6 +3135,53 @@ bool mex::run_process ( mex::process p )
 			              ( value );
 		    break;
 		}
+		case GET:
+		case GETI:
+		{
+		    p->printer << ":";
+		    min::lab_ptr lp ( tinfo );
+		    if ( lp != min::NULL_STUB
+		         &&
+			 min::lablen ( lp ) == 2 )
+		        p->printer << " "
+			           << ::pvar ( lp[1] )
+				   << " <= "
+				   << ::pvar ( lp[0] );
+		    else
+		        p->printer << " * <= *";
+		    p->printer << "["
+		               << min::pgen_quote
+			       	      ( label )
+			       << "] = "
+		               << min::pgen_quote
+			              ( value );
+		    break;
+		}
+		case SET:
+		case SETI:
+		{
+		    p->printer << ":";
+		    min::lab_ptr lp ( tinfo );
+		    if ( lp != min::NULL_STUB
+		         &&
+			 min::lablen ( lp ) == 2 )
+		        p->printer << " "
+			           << ::pvar ( lp[1] )
+				   << "["
+				   << min::pgen_quote
+				          ( label )
+				   << "] <= "
+				   << ::pvar ( lp[0] );
+		    else
+		        p->printer << " *["
+				   << min::pgen_quote
+				          ( label )
+				   << "] <= *";
+		    p->printer << " = "
+		               << min::pgen_quote
+			              ( value );
+		    break;
+		}
 		case mex::PUSHI:
 		case mex::PUSHNARGS:
 		{
@@ -3254,10 +3315,6 @@ bool mex::run_process ( mex::process p )
 	    case mex::PUSHS:
 	    case mex::PUSHA:
 	    case mex::PUSHNARGS:
-	    {
-		* sp ++ = value;
-		break;
-	    }
 	    case mex::PUSHI:
 	    case mex::PUSHG:
 	    case mex::PUSHL:
@@ -3270,6 +3327,21 @@ bool mex::run_process ( mex::process p )
 	    {
 		-- sp;
 		sp[-(int)immedA] = value;
+		MUP::acc_write_update ( p, value );
+		break;
+	    }
+	    case mex::GET:
+	    case mex::GETI:
+	    {
+	        sp += sp_change;
+		sp = mex::process_push
+		    ( p, sp - 1, value );
+		break;
+	    }
+	    case mex::SET:
+	    case mex::SETI:
+	    {
+	        sp += sp_change;
 		break;
 	    }
 	    case mex::BEG:
