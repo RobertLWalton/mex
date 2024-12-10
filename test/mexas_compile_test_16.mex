@@ -1,0 +1,17 @@
+// MEXAS Compile Test 16 Input
+//
+// File:	mexas_compile_test_16.mex
+// Author:	Bob Walton (walton@acm.org)
+// Date:	Sun Dec  8 07:17:32 PM EST 2024
+//
+// The authors have placed this program in the public
+// domain; they make no warranty and accept no liability
+// for this program.
+
+
+PUSHI OBJ X
+PUSHI 5
+SETI X "A"
+PUSHI 7
+SETI X "B"
+PUSH X

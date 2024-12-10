@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Dec 10 07:23:43 AM EST 2024
+// Date:	Tue Dec 10 01:19:59 PM EST 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1165,8 +1165,8 @@ mex::module mexas::compile ( min::file file )
 			instr.immedC = 
 			    ( op_code == mex::SET ?
 			      1 : 0 );
-			if ( SP <= mexstack::fp[L]
-			         + instr.immedC + 1 )
+			if ( SP < mexstack::fp[L]
+			        + instr.immedC + 1 )
 			{
 			    mexcom::compile_error
 				( pp, "stack locations"
