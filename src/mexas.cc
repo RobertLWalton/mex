@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Dec 10 02:11:19 AM EST 2024
+// Date:	Tue Dec 10 07:23:43 AM EST 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1104,9 +1104,15 @@ mex::module mexas::compile ( min::file file )
 		    ( instr, pp, trace_info );
 		break;
 	    }
-	    case mex::GET:
 	    case mex::GETI:
+	    case mex::GET:
+	    case mex::SETI:
+	    case mex::SET:
 	    {
+	        MIN_REQUIRE ( instr.immedB == 0 );
+		    // No extra var pop unless immedB
+		    // set below.
+
 	        min::gen obj_var_name =
 		    mexas::get_name ( index );
 		if ( obj_var_name == min::NONE() )
@@ -1124,7 +1130,9 @@ mex::module mexas::compile ( min::file file )
 		    continue;
 		instr.immedA = SP - j - 1;
 
-		if ( op_code == mex::GET )
+		if ( op_code == mex::GET
+		     ||
+		     op_code == mex::SET )
 		{
 		    min::gen attr_var_name =
 			mexas::get_name ( index );
@@ -1154,10 +1162,27 @@ mex::module mexas::compile ( min::file file )
 		    else
 		    {
 			instr.immedB = 1;
-			instr.immedC = 0;
+			instr.immedC = 
+			    ( op_code == mex::SET ?
+			      1 : 0 );
+			if ( SP <= mexstack::fp[L]
+			         + instr.immedC + 1 )
+			{
+			    mexcom::compile_error
+				( pp, "stack locations"
+				      " to be popped"
+				      " are arguments"
+				      " or below"
+				      " current lexical"
+				      " level;"
+				      " instruction"
+				      " ignored" );
+			    continue;
+			}
 		    }
 		}
-		else // op_code == mex::GETI
+		else //    op_code == mex::GETI
+		     // || op_code == mex::SETI
 		{
 		    min::locatable_gen attr_label
 		        ( mexas::get_label ( index ) );
@@ -1172,24 +1197,60 @@ mex::module mexas::compile ( min::file file )
 		    instr.immedD = attr_label;
 		}
 
-		min::gen new_name =
-		    mexas::get_name ( index );
-		if ( new_name != min::NONE() )
-		    check_new_name ( new_name, pp );
-		else
-		    new_name =
-		        mexas::get_star ( index );
-		if ( new_name == min::NONE() )
-		    new_name = mexas::star;
+		min::locatable_gen trace_info;
 
-		min::gen labbuf[2] =
-		    { obj_var_name, new_name };
-		min::locatable_gen trace_info
-		    ( min::new_lab_gen ( labbuf, 2 ) );
+		if ( op_code == mex::GET
+		     ||
+		     op_code == mex::GETI )
+		{
+		    min::gen new_name =
+			mexas::get_name ( index );
+		    if ( new_name != min::NONE() )
+			check_new_name ( new_name, pp );
+		    else
+			new_name =
+			    mexas::get_star ( index );
+		    if ( new_name == min::NONE() )
+			new_name = mexas::star;
 
-		mexas::push_variable
-		    ( mexas::variables, new_name,
-		      L, mexstack::depth[L] );
+		    min::gen labbuf[2] =
+			{ obj_var_name, new_name };
+		    trace_info =
+			min::new_lab_gen ( labbuf, 2 );
+
+		    if ( instr.immedB != 0 )
+		    {
+			min::pop ( mexas::variables );
+			mexstack::var_stack_length -= 1;
+		    }
+
+		    mexas::push_variable
+			( mexas::variables, new_name,
+			  L, mexstack::depth[L] );
+		}
+		else //    op_code == mex::SET
+		     // || op_code == mex::SETI
+		{
+		    min::gen old_name =
+			( mexas::variables
+			  +
+			  ( mexstack::var_stack_length
+			    - 1 ) )
+			->name;
+		    min::gen labbuf[2] =
+		        { old_name, obj_var_name };
+		    trace_info =
+			min::new_lab_gen ( labbuf, 2 );
+
+		    min::pop ( mexas::variables );
+		    mexstack::var_stack_length -= 1;
+
+		    if ( instr.immedB != 0 )
+		    {
+			min::pop ( mexas::variables );
+			mexstack::var_stack_length -= 1;
+		    }
+		}
 		mexstack::push_instr
 		    ( instr, pp, trace_info );
 		break;
