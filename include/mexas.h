@@ -72,6 +72,10 @@ extern min::locatable_gen single_quote;
     // new_str_gen ( "'" );
 extern min::locatable_gen double_quote;
     // new_str_gen ( "\"" );
+extern min::locatable_gen left_bracket;
+    // new_str_gen ( "[" );
+extern min::locatable_gen right_bracket;
+    // new_str_gen ( "]" );
 
 // Variable Stack
 //
@@ -275,6 +279,53 @@ inline min::gen get_str ( min::uns32 & i )
 	return min::NONE();
 }
 
+// Executes get_str and if that returns non-NONE,
+// returns its value.  Otherwise checks for '['
+// and if found, skips, collects get_str values
+// until ']' found, and then puts these values in
+// a MIN label and returns that.  Returns NONE
+// if neither of these are found (including the
+// case of missing ']').
+// 
+// If MIN label returned, it will need gc
+// protection.
+//
+inline min::gen get_label ( min::uns32 & i )
+{
+    min::uns32 original_i = i;
+
+    min::gen value = mexas::get_str ( i );
+    if ( value != min::NONE() ) return value;
+
+    if ( i + 2 < mexas::statement->length
+         &&
+	 statement[i] == mexas::left_bracket )
+    {
+        ++ i;
+	min::gen labv [ mexas::statement->length];
+	min::uns32 j = 0;
+	while ( true )
+	{
+	    value = mexas::get_str ( i );
+	    if ( value == min::NONE() ) break;
+	    labv[j++] = value;
+	}
+	if ( i < mexas::statement->length
+	     &&
+	     statement[i] == mexas::right_bracket )
+	{
+	    ++ i;
+	    return new_lab_gen ( labv, j );
+	}
+
+	i = original_i;
+	return min::NONE();
+    }
+
+    else
+	return min::NONE();
+}
+
 // If statement[i] exists and is a quote, return a MIN
 // label containing the statement lexemes after the
 // quote, and set i = statement->length.  Otherwise
@@ -377,7 +428,8 @@ inline min::uns32 search ( min::gen name, min::uns32 i )
 extern min::locatable_gen V, F;  // global search types.
 
 min::uns32 local_search
-	( min::gen name, min::phrase_position pp );
+	( min::gen name, min::phrase_position pp,
+	  bool argument_ok = false );
     // Search variables stack for a variable of the
     // given name, and if there is no error, return
     // its index.  If there is an error, output an
@@ -388,8 +440,8 @@ min::uns32 local_search
     //     (1) variable not found in stack
     //     (2) variable of less than current lexical
     //         level
-    //     (3) variable is an argument of the current
-    //         function
+    //     (3) argument_ok == false and variable is
+    //         an argument of the current function
 
 min::uns32 global_search
 	( mex::module & m, min::gen module_name,

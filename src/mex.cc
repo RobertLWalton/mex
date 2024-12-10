@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Dec  9 07:11:28 PM EST 2024
+// Date:	Tue Dec 10 01:33:49 AM EST 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -2727,14 +2727,14 @@ bool mex::run_process ( mex::process p )
 			 ||
 		         floor ( flabel ) != flabel )
 		    {
-		        message = "GET: numeric label"
+		        message = "SET: numeric label"
 			          " is not integer in"
 				  " range (-1e9, +1e9)";
 			goto INNER_FATAL;
 		    }
 		    if ( flabel < 0 || flabel >= s )
 		    {
-		        message = "GET: vector element"
+		        message = "SET: vector element"
 			          " does not exist";
 			goto INNER_FATAL;
 		    }
@@ -3333,9 +3333,8 @@ bool mex::run_process ( mex::process p )
 	    case mex::GET:
 	    case mex::GETI:
 	    {
-	        sp += sp_change;
 		sp = mex::process_push
-		    ( p, sp - 1, value );
+		    ( p, sp + sp_change - 1, value );
 		break;
 	    }
 	    case mex::SET:

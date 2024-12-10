@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Dec  2 07:08:24 PM EST 2024
+// Date:	Tue Dec 10 02:11:19 AM EST 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -134,6 +134,8 @@ min::uns32 mexas::first_line_number,
 
 min::locatable_gen mexas::single_quote;
 min::locatable_gen mexas::double_quote;
+min::locatable_gen mexas::left_bracket;
+min::locatable_gen mexas::right_bracket;
 static min::locatable_gen backslash;
 static min::locatable_gen on;
 static min::locatable_gen off;
@@ -149,6 +151,8 @@ static void initialize ( void )
     mexas::F = min::new_str_gen ( "F" );
     mexas::single_quote = min::new_str_gen ( "'" );
     mexas::double_quote = min::new_str_gen ( "\"" );
+    mexas::left_bracket = min::new_str_gen ( "[" );
+    mexas::right_bracket = min::new_str_gen ( "]" );
     ::backslash = min::new_str_gen ( "\\" );
     ::on = min::new_str_gen ( "ON" );
     ::off = min::new_str_gen ( "OFF" );
@@ -192,7 +196,8 @@ bool mexas::check_new_name
 
 min::uns32 mexas::local_search
     ( min::gen name,
-      min::phrase_position pp )
+      min::phrase_position pp,
+      bool argument_ok )
 {
     min::uns32 j = search ( name, SP );
     if ( j == mexas::NOT_FOUND )
@@ -221,7 +226,7 @@ min::uns32 mexas::local_search
 		  " ignored" );
 	return mexas::NOT_FOUND;
     }
-    if ( j < mexstack::fp[L] )
+    if ( ! argument_ok && j < mexstack::fp[L] )
     {
 	mexcom::compile_error
 	    ( pp, "variable named ",
@@ -1095,6 +1100,96 @@ mex::module mexas::compile ( min::file file )
 
 		min::pop ( mexas::variables );
 	        mexstack::var_stack_length -= 1;
+		mexstack::push_instr
+		    ( instr, pp, trace_info );
+		break;
+	    }
+	    case mex::GET:
+	    case mex::GETI:
+	    {
+	        min::gen obj_var_name =
+		    mexas::get_name ( index );
+		if ( obj_var_name == min::NONE() )
+		{
+		    mexcom::compile_error
+			( pp, "no object-variable-name;"
+			      " instruction ignored" );
+		    continue;
+		}
+
+		min::uns32 j =
+		    local_search
+		        ( obj_var_name, pp, true );
+		if ( j == mexas::NOT_FOUND )
+		    continue;
+		instr.immedA = SP - j - 1;
+
+		if ( op_code == mex::GET )
+		{
+		    min::gen attr_var_name =
+			mexas::get_name ( index );
+		    if ( attr_var_name == min::NONE() )
+			attr_var_name =
+			    mexas::get_star ( index );
+		    if ( attr_var_name == min::NONE() )
+		    {
+			mexcom::compile_error
+			    ( pp, "no attribute-label-"
+				  "variable-name;"
+				  " instruction"
+				  " ignored" );
+			continue;
+		    }
+
+		    if ( attr_var_name != mexas::star )
+		    {
+			min::uns32 j =
+			    local_search
+				( attr_var_name, pp,
+				  true );
+			if ( j == mexas::NOT_FOUND )
+			    continue;
+			instr.immedC = SP - j - 1;
+		    }
+		    else
+		    {
+			instr.immedB = 1;
+			instr.immedC = 0;
+		    }
+		}
+		else // op_code == mex::GETI
+		{
+		    min::locatable_gen attr_label
+		        ( mexas::get_label ( index ) );
+		    if ( attr_label == min::NONE() )
+		    {
+			mexcom::compile_error
+			    ( pp, "no attribute-label;"
+				  " instruction"
+				  " ignored" );
+			continue;
+		    }
+		    instr.immedD = attr_label;
+		}
+
+		min::gen new_name =
+		    mexas::get_name ( index );
+		if ( new_name != min::NONE() )
+		    check_new_name ( new_name, pp );
+		else
+		    new_name =
+		        mexas::get_star ( index );
+		if ( new_name == min::NONE() )
+		    new_name = mexas::star;
+
+		min::gen labbuf[2] =
+		    { obj_var_name, new_name };
+		min::locatable_gen trace_info
+		    ( min::new_lab_gen ( labbuf, 2 ) );
+
+		mexas::push_variable
+		    ( mexas::variables, new_name,
+		      L, mexstack::depth[L] );
 		mexstack::push_instr
 		    ( instr, pp, trace_info );
 		break;
