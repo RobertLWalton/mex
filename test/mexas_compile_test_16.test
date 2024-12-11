@@ -2,7 +2,7 @@
 //
 // File:        mexas_compile_test_16.mex
 // Author:      Bob Walton (walton@acm.org)
-// Date:        Sun Dec  8 07:17:32 PM EST 2024
+// Date:        Wed Dec 11 01:26:03 AM EST 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -44,6 +44,27 @@ SET X Y
     [29:14;5] SET T_SET 5 0 1; [< * X >]
 PUSH X
     [30:15;6] PUSHS T_PUSH 4 0 0; [< X * >]
+
+PUSHI "A"
+    [32:16;7] PUSHI T_PUSH 0 0 0 "A"; *
+PUSHI 17
+    [33:17;8] PUSHI T_PUSH 0 0 0 17; *
+SET X *
+    [34:18;6] SET T_SET 7 1 1; [< * X >]
+PUSH X
+    [35:19;7] PUSHS T_PUSH 5 0 0; [< X * >]
+
+GETI X "A"
+    [37:20;8] GETI T_GET 6 0 0 "A"; [< X * >]
+GETI X "B"
+    [38:21;9] GETI T_GET 7 0 0 "B"; [< X * >]
+GETI X "C"
+    [39:22;10] GETI T_GET 8 0 0 "C"; [< X * >]
+
+PUSHI "A"
+    [41:23;11] PUSHI T_PUSH 0 0 0 "A"; *
+GET X *
+    [42:24;11] GET T_GET 10 1 0; [< X * >]
 * {12:0,1,1} PUSHI: X <= {}
 * {13:1,2,2} PUSHI: * <= 5
 * {14:2,1,3} SETI: X["A"] <= * = 5
@@ -60,4 +81,13 @@ PUSH X
 * {28:13,6,14} PUSHI: * <= 13
 * {29:14,5,15} SET: X["B"] <= * = 13
 * {30:15,6,16} PUSHS: * <= X = {MINE: A = 5, B = 13}
+* {32:16,7,17} PUSHI: * <= "A"
+* {33:17,8,18} PUSHI: * <= 17
+* {34:18,6,19} SET: X["A"] <= * = 17
+* {35:19,7,20} PUSHS: * <= X = {MINE: A = 17, B = 13}
+* {37:20,8,21} GETI: * <= X["A"] = 17
+* {38:21,9,22} GETI: * <= X["B"] = 13
+* {39:22,10,23} GETI: * <= X["C"] = *NONE*
+* {41:23,11,24} PUSHI: * <= "A"
+* {42:24,11,25} GET: * <= X["A"] = 17
 mexas_compile_test_16.mex successfully compiled

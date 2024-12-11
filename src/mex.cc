@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Dec 10 08:00:55 PM EST 2024
+// Date:	Wed Dec 11 01:32:40 AM EST 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -585,6 +585,51 @@ static bool optimized_run_process ( mex::process p )
 	    sp[-(int)i] = * sp;
 	    break;
 	}
+	case mex::VPUSH:
+	{
+	    min::uns32 i = pc->immedA;
+	    if ( sp < spbegin || i >= sp - spbegin )
+	        goto ERROR_EXIT;
+
+	    min::gen obj = sp[-(int)i-1];
+	    if ( ! min::is_obj ( obj ) )
+		goto ERROR_EXIT;
+
+	    min::obj_vec_insptr vp = obj;
+	    min::locatable_gen value ( * -- sp );
+	    if ( pc->immedD != min::NONE()
+	         &&
+		    min::get ( value,
+		               min::dot_initiator )
+		 == pc->immedD )
+	    {
+	        min::obj_vec_ptr vp1 = value;
+		min::uns32 s = min::size_of ( vp1 );
+		for ( min::uns32 i = 0; i < s; ++ i )
+		    min::attr_push ( vp ) = vp1[i];
+	    }
+	    else
+	        min::attr_push ( vp ) = value;
+
+	    break;
+	}
+	case mex::VPOP:
+	{
+	    min::uns32 i = pc->immedA;
+	    if ( sp < spbegin || i >= sp - spbegin
+	                      || sp >= spend )
+	        goto ERROR_EXIT;
+
+	    min::gen obj = sp[-(int)i-1];
+	    if ( ! min::is_obj ( obj ) )
+		goto ERROR_EXIT;
+
+	    min::obj_vec_insptr vp = obj;
+	    sp = mex::process_push
+	        ( p, sp, min::attr_pop ( vp ) );
+
+	    break;
+	}
 	case mex::GET:
 	{
 	    if ( sp <= spbegin )
@@ -622,8 +667,9 @@ static bool optimized_run_process ( mex::process p )
 		     ||
 		     floor ( flabel ) != flabel )
 		    goto ERROR_EXIT;
-		* new_sp ++ =
-		    ( ( flabel < 0 || flabel >= s ) ?
+		new_sp = mex::process_push
+		    ( p, new_sp,
+		      ( flabel < 0 || flabel >= s ) ?
 		      min::NONE() :
 		      vp[(int)flabel] );
 	    }
@@ -632,7 +678,9 @@ static bool optimized_run_process ( mex::process p )
 		min::gen obj = sp[-(int)i-1];
 		if ( ! min::is_obj ( obj ) )
 		    goto ERROR_EXIT;
-		* new_sp ++ = min::get ( obj, label );
+		new_sp = mex::process_push
+		    ( p, new_sp,
+		      min::get ( obj, label ) );
 	    }
 	    else
 	        goto ERROR_EXIT;
@@ -656,7 +704,8 @@ static bool optimized_run_process ( mex::process p )
 	         ||
 		 ! min::is_name ( label ) )
 	        goto ERROR_EXIT;
-	    * sp ++ = min::get ( obj, label );
+	    sp = mex::process_push
+	        ( p, sp, min::get ( obj, label ) );
 	    break;
 	}
 	case mex::SET:
@@ -2470,7 +2519,7 @@ bool mex::run_process ( mex::process p )
 	    min::uns32 immedC = pc->immedC;
 	    min::gen immedD = pc->immedD;
 
-	    min::gen value;
+	    min::locatable_gen value;
 	        // Value to be pushed or popped.
 		// Computed early for tracing.
 
@@ -2633,6 +2682,55 @@ bool mex::run_process ( mex::process p )
 		value = sp[-1];
 		sp_change = -1;
 		break;
+	    case mex::VPUSH:
+	    {
+		if (    sp < spbegin
+		     || immedA >= sp - spbegin )
+		    goto STACK_TOO_SMALL;
+
+		min::gen obj = sp[-(int)immedA-1];
+		if ( ! min::is_obj ( obj ) )
+		    goto NOT_AN_OBJECT;
+
+		min::obj_vec_insptr vp = obj;
+		value = sp[-1];
+		if ( pc->immedD != min::NONE()
+		     &&
+			min::get ( value,
+				   min::dot_initiator )
+		     == pc->immedD )
+		{
+		    min::obj_vec_ptr vp1 = value;
+		    min::uns32 s = min::size_of ( vp1 );
+		    for ( min::uns32 i = 0;
+		          i < s; ++ i )
+			min::attr_push ( vp ) = vp1[i];
+		}
+		else
+		    min::attr_push ( vp ) = value;
+
+		sp_change = -1;
+		break;
+	    }
+	    case mex::VPOP:
+	    {
+		if (    sp < spbegin
+		     || immedA >= sp - spbegin )
+		    goto STACK_TOO_SMALL;
+		if ( sp >= spend )
+		    goto STACK_LIMIT_STOP;
+
+		min::gen obj = sp[-(int)immedA-1];
+		if ( ! min::is_obj ( obj ) )
+		    goto NOT_AN_OBJECT;
+
+		min::obj_vec_insptr vp = obj;
+		value = min::attr_pop ( vp );
+		mex::process_push ( p, sp, value );
+		sp_change = +1;
+
+		break;
+	    }
 	    case mex::GET:
 		if ( sp <= spbegin
 		     ||
@@ -3157,8 +3255,44 @@ bool mex::run_process ( mex::process p )
 			              ( value );
 		    break;
 		}
-		case GET:
-		case GETI:
+		case mex::VPUSH:
+		{
+		    p->printer << ":";
+		    min::lab_ptr lp ( tinfo );
+		    if ( lp != min::NULL_STUB
+		         &&
+			 min::lablen ( lp ) == 2 )
+		        p->printer << " PUSHED "
+			           << ::pvar ( lp[1] )
+				   << " <= "
+				   << ::pvar ( lp[0] );
+		    else
+		        p->printer << " PUSHED * <= *";
+		    p->printer << " = "
+		               << min::pgen_quote
+			              ( value );
+		    break;
+		}
+		case mex::VPOP:
+		{
+		    p->printer << ":";
+		    min::lab_ptr lp ( tinfo );
+		    if ( lp != min::NULL_STUB
+		         &&
+			 min::lablen ( lp ) == 2 )
+		        p->printer << " "
+			           << ::pvar ( lp[1] )
+				   << " <= POPPED "
+				   << ::pvar ( lp[0] );
+		    else
+		        p->printer << " * <= POPPED *";
+		    p->printer << " = "
+		               << min::pgen_quote
+			              ( value );
+		    break;
+		}
+		case mex::GET:
+		case mex::GETI:
 		{
 		    p->printer << ":";
 		    min::lab_ptr lp ( tinfo );
@@ -3179,8 +3313,8 @@ bool mex::run_process ( mex::process p )
 			              ( value );
 		    break;
 		}
-		case SET:
-		case SETI:
+		case mex::SET:
+		case mex::SETI:
 		{
 		    p->printer << ":";
 		    min::lab_ptr lp ( tinfo );
@@ -3352,6 +3486,7 @@ bool mex::run_process ( mex::process p )
 		MUP::acc_write_update ( p, value );
 		break;
 	    }
+	    case mex::VPOP:
 	    case mex::GET:
 	    case mex::GETI:
 	    {
@@ -3359,6 +3494,7 @@ bool mex::run_process ( mex::process p )
 		    ( p, sp + sp_change - 1, value );
 		break;
 	    }
+	    case mex::VPUSH:
 	    case mex::SET:
 	    case mex::SETI:
 	    {
