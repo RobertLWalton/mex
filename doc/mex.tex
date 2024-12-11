@@ -244,7 +244,7 @@
 
 \author{Robert L. Walton}
 
-\date{December 10, 2024}
+\date{December 11, 2024}
  
 \maketitle
 
@@ -3480,12 +3480,12 @@ this instruction pops {\em nresults} elements from the
 variables stack.
 \end{indpar}
 
-\ttkey{VPUSH} ~ {\em object-variable-name} {\em string}\QMARK{}
+\ttkey{VPUSH} ~ {\em object-variable-name} {\em attribute-label}\QMARK{}
 \begin{indpar}
 At run-time this instruction's actions are as described in
 Figure~\itemref{OBJECT-INSTRUCTIONS}, where {\em object-variable-name}
 specifies the variable containing the object pointer, and
-{\em string} specifies the MIN string that is the \TT{immedD} value
+{\em attribute-label} specifies the MIN string that is the \TT{immedD} value
 (default, \TT{min::NONE()}).
 
 At assembly time, pops the variable stack.
