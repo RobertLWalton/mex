@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Dec 10 07:11:08 PM EST 2024
+// Date:	Tue Dec 10 08:00:55 PM EST 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1492,7 +1492,7 @@ mex::op_info mex::op_infos [ mex::NUMBER_OF_OP_CODES ] =
     { mex::VPOP, NONA, T_GET, NULL, "VPOP", NULL },
     { mex::SET, NONA, T_SET, NULL, "SET", NULL },
     { mex::SETI, NONA, T_SET, NULL, "SETI", NULL },
-    { mex::GET, NONA, T_GET, NULL, "SET", NULL },
+    { mex::GET, NONA, T_GET, NULL, "GET", NULL },
     { mex::GETI, NONA, T_GET, NULL, "GETI", NULL },
 };
 

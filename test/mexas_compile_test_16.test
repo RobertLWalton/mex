@@ -1,0 +1,63 @@
+// MEXAS Compile Test 16 Input
+//
+// File:        mexas_compile_test_16.mex
+// Author:      Bob Walton (walton@acm.org)
+// Date:        Sun Dec  8 07:17:32 PM EST 2024
+//
+// The authors have placed this program in the public
+// domain; they make no warranty and accept no liability
+// for this program.
+
+
+PUSHI OBJ X
+    [12:0;1] PUSHI T_PUSH 0 0 0 {}; X
+PUSHI 5
+    [13:1;2] PUSHI T_PUSH 0 0 0 5; *
+SETI X "A"
+    [14:2;1] SETI T_SET 1 0 0 "A"; [< * X >]
+PUSHI 7
+    [15:3;2] PUSHI T_PUSH 0 0 0 7; *
+SETI X "B"
+    [16:4;1] SETI T_SET 1 0 0 "B"; [< * X >]
+PUSH X
+    [17:5;2] PUSHS T_PUSH 0 0 0; [< X * >]
+
+PUSHI NONE
+    [19:6;3] PUSHI T_PUSH 0 0 0 *NONE*; *
+SETI X "B"
+    [20:7;2] SETI T_SET 2 0 0 "B"; [< * X >]
+PUSH X
+    [21:8;3] PUSHS T_PUSH 1 0 0; [< X * >]
+
+PUSHI "MINE"
+    [23:9;4] PUSHI T_PUSH 0 0 0 "MINE"; *
+SETI X ".type"
+    [24:10;3] SETI T_SET 3 0 0 ".type"; [< * X >]
+PUSH X
+    [25:11;4] PUSHS T_PUSH 2 0 0; [< X * >]
+
+PUSHI "B" Y
+    [27:12;5] PUSHI T_PUSH 0 0 0 "B"; Y
+PUSHI 13
+    [28:13;6] PUSHI T_PUSH 0 0 0 13; *
+SET X Y
+    [29:14;5] SET T_SET 5 0 1; [< * X >]
+PUSH X
+    [30:15;6] PUSHS T_PUSH 4 0 0; [< X * >]
+* {12:0,1,1} PUSHI: X <= {}
+* {13:1,2,2} PUSHI: * <= 5
+* {14:2,1,3} SETI: X["A"] <= * = 5
+* {15:3,2,4} PUSHI: * <= 7
+* {16:4,1,5} SETI: X["B"] <= * = 7
+* {17:5,2,6} PUSHS: * <= X = {"": A = 5, B = 7}
+* {19:6,3,7} PUSHI: * <= *NONE*
+* {20:7,2,8} SETI: X["B"] <= * = *NONE*
+* {21:8,3,9} PUSHS: * <= X = {"": A = 5}
+* {23:9,4,10} PUSHI: * <= "MINE"
+* {24:10,3,11} SETI: X[".type"] <= * = "MINE"
+* {25:11,4,12} PUSHS: * <= X = {MINE: A = 5}
+* {27:12,5,13} PUSHI: Y <= "B"
+* {28:13,6,14} PUSHI: * <= 13
+* {29:14,5,15} SET: X["B"] <= * = 13
+* {30:15,6,16} PUSHS: * <= X = {MINE: A = 5, B = 13}
+mexas_compile_test_16.mex successfully compiled
