@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Dec 11 01:32:40 AM EST 2024
+// Date:	Wed Dec 11 05:54:04 PM EST 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -625,8 +625,30 @@ static bool optimized_run_process ( mex::process p )
 		goto ERROR_EXIT;
 
 	    min::obj_vec_insptr vp = obj;
+	    if ( min::size_of ( vp ) == 0 )
+		sp = mex::process_push
+		    ( p, sp, min::NONE() );
+	    else
+		sp = mex::process_push
+		    ( p, sp, min::attr_pop ( vp ) );
+
+	    break;
+	}
+	case mex::VSIZE:
+	{
+	    min::uns32 i = pc->immedA;
+	    if ( sp < spbegin || i >= sp - spbegin
+	                      || sp >= spend )
+	        goto ERROR_EXIT;
+
+	    min::gen obj = sp[-(int)i-1];
+	    if ( ! min::is_obj ( obj ) )
+		goto ERROR_EXIT;
+
+	    min::obj_vec_ptr vp = obj;
 	    sp = mex::process_push
-	        ( p, sp, min::attr_pop ( vp ) );
+	        ( p, sp,
+		  GF ( min::size_of ( vp ) ) );
 
 	    break;
 	}
@@ -1539,6 +1561,7 @@ mex::op_info mex::op_infos [ mex::NUMBER_OF_OP_CODES ] =
                          NULL, "SET_OPTIMIZE", NULL },
     { mex::VPUSH, NONA, T_SET, NULL, "VPUSH", NULL },
     { mex::VPOP, NONA, T_GET, NULL, "VPOP", NULL },
+    { mex::VSIZE, NONA, T_GET, NULL, "VSIZE", NULL },
     { mex::SET, NONA, T_SET, NULL, "SET", NULL },
     { mex::SETI, NONA, T_SET, NULL, "SETI", NULL },
     { mex::GET, NONA, T_GET, NULL, "GET", NULL },
@@ -2713,6 +2736,7 @@ bool mex::run_process ( mex::process p )
 		break;
 	    }
 	    case mex::VPOP:
+	    case mex::VSIZE:
 	    {
 		if (    sp < spbegin
 		     || immedA >= sp - spbegin )
@@ -2724,8 +2748,19 @@ bool mex::run_process ( mex::process p )
 		if ( ! min::is_obj ( obj ) )
 		    goto NOT_AN_OBJECT;
 
-		min::obj_vec_insptr vp = obj;
-		value = min::attr_pop ( vp );
+		if ( op_code == mex::VPOP )
+		{
+		    min::obj_vec_insptr vp = obj;
+		    value = ( min::size_of ( vp ) == 0 ?
+		              min::NONE() :
+			      min::attr_pop ( vp ) );
+		}
+		else
+		{
+		    min::obj_vec_ptr vp = obj;
+		    value = min::new_direct_float_gen
+			        ( min::size_of ( vp ) );
+		}
 		mex::process_push ( p, sp, value );
 		sp_change = +1;
 
@@ -3274,7 +3309,11 @@ bool mex::run_process ( mex::process p )
 		    break;
 		}
 		case mex::VPOP:
+		case mex::VSIZE:
 		{
+		    const char * s =
+		        ( op_code == mex::VPOP ?
+			  "POPPED" : "SIZE OF" );
 		    p->printer << ":";
 		    min::lab_ptr lp ( tinfo );
 		    if ( lp != min::NULL_STUB
@@ -3282,10 +3321,11 @@ bool mex::run_process ( mex::process p )
 			 min::lablen ( lp ) == 2 )
 		        p->printer << " "
 			           << ::pvar ( lp[1] )
-				   << " <= POPPED "
+				   << " <= " << s << " "
 				   << ::pvar ( lp[0] );
 		    else
-		        p->printer << " * <= POPPED *";
+		        p->printer << " * <= "
+			           << s << " *";
 		    p->printer << " = "
 		               << min::pgen_quote
 			              ( value );
@@ -3487,6 +3527,7 @@ bool mex::run_process ( mex::process p )
 		break;
 	    }
 	    case mex::VPOP:
+	    case mex::VSIZE:
 	    case mex::GET:
 	    case mex::GETI:
 	    {

@@ -1320,6 +1320,10 @@ the logical values `true' and `false':
         However, \\
     & if the vector is empty, push \TT{min::NONE()} instead.
 \\\hline
+\ttkey{VSIZE}
+    & Push the size of the vector of the object pointed at by \\
+    & \TT{sp[- immedA - 1]} into the stack.
+\\\hline
 \ttkey{GET}
     & Read the attribute labelled by the value X
         of \TT{sp[- immedC - 1]} from \\
@@ -1594,7 +1598,7 @@ is \TT{mex::T\_AOP}.
                             and \TT{SETI} instructions in Figure
                             \itemref{OBJECT-INSTRUCTIONS}.
 \\\hline
-\ttmkey{GET}{trace class} & The \TT{VPOP}, \TT{GET},
+\ttmkey{GET}{trace class} & The \TT{VPOP}, \TT{VSIZE}, \TT{GET},
                             and \TT{GETI} instructions in Figure
                             \itemref{OBJECT-INSTRUCTIONS}.
 \\\hline
@@ -1767,6 +1771,11 @@ Figure~\itemref{OBJECT-INSTRUCTIONS} are:
 \TT{VPOP} &
 {\em trace-header}\TT{:} {\em to-variable}
                     \TT{<= POPPED} {\em object-variable}
+		    \TT{=} {\em value}
+\\[1ex]
+\TT{VSIZE} &
+{\em trace-header}\TT{:} {\em to-variable}
+                    \TT{<= SIZE OF} {\em object-variable}
 		    \TT{=} {\em value}
 \\[1ex]
 \TT{GET}/\TT{GETI} &
@@ -3505,6 +3514,12 @@ element with {\em new-variable-name} as its name.
 
 The variable stack search for {\em object-variable-name} is restricted to
 elements with the same lexical level as the \TT{VPOP} instruction.
+\end{indpar}
+
+\ttkey{VSIZE} ~ {\em object-variable-name} {\em new-variable-name}\QMARK{}
+\begin{indpar}
+Same as \TT{VPOP} except the value pushed into the stack is the
+size of the vector of the object.
 \end{indpar}
 
 \ttkey{GET} ~ {\em object-variable-name} {\em attribute-label-variable-name}

@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Dec 10 07:10:49 PM EST 2024
+// Date:	Wed Dec 11 02:13:52 PM EST 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -121,6 +121,7 @@ enum op_code {
     SET_OPTIMIZE,
     VPUSH,
     VPOP,
+    VSIZE,
     SET,
     SETI,
     GET,

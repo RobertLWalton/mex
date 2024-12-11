@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Dec 11 08:02:35 AM EST 2024
+// Date:	Wed Dec 11 02:31:07 PM EST 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1151,6 +1151,7 @@ mex::module mexas::compile ( min::file file )
 		break;
 	    }
 	    case mex::VPOP:
+	    case mex::VSIZE:
 	    {
 
 	        min::gen obj_var_name =

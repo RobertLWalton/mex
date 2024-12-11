@@ -2,7 +2,7 @@
 //
 // File:        mexas_compile_test_16.mex
 // Author:      Bob Walton (walton@acm.org)
-// Date:        Wed Dec 11 08:06:03 AM EST 2024
+// Date:        Wed Dec 11 06:10:28 PM EST 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -80,6 +80,72 @@ VPUSH X
     [49:30;11] VPUSH T_SET 11 0 0 *NONE*; [< * X >]
 PUSH X
     [50:31;12] PUSHS T_PUSH 10 0 0; [< X * >]
+VSIZE X
+    [51:32;13] VSIZE T_GET 11 0 0; [< X * >]
+
+PUSHI OBJ X
+    [53:33;14] PUSHI T_PUSH 0 0 0 {}; X
+PUSHI "["
+    [54:34;15] PUSHI T_PUSH 0 0 0 "["; *
+SETI X ".initiator"
+    [55:35;14] SETI T_SET 1 0 0 ".initiator"; [< * X >]
+PUSHI "]"
+    [56:36;15] PUSHI T_PUSH 0 0 0 "]"; *
+SETI X ".terminator"
+    [57:37;14] SETI T_SET 1 0 0 ".terminator"; [< * X >]
+PUSHI ","
+    [58:38;15] PUSHI T_PUSH 0 0 0 ","; *
+SETI X ".separator"
+    [59:39;14] SETI T_SET 1 0 0 ".separator"; [< * X >]
+PUSHI 1
+    [60:40;15] PUSHI T_PUSH 0 0 0 1; *
+VPUSH X
+    [61:41;14] VPUSH T_SET 1 0 0 *NONE*; [< * X >]
+PUSHI 2
+    [62:42;15] PUSHI T_PUSH 0 0 0 2; *
+VPUSH X
+    [63:43;14] VPUSH T_SET 1 0 0 *NONE*; [< * X >]
+PUSHI 3
+    [64:44;15] PUSHI T_PUSH 0 0 0 3; *
+VPUSH X
+    [65:45;14] VPUSH T_SET 1 0 0 *NONE*; [< * X >]
+
+PUSH X
+    [67:46;15] PUSHS T_PUSH 0 0 0; [< X * >]
+
+PUSHI OBJ Y
+    [69:47;16] PUSHI T_PUSH 0 0 0 {}; Y
+PUSHI "["
+    [70:48;17] PUSHI T_PUSH 0 0 0 "["; *
+SETI Y ".initiator"
+    [71:49;16] SETI T_SET 1 0 0 ".initiator"; [< * Y >]
+PUSHI "]"
+    [72:50;17] PUSHI T_PUSH 0 0 0 "]"; *
+SETI Y ".terminator"
+    [73:51;16] SETI T_SET 1 0 0 ".terminator"; [< * Y >]
+PUSHI ","
+    [74:52;17] PUSHI T_PUSH 0 0 0 ","; *
+SETI Y ".separator"
+    [75:53;16] SETI T_SET 1 0 0 ".separator"; [< * Y >]
+PUSHI 100
+    [76:54;17] PUSHI T_PUSH 0 0 0 100; *
+VPUSH Y
+    [77:55;16] VPUSH T_SET 1 0 0 *NONE*; [< * Y >]
+PUSHI 200
+    [78:56;17] PUSHI T_PUSH 0 0 0 200; *
+VPUSH Y
+    [79:57;16] VPUSH T_SET 1 0 0 *NONE*; [< * Y >]
+PUSH X
+    [80:58;17] PUSHS T_PUSH 2 0 0; [< X * >]
+VPUSH Y "["
+    [81:59;16] VPUSH T_SET 1 0 0 "["; [< * Y >]
+PUSHI 300
+    [82:60;17] PUSHI T_PUSH 0 0 0 300; *
+VPUSH Y
+    [83:61;16] VPUSH T_SET 1 0 0 *NONE*; [< * Y >]
+
+PUSH Y
+    [85:62;17] PUSHS T_PUSH 0 0 0; [< Y * >]
 * {12:0,1,1} PUSHI: X <= {}
 * {13:1,2,2} PUSHI: * <= 5
 * {14:2,1,3} SETI: X["A"] <= * = 5
@@ -112,4 +178,35 @@ PUSH X
 * {48:29,12,30} VPUSH: PUSHED X <= * = 101
 * {49:30,11,31} VPUSH: PUSHED X <= * = 100
 * {50:31,12,32} PUSHS: * <= X = {MINE: A = 17, B = 13|102 101 100|MINE}
+* {51:32,13,33} VSIZE: * <= SIZE OF X = 3
+* {53:33,14,34} PUSHI: X <= {}
+* {54:34,15,35} PUSHI: * <= "["
+* {55:35,14,36} SETI: X[".initiator"] <= * = "["
+* {56:36,15,37} PUSHI: * <= "]"
+* {57:37,14,38} SETI: X[".terminator"] <= * = "]"
+* {58:38,15,39} PUSHI: * <= ","
+* {59:39,14,40} SETI: X[".separator"] <= * = ","
+* {60:40,15,41} PUSHI: * <= 1
+* {61:41,14,42} VPUSH: PUSHED X <= * = 1
+* {62:42,15,43} PUSHI: * <= 2
+* {63:43,14,44} VPUSH: PUSHED X <= * = 2
+* {64:44,15,45} PUSHI: * <= 3
+* {65:45,14,46} VPUSH: PUSHED X <= * = 3
+* {67:46,15,47} PUSHS: * <= X = [1, 2, 3]
+* {69:47,16,48} PUSHI: Y <= {}
+* {70:48,17,49} PUSHI: * <= "["
+* {71:49,16,50} SETI: Y[".initiator"] <= * = "["
+* {72:50,17,51} PUSHI: * <= "]"
+* {73:51,16,52} SETI: Y[".terminator"] <= * = "]"
+* {74:52,17,53} PUSHI: * <= ","
+* {75:53,16,54} SETI: Y[".separator"] <= * = ","
+* {76:54,17,55} PUSHI: * <= 100
+* {77:55,16,56} VPUSH: PUSHED Y <= * = 100
+* {78:56,17,57} PUSHI: * <= 200
+* {79:57,16,58} VPUSH: PUSHED Y <= * = 200
+* {80:58,17,59} PUSHS: * <= X = [1, 2, 3]
+* {81:59,16,60} VPUSH: PUSHED Y <= * = [1, 2, 3]
+* {82:60,17,61} PUSHI: * <= 300
+* {83:61,16,62} VPUSH: PUSHED Y <= * = 300
+* {85:62,17,63} PUSHS: * <= Y = [100, 200, 1, 2, 3, 300]
 mexas_compile_test_16.mex successfully compiled
