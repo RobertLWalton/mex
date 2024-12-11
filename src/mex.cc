@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Dec 10 01:33:49 AM EST 2024
+// Date:	Tue Dec 10 07:11:08 PM EST 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -867,6 +867,23 @@ static bool optimized_run_process ( mex::process p )
 	    }
 	    break;
 	}
+	case mex::JMPNONE:
+	{
+	    if ( sp < spbegin + 1 )
+		goto ERROR_EXIT;
+	    min::gen arg = * -- sp;
+	    if ( arg == min::NONE() )
+	    {
+		if ( pc->immedB == 0 )
+		    goto EXECUTE_JMP;
+	    }
+	    else
+	    {
+		if ( pc->immedB > 0 )
+		    goto EXECUTE_JMP;
+	    }
+	    break;
+	}
 	case mex::JMPINT:
 	{
 	    if ( sp < spbegin + 1 )
@@ -1435,6 +1452,7 @@ mex::op_info mex::op_infos [ mex::NUMBER_OF_OP_CODES ] =
     { mex::JMPTRUE, J1, T_JMPS, NULL, "JMPTRUE", NULL },
     { mex::JMPFALSE, J1, T_JMPS, NULL,
       "JMPFALSE", NULL },
+    { mex::JMPNONE, J1, T_JMPS, NULL, "JMPNONE", NULL },
     { mex::JMPINT, J1, T_JMPS, NULL, "JMPINT", NULL },
     { mex::JMPFIN, J1, T_JMPS, NULL, "JMPFIN", NULL },
     { mex::JMPINF, J1, T_JMPS, NULL, "JMPINF", NULL },
@@ -2197,6 +2215,10 @@ bool mex::run_process ( mex::process p )
 		case mex::JMPFALSE:
 		    execute_jmp =
 		        ( arg1 == mex::FALSE );
+		    break;
+		case mex::JMPNONE:
+		    execute_jmp =
+		        ( arg1 == min::NONE() );
 		    break;
 		case mex::JMPINT:
 		{

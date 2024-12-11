@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Dec 10 01:19:59 PM EST 2024
+// Date:	Tue Dec 10 07:02:01 PM EST 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -142,6 +142,7 @@ static min::locatable_gen off;
 static min::locatable_gen loop;
 static min::locatable_gen TRUE;
 static min::locatable_gen FALSE;
+static min::locatable_gen NONE;
 static min::locatable_gen OBJ;
 
 static void initialize ( void )
@@ -159,6 +160,7 @@ static void initialize ( void )
     ::loop = min::new_str_gen ( "LOOP" );
     ::TRUE = min::new_str_gen ( "TRUE" );
     ::FALSE = min::new_str_gen ( "FALSE" );
+    ::NONE = min::new_str_gen ( "NONE" );
     ::OBJ = min::new_str_gen ( "OBJ" );
 
     ::init_op_code_table();
@@ -1018,6 +1020,8 @@ mex::module mexas::compile ( min::file file )
 		        D = mex::TRUE;
 		    else if ( D == ::FALSE )
 		        D = mex::FALSE;
+		    else if ( D == ::NONE )
+		        D = min::NONE();
 		    else if ( D == ::OBJ )
 			D = min::new_obj_gen ( 32, 8 );
 		    else

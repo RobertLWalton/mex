@@ -244,7 +244,7 @@
 
 \author{Robert L. Walton}
 
-\date{December 8, 2024}
+\date{December 10, 2024}
  
 \maketitle
 
@@ -1184,6 +1184,8 @@ the logical values `true' and `false':
     & Pop 1 value and respectively test whether it equals \TT{mex::TRUE}, \\
 \ttkey{JMPFALSE}
     & equals \TT{mex::FALSE}, \\
+\ttkey{JMPNONE}
+    & equals \TT{min::NONE()}, \\
 \ttkey{JMPINT}
     & is an integer in the range (-1e15,+1e15), \\
 \ttkey{JMPFIN}/\ttkey{JMPINF}
@@ -3219,11 +3221,13 @@ is called.  Otherwise {\tt PUSHG} is used.)
 \ttkey{PUSHI} ~ {\em string} ~ {\em new-variable-name}\QMARK{} \\
 \ttkey{PUSHI} ~ \TT{TRUE} ~ {\em new-variable-name}\QMARK{} \\
 \ttkey{PUSHI} ~ \TT{FALSE} ~ {\em new-variable-name}\QMARK{} \\
+\ttkey{PUSHI} ~ \TT{NONE} ~ {\em new-variable-name}\QMARK{} \\
 \ttkey{PUSHI} ~ \TT{OBJ} ~ {\em new-variable-name}\QMARK{}
 \begin{indpar}
 At run-time, pushes into the process stack a copy of
 the {\em number}\pagnote{NUMBER}, or the {\em string}\pagnote{STRING},
-or \TT{mex::TRUE}, or \TT{mex::FALSE}, or an empty MIN object.
+or \TT{mex::TRUE}, or \TT{mex::FALSE}, or \TT{min::NONE()},
+or an empty MIN object.
 At assembly time, pushes into the variable stack an
 element with {\em new-variable-name} as its name.
 \end{indpar}
@@ -3275,8 +3279,8 @@ $S$ value is the length of the variable stack \underline{after}
 the two elements are popped (and before any element is pushed back).
 \end{indpar}
 
-\ttkey{JMPTRUE}/\ttkey{JMPFALSE}/\ttkey{JMPINT}/\ttkey{JMPFIN}/%
-    \ttkey{JMPINF}/\ttkey{JMPNUM}/\ttkey{JMPTRUTH}/%
+\ttkey{JMPTRUE}/\ttkey{JMPFALSE}/\ttkey{JMPNONE}/\ttkey{JMPINT}/%
+    \ttkey{JMPFIN}/\ttkey{JMPINF}/\ttkey{JMPNUM}/\ttkey{JMPTRUTH}/%
     \ttkey{JMPSTR}/\ttkey{JMPOBJ} \\
 \hspace*{1in}\ttkey{*}\QMARK{} {\em jmp-target}
 \begin{indpar}
