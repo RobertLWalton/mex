@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Dec 10 07:02:01 PM EST 2024
+// Date:	Wed Dec 11 08:02:35 AM EST 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1104,6 +1104,91 @@ mex::module mexas::compile ( min::file file )
 
 		min::pop ( mexas::variables );
 	        mexstack::var_stack_length -= 1;
+		mexstack::push_instr
+		    ( instr, pp, trace_info );
+		break;
+	    }
+	    case mex::VPUSH:
+	    {
+
+	        min::gen obj_var_name =
+		    mexas::get_name ( index );
+		if ( obj_var_name == min::NONE() )
+		{
+		    mexcom::compile_error
+			( pp, "no object-variable-name;"
+			      " instruction ignored" );
+		    continue;
+		}
+
+		min::uns32 j =
+		    local_search
+		        ( obj_var_name, pp, true );
+		if ( j == mexas::NOT_FOUND )
+		    continue;
+		instr.immedA = SP - j - 1;
+
+		min::locatable_gen attr_label
+		    ( mexas::get_label ( index ) );
+		instr.immedD = attr_label;
+
+		min::gen old_name =
+		    ( mexas::variables
+		      +
+		      ( mexstack::var_stack_length
+			- 1 ) )
+		    ->name;
+		min::gen labbuf[2] =
+		    { old_name, obj_var_name };
+		min::locatable_gen trace_info
+		    ( min::new_lab_gen ( labbuf, 2 ) );
+
+		min::pop ( mexas::variables );
+		mexstack::var_stack_length -= 1;
+
+		mexstack::push_instr
+		    ( instr, pp, trace_info );
+		break;
+	    }
+	    case mex::VPOP:
+	    {
+
+	        min::gen obj_var_name =
+		    mexas::get_name ( index );
+		if ( obj_var_name == min::NONE() )
+		{
+		    mexcom::compile_error
+			( pp, "no object-variable-name;"
+			      " instruction ignored" );
+		    continue;
+		}
+
+		min::uns32 j =
+		    local_search
+		        ( obj_var_name, pp, true );
+		if ( j == mexas::NOT_FOUND )
+		    continue;
+		instr.immedA = SP - j - 1;
+
+		min::gen new_name =
+		    mexas::get_name ( index );
+		if ( new_name != min::NONE() )
+		    check_new_name ( new_name, pp );
+		else
+		    new_name =
+			mexas::get_star ( index );
+		if ( new_name == min::NONE() )
+		    new_name = mexas::star;
+
+		min::gen labbuf[2] =
+		    { obj_var_name, new_name };
+		min::locatable_gen trace_info
+		    ( min::new_lab_gen ( labbuf, 2 ) );
+
+		mexas::push_variable
+		    ( mexas::variables, new_name,
+		      L, mexstack::depth[L] );
+
 		mexstack::push_instr
 		    ( instr, pp, trace_info );
 		break;

@@ -2,7 +2,7 @@
 //
 // File:        mexas_compile_test_16.mex
 // Author:      Bob Walton (walton@acm.org)
-// Date:        Wed Dec 11 01:26:03 AM EST 2024
+// Date:        Wed Dec 11 08:06:03 AM EST 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -65,6 +65,21 @@ PUSHI "A"
     [41:23;11] PUSHI T_PUSH 0 0 0 "A"; *
 GET X *
     [42:24;11] GET T_GET 10 1 0; [< X * >]
+
+PUSHI 100
+    [44:25;12] PUSHI T_PUSH 0 0 0 100; *
+PUSHI 101
+    [45:26;13] PUSHI T_PUSH 0 0 0 101; *
+PUSHI 102
+    [46:27;14] PUSHI T_PUSH 0 0 0 102; *
+VPUSH X
+    [47:28;13] VPUSH T_SET 13 0 0 *NONE*; [< * X >]
+VPUSH X
+    [48:29;12] VPUSH T_SET 12 0 0 *NONE*; [< * X >]
+VPUSH X
+    [49:30;11] VPUSH T_SET 11 0 0 *NONE*; [< * X >]
+PUSH X
+    [50:31;12] PUSHS T_PUSH 10 0 0; [< X * >]
 * {12:0,1,1} PUSHI: X <= {}
 * {13:1,2,2} PUSHI: * <= 5
 * {14:2,1,3} SETI: X["A"] <= * = 5
@@ -90,4 +105,11 @@ GET X *
 * {39:22,10,23} GETI: * <= X["C"] = *NONE*
 * {41:23,11,24} PUSHI: * <= "A"
 * {42:24,11,25} GET: * <= X["A"] = 17
+* {44:25,12,26} PUSHI: * <= 100
+* {45:26,13,27} PUSHI: * <= 101
+* {46:27,14,28} PUSHI: * <= 102
+* {47:28,13,29} VPUSH: PUSHED X <= * = 102
+* {48:29,12,30} VPUSH: PUSHED X <= * = 101
+* {49:30,11,31} VPUSH: PUSHED X <= * = 100
+* {50:31,12,32} PUSHS: * <= X = {MINE: A = 17, B = 13|102 101 100|MINE}
 mexas_compile_test_16.mex successfully compiled
