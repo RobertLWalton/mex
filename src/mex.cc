@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Dec 11 05:54:04 PM EST 2024
+// Date:	Thu Dec 12 01:51:57 AM EST 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -597,9 +597,7 @@ static bool optimized_run_process ( mex::process p )
 
 	    min::obj_vec_insptr vp = obj;
 	    min::locatable_gen value ( * -- sp );
-	    if ( pc->immedD != min::NONE()
-	         &&
-		    min::get ( value,
+	    if (    min::get ( value,
 		               min::dot_initiator )
 		 == pc->immedD )
 	    {
@@ -2717,9 +2715,7 @@ bool mex::run_process ( mex::process p )
 
 		min::obj_vec_insptr vp = obj;
 		value = sp[-1];
-		if ( pc->immedD != min::NONE()
-		     &&
-			min::get ( value,
+		if (    min::get ( value,
 				   min::dot_initiator )
 		     == pc->immedD )
 		{

@@ -2,12 +2,13 @@
 //
 // File:	mexas_compile_test_16.mex
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Dec 11 06:10:28 PM EST 2024
+// Date:	Thu Dec 12 01:13:29 AM EST 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
 // for this program.
 
+// SETI/GETI Test
 
 PUSHI OBJ X
 PUSHI 5
@@ -24,30 +25,120 @@ PUSHI "MINE"
 SETI X ".type"
 PUSH X
 
-PUSHI "B" Y
-PUSHI 13
-SET X Y
+GETI X "A" A1
+GETI X "B"
+GETI X "C"
+PUSH A1
+
+PUSHI OBJ Y
+PUSH X
+SETI Y "X"
+GETI Y "X"
+PUSH Y
+
+// SET/GET Test
+
+PUSHI OBJ X
+PUSHI "A" A
+PUSHI "B" B
+PUSHI "C" C
+PUSHI 5
+SET X A
+PUSHI 7
+SET X B
 PUSH X
 
+PUSHI NONE
+SET X B
+PUSH X
+
+GET X A A2
+GET X B
+GET X C
+PUSH A2
+
+PUSHI OBJ Y
+PUSHI "X" X-name
+PUSH X
+SET Y X-name
+GET Y X-name
+PUSH Y
+
+// SET/GET * Test
+
+PUSHI OBJ X
 PUSHI "A"
-PUSHI 17
+PUSHI 5
+SET X *
+PUSHI "B"
+PUSHI 7
 SET X *
 PUSH X
 
-GETI X "A"
-GETI X "B"
-GETI X "C"
+PUSHI "B"
+PUSHI NONE
+SET X *
+PUSH X
 
 PUSHI "A"
 GET X *
+PUSHI "B"
+GET X *
+PUSHI "C"
+GET X *
+
+PUSHI OBJ Y
+PUSHI "X"
+PUSH X
+SET Y *
+PUSHI "X"
+GET Y *
+PUSH Y
+
+// VPUSH/VPOP/VSIZE Test
 
 PUSHI 100
+VPUSH X
 PUSHI 101
+VPUSH X
 PUSHI 102
 VPUSH X
+PUSH X
+VSIZE X XSIZE3
+VPOP X
+VPOP X X101
+VPOP X
+PUSH X101
+PUSH XSIZE3
+
+PUSHI OBJ Y
+PUSHI 1
+VPUSH Y
+PUSHI 2
+VPUSH Y
+PUSHI OBJ X
+PUSHI 100
 VPUSH X
+PUSHI 200
+VPUSH X
+PUSH Y
+VPUSH X
+PUSHI 300
+VPUSH X
+PUSH Y
+VPUSH X NONE
+PUSHI 400
 VPUSH X
 PUSH X
+VSIZE X
+VPOP X
+VPOP X
+VPOP X
+VPOP X
+VSIZE X
+VPOP X
+VPOP X
+VPOP X
 VSIZE X
 
 PUSHI OBJ X
@@ -82,4 +173,8 @@ VPUSH Y "["
 PUSHI 300
 VPUSH Y
 
+PUSH Y
+
+PUSH X
+SETI Y "A"
 PUSH Y

@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Dec 11 02:31:07 PM EST 2024
+// Date:	Thu Dec 12 01:58:10 AM EST 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1130,6 +1130,19 @@ mex::module mexas::compile ( min::file file )
 
 		min::locatable_gen attr_label
 		    ( mexas::get_label ( index ) );
+		if ( attr_label == min::NONE() )
+		{
+		    min::uns32 original_index = index;
+		    attr_label =
+		        mexas::get_name ( index );
+		    if ( attr_label == ::NONE )
+		        attr_label = min::NONE();
+		    else
+		    {
+			attr_label = min::MISSING();
+		        index = original_index;
+		    }
+		}
 		instr.immedD = attr_label;
 
 		min::gen old_name =
