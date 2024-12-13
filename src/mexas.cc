@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Dec 12 01:58:10 AM EST 2024
+// Date:	Fri Dec 13 03:06:35 AM EST 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -462,6 +462,26 @@ bool mexas::check_parameter
 	      " parameter out of range;"
 	      " statement ignored" );
     return false;
+}
+
+static bool check_pop
+	( min::uns32 nvars, min::phrase_position pp )
+{
+    if ( SP < mexstack::stack_limit + nvars )
+    {
+	mexcom::compile_error
+	    ( pp, "stack locations"
+		  " to be popped"
+		  " are arguments"
+		  " or below"
+		  " current lexical"
+		  " level or depth;"
+		  " instruction"
+		  " ignored" );
+	return false;
+    }
+    else
+        return true;
 }
 
 
@@ -1055,6 +1075,8 @@ mex::module mexas::compile ( min::file file )
 	    }
 	    case ::POP:
 	    {
+	        if ( ! check_pop ( 1, pp ) )
+		    continue;
 		min::gen name =
 		    mexas::get_name ( index );
 		if ( name == min::NONE() )
@@ -1110,6 +1132,8 @@ mex::module mexas::compile ( min::file file )
 	    }
 	    case mex::VPUSH:
 	    {
+	        if ( ! check_pop ( 1, pp ) )
+		    continue;
 
 	        min::gen obj_var_name =
 		    mexas::get_name ( index );
@@ -1268,20 +1292,10 @@ mex::module mexas::compile ( min::file file )
 			instr.immedC = 
 			    ( op_code == mex::SET ?
 			      1 : 0 );
-			if ( SP < mexstack::fp[L]
-			        + instr.immedC + 1 )
-			{
-			    mexcom::compile_error
-				( pp, "stack locations"
-				      " to be popped"
-				      " are arguments"
-				      " or below"
-				      " current lexical"
-				      " level;"
-				      " instruction"
-				      " ignored" );
+			if ( ! check_pop
+			           ( instr.immedC + 1,
+				     pp ) )
 			    continue;
-			}
 		    }
 		}
 		else //    op_code == mex::GETI
@@ -1844,6 +1858,8 @@ mex::module mexas::compile ( min::file file )
 		            ( nresults, nn,
 			      pp, "nresults" ) )
 		    continue;
+		if ( ! check_pop ( nresults, pp ) )
+		    continue;
 		instr.immedB = L;
 		instr.immedC = nresults;
 		min::pop ( mexas::variables, nresults );
@@ -2005,6 +2021,8 @@ mex::module mexas::compile ( min::file file )
 		if ( !  mexas::check_parameter
 		            ( nargs, na,
 			      pp, "nargs" ) )
+		    continue;
+		if ( ! check_pop ( nargs, pp ) )
 		    continue;
 
 		if ( ip->immedA > nargs )

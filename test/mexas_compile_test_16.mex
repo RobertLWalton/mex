@@ -2,7 +2,7 @@
 //
 // File:	mexas_compile_test_16.mex
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Dec 12 01:13:29 AM EST 2024
+// Date:	Fri Dec 13 01:40:08 AM EST 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -105,6 +105,16 @@ PUSHI 102
 VPUSH X
 PUSH X
 VSIZE X XSIZE3
+PUSHI 0
+GET X *
+PUSHI 1
+GET X *
+PUSHI 2
+GET X *
+PUSHI -1
+GET X *
+PUSHI 3
+GET X *
 VPOP X
 VPOP X X101
 VPOP X

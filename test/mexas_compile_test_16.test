@@ -2,7 +2,7 @@
 //
 // File:        mexas_compile_test_16.mex
 // Author:      Bob Walton (walton@acm.org)
-// Date:        Thu Dec 12 01:13:29 AM EST 2024
+// Date:        Fri Dec 13 01:40:08 AM EST 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -181,146 +181,166 @@ PUSH X
     [106:74;35] PUSHS T_PUSH 8 0 0; [< X * >]
 VSIZE X XSIZE3
     [107:75;36] VSIZE T_GET 9 0 0; [< X XSIZE3 >]
-VPOP X
-    [108:76;37] VPOP T_GET 10 0 0; [< X * >]
-VPOP X X101
-    [109:77;38] VPOP T_GET 11 0 0; [< X X101 >]
-VPOP X
-    [110:78;39] VPOP T_GET 12 0 0; [< X * >]
-PUSH X101
-    [111:79;40] PUSHS T_PUSH 1 0 0; [< X101 * >]
-PUSH XSIZE3
-    [112:80;41] PUSHS T_PUSH 4 0 0; [< XSIZE3 * >]
-
-PUSHI OBJ Y
-    [114:81;42] PUSHI T_PUSH 0 0 0 {}; Y
+PUSHI 0
+    [108:76;37] PUSHI T_PUSH 0 0 0 0; *
+GET X *
+    [109:77;37] GET T_GET 11 1 0; [< X * >]
 PUSHI 1
-    [115:82;43] PUSHI T_PUSH 0 0 0 1; *
-VPUSH Y
-    [116:83;42] VPUSH T_SET 1 0 0; [< * Y >]
+    [110:78;38] PUSHI T_PUSH 0 0 0 1; *
+GET X *
+    [111:79;38] GET T_GET 12 1 0; [< X * >]
 PUSHI 2
-    [117:84;43] PUSHI T_PUSH 0 0 0 2; *
-VPUSH Y
-    [118:85;42] VPUSH T_SET 1 0 0; [< * Y >]
-PUSHI OBJ X
-    [119:86;43] PUSHI T_PUSH 0 0 0 {}; X
-PUSHI 100
-    [120:87;44] PUSHI T_PUSH 0 0 0 100; *
-VPUSH X
-    [121:88;43] VPUSH T_SET 1 0 0; [< * X >]
-PUSHI 200
-    [122:89;44] PUSHI T_PUSH 0 0 0 200; *
-VPUSH X
-    [123:90;43] VPUSH T_SET 1 0 0; [< * X >]
-PUSH Y
-    [124:91;44] PUSHS T_PUSH 1 0 0; [< Y * >]
-VPUSH X
-    [125:92;43] VPUSH T_SET 1 0 0; [< * X >]
-PUSHI 300
-    [126:93;44] PUSHI T_PUSH 0 0 0 300; *
-VPUSH X
-    [127:94;43] VPUSH T_SET 1 0 0; [< * X >]
-PUSH Y
-    [128:95;44] PUSHS T_PUSH 1 0 0; [< Y * >]
-VPUSH X NONE
-    [129:96;43] VPUSH T_SET 1 0 0 *NONE*; [< * X >]
-PUSHI 400
-    [130:97;44] PUSHI T_PUSH 0 0 0 400; *
-VPUSH X
-    [131:98;43] VPUSH T_SET 1 0 0; [< * X >]
-PUSH X
-    [132:99;44] PUSHS T_PUSH 0 0 0; [< X * >]
-VSIZE X
-    [133:100;45] VSIZE T_GET 1 0 0; [< X * >]
-VPOP X
-    [134:101;46] VPOP T_GET 2 0 0; [< X * >]
-VPOP X
-    [135:102;47] VPOP T_GET 3 0 0; [< X * >]
-VPOP X
-    [136:103;48] VPOP T_GET 4 0 0; [< X * >]
-VPOP X
-    [137:104;49] VPOP T_GET 5 0 0; [< X * >]
-VSIZE X
-    [138:105;50] VSIZE T_GET 6 0 0; [< X * >]
-VPOP X
-    [139:106;51] VPOP T_GET 7 0 0; [< X * >]
-VPOP X
-    [140:107;52] VPOP T_GET 8 0 0; [< X * >]
-VPOP X
-    [141:108;53] VPOP T_GET 9 0 0; [< X * >]
-VSIZE X
-    [142:109;54] VSIZE T_GET 10 0 0; [< X * >]
-
-PUSHI OBJ X
-    [144:110;55] PUSHI T_PUSH 0 0 0 {}; X
-PUSHI "["
-    [145:111;56] PUSHI T_PUSH 0 0 0 "["; *
-SETI X ".initiator"
-    [146:112;55] SETI T_SET 1 0 0 ".initiator"; [< * X >]
-PUSHI "]"
-    [147:113;56] PUSHI T_PUSH 0 0 0 "]"; *
-SETI X ".terminator"
-    [148:114;55] SETI T_SET 1 0 0 ".terminator"; [< * X >]
-PUSHI ","
-    [149:115;56] PUSHI T_PUSH 0 0 0 ","; *
-SETI X ".separator"
-    [150:116;55] SETI T_SET 1 0 0 ".separator"; [< * X >]
-PUSHI 1
-    [151:117;56] PUSHI T_PUSH 0 0 0 1; *
-VPUSH X
-    [152:118;55] VPUSH T_SET 1 0 0; [< * X >]
-PUSHI 2
-    [153:119;56] PUSHI T_PUSH 0 0 0 2; *
-VPUSH X
-    [154:120;55] VPUSH T_SET 1 0 0; [< * X >]
+    [112:80;39] PUSHI T_PUSH 0 0 0 2; *
+GET X *
+    [113:81;39] GET T_GET 13 1 0; [< X * >]
+PUSHI -1
+    [114:82;40] PUSHI T_PUSH 0 0 0 -1; *
+GET X *
+    [115:83;40] GET T_GET 14 1 0; [< X * >]
 PUSHI 3
-    [155:121;56] PUSHI T_PUSH 0 0 0 3; *
-VPUSH X
-    [156:122;55] VPUSH T_SET 1 0 0; [< * X >]
-
-PUSH X
-    [158:123;56] PUSHS T_PUSH 0 0 0; [< X * >]
+    [116:84;41] PUSHI T_PUSH 0 0 0 3; *
+GET X *
+    [117:85;41] GET T_GET 15 1 0; [< X * >]
+VPOP X
+    [118:86;42] VPOP T_GET 15 0 0; [< X * >]
+VPOP X X101
+    [119:87;43] VPOP T_GET 16 0 0; [< X X101 >]
+VPOP X
+    [120:88;44] VPOP T_GET 17 0 0; [< X * >]
+PUSH X101
+    [121:89;45] PUSHS T_PUSH 1 0 0; [< X101 * >]
+PUSH XSIZE3
+    [122:90;46] PUSHS T_PUSH 9 0 0; [< XSIZE3 * >]
 
 PUSHI OBJ Y
-    [160:124;57] PUSHI T_PUSH 0 0 0 {}; Y
-PUSHI "["
-    [161:125;58] PUSHI T_PUSH 0 0 0 "["; *
-SETI Y ".initiator"
-    [162:126;57] SETI T_SET 1 0 0 ".initiator"; [< * Y >]
-PUSHI "]"
-    [163:127;58] PUSHI T_PUSH 0 0 0 "]"; *
-SETI Y ".terminator"
-    [164:128;57] SETI T_SET 1 0 0 ".terminator"; [< * Y >]
-PUSHI ","
-    [165:129;58] PUSHI T_PUSH 0 0 0 ","; *
-SETI Y ".separator"
-    [166:130;57] SETI T_SET 1 0 0 ".separator"; [< * Y >]
+    [124:91;47] PUSHI T_PUSH 0 0 0 {}; Y
+PUSHI 1
+    [125:92;48] PUSHI T_PUSH 0 0 0 1; *
+VPUSH Y
+    [126:93;47] VPUSH T_SET 1 0 0; [< * Y >]
+PUSHI 2
+    [127:94;48] PUSHI T_PUSH 0 0 0 2; *
+VPUSH Y
+    [128:95;47] VPUSH T_SET 1 0 0; [< * Y >]
+PUSHI OBJ X
+    [129:96;48] PUSHI T_PUSH 0 0 0 {}; X
 PUSHI 100
-    [167:131;58] PUSHI T_PUSH 0 0 0 100; *
-VPUSH Y
-    [168:132;57] VPUSH T_SET 1 0 0; [< * Y >]
+    [130:97;49] PUSHI T_PUSH 0 0 0 100; *
+VPUSH X
+    [131:98;48] VPUSH T_SET 1 0 0; [< * X >]
 PUSHI 200
-    [169:133;58] PUSHI T_PUSH 0 0 0 200; *
-VPUSH Y
-    [170:134;57] VPUSH T_SET 1 0 0; [< * Y >]
-PUSH X
-    [171:135;58] PUSHS T_PUSH 2 0 0; [< X * >]
-VPUSH Y "["
-    [172:136;57] VPUSH T_SET 1 0 0 "["; [< * Y >]
+    [132:99;49] PUSHI T_PUSH 0 0 0 200; *
+VPUSH X
+    [133:100;48] VPUSH T_SET 1 0 0; [< * X >]
+PUSH Y
+    [134:101;49] PUSHS T_PUSH 1 0 0; [< Y * >]
+VPUSH X
+    [135:102;48] VPUSH T_SET 1 0 0; [< * X >]
 PUSHI 300
-    [173:137;58] PUSHI T_PUSH 0 0 0 300; *
-VPUSH Y
-    [174:138;57] VPUSH T_SET 1 0 0; [< * Y >]
-
+    [136:103;49] PUSHI T_PUSH 0 0 0 300; *
+VPUSH X
+    [137:104;48] VPUSH T_SET 1 0 0; [< * X >]
 PUSH Y
-    [176:139;58] PUSHS T_PUSH 0 0 0; [< Y * >]
+    [138:105;49] PUSHS T_PUSH 1 0 0; [< Y * >]
+VPUSH X NONE
+    [139:106;48] VPUSH T_SET 1 0 0 *NONE*; [< * X >]
+PUSHI 400
+    [140:107;49] PUSHI T_PUSH 0 0 0 400; *
+VPUSH X
+    [141:108;48] VPUSH T_SET 1 0 0; [< * X >]
+PUSH X
+    [142:109;49] PUSHS T_PUSH 0 0 0; [< X * >]
+VSIZE X
+    [143:110;50] VSIZE T_GET 1 0 0; [< X * >]
+VPOP X
+    [144:111;51] VPOP T_GET 2 0 0; [< X * >]
+VPOP X
+    [145:112;52] VPOP T_GET 3 0 0; [< X * >]
+VPOP X
+    [146:113;53] VPOP T_GET 4 0 0; [< X * >]
+VPOP X
+    [147:114;54] VPOP T_GET 5 0 0; [< X * >]
+VSIZE X
+    [148:115;55] VSIZE T_GET 6 0 0; [< X * >]
+VPOP X
+    [149:116;56] VPOP T_GET 7 0 0; [< X * >]
+VPOP X
+    [150:117;57] VPOP T_GET 8 0 0; [< X * >]
+VPOP X
+    [151:118;58] VPOP T_GET 9 0 0; [< X * >]
+VSIZE X
+    [152:119;59] VSIZE T_GET 10 0 0; [< X * >]
+
+PUSHI OBJ X
+    [154:120;60] PUSHI T_PUSH 0 0 0 {}; X
+PUSHI "["
+    [155:121;61] PUSHI T_PUSH 0 0 0 "["; *
+SETI X ".initiator"
+    [156:122;60] SETI T_SET 1 0 0 ".initiator"; [< * X >]
+PUSHI "]"
+    [157:123;61] PUSHI T_PUSH 0 0 0 "]"; *
+SETI X ".terminator"
+    [158:124;60] SETI T_SET 1 0 0 ".terminator"; [< * X >]
+PUSHI ","
+    [159:125;61] PUSHI T_PUSH 0 0 0 ","; *
+SETI X ".separator"
+    [160:126;60] SETI T_SET 1 0 0 ".separator"; [< * X >]
+PUSHI 1
+    [161:127;61] PUSHI T_PUSH 0 0 0 1; *
+VPUSH X
+    [162:128;60] VPUSH T_SET 1 0 0; [< * X >]
+PUSHI 2
+    [163:129;61] PUSHI T_PUSH 0 0 0 2; *
+VPUSH X
+    [164:130;60] VPUSH T_SET 1 0 0; [< * X >]
+PUSHI 3
+    [165:131;61] PUSHI T_PUSH 0 0 0 3; *
+VPUSH X
+    [166:132;60] VPUSH T_SET 1 0 0; [< * X >]
 
 PUSH X
-    [178:140;59] PUSHS T_PUSH 3 0 0; [< X * >]
-SETI Y "A"
-    [179:141;58] SETI T_SET 2 0 0 "A"; [< * Y >]
+    [168:133;61] PUSHS T_PUSH 0 0 0; [< X * >]
+
+PUSHI OBJ Y
+    [170:134;62] PUSHI T_PUSH 0 0 0 {}; Y
+PUSHI "["
+    [171:135;63] PUSHI T_PUSH 0 0 0 "["; *
+SETI Y ".initiator"
+    [172:136;62] SETI T_SET 1 0 0 ".initiator"; [< * Y >]
+PUSHI "]"
+    [173:137;63] PUSHI T_PUSH 0 0 0 "]"; *
+SETI Y ".terminator"
+    [174:138;62] SETI T_SET 1 0 0 ".terminator"; [< * Y >]
+PUSHI ","
+    [175:139;63] PUSHI T_PUSH 0 0 0 ","; *
+SETI Y ".separator"
+    [176:140;62] SETI T_SET 1 0 0 ".separator"; [< * Y >]
+PUSHI 100
+    [177:141;63] PUSHI T_PUSH 0 0 0 100; *
+VPUSH Y
+    [178:142;62] VPUSH T_SET 1 0 0; [< * Y >]
+PUSHI 200
+    [179:143;63] PUSHI T_PUSH 0 0 0 200; *
+VPUSH Y
+    [180:144;62] VPUSH T_SET 1 0 0; [< * Y >]
+PUSH X
+    [181:145;63] PUSHS T_PUSH 2 0 0; [< X * >]
+VPUSH Y "["
+    [182:146;62] VPUSH T_SET 1 0 0 "["; [< * Y >]
+PUSHI 300
+    [183:147;63] PUSHI T_PUSH 0 0 0 300; *
+VPUSH Y
+    [184:148;62] VPUSH T_SET 1 0 0; [< * Y >]
+
 PUSH Y
-    [180:142;59] PUSHS T_PUSH 1 0 0; [< Y * >]
+    [186:149;63] PUSHS T_PUSH 0 0 0; [< Y * >]
+
+PUSH X
+    [188:150;64] PUSHS T_PUSH 3 0 0; [< X * >]
+SETI Y "A"
+    [189:151;63] SETI T_SET 2 0 0 "A"; [< * Y >]
+PUSH Y
+    [190:152;64] PUSHS T_PUSH 1 0 0; [< Y * >]
 * {13:0,1,1} PUSHI: X <= {}
 * {14:1,2,2} PUSHI: * <= 5
 * {15:2,1,3} SETI: X["A"] <= * = 5
@@ -397,73 +417,83 @@ PUSH Y
 * {105:73,34,74} VPUSH: PUSHED X <= * = 102
 * {106:74,35,75} PUSHS: * <= X = {"": A = 5|100 101 102|}
 * {107:75,36,76} VSIZE: XSIZE3 <= SIZE OF X = 3
-* {108:76,37,77} VPOP: * <= POPPED X = 102
-* {109:77,38,78} VPOP: X101 <= POPPED X = 101
-* {110:78,39,79} VPOP: * <= POPPED X = 100
-* {111:79,40,80} PUSHS: * <= X101 = 101
-* {112:80,41,81} PUSHS: * <= XSIZE3 = 3
-* {114:81,42,82} PUSHI: Y <= {}
-* {115:82,43,83} PUSHI: * <= 1
-* {116:83,42,84} VPUSH: PUSHED Y <= * = 1
-* {117:84,43,85} PUSHI: * <= 2
-* {118:85,42,86} VPUSH: PUSHED Y <= * = 2
-* {119:86,43,87} PUSHI: X <= {}
-* {120:87,44,88} PUSHI: * <= 100
-* {121:88,43,89} VPUSH: PUSHED X <= * = 100
-* {122:89,44,90} PUSHI: * <= 200
-* {123:90,43,91} VPUSH: PUSHED X <= * = 200
-* {124:91,44,92} PUSHS: * <= Y = {|1 2|}
-* {125:92,43,93} VPUSH: PUSHED X <= * = {|1 2|}
-* {126:93,44,94} PUSHI: * <= 300
-* {127:94,43,95} VPUSH: PUSHED X <= * = 300
-* {128:95,44,96} PUSHS: * <= Y = {|1 2|}
-* {129:96,43,97} VPUSH: PUSHED X <= * = {|1 2|}
-* {130:97,44,98} PUSHI: * <= 400
-* {131:98,43,99} VPUSH: PUSHED X <= * = 400
-* {132:99,44,100} PUSHS: * <= X = {|100 200 {|1 2|} 300 1 2 400|}
-* {133:100,45,101} VSIZE: * <= SIZE OF X = 7
-* {134:101,46,102} VPOP: * <= POPPED X = 400
-* {135:102,47,103} VPOP: * <= POPPED X = 2
-* {136:103,48,104} VPOP: * <= POPPED X = 1
-* {137:104,49,105} VPOP: * <= POPPED X = 300
-* {138:105,50,106} VSIZE: * <= SIZE OF X = 3
-* {139:106,51,107} VPOP: * <= POPPED X = {|1 2|}
-* {140:107,52,108} VPOP: * <= POPPED X = 200
-* {141:108,53,109} VPOP: * <= POPPED X = 100
-* {142:109,54,110} VSIZE: * <= SIZE OF X = 0
-* {144:110,55,111} PUSHI: X <= {}
-* {145:111,56,112} PUSHI: * <= "["
-* {146:112,55,113} SETI: X[".initiator"] <= * = "["
-* {147:113,56,114} PUSHI: * <= "]"
-* {148:114,55,115} SETI: X[".terminator"] <= * = "]"
-* {149:115,56,116} PUSHI: * <= ","
-* {150:116,55,117} SETI: X[".separator"] <= * = ","
-* {151:117,56,118} PUSHI: * <= 1
-* {152:118,55,119} VPUSH: PUSHED X <= * = 1
-* {153:119,56,120} PUSHI: * <= 2
-* {154:120,55,121} VPUSH: PUSHED X <= * = 2
-* {155:121,56,122} PUSHI: * <= 3
-* {156:122,55,123} VPUSH: PUSHED X <= * = 3
-* {158:123,56,124} PUSHS: * <= X = [1, 2, 3]
-* {160:124,57,125} PUSHI: Y <= {}
-* {161:125,58,126} PUSHI: * <= "["
-* {162:126,57,127} SETI: Y[".initiator"] <= * = "["
-* {163:127,58,128} PUSHI: * <= "]"
-* {164:128,57,129} SETI: Y[".terminator"] <= * = "]"
-* {165:129,58,130} PUSHI: * <= ","
-* {166:130,57,131} SETI: Y[".separator"] <= * = ","
-* {167:131,58,132} PUSHI: * <= 100
-* {168:132,57,133} VPUSH: PUSHED Y <= * = 100
-* {169:133,58,134} PUSHI: * <= 200
-* {170:134,57,135} VPUSH: PUSHED Y <= * = 200
-* {171:135,58,136} PUSHS: * <= X = [1, 2, 3]
-* {172:136,57,137} VPUSH: PUSHED Y <= * = [1, 2, 3]
-* {173:137,58,138} PUSHI: * <= 300
-* {174:138,57,139} VPUSH: PUSHED Y <= * = 300
-* {176:139,58,140} PUSHS: * <= Y = [100, 200, 1, 2, 3, 300]
-* {178:140,59,141} PUSHS: * <= X = [1, 2, 3]
-* {179:141,58,142} SETI: Y["A"] <= * = [1, 2, 3]
-* {180:142,59,143} PUSHS: * <= Y =
+* {108:76,37,77} PUSHI: * <= 0
+* {109:77,37,78} GET: * <= X[0] = 100
+* {110:78,38,79} PUSHI: * <= 1
+* {111:79,38,80} GET: * <= X[1] = 101
+* {112:80,39,81} PUSHI: * <= 2
+* {113:81,39,82} GET: * <= X[2] = 102
+* {114:82,40,83} PUSHI: * <= -1
+* {115:83,40,84} GET: * <= X[-1] = *NONE*
+* {116:84,41,85} PUSHI: * <= 3
+* {117:85,41,86} GET: * <= X[3] = *NONE*
+* {118:86,42,87} VPOP: * <= POPPED X = 102
+* {119:87,43,88} VPOP: X101 <= POPPED X = 101
+* {120:88,44,89} VPOP: * <= POPPED X = 100
+* {121:89,45,90} PUSHS: * <= X101 = 101
+* {122:90,46,91} PUSHS: * <= XSIZE3 = 3
+* {124:91,47,92} PUSHI: Y <= {}
+* {125:92,48,93} PUSHI: * <= 1
+* {126:93,47,94} VPUSH: PUSHED Y <= * = 1
+* {127:94,48,95} PUSHI: * <= 2
+* {128:95,47,96} VPUSH: PUSHED Y <= * = 2
+* {129:96,48,97} PUSHI: X <= {}
+* {130:97,49,98} PUSHI: * <= 100
+* {131:98,48,99} VPUSH: PUSHED X <= * = 100
+* {132:99,49,100} PUSHI: * <= 200
+* {133:100,48,101} VPUSH: PUSHED X <= * = 200
+* {134:101,49,102} PUSHS: * <= Y = {|1 2|}
+* {135:102,48,103} VPUSH: PUSHED X <= * = {|1 2|}
+* {136:103,49,104} PUSHI: * <= 300
+* {137:104,48,105} VPUSH: PUSHED X <= * = 300
+* {138:105,49,106} PUSHS: * <= Y = {|1 2|}
+* {139:106,48,107} VPUSH: PUSHED X <= * = {|1 2|}
+* {140:107,49,108} PUSHI: * <= 400
+* {141:108,48,109} VPUSH: PUSHED X <= * = 400
+* {142:109,49,110} PUSHS: * <= X = {|100 200 {|1 2|} 300 1 2 400|}
+* {143:110,50,111} VSIZE: * <= SIZE OF X = 7
+* {144:111,51,112} VPOP: * <= POPPED X = 400
+* {145:112,52,113} VPOP: * <= POPPED X = 2
+* {146:113,53,114} VPOP: * <= POPPED X = 1
+* {147:114,54,115} VPOP: * <= POPPED X = 300
+* {148:115,55,116} VSIZE: * <= SIZE OF X = 3
+* {149:116,56,117} VPOP: * <= POPPED X = {|1 2|}
+* {150:117,57,118} VPOP: * <= POPPED X = 200
+* {151:118,58,119} VPOP: * <= POPPED X = 100
+* {152:119,59,120} VSIZE: * <= SIZE OF X = 0
+* {154:120,60,121} PUSHI: X <= {}
+* {155:121,61,122} PUSHI: * <= "["
+* {156:122,60,123} SETI: X[".initiator"] <= * = "["
+* {157:123,61,124} PUSHI: * <= "]"
+* {158:124,60,125} SETI: X[".terminator"] <= * = "]"
+* {159:125,61,126} PUSHI: * <= ","
+* {160:126,60,127} SETI: X[".separator"] <= * = ","
+* {161:127,61,128} PUSHI: * <= 1
+* {162:128,60,129} VPUSH: PUSHED X <= * = 1
+* {163:129,61,130} PUSHI: * <= 2
+* {164:130,60,131} VPUSH: PUSHED X <= * = 2
+* {165:131,61,132} PUSHI: * <= 3
+* {166:132,60,133} VPUSH: PUSHED X <= * = 3
+* {168:133,61,134} PUSHS: * <= X = [1, 2, 3]
+* {170:134,62,135} PUSHI: Y <= {}
+* {171:135,63,136} PUSHI: * <= "["
+* {172:136,62,137} SETI: Y[".initiator"] <= * = "["
+* {173:137,63,138} PUSHI: * <= "]"
+* {174:138,62,139} SETI: Y[".terminator"] <= * = "]"
+* {175:139,63,140} PUSHI: * <= ","
+* {176:140,62,141} SETI: Y[".separator"] <= * = ","
+* {177:141,63,142} PUSHI: * <= 100
+* {178:142,62,143} VPUSH: PUSHED Y <= * = 100
+* {179:143,63,144} PUSHI: * <= 200
+* {180:144,62,145} VPUSH: PUSHED Y <= * = 200
+* {181:145,63,146} PUSHS: * <= X = [1, 2, 3]
+* {182:146,62,147} VPUSH: PUSHED Y <= * = [1, 2, 3]
+* {183:147,63,148} PUSHI: * <= 300
+* {184:148,62,149} VPUSH: PUSHED Y <= * = 300
+* {186:149,63,150} PUSHS: * <= Y = [100, 200, 1, 2, 3, 300]
+* {188:150,64,151} PUSHS: * <= X = [1, 2, 3]
+* {189:151,63,152} SETI: Y["A"] <= * = [1, 2, 3]
+* {190:152,64,153} PUSHS: * <= Y =
                    {"": A = [1, 2, 3], .initiator = "[", .terminator =
                         "]", .separator = ","|100 200 1 2 3 300|}
 mexas_compile_test_16.mex successfully compiled
