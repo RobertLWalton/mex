@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Dec 12 01:51:57 AM EST 2024
+// Date:	Fri Dec 13 06:18:06 PM EST 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -583,6 +583,17 @@ static bool optimized_run_process ( mex::process p )
 	        goto ERROR_EXIT;
 	    -- sp;
 	    sp[-(int)i] = * sp;
+	    break;
+	}
+	case mex::PUSHOBJ:
+	{
+	    if ( sp >= spend )
+	        goto ERROR_EXIT;
+	    min::locatable_gen value
+	        ( min::new_obj_gen
+		      ( pc->immedA, pc->immedC ) );
+	    sp = mex::process_push
+	        ( p, sp, value );
 	    break;
 	}
 	case mex::VPUSH:
@@ -1557,6 +1568,8 @@ mex::op_info mex::op_infos [ mex::NUMBER_OF_OP_CODES ] =
                           NULL, "TRACE_EXCEPTS", NULL },
     { mex::SET_OPTIMIZE, NONA, T_SET_OPTIMIZE,
                          NULL, "SET_OPTIMIZE", NULL },
+    { mex::PUSHOBJ, NONA, T_SET,
+                    NULL, "PUSHOBJ", NULL },
     { mex::VPUSH, NONA, T_SET, NULL, "VPUSH", NULL },
     { mex::VPOP, NONA, T_GET, NULL, "VPOP", NULL },
     { mex::VSIZE, NONA, T_GET, NULL, "VSIZE", NULL },
@@ -2703,6 +2716,13 @@ bool mex::run_process ( mex::process p )
 		value = sp[-1];
 		sp_change = -1;
 		break;
+	    case mex::PUSHOBJ:
+		if ( sp >= spend )
+		    goto STACK_LIMIT_STOP;
+		value = min::new_obj_gen
+		    ( immedA, immedC );
+		sp_change = +1;
+		break;
 	    case mex::VPUSH:
 	    {
 		if (    sp < spbegin
@@ -3286,6 +3306,15 @@ bool mex::run_process ( mex::process p )
 			              ( value );
 		    break;
 		}
+		case mex::PUSHOBJ:
+		{
+		    p->printer << ": "
+			       << ::pvar ( tinfo )
+			       << " <= NEW OBJ ( "
+			       << immedA << ", "
+			       << immedC << ")";
+		    break;
+		}
 		case mex::VPUSH:
 		{
 		    p->printer << ":";
@@ -3510,6 +3539,7 @@ bool mex::run_process ( mex::process p )
 	    case mex::PUSHI:
 	    case mex::PUSHG:
 	    case mex::PUSHL:
+	    case mex::PUSHOBJ:
 	    {
 		sp = mex::process_push
 		    ( p, sp, value );

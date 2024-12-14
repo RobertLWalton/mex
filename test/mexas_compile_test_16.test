@@ -2,7 +2,7 @@
 //
 // File:        mexas_compile_test_16.mex
 // Author:      Bob Walton (walton@acm.org)
-// Date:        Fri Dec 13 01:40:08 AM EST 2024
+// Date:        Fri Dec 13 06:35:32 PM EST 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -10,8 +10,8 @@
 
 // SETI/GETI Test
 
-PUSHI OBJ X
-    [13:0;1] PUSHI T_PUSH 0 0 0 {}; X
+PUSHOBJ X
+    [13:0;1] PUSHOBJ T_SET 32 0 8; X
 PUSHI 5
     [14:1;2] PUSHI T_PUSH 0 0 0 5; *
 SETI X "A"
@@ -46,8 +46,8 @@ GETI X "C"
 PUSH A1
     [31:15;8] PUSHS T_PUSH 2 0 0; [< A1 * >]
 
-PUSHI OBJ Y
-    [33:16;9] PUSHI T_PUSH 0 0 0 {}; Y
+PUSHOBJ Y
+    [33:16;9] PUSHOBJ T_SET 32 0 8; Y
 PUSH X
     [34:17;10] PUSHS T_PUSH 8 0 0; [< X * >]
 SETI Y "X"
@@ -59,8 +59,8 @@ PUSH Y
 
 // SET/GET Test
 
-PUSHI OBJ X
-    [41:21;12] PUSHI T_PUSH 0 0 0 {}; X
+PUSHOBJ X
+    [41:21;12] PUSHOBJ T_SET 32 0 8; X
 PUSHI "A" A
     [42:22;13] PUSHI T_PUSH 0 0 0 "A"; A
 PUSHI "B" B
@@ -94,8 +94,8 @@ GET X C
 PUSH A2
     [58:36;21] PUSHS T_PUSH 2 0 0; [< A2 * >]
 
-PUSHI OBJ Y
-    [60:37;22] PUSHI T_PUSH 0 0 0 {}; Y
+PUSHOBJ Y
+    [60:37;22] PUSHOBJ T_SET 32 0 8; Y
 PUSHI "X" X-name
     [61:38;23] PUSHI T_PUSH 0 0 0 "X"; X-name
 PUSH X
@@ -109,8 +109,8 @@ PUSH Y
 
 // SET/GET * Test
 
-PUSHI OBJ X
-    [69:43;26] PUSHI T_PUSH 0 0 0 {}; X
+PUSHOBJ X
+    [69:43;26] PUSHOBJ T_SET 32 0 8; X
 PUSHI "A"
     [70:44;27] PUSHI T_PUSH 0 0 0 "A"; *
 PUSHI 5
@@ -148,8 +148,8 @@ PUSHI "C"
 GET X *
     [88:60;31] GET T_GET 5 1 0; [< X * >]
 
-PUSHI OBJ Y
-    [90:61;32] PUSHI T_PUSH 0 0 0 {}; Y
+PUSHOBJ Y
+    [90:61;32] PUSHOBJ T_SET 32 0 8; Y
 PUSHI "X"
     [91:62;33] PUSHI T_PUSH 0 0 0 "X"; *
 PUSH X
@@ -212,8 +212,8 @@ PUSH X101
 PUSH XSIZE3
     [122:90;46] PUSHS T_PUSH 9 0 0; [< XSIZE3 * >]
 
-PUSHI OBJ Y
-    [124:91;47] PUSHI T_PUSH 0 0 0 {}; Y
+PUSHOBJ Y
+    [124:91;47] PUSHOBJ T_SET 32 0 8; Y
 PUSHI 1
     [125:92;48] PUSHI T_PUSH 0 0 0 1; *
 VPUSH Y
@@ -222,8 +222,8 @@ PUSHI 2
     [127:94;48] PUSHI T_PUSH 0 0 0 2; *
 VPUSH Y
     [128:95;47] VPUSH T_SET 1 0 0; [< * Y >]
-PUSHI OBJ X
-    [129:96;48] PUSHI T_PUSH 0 0 0 {}; X
+PUSHOBJ X
+    [129:96;48] PUSHOBJ T_SET 32 0 8; X
 PUSHI 100
     [130:97;49] PUSHI T_PUSH 0 0 0 100; *
 VPUSH X
@@ -271,8 +271,8 @@ VPOP X
 VSIZE X
     [152:119;59] VSIZE T_GET 10 0 0; [< X * >]
 
-PUSHI OBJ X
-    [154:120;60] PUSHI T_PUSH 0 0 0 {}; X
+PUSHOBJ X
+    [154:120;60] PUSHOBJ T_SET 32 0 8; X
 PUSHI "["
     [155:121;61] PUSHI T_PUSH 0 0 0 "["; *
 SETI X ".initiator"
@@ -301,8 +301,8 @@ VPUSH X
 PUSH X
     [168:133;61] PUSHS T_PUSH 0 0 0; [< X * >]
 
-PUSHI OBJ Y
-    [170:134;62] PUSHI T_PUSH 0 0 0 {}; Y
+PUSHOBJ Y
+    [170:134;62] PUSHOBJ T_SET 32 0 8; Y
 PUSHI "["
     [171:135;63] PUSHI T_PUSH 0 0 0 "["; *
 SETI Y ".initiator"
@@ -341,7 +341,7 @@ SETI Y "A"
     [189:151;63] SETI T_SET 2 0 0 "A"; [< * Y >]
 PUSH Y
     [190:152;64] PUSHS T_PUSH 1 0 0; [< Y * >]
-* {13:0,1,1} PUSHI: X <= {}
+* {13:0,1,1} PUSHOBJ: X <= NEW OBJ ( 32, 8)
 * {14:1,2,2} PUSHI: * <= 5
 * {15:2,1,3} SETI: X["A"] <= * = 5
 * {16:3,2,4} PUSHI: * <= 7
@@ -357,12 +357,12 @@ PUSH Y
 * {29:13,6,14} GETI: * <= X["B"] = *NONE*
 * {30:14,7,15} GETI: * <= X["C"] = *NONE*
 * {31:15,8,16} PUSHS: * <= A1 = 5
-* {33:16,9,17} PUSHI: Y <= {}
+* {33:16,9,17} PUSHOBJ: Y <= NEW OBJ ( 32, 8)
 * {34:17,10,18} PUSHS: * <= X = {MINE: A = 5}
 * {35:18,9,19} SETI: Y["X"] <= * = {MINE: A = 5}
 * {36:19,10,20} GETI: * <= Y["X"] = {MINE: A = 5}
 * {37:20,11,21} PUSHS: * <= Y = {"": X = {MINE: A = 5}}
-* {41:21,12,22} PUSHI: X <= {}
+* {41:21,12,22} PUSHOBJ: X <= NEW OBJ ( 32, 8)
 * {42:22,13,23} PUSHI: A <= "A"
 * {43:23,14,24} PUSHI: B <= "B"
 * {44:24,15,25} PUSHI: C <= "C"
@@ -378,13 +378,13 @@ PUSH Y
 * {56:34,19,35} GET: * <= X["B"] = *NONE*
 * {57:35,20,36} GET: * <= X["C"] = *NONE*
 * {58:36,21,37} PUSHS: * <= A2 = 5
-* {60:37,22,38} PUSHI: Y <= {}
+* {60:37,22,38} PUSHOBJ: Y <= NEW OBJ ( 32, 8)
 * {61:38,23,39} PUSHI: X-name <= "X"
 * {62:39,24,40} PUSHS: * <= X = {"": A = 5}
 * {63:40,23,41} SET: Y["X"] <= * = {"": A = 5}
 * {64:41,24,42} GET: * <= Y["X"] = {"": A = 5}
 * {65:42,25,43} PUSHS: * <= Y = {"": X = {"": A = 5}}
-* {69:43,26,44} PUSHI: X <= {}
+* {69:43,26,44} PUSHOBJ: X <= NEW OBJ ( 32, 8)
 * {70:44,27,45} PUSHI: * <= "A"
 * {71:45,28,46} PUSHI: * <= 5
 * {72:46,26,47} SET: X["A"] <= * = 5
@@ -402,7 +402,7 @@ PUSH Y
 * {86:58,30,59} GET: * <= X["B"] = *NONE*
 * {87:59,31,60} PUSHI: * <= "C"
 * {88:60,31,61} GET: * <= X["C"] = *NONE*
-* {90:61,32,62} PUSHI: Y <= {}
+* {90:61,32,62} PUSHOBJ: Y <= NEW OBJ ( 32, 8)
 * {91:62,33,63} PUSHI: * <= "X"
 * {92:63,34,64} PUSHS: * <= X = {"": A = 5}
 * {93:64,32,65} SET: Y["X"] <= * = {"": A = 5}
@@ -432,12 +432,12 @@ PUSH Y
 * {120:88,44,89} VPOP: * <= POPPED X = 100
 * {121:89,45,90} PUSHS: * <= X101 = 101
 * {122:90,46,91} PUSHS: * <= XSIZE3 = 3
-* {124:91,47,92} PUSHI: Y <= {}
+* {124:91,47,92} PUSHOBJ: Y <= NEW OBJ ( 32, 8)
 * {125:92,48,93} PUSHI: * <= 1
 * {126:93,47,94} VPUSH: PUSHED Y <= * = 1
 * {127:94,48,95} PUSHI: * <= 2
 * {128:95,47,96} VPUSH: PUSHED Y <= * = 2
-* {129:96,48,97} PUSHI: X <= {}
+* {129:96,48,97} PUSHOBJ: X <= NEW OBJ ( 32, 8)
 * {130:97,49,98} PUSHI: * <= 100
 * {131:98,48,99} VPUSH: PUSHED X <= * = 100
 * {132:99,49,100} PUSHI: * <= 200
@@ -461,7 +461,7 @@ PUSH Y
 * {150:117,57,118} VPOP: * <= POPPED X = 200
 * {151:118,58,119} VPOP: * <= POPPED X = 100
 * {152:119,59,120} VSIZE: * <= SIZE OF X = 0
-* {154:120,60,121} PUSHI: X <= {}
+* {154:120,60,121} PUSHOBJ: X <= NEW OBJ ( 32, 8)
 * {155:121,61,122} PUSHI: * <= "["
 * {156:122,60,123} SETI: X[".initiator"] <= * = "["
 * {157:123,61,124} PUSHI: * <= "]"
@@ -475,7 +475,7 @@ PUSH Y
 * {165:131,61,132} PUSHI: * <= 3
 * {166:132,60,133} VPUSH: PUSHED X <= * = 3
 * {168:133,61,134} PUSHS: * <= X = [1, 2, 3]
-* {170:134,62,135} PUSHI: Y <= {}
+* {170:134,62,135} PUSHOBJ: Y <= NEW OBJ ( 32, 8)
 * {171:135,63,136} PUSHI: * <= "["
 * {172:136,62,137} SETI: Y[".initiator"] <= * = "["
 * {173:137,63,138} PUSHI: * <= "]"

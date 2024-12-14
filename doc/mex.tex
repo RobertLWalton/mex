@@ -244,7 +244,7 @@
 
 \author{Robert L. Walton}
 
-\date{December 12, 2024}
+\date{December 13, 2024}
  
 \maketitle
 
@@ -1149,7 +1149,8 @@ the logical values `true' and `false':
     & \TT{m->globals[immedA]} instead.  Note \TT{fp[0] == 0}.
 \\\hline
 \ttkey{PUSHI}
-    & Push \TT{immedD} into the stack.
+    & Push \TT{immedD} into the stack.  \TT{immedD} should \underline{not} be \\
+    & a modifyable value like a non-public object.
 \\\hline
 \ttkey{PUSHG}
     & Push \TT{m->globals[immedA]} into the stack, where \TT{m} is \\
@@ -1594,7 +1595,7 @@ is \TT{mex::T\_AOP}.
 		the effective trace class is changed
 		to \TT{JMPF}.
 \\\hline
-\ttmkey{SET}{trace class} & The \TT{VPUSH}, \TT{SET},
+\ttmkey{SET}{trace class} & The \TT{PUSHOBJ}, \TT{VPUSH}, \TT{SET},
                             and \TT{SETI} instructions in Figure
                             \itemref{OBJECT-INSTRUCTIONS}.
 \\\hline
@@ -1763,6 +1764,11 @@ The trace messages for the object instructions in
 Figure~\itemref{OBJECT-INSTRUCTIONS} are:
 \begin{center}
 \begin{tabular}{l@{~~~~~}l}
+\TT{PUSHOBJ} &
+{\em trace-header}\TT{:} {\em to-variable}
+                    \TT{<=} \TT{NEW OBJ (} {\em unused\_size}\TT{,}
+		    {\em hash\_size} \TT{)}
+\\[1ex]
 \TT{VPUSH} &
 {\em trace-header}\TT{:} \TT{PUSHED} {\em object-variable}
                     \TT{<=} {\em from-variable}
@@ -3230,13 +3236,11 @@ is called.  Otherwise {\tt PUSHG} is used.)
 \ttkey{PUSHI} ~ {\em string} ~ {\em new-variable-name}\QMARK{} \\
 \ttkey{PUSHI} ~ \TT{TRUE} ~ {\em new-variable-name}\QMARK{} \\
 \ttkey{PUSHI} ~ \TT{FALSE} ~ {\em new-variable-name}\QMARK{} \\
-\ttkey{PUSHI} ~ \TT{NONE} ~ {\em new-variable-name}\QMARK{} \\
-\ttkey{PUSHI} ~ \TT{OBJ} ~ {\em new-variable-name}\QMARK{}
+\ttkey{PUSHI} ~ \TT{NONE} ~ {\em new-variable-name}\QMARK{}
 \begin{indpar}
 At run-time, pushes into the process stack a copy of
 the {\em number}\pagnote{NUMBER}, or the {\em string}\pagnote{STRING},
-or \TT{mex::TRUE}, or \TT{mex::FALSE}, or \TT{min::NONE()},
-or an empty MIN object.
+or \TT{mex::TRUE}, or \TT{mex::FALSE}, or \TT{min::NONE()}.
 At assembly time, pushes into the variable stack an
 element with {\em new-variable-name} as its name.
 \end{indpar}
@@ -3487,6 +3491,18 @@ At run-time this instruction's actions are as described in
 Figure~\itemref{BLOCK-AND-FUNCTION-INSTRUCTIONS}.  At assembly-time,
 this instruction pops {\em nresults} elements from the
 variables stack.
+\end{indpar}
+
+\ttkey{PUSHOBJ} ~ {\em unused\_size}\QMARK{}
+                ~ {\em hash\_size}\QMARK{}
+                ~ {\em new-variable-name}\QMARK{}
+\begin{indpar}
+At run-time, pushes into the process stack a new object with the
+given {\em unused\_size} (\TT{immedA} value, default 32) and
+{\em hash\_size} (\TT{immedC} value, default 8):
+see Figure~\itemref{OBJECT-INSTRUCTIONS}.
+At assembly time, pushes into the variable stack an
+element with {\em new-variable-name} as its name.
 \end{indpar}
 
 \ttkey{VPUSH} ~ {\em object-variable-name}

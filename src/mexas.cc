@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Dec 13 03:06:35 AM EST 2024
+// Date:	Fri Dec 13 06:29:13 PM EST 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -143,7 +143,6 @@ static min::locatable_gen loop;
 static min::locatable_gen TRUE;
 static min::locatable_gen FALSE;
 static min::locatable_gen NONE;
-static min::locatable_gen OBJ;
 
 static void initialize ( void )
 {
@@ -161,7 +160,6 @@ static void initialize ( void )
     ::TRUE = min::new_str_gen ( "TRUE" );
     ::FALSE = min::new_str_gen ( "FALSE" );
     ::NONE = min::new_str_gen ( "NONE" );
-    ::OBJ = min::new_str_gen ( "OBJ" );
 
     ::init_op_code_table();
 
@@ -1042,8 +1040,6 @@ mex::module mexas::compile ( min::file file )
 		        D = mex::FALSE;
 		    else if ( D == ::NONE )
 		        D = min::NONE();
-		    else if ( D == ::OBJ )
-			D = min::new_obj_gen ( 32, 8 );
 		    else
 		    {
 			mexcom::compile_error
@@ -1128,6 +1124,39 @@ mex::module mexas::compile ( min::file file )
 	        mexstack::var_stack_length -= 1;
 		mexstack::push_instr
 		    ( instr, pp, trace_info );
+		break;
+	    }
+	    case mex::PUSHOBJ:
+	    {
+		min::gen A = mexas::get_num ( index );
+		if ( A == min::NONE() )
+		    instr.immedA = 32;
+		else if ( ! mexas::check_parameter
+		                ( instr.immedA, A,
+				  pp, "unused_size" ) )
+		    continue;
+		min::gen C = mexas::get_num ( index );
+		if ( C == min::NONE() )
+		    instr.immedC = 8;
+		else if ( ! mexas::check_parameter
+		                ( instr.immedC, C,
+				  pp, "hash_size" ) )
+		    continue;
+		min::gen new_name =
+		    mexas::get_name ( index );
+		if ( new_name != min::NONE() )
+		    check_new_name ( new_name, pp );
+		else
+		    new_name =
+		        mexas::get_star ( index );
+		if ( new_name == min::NONE() )
+		    new_name = mexas::star;
+
+		mexas::push_variable
+		    ( mexas::variables, new_name,
+		      L, mexstack::depth[L] );
+		mexstack::push_instr
+		    ( instr, pp, new_name );
 		break;
 	    }
 	    case mex::VPUSH:

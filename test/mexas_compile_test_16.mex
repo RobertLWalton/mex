@@ -2,7 +2,7 @@
 //
 // File:	mexas_compile_test_16.mex
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Dec 13 01:40:08 AM EST 2024
+// Date:	Fri Dec 13 06:35:32 PM EST 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -10,7 +10,7 @@
 
 // SETI/GETI Test
 
-PUSHI OBJ X
+PUSHOBJ X
 PUSHI 5
 SETI X "A"
 PUSHI 7
@@ -30,7 +30,7 @@ GETI X "B"
 GETI X "C"
 PUSH A1
 
-PUSHI OBJ Y
+PUSHOBJ Y
 PUSH X
 SETI Y "X"
 GETI Y "X"
@@ -38,7 +38,7 @@ PUSH Y
 
 // SET/GET Test
 
-PUSHI OBJ X
+PUSHOBJ X
 PUSHI "A" A
 PUSHI "B" B
 PUSHI "C" C
@@ -57,7 +57,7 @@ GET X B
 GET X C
 PUSH A2
 
-PUSHI OBJ Y
+PUSHOBJ Y
 PUSHI "X" X-name
 PUSH X
 SET Y X-name
@@ -66,7 +66,7 @@ PUSH Y
 
 // SET/GET * Test
 
-PUSHI OBJ X
+PUSHOBJ X
 PUSHI "A"
 PUSHI 5
 SET X *
@@ -87,7 +87,7 @@ GET X *
 PUSHI "C"
 GET X *
 
-PUSHI OBJ Y
+PUSHOBJ Y
 PUSHI "X"
 PUSH X
 SET Y *
@@ -121,12 +121,12 @@ VPOP X
 PUSH X101
 PUSH XSIZE3
 
-PUSHI OBJ Y
+PUSHOBJ Y
 PUSHI 1
 VPUSH Y
 PUSHI 2
 VPUSH Y
-PUSHI OBJ X
+PUSHOBJ X
 PUSHI 100
 VPUSH X
 PUSHI 200
@@ -151,7 +151,7 @@ VPOP X
 VPOP X
 VSIZE X
 
-PUSHI OBJ X
+PUSHOBJ X
 PUSHI "["
 SETI X ".initiator"
 PUSHI "]"
@@ -167,7 +167,7 @@ VPUSH X
 
 PUSH X
 
-PUSHI OBJ Y
+PUSHOBJ Y
 PUSHI "["
 SETI Y ".initiator"
 PUSHI "]"
