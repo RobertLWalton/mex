@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat Dec 21 07:03:45 PM EST 2024
+// Date:	Sun Dec 22 01:31:19 AM EST 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -82,18 +82,31 @@ extern min::locatable_gen right_bracket;
 struct variable_element
 {
     const min::gen name;  // mexas::star if none.
+
     min::uns32 level_and_depth;
         // Level is in high order 16 bits, depth is in
 	// low order 16 bits.
+    min::uns8 level ()
+      { return (min::uns8)
+               ( level_and_depth >> 16 ); }
+    min::uns8 depth ()
+      { return (min::uns8)
+               ( level_and_depth & 0xFFFF ); }
+
+    bool is_write_only;
+
     variable_element
 	    ( const variable_element & e ) :
 	name ( e.name ),
-	level_and_depth ( e.level_and_depth ) {}
+	level_and_depth ( e.level_and_depth ),
+	is_write_only ( e.is_write_only ) {}
     variable_element
 	    ( min::gen name,
-	      min::uns32 level_and_depth ) :
+	      min::uns32 level_and_depth,
+	      bool is_write_only ) :
 	name ( name ),
-	level_and_depth ( level_and_depth ) {}
+	level_and_depth ( level_and_depth ),
+	is_write_only ( is_write_only ) {}
     variable_element & operator =
 	    ( const variable_element & e )
     {
@@ -102,6 +115,7 @@ struct variable_element
 	//
         * (min::gen *) & this->name = e.name;
 	this->level_and_depth = e.level_and_depth;
+	this->is_write_only = e.is_write_only;
 	return * this;
     }
 };
@@ -111,10 +125,11 @@ extern min::locatable_var<mexas::variable_stack>
     variables;
 inline void push_variable
 	( mexas::variable_stack s, min::gen name,
-	  min::uns32 level, min::uns32 depth )
+	  min::uns32 level_and_depth,
+	  bool is_write_only = false )
 {
     mexas::variable_element e =
-        { name, ( level << 16 ) + depth };
+        { name, level_and_depth, is_write_only };
     min::push(s) = e;
     min::unprotected::acc_write_update ( s, name );
     ++ mexstack::var_stack_length;
@@ -125,9 +140,17 @@ inline void push_variable
 struct function_element
 {
     const min::gen name;
+
     min::uns32 level_and_depth;
         // Level is in high order 16 bits, depth is in
 	// low order 16 bits.
+    min::uns8 level ()
+      { return (min::uns8)
+               ( level_and_depth >> 16 ); }
+    min::uns8 depth ()
+      { return (min::uns8)
+               ( level_and_depth & 0xFFFF ); }
+
     min::uns32 index;  // of BEGF in code vector
     function_element
 	    ( const function_element & f ) :
@@ -158,11 +181,11 @@ extern min::locatable_var<mexas::function_stack>
     functions;
 inline void push_function
 	( mexas::function_stack s, min::gen name,
-	  min::uns32 level, min::uns32 depth,
+	  min::uns32 level_and_depth,
 	  min::uns32 index )
 {
     mexas::function_element e =
-        { name, ( level << 16 ) + depth, index };
+        { name, level_and_depth, index };
     min::push(s) = e;
     min::unprotected::acc_write_update ( s, name );
     ++ mexstack::func_stack_length;

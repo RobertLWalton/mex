@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat Dec 21 07:53:38 PM EST 2024
+// Date:	Sun Dec 22 01:42:35 AM EST 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -33,20 +33,30 @@
 
 void mexstack::pop_stacks ( void )
 {
-    MIN_REQUIRE (    mexas::variables->length
-                  >= mexstack::var_stack_length );
+    min::uns32 level_and_depth = LEVEL_AND_DEPTH;
+    min::uns32 length = mexas::variables->length;
+    while ( length > 0 )
+    {
+        mexas::variable_element * ve =
+	    ~( mexas::variables + ( length - 1 ) );
+	if ( ve->level_and_depth <= level_and_depth )
+	    break;
+	-- length;
+    }
     min::pop ( mexas::variables,
-    	         mexas::variables->length
-	       - mexstack::var_stack_length );
+	       mexas::variables->length - length );
 
-    MIN_REQUIRE
-        ( mexstack::func_var_stack_length == 0 );
-
-    MIN_REQUIRE (    mexas::functions->length
-                  >= mexstack::func_stack_length );
+    length = mexas::functions->length;
+    while ( length > 0 )
+    {
+        mexas::function_element * fe =
+	    ~( mexas::functions + ( length - 1 ) );
+	if ( fe->level_and_depth <= level_and_depth )
+	    break;
+	-- length;
+    }
     min::pop ( mexas::functions,
-    	         mexas::functions->length
-	       - mexstack::func_stack_length );
+    	       mexas::functions->length - length );
 }
 
 min::locatable_gen mexas::star;
@@ -215,7 +225,7 @@ min::uns32 mexas::local_search
     }
     mexas::variable_element * ve =
 	~ ( mexas::variables + j );
-    if ( ( ve->level_and_depth >> 16 ) < L )
+    if ( ve->level() < L )
     {
 	mexcom::compile_error
 	    ( pp, "variable named ",
@@ -340,6 +350,13 @@ void mexas::push_push_instr
     min::uns32 i = search ( name, SP );
     if ( i != mexas::NOT_FOUND )
     {
+        if ( (mexas::variables+i)->is_write_only )
+	    mexcom::compile_error
+		(    mexstack::print_switch
+		  == mexstack::PRINT_WITH_SOURCE ?
+		      min::MISSING_PHRASE_POSITION : pp,
+		  "reading write-only variable named ",
+		  min::pgen ( name ) );
     	mexstack::push_push_instr
 	    ( new_name, name, i, pp,
 	      no_source, stack_offset );
@@ -871,7 +888,7 @@ mex::module mexas::compile ( min::file file )
 		check_new_name ( name, pp );
 	    mexas::push_variable
 	        ( mexas::variables, name,
-	          L, mexstack::depth[L] );
+		  LEVEL_AND_DEPTH );
 	    mexstack::push_instr ( instr, pp, name );
 	    goto EXTRA_STUFF_CHECK;
 	}
@@ -893,7 +910,7 @@ mex::module mexas::compile ( min::file file )
 	    if ( top_name != min::NONE() )
 		mexas::push_variable
 		    ( mexas::variables, top_name,
-		      L, mexstack::depth[L] );
+		      LEVEL_AND_DEPTH );
 	    goto EXTRA_STUFF_CHECK;
 	}
 	NON_ARITHMETIC:
@@ -946,7 +963,7 @@ mex::module mexas::compile ( min::file file )
 		{
 		    mexas::push_variable
 			( mexas::variables, new_name,
-			  L, mexstack::depth[L] );
+			  LEVEL_AND_DEPTH );
 		    mexas::push_push_instr
 		        ( new_name, name, pp );
 		    break;
@@ -982,7 +999,7 @@ mex::module mexas::compile ( min::file file )
 			      ( labbuf, 2 ) );
 		    mexas::push_variable
 			( mexas::variables, new_name,
-			  L, mexstack::depth[L] );
+			  LEVEL_AND_DEPTH );
 		    mexstack::push_instr
 			( instr, pp, trace_info );
 		    break;
@@ -1019,7 +1036,7 @@ mex::module mexas::compile ( min::file file )
 			      ( labbuf, 3 ) );
 		    mexas::push_variable
 			( mexas::variables, new_name,
-			  L, mexstack::depth[L] );
+			  LEVEL_AND_DEPTH );
 		    mexstack::push_instr
 			( instr, pp, trace_info );
 
@@ -1067,7 +1084,7 @@ mex::module mexas::compile ( min::file file )
 
 		mexas::push_variable
 		    ( mexas::variables, new_name,
-		      L, mexstack::depth[L] );
+		      LEVEL_AND_DEPTH );
 		mexstack::push_instr
 		    ( instr, pp, new_name );
 		break;
@@ -1091,12 +1108,14 @@ mex::module mexas::compile ( min::file file )
 
 		    mexas::variable_element * ve =
 		        ~ ( mexas::variables + j );
-		    if (    (   ve->level_and_depth
-		              & 0xFFFF )
+		    if ( ! ve->is_write_only
+		         &&
+			    ve->depth()
 		         == mexstack::depth[L] )
 		    {
 			mexcom::compile_error
-			    ( pp, "variable named ",
+			    ( pp, "non write-only"
+			          " variable named ",
 				  min::pgen ( name ),
 				  " has the same depth"
 				  " as the POP"
@@ -1158,7 +1177,7 @@ mex::module mexas::compile ( min::file file )
 
 		mexas::push_variable
 		    ( mexas::variables, new_name,
-		      L, mexstack::depth[L] );
+		      LEVEL_AND_DEPTH );
 		mexstack::push_instr
 		    ( instr, pp, new_name );
 		break;
@@ -1258,7 +1277,7 @@ mex::module mexas::compile ( min::file file )
 
 		mexas::push_variable
 		    ( mexas::variables, new_name,
-		      L, mexstack::depth[L] );
+		      LEVEL_AND_DEPTH );
 
 		mexstack::push_instr
 		    ( instr, pp, trace_info );
@@ -1376,7 +1395,7 @@ mex::module mexas::compile ( min::file file )
 
 		    mexas::push_variable
 			( mexas::variables, new_name,
-			  L, mexstack::depth[L] );
+			  LEVEL_AND_DEPTH );
 		}
 		else //    op_code == mex::SET
 		     // || op_code == mex::SETI
@@ -1465,12 +1484,13 @@ mex::module mexas::compile ( min::file file )
 		        variables[i];
 		    printer
 		        << min::indent
-		        << ( v.level_and_depth >> 16 )
+		        << v.level()
 			<< "."
-			<< (   v.level_and_depth
-			     & 0xFFFF )
+			<< v.depth()
 			<< " "
 			<< v.name;
+		    if ( v.is_write_only )
+		        printer << " [WO]";
 		}
 		printer << min::restore_indent;
 
@@ -1492,10 +1512,9 @@ mex::module mexas::compile ( min::file file )
 		        functions[i];
 		    printer
 		        << min::indent
-		        << ( f.level_and_depth >> 16 )
+		        << f.level()
 			<< "."
-			<< (   f.level_and_depth
-			     & 0xFFFF )
+			<< f.depth()
 			<< " "
 			<< f.name;
 		}
@@ -1738,13 +1757,17 @@ mex::module mexas::compile ( min::file file )
 		min::locatable_gen trace_info
 		    ( min::new_lab_gen
 		          ( labbuf, nnext + 1 ) );
+		min::uns32 pre_stack_limit =
+		    mexstack::stack_limit;
+		mexstack::begx
+		    ( instr, nnext, 0, trace_info, pp );
 
 		for ( min::uns32 i = 0;
 		      i < nnext; ++ i )
 		{
 		    MIN_ASSERT
 			(    nnext
-			  <= SP - mexstack::stack_limit,
+			  <= SP - pre_stack_limit,
 			  "BEGL: mexstack::stack_limit"
 			  " violation"
 			);
@@ -1765,10 +1788,8 @@ mex::module mexas::compile ( min::file file )
 
 		    mexas::push_variable
 			( mexas::variables, name,
-			  L, mexstack::depth[L] );
+			  LEVEL_AND_DEPTH, true );
 		}
-		mexstack::begx
-		    ( instr, nnext, 0, trace_info, pp );
 		break;
 	    }
 	    case mex::ENDL:
@@ -1834,7 +1855,7 @@ mex::module mexas::compile ( min::file file )
 		mexas::push_function
 		    ( mexas::functions,
 		      function_name,
-		      L, mexstack::depth[L],
+		      LEVEL_AND_DEPTH,
 		      m->length );
 
 		mexstack::begx
@@ -1845,7 +1866,7 @@ mex::module mexas::compile ( min::file file )
 		    mexas::push_variable
 			( mexas::variables,
 			  statement[first+i],
-			  L, mexstack::depth[L] );
+			  LEVEL_AND_DEPTH );
 		break;
 	    }
 	    case mex::ENDF:
@@ -2093,7 +2114,7 @@ mex::module mexas::compile ( min::file file )
 		    mexas::push_variable
 			( mexas::variables,
 			  statement[first+i],
-			  L, mexstack::depth[L] );
+			  LEVEL_AND_DEPTH );
 		mexstack::push_instr
 		    ( instr, pp, trace_info );
 		break;
@@ -2225,7 +2246,7 @@ mex::module mexas::compile ( min::file file )
 
 		mexas::push_variable
 		    ( mexas::variables, new_name,
-		      L, mexstack::depth[L] );
+		      LEVEL_AND_DEPTH );
 		mexstack::push_instr
 		    ( instr, pp, new_name );
 		break;

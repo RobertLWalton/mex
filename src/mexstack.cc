@@ -2,7 +2,7 @@
 //
 // File:	mexstack.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Dec  2 07:00:15 PM EST 2024
+// Date:	Sun Dec 22 02:54:33 AM EST 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -343,6 +343,9 @@ void mexstack::begx ( mex::instr & instr,
     else if ( instr.op_code == mex::BEGL )
     {
 	e.end_op_code = mex::ENDL;
+	e.stack_limit =
+	    mexstack::var_stack_length + nvars;
+	stack_offset = nvars;
 
         ++ mexstack::depth[L];
 	instr.immedA = tvars;
