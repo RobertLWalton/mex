@@ -2,7 +2,7 @@
 //
 // File:	mexstack.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Dec  2 06:52:40 PM EST 2024
+// Date:	Sun Dec 22 03:18:30 AM EST 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -33,9 +33,7 @@ namespace mexstack {
 extern min::uns8 lexical_level;
 extern min::uns8 depth[mex::max_lexical_level+1];
 
-extern min::uns32 var_stack_length;
-extern min::uns32 func_stack_length;
-extern min::uns32 func_var_stack_length;
+extern min::uns32 run_stack_length;
 void pop_stacks ( void );
 
 extern min::uns32 lp[mex::max_lexical_level+1];
@@ -48,9 +46,7 @@ struct block_element
 {
     min::uns8 begin_op_code;
     min::uns8 end_op_code;
-    min::uns32 stack_limit;
-    min::uns32 func_stack_length;
-    min::uns32 func_var_stack_length;
+    min::uns32 run_stack_limit;
     min::uns32 nvars;
     min::uns32 begin_location;
 };
@@ -59,14 +55,14 @@ typedef min::packed_vec_insptr<mexstack::block_element>
 extern min::locatable_var<mexstack::block_stack>
     blocks;
 
-extern min::uns32 stack_limit;
+extern min::uns32 run_stack_limit;
 
 struct jump_element
 {
     const min::gen target;
     min::uns32 jmp_location;
     min::uns8 lexical_level, depth, minimum_depth;
-    min::uns32 var_stack_length, var_stack_minimum;
+    min::uns32 run_stack_length, run_stack_minimum;
     min::uns32 next;
     jump_element
 	    ( const jump_element & j ) :
@@ -75,8 +71,8 @@ struct jump_element
 	lexical_level ( j.lexical_level ),
         depth ( j.depth ),
         minimum_depth ( j.minimum_depth ),
-        var_stack_length ( j.var_stack_length ),
-        var_stack_minimum ( j.var_stack_minimum ),
+        run_stack_length ( j.run_stack_length ),
+        run_stack_minimum ( j.run_stack_minimum ),
 	next ( j.next ) {}
     jump_element
 	    ( min::gen target,
@@ -84,16 +80,16 @@ struct jump_element
 	      min::uns32 lexical_level,
               min::uns32 depth,
               min::uns32 minimum_depth,
-              min::uns32 var_stack_length,
-              min::uns32 var_stack_minimum,
+              min::uns32 run_stack_length,
+              min::uns32 run_stack_minimum,
               min::uns32 next ) :
 	target ( target ),
 	jmp_location ( jmp_location ),
 	lexical_level ( lexical_level ),
         depth ( depth ),
         minimum_depth ( minimum_depth ),
-        var_stack_length ( var_stack_length ),
-        var_stack_minimum ( var_stack_minimum ),
+        run_stack_length ( run_stack_length ),
+        run_stack_minimum ( run_stack_minimum ),
 	next ( next ) {}
     jump_element & operator =
 	    ( const jump_element & e )
@@ -198,7 +194,7 @@ inline void push_jmp_instr
         ( instr, pp, target, no_source, stack_offset );
     min::uns8 L = mexstack::lexical_level,
               D = mexstack::depth[L];
-    min::uns32 S = mexstack::var_stack_length
+    min::uns32 S = mexstack::run_stack_length
                  + stack_offset;
     mexstack::jump_element je = {
         target,

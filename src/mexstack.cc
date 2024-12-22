@@ -2,7 +2,7 @@
 //
 // File:	mexstack.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Dec 22 02:54:33 AM EST 2024
+// Date:	Sun Dec 22 03:27:30 AM EST 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -24,11 +24,9 @@ mexstack::print mexstack::print_switch =
     mexstack::NO_PRINT;
 
 # define L mexstack::lexical_level
-# define SP mexstack::var_stack_length
+# define SP mexstack::run_stack_length
 
-min::uns32 mexstack::var_stack_length = 0;
-min::uns32 mexstack::func_stack_length = 0;
-min::uns32 mexstack::func_var_stack_length = 0;
+min::uns32 mexstack::run_stack_length = 0;
 
 min::uns8 mexstack::lexical_level;
 min::uns8 mexstack::depth[mex::max_lexical_level+1];
@@ -42,7 +40,7 @@ static min::packed_vec<mexstack::block_element>
 min::locatable_var<mexstack::block_stack>
     mexstack::blocks;
 
-min::uns32 mexstack::stack_limit;
+min::uns32 mexstack::run_stack_limit;
 
 static min::uns32 jump_element_gen_disp[] =
 {
@@ -73,14 +71,12 @@ static min::initializer initializer ( ::initialize );
 
 void mexstack::init ( void )
 {
-    mexstack::var_stack_length		= 0;
-    mexstack::func_stack_length		= 0;
-    mexstack::func_var_stack_length	= 0;
+    mexstack::run_stack_length		= 0;
     mexstack::lexical_level		= 0;
     mexstack::depth[0]			= 0;
     mexstack::lp[0]			= 0;
     mexstack::fp[0]			= 0;
-    mexstack::stack_limit		= 0;
+    mexstack::run_stack_limit		= 0;
 
     min::pop ( mexstack::blocks,
                mexstack::blocks->length );
@@ -118,7 +114,7 @@ void mexstack::print_instr
 		  +
 		  ( pp.end.offset != 0 )
 	<< ":" << location
-	<< ";" <<   mexstack::var_stack_length
+	<< ";" <<   mexstack::run_stack_length
 	          + stack_offset
 	<< "] "
 	<< min::place_indent ( 0 )
@@ -198,8 +194,8 @@ unsigned mexstack::jmp_update ( void )
 	      "jmp_clear not called at ENDF" );
 	if ( next->minimum_depth > mexstack::depth[L] )
 	     next->minimum_depth = mexstack::depth[L];
-	if ( next->var_stack_minimum > SP )
-	    next->var_stack_minimum = SP;
+	if ( next->run_stack_minimum > SP )
+	    next->run_stack_minimum = SP;
 	previous = next;
 	++ count;
     }
@@ -236,12 +232,12 @@ unsigned mexstack::jmp_target
 	        next->depth - mexstack::depth[L];
 	    min::phrase_position pp =
 		m->position[next->jmp_location];
-	    if ( SP > next->var_stack_minimum )
+	    if ( SP > next->run_stack_minimum )
 		mexcom::compile_error
 		    ( pp, "code jumped over pushes"
 		          " of values into the stack;"
 			  " JMP unresolved" );
-	    else if ( SP < next->var_stack_minimum )
+	    else if ( SP < next->run_stack_minimum )
 		mexcom::compile_error
 		    ( pp, "code jumped over pops"
 		          " of values from the stack;"
@@ -250,8 +246,8 @@ unsigned mexstack::jmp_target
 	    {
 		min::ptr<mex::instr> instr =
 		    m + next->jmp_location;
-		instr->immedA = next->var_stack_length
-			      - next->var_stack_minimum;
+		instr->immedA = next->run_stack_length
+			      - next->run_stack_minimum;
 		instr->immedC = m->length
 			      - next->jmp_location;
 		instr->trace_depth = depth_diff;
@@ -300,7 +296,7 @@ void mexstack::print_label
                       << ":";
     printer
 	<< m->length
-	<< ";" <<   mexstack::var_stack_length
+	<< ";" <<   mexstack::run_stack_length
 	          + stack_offset
 	<< "] LABEL " << min::pgen_name ( name )
         << min::eom;
@@ -313,8 +309,7 @@ void mexstack::begx ( mex::instr & instr,
 {
     mexstack::block_element e =
         { instr.op_code, 0,
-	  mexstack::var_stack_length,
-	  mexstack::func_stack_length, 0,
+	  mexstack::run_stack_length,
 	  nvars,
 	  mexcom::output_module->length };
 
@@ -328,13 +323,13 @@ void mexstack::begx ( mex::instr & instr,
 	MIN_ASSERT ( tvars == 0,
 	             "BEGF has trace variables" );
 	e.end_op_code = mex::ENDF;
-	e.stack_limit =
-	    mexstack::var_stack_length + nvars;
+	e.run_stack_limit =
+	    mexstack::run_stack_length + nvars;
 	stack_offset = nvars;
 
 	++ L;
 	mexstack::depth[L] = 0;
-	mexstack::lp[L] = mexstack::var_stack_length;
+	mexstack::lp[L] = mexstack::run_stack_length;
 	mexstack::fp[L] = mexstack::lp[L] + nvars;
 
 	instr.immedA = nvars;
@@ -343,8 +338,8 @@ void mexstack::begx ( mex::instr & instr,
     else if ( instr.op_code == mex::BEGL )
     {
 	e.end_op_code = mex::ENDL;
-	e.stack_limit =
-	    mexstack::var_stack_length + nvars;
+	e.run_stack_limit =
+	    mexstack::run_stack_length + nvars;
 	stack_offset = nvars;
 
         ++ mexstack::depth[L];
@@ -362,7 +357,7 @@ void mexstack::begx ( mex::instr & instr,
 	    ( "bad instr.op_code to mexstack::begx" );
 
     min::push ( mexstack::blocks ) = e;
-    mexstack::stack_limit = e.stack_limit;
+    mexstack::run_stack_limit = e.run_stack_limit;
     mexstack::push_instr
         ( instr, pp, trace_info, false, stack_offset );
 }
@@ -432,10 +427,6 @@ unsigned mexstack::endx ( mex::instr & instr,
 
     mexstack::block_element e =
         min::pop ( mexstack::blocks );
-    mexstack::func_stack_length =
-        e.func_stack_length;
-    mexstack::func_var_stack_length =
-        e.func_var_stack_length;
  
     if ( instr.op_code == mex::ENDF )
     {
@@ -455,37 +446,37 @@ unsigned mexstack::endx ( mex::instr & instr,
 
 	instr.immedB = L;
 	mexstack::jmp_clear();
-	mexstack::var_stack_length =
-		e.stack_limit - e.nvars;
+	mexstack::run_stack_length =
+		e.run_stack_limit - e.nvars;
 	-- L;
     }
     else if ( instr.op_code == mex::ENDL )
     {
-	instr.immedA = mexstack::var_stack_length
-	             - e.stack_limit + tvars;
+	instr.immedA = mexstack::run_stack_length
+	             - e.run_stack_limit + tvars;
 	instr.immedB = e.nvars;
         instr.immedC = mexcom::output_module->length
 	             - e.begin_location - 1;
 	-- mexstack::depth[L];
-	mexstack::var_stack_length =
-		e.stack_limit - e.nvars;
+	mexstack::run_stack_length =
+		e.run_stack_limit - e.nvars;
 	mexstack::jmp_update();
     }
     else // if mex::END
     {
-	instr.immedA = mexstack::var_stack_length
-	             - e.stack_limit + tvars;
+	instr.immedA = mexstack::run_stack_length
+	             - e.run_stack_limit + tvars;
 	-- mexstack::depth[L];
-	mexstack::var_stack_length =
-		e.stack_limit;
+	mexstack::run_stack_length =
+		e.run_stack_limit;
 	mexstack::jmp_update();
     }
     mexstack::pop_stacks();
 
     min::uns32 len = mexstack::blocks->length;
-    mexstack::stack_limit =
+    mexstack::run_stack_limit =
         ( len == 0 ? 0 : 
-	  (mexstack::blocks+(len-1))->stack_limit );
+	  (mexstack::blocks+(len-1))->run_stack_limit );
     mexstack::push_instr
         ( instr, pp, trace_info,
 	  instr.op_code == mex::ENDF );
@@ -514,8 +505,8 @@ bool mexstack::cont ( mex::instr & instr,
 	++ instr.trace_depth;
     }
 
-    instr.immedA = mexstack::var_stack_length
-		 - bp->stack_limit + tvars;
+    instr.immedA = mexstack::run_stack_length
+		 - bp->run_stack_limit + tvars;
     instr.immedB = bp->nvars;
     instr.immedC = mexcom::output_module->length
 		 - bp->begin_location - 1;

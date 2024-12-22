@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Dec 22 01:31:19 AM EST 2024
+// Date:	Sun Dec 22 03:22:23 AM EST 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -132,7 +132,7 @@ inline void push_variable
         { name, level_and_depth, is_write_only };
     min::push(s) = e;
     min::unprotected::acc_write_update ( s, name );
-    ++ mexstack::var_stack_length;
+    ++ mexstack::run_stack_length;
 }
 
 // Function Stack
@@ -188,7 +188,6 @@ inline void push_function
         { name, level_and_depth, index };
     min::push(s) = e;
     min::unprotected::acc_write_update ( s, name );
-    ++ mexstack::func_stack_length;
 }
 
 
@@ -439,7 +438,7 @@ const min::uns32 NOT_FOUND = 0xFFFFFFFF;
 // The elements searched are those with indices i-1,
 // i-2, i-3, ..., 0 in that order.  Suitable values for
 // the argument i are mexas::variables->length and
-// mexas::stack_limit.
+// mexstack::run_stack_limit.
 //
 inline min::uns32 search ( min::gen name, min::uns32 i )
 {
@@ -496,9 +495,10 @@ void make_module_interface ( void );
 bool check_new_name
 	( min::gen name, min::phrase_position pp );
     // Test whether name is a variable name in the
-    // variables stack below mexas::stack_limit.  If
-    // yes, print `improper hidding' error message using
-    // pp and return false.  Otherwise return true.
+    // variables stack below mexstack::run_stack_limit.
+    // If yes, print `improper hidding' error message
+    // using pp and return false.  Otherwise return
+    // true.
     //
     // But if name == '*', just return true.
 
