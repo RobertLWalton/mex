@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Dec 13 06:29:13 PM EST 2024
+// Date:	Sat Dec 21 07:53:38 PM EST 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -25,6 +25,9 @@
 
 # define L mexstack::lexical_level
 # define SP mexstack::var_stack_length
+# define LEVEL_AND_DEPTH \
+    (   ( (min::uns32) L << 16 ) \
+      + (min::uns32) mexstack::depth[L] )
 
 # define MUP min::unprotected
 
@@ -212,7 +215,7 @@ min::uns32 mexas::local_search
     }
     mexas::variable_element * ve =
 	~ ( mexas::variables + j );
-    if ( ve->level < L )
+    if ( ( ve->level_and_depth >> 16 ) < L )
     {
 	mexcom::compile_error
 	    ( pp, "variable named ",
@@ -1088,7 +1091,8 @@ mex::module mexas::compile ( min::file file )
 
 		    mexas::variable_element * ve =
 		        ~ ( mexas::variables + j );
-		    if (    ve->depth
+		    if (    (   ve->level_and_depth
+		              & 0xFFFF )
 		         == mexstack::depth[L] )
 		    {
 			mexcom::compile_error
@@ -1452,8 +1456,6 @@ mex::module mexas::compile ( min::file file )
 		printer << min::save_indent
                         << "VARIABLES: "
 		        << min::place_indent ( 0 );
-		min::uns32 level = L;
-		min::uns32 depth = mexstack::depth[L];
 		for ( min::uns32 i =
 		          mexstack::var_stack_length;
 		      0 < i; )
@@ -1461,19 +1463,14 @@ mex::module mexas::compile ( min::file file )
 		    -- i;
 		    mexas::variable_element v =
 		        variables[i];
-		    while ( v.level < level )
-		    {
-		        printer << "| ";
-			-- level;
-			depth = mexstack::depth[level];
-		    }
-		    while ( v.depth < depth )
-		    {
-		        printer << "; ";
-			-- depth;
-		    }
-		    printer << v.name;
-		    if ( i > 0 ) printer << " ";
+		    printer
+		        << min::indent
+		        << ( v.level_and_depth >> 16 )
+			<< "."
+			<< (   v.level_and_depth
+			     & 0xFFFF )
+			<< " "
+			<< v.name;
 		}
 		printer << min::restore_indent;
 
@@ -1487,27 +1484,20 @@ mex::module mexas::compile ( min::file file )
                         << min::save_indent
 		        << "FUNCTIONS: "
 		        << min::place_indent ( 0 );
-		level = L;
-		depth = mexstack::depth[L];
 		for ( min::uns32 i = functions->length;
 		      0 < i; )
 		{
 		    -- i;
 		    mexas::function_element f =
 		        functions[i];
-		    while ( f.level < level )
-		    {
-		        printer << "| ";
-			-- level;
-			depth = mexstack::depth[level];
-		    }
-		    while ( f.depth < depth )
-		    {
-		        printer << "; ";
-			-- depth;
-		    }
-		    printer << f.name;
-		    if ( i > 0 ) printer << " ";
+		    printer
+		        << min::indent
+		        << ( f.level_and_depth >> 16 )
+			<< "."
+			<< (   f.level_and_depth
+			     & 0xFFFF )
+			<< " "
+			<< f.name;
 		}
 		printer << min::restore_indent;
 
@@ -1718,9 +1708,8 @@ mex::module mexas::compile ( min::file file )
 		    mexas::variable_element * ve =
 		        ~ (   mexas::variables
 		            + ( SP - i ) );
-		    if ( ve->level != L
-		         ||
-			 ve->depth != mexstack::depth[L]
+		    if (    ve->level_and_depth
+		         != LEVEL_AND_DEPTH
 			 ||
 			 ve->name == mexas::star )
 		    {

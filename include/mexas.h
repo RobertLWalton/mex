@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Dec 10 02:55:52 AM EST 2024
+// Date:	Sat Dec 21 07:03:45 PM EST 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -82,16 +82,18 @@ extern min::locatable_gen right_bracket;
 struct variable_element
 {
     const min::gen name;  // mexas::star if none.
-    min::uns32 level, depth;
+    min::uns32 level_and_depth;
+        // Level is in high order 16 bits, depth is in
+	// low order 16 bits.
     variable_element
 	    ( const variable_element & e ) :
-	name ( e.name ), level ( e.level ),
-        depth ( e.depth ) {}
+	name ( e.name ),
+	level_and_depth ( e.level_and_depth ) {}
     variable_element
-	    ( min::gen name, min::uns32 level,
-                             min::uns32 depth ) :
-	name ( name ), level ( level ),
-        depth ( depth ) {}
+	    ( min::gen name,
+	      min::uns32 level_and_depth ) :
+	name ( name ),
+	level_and_depth ( level_and_depth ) {}
     variable_element & operator =
 	    ( const variable_element & e )
     {
@@ -99,8 +101,7 @@ struct variable_element
 	// of const members.
 	//
         * (min::gen *) & this->name = e.name;
-	this->level = e.level;
-	this->depth = e.depth;
+	this->level_and_depth = e.level_and_depth;
 	return * this;
     }
 };
@@ -112,7 +113,8 @@ inline void push_variable
 	( mexas::variable_stack s, min::gen name,
 	  min::uns32 level, min::uns32 depth )
 {
-    mexas::variable_element e = { name, level, depth };
+    mexas::variable_element e =
+        { name, ( level << 16 ) + depth };
     min::push(s) = e;
     min::unprotected::acc_write_update ( s, name );
     ++ mexstack::var_stack_length;
@@ -123,18 +125,21 @@ inline void push_variable
 struct function_element
 {
     const min::gen name;
-    min::uns32 level, depth;
+    min::uns32 level_and_depth;
+        // Level is in high order 16 bits, depth is in
+	// low order 16 bits.
     min::uns32 index;  // of BEGF in code vector
     function_element
 	    ( const function_element & f ) :
-	name ( f.name ), level ( f.level ),
-        depth ( f.depth ), index ( f.index ) {}
+	name ( f.name ),
+	level_and_depth ( f.level_and_depth ),
+        index ( f.index ) {}
     function_element
-	    ( min::gen name, min::uns32 level,
-                             min::uns32 depth,
+	    ( min::gen name, min::uns32 level_and_depth,
                              min::uns32 index ) :
-	name ( name ), level ( level ),
-        depth ( depth ), index ( index ) {}
+	name ( name ),
+	level_and_depth ( level_and_depth ),
+        index ( index ) {}
     function_element & operator =
 	    ( const function_element & e )
     {
@@ -142,8 +147,7 @@ struct function_element
 	// of const members.
 	//
         * (min::gen *) & this->name = e.name;
-	this->level = e.level;
-	this->depth = e.depth;
+	this->level_and_depth = e.level_and_depth;
 	this->index = e.index;
 	return * this;
     }
@@ -158,7 +162,7 @@ inline void push_function
 	  min::uns32 index )
 {
     mexas::function_element e =
-        { name, level, depth, index };
+        { name, ( level << 16 ) + depth, index };
     min::push(s) = e;
     min::unprotected::acc_write_update ( s, name );
     ++ mexstack::func_stack_length;

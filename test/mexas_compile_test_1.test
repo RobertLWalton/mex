@@ -14,10 +14,11 @@ PUSHI 2 X
     [13:0;1] PUSHI T_PUSH 0 0 0 2; X
 PUSHI 2 Y
     [14:1;2] PUSHI T_PUSH 0 0 0 2; Y
-    STACKS: VARIABLES: Y X
+    STACKS: VARIABLES: 0.0 Y
+                       0.0 X
 ADD Z
     [16:2;1] ADD T_AOP 0 0 0; Z
-    STACKS: VARIABLES: Z
+    STACKS: VARIABLES: 0.0 Z
 ERROR: variable named X not defined; instruction changed to PUSHI
        missing value
 PUSH X
@@ -32,7 +33,7 @@ PUSH Z W
     [21:5;2] PUSHS T_PUSH 0 0 0; [< Z W >]
 SUB
     [22:6;1] SUB T_AOP 0 0 0; *
-    STACKS: VARIABLES: *
+    STACKS: VARIABLES: 0.0 *
 POP
     [24:7;0] POPS T_POP 0 0 0; [< * * >]
     STACKS: VARIABLES:
@@ -46,12 +47,18 @@ PUSHI 23 Y
     [31:9;2] PUSHI T_PUSH 0 0 0 23; Y
 PUSHI NaN Z
     [32:10;3] PUSHI T_PUSH 0 0 0 nan; Z
-    STACKS: VARIABLES: Z Y X
+    STACKS: VARIABLES: 0.0 Z
+                       0.0 Y
+                       0.0 X
 PUSH X
     [34:11;4] PUSHS T_PUSH 2 0 0; [< X * >]
 PUSH Y
     [35:12;5] PUSHS T_PUSH 2 0 0; [< Y * >]
-    STACKS: VARIABLES: * * Z Y X
+    STACKS: VARIABLES: 0.0 *
+                       0.0 *
+                       0.0 Z
+                       0.0 Y
+                       0.0 X
 JMPLT ITS-X
     [37:13;3] JMPLT T_JMPS 0 0 0; ITS-X
 PUSH Y
@@ -70,14 +77,17 @@ POP // Z, but illegal as Z has same depth
 LABEL DONE
     [44:19;3] LABEL DONE
     [40:16;3] JMP T_JMP 0 0 3; DONE
-    STACKS: VARIABLES: Z Y X
+    STACKS: VARIABLES: 0.0 Z
+                       0.0 Y
+                       0.0 X
 POP
     [46:19;2] POPS T_POP 0 0 0; [< Z * >]
 
 // JMP TEST 2
 // Z = MIN ( X, Y )
 //
-    STACKS: VARIABLES: Y X
+    STACKS: VARIABLES: 0.0 Y
+                       0.0 X
 PUSH X Z
     [52:20;3] PUSHS T_PUSH 1 0 0; [< X Z >]
 PUSH X
@@ -100,7 +110,8 @@ POP
 // Z = MIN ( X, Y )
 // Z pushed into stack by code jumped over
 //
-    STACKS: VARIABLES: Y X
+    STACKS: VARIABLES: 0.0 Y
+                       0.0 X
 PUSH X
     [66:27;3] PUSHS T_PUSH 1 0 0; [< X * >]
 PUSH Y
@@ -123,7 +134,10 @@ LABEL DONE
 ERROR: in mexas_compile_test_1.mex: line ####: code jumped over pushes of
        values into the stack; JMP unresolved:
 JMP DONE
-    STACKS: VARIABLES: Z Z Y X
+    STACKS: VARIABLES: 0.0 Z
+                       0.0 Z
+                       0.0 Y
+                       0.0 X
 POP
     [75:33;3] POPS T_POP 0 0 0; [< Z * >]
 POP
@@ -133,7 +147,8 @@ POP
 // Z = MIN ( X, Y )
 // Z popped from stack by code jumped over
 //
-    STACKS: VARIABLES: Y X
+    STACKS: VARIABLES: 0.0 Y
+                       0.0 X
 PUSH X
     [83:35;3] PUSHS T_PUSH 1 0 0; [< X * >]
 PUSH Y
@@ -151,7 +166,9 @@ LABEL ITS-X
 ERROR: in mexas_compile_test_1.mex: line ####: code jumped over pops of
        values from the stack; JMP unresolved:
 JMPLT ITS-X
-    STACKS: VARIABLES: * Y X
+    STACKS: VARIABLES: 0.0 *
+                       0.0 Y
+                       0.0 X
 POP
     [91:41;2] POPS T_POP 0 0 0; [< * * >]
 
@@ -159,7 +176,8 @@ POP
 // Z = MIN ( X, Y )
 // Done legally by jumping over a POP/PUSH pair.
 //
-    STACKS: VARIABLES: Y X
+    STACKS: VARIABLES: 0.0 Y
+                       0.0 X
 PUSH Y Z
     [98:42;3] PUSHS T_PUSH 0 0 0; [< Y Z >]
 PUSH X
@@ -175,7 +193,9 @@ PUSH X Z
 LABEL DONE
     [104:48;3] LABEL DONE
     [101:45;3] JMPGEQ T_JMPS 0 0 3; DONE
-    STACKS: VARIABLES: Z Y X
+    STACKS: VARIABLES: 0.0 Z
+                       0.0 Y
+                       0.0 X
 POP
     [106:48;2] POPS T_POP 0 0 0; [< Z * >]
 
@@ -184,7 +204,9 @@ POP
 //
 PUSHI NaN Z
     [111:49;3] PUSHI T_PUSH 0 0 0 nan; Z
-    STACKS: VARIABLES: Z Y X
+    STACKS: VARIABLES: 0.0 Z
+                       0.0 Y
+                       0.0 X
 PUSHI 5
     [113:50;4] PUSHI T_PUSH 0 0 0 5; *
 PUSH X
@@ -214,14 +236,17 @@ LABEL DONE
     [120:57;3] JMP T_JMP 0 0 3; DONE
 POP
     [125:60;2] POPS T_POP 0 0 0; [< Z * >]
-    STACKS: VARIABLES: Y X
+    STACKS: VARIABLES: 0.0 Y
+                       0.0 X
 
 // JMP TEST 7
 // Z = 1 if Z == FALSE else 0 if Z == TRUE else 10
 //
 PUSHI 1 Z
     [131:61;3] PUSHI T_PUSH 0 0 0 1; Z
-    STACKS: VARIABLES: Z Y X
+    STACKS: VARIABLES: 0.0 Z
+                       0.0 Y
+                       0.0 X
 PUSH Z
     [133:62;4] PUSHS T_PUSH 0 0 0; [< Z * >]
 JMPFALSE ITS-0
@@ -258,7 +283,8 @@ LABEL DONE
     [139:68;3] JMP T_JMP 0 0 6; DONE
 POP
     [148:74;2] POPS T_POP 0 0 0; [< Z * >]
-    STACKS: VARIABLES: Y X
+    STACKS: VARIABLES: 0.0 Y
+                       0.0 X
 
 // Check for extra stuff at end of instruction
 //

@@ -45,7 +45,9 @@ BEG
     [28:12;4] PUSHI T_PUSH 0 0 0 2000; UNUSED
 END
     [29:13;3] END T_END 1 0 0
-    STACKS: VARIABLES: Z Y X
+    STACKS: VARIABLES: 0.0 Z
+                       0.0 Y
+                       0.0 X
 POP
     [31:14;2] POPS T_POP 0 0 0; [< Z * >]
 POP
@@ -64,7 +66,11 @@ PUSHI 4 I
     [40:19;3] PUSHI T_PUSH 0 0 0 4; I
 BEGL 2
     [41:20;5] BEGL T_BEGL 0 2 0; [< LOOP SUM I >]
-    STACKS: VARIABLES: ; next-I next-SUM I SUM LIMIT
+    STACKS: VARIABLES: 0.0 next-I
+                       0.0 next-SUM
+                       0.0 I
+                       0.0 SUM
+                       0.0 LIMIT
     PUSH I
     [43:21;6] PUSHS T_PUSH 2 0 0; [< I * >]
     PUSH LIMIT
@@ -89,7 +95,9 @@ BEGL 2
     [53:31;5] POPS T_POP 1 0 0; [< * next-I >]
 ENDL
     [54:32;3] ENDL T_ENDL 0 2 11
-    STACKS: VARIABLES: I SUM LIMIT
+    STACKS: VARIABLES: 0.0 I
+                       0.0 SUM
+                       0.0 LIMIT
 LABEL DONE
     [56:33;3] LABEL DONE
     [45:23;3] JMPGT T_JMPS[1] 2 0 10; DONE
@@ -145,7 +153,11 @@ BEGL 2
     [83:53;7] POPS T_POP 1 0 0; [< * next-Y >]
 ENDL
     [84:54;5] ENDL T_ENDL 0 2 12
-    STACKS: VARIABLES: Y COUNT Y2 Y1 X
+    STACKS: VARIABLES: 0.0 Y
+                       0.0 COUNT
+                       0.0 Y2
+                       0.0 Y1
+                       0.0 X
 LABEL DONE
     [86:55;5] LABEL DONE
     [74:46;5] JMPGT T_JMPS[1] 2 0 9; DONE
@@ -281,13 +293,16 @@ BEG
     [157:107;2] BEG T_BEG 0 0 0
 PUSHI 3 Z
     [158:108;3] PUSHI T_PUSH 0 0 0 3; Z
-    STACKS: VARIABLES: Z ; Y ; X
+    STACKS: VARIABLES: 0.2 Z
+                       0.1 Y
+                       0.0 X
 END
     [160:109;2] END T_END 1 0 0
-    STACKS: VARIABLES: Y ; X
+    STACKS: VARIABLES: 0.1 Y
+                       0.0 X
 END
     [162:110;1] END T_END 1 0 0
-    STACKS: VARIABLES: X
+    STACKS: VARIABLES: 0.0 X
 POP
     [164:111;0] POPS T_POP 0 0 0; [< X * >]
 * {14:0,1,1} PUSHI: X <= 295

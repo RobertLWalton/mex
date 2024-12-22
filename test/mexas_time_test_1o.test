@@ -18,8 +18,9 @@ BEGF sum low high
     [15:2;4] PUSHS T_PUSH 1 0 0; [< high * >]
     JMPGT EXIT
     [16:3;2] JMPGT T_JMPS 0 0 0; EXIT
-    STACKS: VARIABLES: high low
-            FUNCTIONS: | sum
+    STACKS: VARIABLES: 1.0 high
+                       1.0 low
+            FUNCTIONS: 0.0 sum
     PUSH low
     [18:4;3] PUSHS T_PUSH 1 0 0; [< low * >]
     ADDI 1
@@ -28,12 +29,17 @@ BEGF sum low high
     [20:6;4] PUSHS T_PUSH 1 0 0; [< high * >]
     CALL sum 2 *
     [21:7;3] CALLM T_CALLM 2 1 0; [< sum * >]
-    STACKS: VARIABLES: * high low
-            FUNCTIONS: | sum
+    STACKS: VARIABLES: 1.0 *
+                       1.0 high
+                       1.0 low
+            FUNCTIONS: 0.0 sum
     PUSH low
     [23:8;4] PUSHS T_PUSH 2 0 0; [< low * >]
-    STACKS: VARIABLES: * * high low
-            FUNCTIONS: | sum
+    STACKS: VARIABLES: 1.0 *
+                       1.0 *
+                       1.0 high
+                       1.0 low
+            FUNCTIONS: 0.0 sum
     ADD
     [25:9;3] ADD T_AOP 0 0 0; *
     RET 1
