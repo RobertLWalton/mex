@@ -244,7 +244,7 @@
 
 \author{Robert L. Walton}
 
-\date{December 13, 2024}
+\date{December 25, 2024}
  
 \maketitle
 
@@ -2374,36 +2374,9 @@ The MEX stack compiler component is in the following:
 \label{MEX-STACK-COMPONENT-DATA}
 
 For stack management the compiler and {\tt mexstack}
-communicate through the following variables and functions:
+communicate through the following variables:
 
 \begin{tabular}{@{}r@{~~~}l}
-\verb|min::uns32 mexstack::| & \MEXSTACKKEY{var\_stack\_length}%
-    \label{VAR-STACK-LENGTH} \\
-\verb|min::uns32 mexstack::| & \MEXSTACKKEY{func\_stack\_length} \\
-\verb|min::uns32 mexstack::| & \MEXSTACKKEY{func\_var\_stack\_length} \\
-\verb|void mexstack::| & \MEXSTACKKEY{pop\_stacks} {\tt ( void )}
-\end{tabular}
-
-\begin{indpar}
-These are the lengths of the three compiler stacks: variable, function,
-and function variable.  Or alternatively they are the number of
-variable, function, and function variable elements in the compiler
-symbol table.
-
-These are mostly maintained by the compiler and read by {\tt mexstack}
-code.  However, {\tt mexstack} code may \underline{decrease}
-(or leave untouched) the values in these variables and then,
-\underline{before} returning control to the compiler, call the
-{\tt pop\_stacks} function which is provided by the compiler and which
-will remove elements from the stacks until the stack lengths match
-the values in the above variables.
-
-The {\tt mexstack::init} function (see below) zeros these variables.
-\end{indpar}
-
-{\tt Mexstack} also maintains the following:
-
-\begin{tabular}{@{}l@{~~~}l}
 \verb|min::uns8 mexstack::| & \MEXSTACKKEY{lexical\_level} \\
 \verb|min::uns8 mexstack::| &
     \MEXSTACKKEY{depth}\verb|[mex::max_lexical_level+1]| \\
@@ -2411,8 +2384,79 @@ The {\tt mexstack::init} function (see below) zeros these variables.
     \MEXSTACKKEY{lp}\verb|[mex::max_lexical_level+1]| \\
 \verb|min::uns32 mexstack::| &
     \MEXSTACKKEY{fp}\verb|[mex::max_lexical_level+1]| \\
+\verb|min::uns32 mexstack::| & \MEXSTACKKEY{run\_stack\_length}%
+    \label{VAR-STACK-LENGTH} \\
 \verb|min::uns32 mexstack::| & \MEXSTACKKEY{stack\_limit} \\
 \end{tabular}
+
+\begin{indpar}
+The {\tt mexstack::init} function (see below) zeros these variables.
+
+If \TT{mexstack::lexical\_level} = $L$ when an instruction is assembled,
+then it will be true that {\tt process->level} == $L$ when the instruction
+is executed.
+{\tt mexstack::\EOL lexical\_\EOL level} is incremented when a {\tt BEGF}
+instruction is compiled and decremented when an {\tt ENDF}
+instruction is compiled.
+
+If \TT{mexstack::depth[$L$]} = $D$ when an instruction is assembled,
+then the instruction is inside $D$ subblocks of the current function.
+{\tt mexstack::depth[$L$} is incremented when a {\tt BEG} of {\tt BEGL}
+instruction is compiled at lexical level $L$, and decremented when
+an {\tt END} or {\tt ENDL} instruction is compiled at lexical level $L$.
+
+If the program and code have no functions, then if
+\TT{mexstack::run\_stack\_length} = $S$ when an instruction is assembled,
+then it will be true that {\tt process->length} == $S$ (the process run-time
+stack length) when the instruction is executed.
+
+The location of a variable at compile time is the value of
+{\tt mexstack::run\_stack\_length - 1} (top of stack)
+just after the {\tt PUSH...}
+instruction that creates the variable is compiled, or just after
+the expression that creates the variable's value in the run-time
+stack is compiled.
+Similarly the location of a variable at run time is the value of
+{\tt process->length - 1} just after the {\tt PUSH...}
+instruction that creates the variable's value executes, or just after
+the expression that creates the variable's value executes.
+
+The lexical level of a variable at compile time is the lexical
+level of the instruction that creates the variable value in
+the process stack, and this equals the lexical level of the variable
+at run time.
+
+If a variable has lexical level $L$, compile time location $\ell$,
+and runtime location $\ell'$, then: \\
+\hspace*{1in}{\tt $\ell$ - mexstack::fp[$L$] == $\ell'$ - process->fp[$L$]}
+
+At compile time variables with lexical level $L$ have locations in
+the range: \\
+\hspace*{1in}{\tt [ mexstack::lp[$L$], mexstack::lp[$L$+1] )}, \\
+where if $L$ is the current compile time lexical level the second
+limit is replace by {\tt mexstack::run\_lime\_length}.
+For lexical level $L$: \\
+\hspace*{1in}{\tt mexstack::lp[$L$] ==  mexstack::fp[$L$] - nargs} \\
+where {\tt nargs} is the minimum number of arguments expected
+by the {\tt BEGF} instruction at level $L$.
+At run-time variables with lexical level $L$ have
+locations in the range: \\
+\hspace*{1in}{\tt [ \begin{tabular}[t]{l}
+                    process->fp[$L$] - process->nargs[$L$], \\
+                    process->fp[$L$+1] - process->nargs[$L$+1] ) \\
+		    \end{tabular} } \\
+where if $L$ is the current run-time lexical level the second
+limit is replaced by {\tt process->\EOL length} (length of run-time stack).
+Here {\tt process->nargs[$L$]} is the actual number of arguments
+of the last call to a function of lexical level $L$, and this
+is at least as large but may be larger then the minimum number
+of arguments expected by the function's {\tt BEGF}.
+
+
+\end{indpar}
+
+TBD
+
 \begin{indpar}
 {\tt Lexical\_level} is the current lexical level, i.e., the lexical
 level of the next instruction to be output by the compiler.
@@ -2464,6 +2508,8 @@ just before the corresponding {\tt BEG\ldots} was compiled.
 The {\tt mexstack::init} function (see below) zeros {\tt lexical\_level},
 {\tt depth[0]}, {\tt lp[0]}, {\tt fp[0]}, and {\tt stack\_limit}.
 \end{indpar}
+
+\verb|void mexstack::| \MEXSTACKKEY{pop\_stacks} {\tt ( void )}
 
 \subsubsection{MEX Stack Component Utility Functions}
 \label{MEX-STACK-COMPONENT-UTILITY-FUNCTIONS}
