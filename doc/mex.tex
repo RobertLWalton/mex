@@ -244,7 +244,7 @@
 
 \author{Robert L. Walton}
 
-\date{December 25, 2024}
+\date{December 26, 2024}
  
 \maketitle
 
@@ -509,14 +509,19 @@ rules of lexical scoping.  For our purposes these are as follows.
 The compiler maintains a stack of visible variables and a separate
 stack of visible functions.  When the compiler outputs a {\tt PUSH\ldots}
 instruction that creates a variable, it pushes the name of the variable
-into the stack of visible variables.  When the compiler outputs a {\tt BEGF}
+into the stack of visible variables (not all {\tt PUSH\ldots} instructions
+create new variables).  When the compiler outputs a {\tt BEGF}
 instruction that creates a function, it pushes the name of the function
 into the stack of visible functions.  Instructions output by the compiler
 that read a variable value can only read visible variables, and 
 instructions that call a function can only call visible functions.
 When a block end instruction ({\tt ENDF}, {\tt ENDL}, or {\tt END}) is
 output, the visible variables and visible functions stacks are popped to
-remove all variables and function defined within the block just ended.
+remove all variables and functions defined within the block just ended.%
+\footnote{The compiler variable and function stacks are stacks but they
+are also symbol tables that allow variables and functions to be looked
+up by name.  Also, the variable and function stacks may be combined into
+a single symbol table.}
 
 The \key{lexical level}\label{LEXICAL-LEVEL}
 of a function is defined as follows.
@@ -542,9 +547,7 @@ we need to analyze the situation in more detail.
 
 We define the level of an instruction to be the level of the
 smallest function lexically containing the instruction, or \TT{0} if the
-instruction is not lexically inside any function.  If $E_I$ is an
-execution of an instruction $I$, the level of $E_I$ is the
-level of $I$.
+instruction is not lexically inside any function.
 
 \begin{indpar}
 {\bf Lemma 1}\label{LEMMA-1}~~~An execution of a \TT{CALL\ldots} instruction of
@@ -562,10 +565,12 @@ Let $E$ be the sequence of instruction executions in an
 incomplete program execution.
 An execution of a function $F$ within $E$ is defined as all the
 instruction executions from the first instruction execution
-after $F$ is called until the last instruction execution which returns
-from the call of $F$.  A function execution can be complete, meaning
+after $F$ is called until and including the instruction that returns
+from $F$, or until the last instruction of $E$ if there is no return
+instruction for the function execution in $E$.
+A function execution can be complete, meaning
 it ends with a return from the function, or incomplete.  A function execution
-$E_i$ contains the function executions of every function called by a 
+$E_i$ contains the function executions of every function called by
 a \TT{CALL\ldots} instruction execution in $E_i$.
 
 The lexical level of a function execution is defined as the lexical level
@@ -585,10 +590,11 @@ $L_1$ and $L_2$.  Let $E_2$ immediately follow $E_1$ in the size
 ordering.  Then $L_2\leq L_1+1$.
 \end{indpar}
 \begin{indpar}
-{\bf Proof}: The \TT{CALL\ldots} to start $E_2$ must be in $E_1$
-and cannot be in a complete function execution inside $E_1$ so
-the \TT{CALL\ldots} must have level $L_1$.  The corollary follows
-from this and Lemma 1. QED
+{\bf Proof}: The \TT{CALL\ldots} instruction that starts $E_2$ must be
+inside the function of $E_1$, as $E_2$ is incomplete
+and $E_2$ immediately follows $E_1$ in the set of incomplete
+function executions.  Therefore this call has level $L_1$ and
+the corollary follows from Lemma 1. QED
 \end{indpar}
 
 \begin{indpar}
@@ -616,9 +622,11 @@ contains $F_1$ ($F=F_1$ is allowed), and if $L_2>L$, then $F$ lexically contains
 $F_2$.
 \end{indpar}
 \begin{indpar}
-{\bf Proof}: The \TT{CALL\ldots} to start $E_2$ must be in $E_1$
-and cannot be in a complete function execution inside $E_1$ so
-the \TT{CALL\ldots} must be an instruction of $F_1$.  This \TT{CALL\ldots}
+{\bf Proof}: The \TT{CALL\ldots} instruction that starts $E_2$ must be
+inside $F_1$, as $E_2$ is incomplete
+and $E_2$ immediately follows $E_1$ in the set of incomplete
+function executions.
+This \TT{CALL\ldots}
 is therefore lexically inside $F$ by hypothesis, and the only functions visible
 to the \TT{CALL\ldots} that have levels $>L$ are also inside $F$.
 Therefore $F_2$ is lexically inside $F$.
@@ -629,7 +637,7 @@ Therefore $F_2$ is lexically inside $F$.
 contains function $F$ of level $L$,
 then during the execution of instructions in $F$ (and not in any other
 function defined inside $F$),
-there is a smallest incomplete execution of $F'$ that is also
+there is a smallest incomplete execution of $F'$ and this is also
 the smallest incomplete function execution of level $L'$.
 \end{indpar}
 
@@ -2328,7 +2336,15 @@ Instructions are assigned the level and depth of their smallest containing
 block.
 
 The MEX stack compiler component ({\tt mexstack}) assumes that the compiler
-maintains a variable stack, a function stack, and a function variable stack
+maintains a virtual stack that mirrors the process run-time stack.
+If there are not functions, this mirror is exact with the value of
+{\tt mexstack::\EOL run\_\EOL stack\_\EOL length}
+when an instruction is compiled equaling the value of
+{\tt process->length}, the run-time stack pointer, when the
+instruction is executed.
+
+TBD
+
 (a \key{function variable} is a function with no arguments whose name
 behaves like a variable name).
 When the compiler outputs a {\tt PUSH\ldots}~instruction
@@ -2484,7 +2500,7 @@ An intuitive way of putting this is that the working part of the
 stack consists of variables of index {\tt $i$ $\geq$ run\_stack\_limit}.
 
 More specifically, {\tt run\_stack\_limit} is set by {\tt BEG\ldots}
-instructions (via the {\tt mexstack::begx} function below) as follows: \\
+instructions (via the {\tt mexstack::\EOL begx} function below) as follows: \\
 \hspace*{3em}\begin{tabular}{@{}ll}
 \tt BEG & \tt run\_stack\_length \\
 \tt BEGL & \tt run\_stack\_length + {\rm instruction} immedB \\
