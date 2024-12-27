@@ -2343,42 +2343,31 @@ block.
 
 The MEX stack compiler component ({\tt mexstack}) assumes that the compiler
 maintains a virtual stack that mirrors the process run-time stack.
-If there are not functions, this mirror is exact with the value of
+If there are no function executions, this mirror is exact with the value of
 {\tt mexstack::\EOL run\_\EOL stack\_\EOL length}
 when an instruction is compiled equaling the value of
 {\tt process->length}, the run-time stack pointer, when the
 instruction is executed.
 
-TBD
+When compiling a function, the virtual stack location of the function's
+frame pointer is recorded as the {\tt mexstack::\EOL run\_\EOL stack\_\EOL
+length} just before the function's {\tt BEGF} instruction is output by the
+compiler.  If the function is of level $L$, this corresponds to the
+run-time frame pointer of the most recent execution of the function
+recorded in {\tt process->fp[$L$]}.
 
-(a \key{function variable} is a function with no arguments whose name
-behaves like a variable name).
-When the compiler outputs a {\tt PUSH\ldots}~instruction
-that creates a variable, it pushes the name of the variable
-into the variable stack.  When the compiler outputs a {\tt BEGF}
-instruction that creates a function, it pushes the name of the function
-into the function stack if the function has arguments, or into the
-function variable stack if the function has no arguments.
-The stack elements are assigned the level and depth
-of the instructions output to create them.
-When the block end instruction ({\tt ENDF}, {\tt ENDL}, or {\tt END}) for
-this level and depth is output, the elements with this level and depth
-are popped from their stacks.
+The compiler maintains one or more symbol tables of variables
+and functions.  For variables the location of the variable value
+in the virtual stack is recorded.  For functions, the location of
+the function {\tt BEGF} instruction in its code vector is recorded.
+The symbol tables are organized as stacks so that
+when an {\tt END\ldots} instruction decreases the compiler's lexical
+level and/or depth, all variables and functions of higher lexical level
+than the new level, or of higher depth and equal lexical level, can be
+popped from the symbol tables.
 
-The compiler may implement the stacks as symbol tables optimized
-for looking up names.  These tables are stacks only in the sense that
-elements can be deleted in the reverse order to that which they were added.
-The compiler may also combine these tables, so variables and functions
-are all in one table.  However for variables it is important for the
-compiler to assign to each variable an index specifying its position
-in the conceptual variable stack.  When a variable is added to the table,
-it is assigned as its index the number of variables in the table before
-it is added.
-
-Note that trace values (values of
-trace variables\pagnote{TRACE-VARIABLE}) in the process
-stack are \underline{not} recorded in the compiler variables stack when their
-{\tt PUSH\ldots}~instructions are output.
+Not all locations in the virtual stack have corresponding variables
+in the symbol table.
 
 The MEX stack compiler component is in the following:
 
@@ -2425,26 +2414,27 @@ instruction is compiled.
 If \TT{mexstack::depth[$L$]} = $D$\label{DEPTH}
 when an instruction is assembled,
 then the instruction is inside $D$ subblocks of the current function.
-{\tt mexstack::depth[$L$} is incremented when a {\tt BEG} of {\tt BEGL}
+{\tt mexstack::depth[$L$]} is incremented when a {\tt BEG} of {\tt BEGL}
 instruction is compiled at lexical level $L$, and decremented when
 an {\tt END} or {\tt ENDL} instruction is compiled at lexical level $L$.
 
-If the program and code have no functions, then if
+If the absence of function executions, if
 \TT{mexstack::run\_stack\_length} = $S$\label{RUN-STACK-LENGTH}
 when an instruction is assembled,
 then it will be true that {\tt process->length} == $S$ (the process run-time
 stack length) when the instruction is executed.
 
-The location of a variable at compile time is the value of
-{\tt mexstack::run\_stack\_length - 1} (top of stack)
+The location of a variable in the compile-time virtual stack
+is the value of
+{\tt mexstack::\EOL run\_\EOL stack\_\EOL length - 1} (top of stack)
 just after the {\tt PUSH...}
 instruction that creates the variable is compiled, or just after
-the expression that creates the variable's value in the run-time
+the subexpression that creates the variable's value in the run-time
 stack is compiled.
 Similarly the location of a variable at run time is the value of
 {\tt process->length - 1} just after the {\tt PUSH...}
 instruction that creates the variable's value executes, or just after
-the expression that creates the variable's value executes.
+the subexpression that creates the variable's value executes.
 
 The lexical level of a variable at compile time is the lexical
 level of the instruction that creates the variable value in
@@ -2485,7 +2475,7 @@ of arguments expected by the function's {\tt BEGF}.
 \end{tabular}
 
 \begin{indpar}
-\TT{Stack\_limit} is used by the MEXAS assembler, but likely will not be
+\TT{Run\_stack\_limit} is used by the MEXAS assembler, but likely will not be
 used by compilers.
 It is set so that for a variable of index
 {\tt $i$ < run\_stack\_limit}\label{RUN-STACK-LIMIT}:
@@ -2523,7 +2513,20 @@ just before the corresponding {\tt BEG\ldots} was compiled.
 The {\tt mexstack::init} function (see below) zeros {\tt run\_stack\_limit}.
 \end{indpar}
 
-\verb|void mexstack::| \MEXSTACKKEY{pop\_stacks} {\tt ( void )}
+\begin{tabular}{@{}r@{~~~}l}
+\verb|void mexstack::| & \MEXSTACKKEY{pop\_stacks} {\tt ( void )}
+\end{tabular}
+\begin{indpar}
+This function is \underline{not} defined by the {\tt mexstack} component
+and must be defined by the compiler (because {\tt mexstack} does not
+know the detailed structure of the symbol tables).
+It pops from the symbol
+tables all entries with lexical level greater than
+{\tt mexstack::\EOL lexical\_\EOL level}, and 
+also all entries with lexical level $L$ equal to
+{\tt mexstack::\EOL lexical\_\EOL level} and 
+depth greater than {\tt mexstack::\EOL depth[$L$]}.
+\end{indpar}
 
 \subsubsection{MEX Stack Component Utility Functions}
 \label{MEX-STACK-COMPONENT-UTILITY-FUNCTIONS}
