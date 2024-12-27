@@ -2395,8 +2395,7 @@ communicate through the following variables:
     \MEXSTACKKEY{lp}\verb|[mex::max_lexical_level+1]| \\
 \verb|min::uns32 mexstack::| &
     \MEXSTACKKEY{fp}\verb|[mex::max_lexical_level+1]| \\
-\verb|min::uns32 mexstack::| & \MEXSTACKKEY{run\_stack\_length}%
-    \label{VAR-STACK-LENGTH} \\
+\verb|min::uns32 mexstack::| & \MEXSTACKKEY{run\_stack\_length} \\
 \end{tabular}
 
 \begin{indpar}
@@ -2424,7 +2423,7 @@ when an instruction is assembled,
 then it will be true that {\tt process->length} == $S$ (the process run-time
 stack length) when the instruction is executed.
 
-The location of a variable in the compile-time virtual stack
+The location (a.k.a., index) of a variable in the compile-time virtual stack
 is the value of
 {\tt mexstack::\EOL run\_\EOL stack\_\EOL length - 1} (top of stack)
 just after the {\tt PUSH...}
@@ -2507,7 +2506,7 @@ instructions (via the {\tt mexstack::\EOL begx} function below) as follows: \\
 Here {\tt run\_stack\_length} is the value just before the {\tt BEG\ldots}
 instruction is compiled.
 The {\tt END\ldots} instructions (via the {\tt mexstack::endx} function below)
-restore {\tt stack\_\EOL limit} to its previous value, the value
+restore {\tt run\_\EOL stack\_\EOL limit} to its previous value, the value
 just before the corresponding {\tt BEG\ldots} was compiled.
 
 The {\tt mexstack::init} function (see below) zeros {\tt run\_stack\_limit}.
@@ -2570,7 +2569,7 @@ The source code is defined by {\tt mexcom::ouput\_module->position[location]}.
 The {\em line-number} is the number of the \underline{last} source code
 line (the first file line is
 number \TT{1}).  The first {\em code-vector-location} is \TT{0}.
-{\em Var-stack-length} equals {\tt run\_stack\_length}\pagnote{VAR-STACK-LENGTH}
+{\em Var-stack-length} equals {\tt run\_stack\_length}\pagnote{RUN-STACK-LENGTH}
 plus {\tt stack\_offset} and is the compiler variable stack length
 \underline{after} the instruction is ouput.  In particular,
 for {\tt PUSH\ldots} instructions
@@ -2980,7 +2979,7 @@ In {\em printout-header}\pagnote{PRINTOUT-HEADER}
 the {\em code-vector-location} is
 {\tt mexcom::ouput\_module->length} and
 the {\em var-stack-length} equals the current value of
-{\tt mexstack::run\_stack\_length}\pagnote{VAR-STACK-LENGTH}
+{\tt mexstack::run\_stack\_length}\pagnote{RUN-STACK-LENGTH}
 plus {\tt stack\_offset} (usually {\tt 0}).
 \end{indpar}
 
@@ -3148,13 +3147,11 @@ that names an element being pushed to the variables stack.
 The {\em new-variable-name}
 must \underline{not} be the same as the name of any variable of
 less lexical level or depth than the instruction, or the same name
-as that of an argument of a function (specifically, must not have the same
+as that of an argument of a function,
+or the same name as a \TT{next-} variable of a loop\pagnote{NEXT-VARIABLE}
+(specifically, must not have the same
 name as a variable whose index is
 {\tt < mexstack::run\_stack\_limit}\pagnote{RUN-STACK-LIMIT}).
-Note that the
-\TT{next-} variables\pagnote{NEXT-VARIABLE}
-of a loop have depth one less than the instructions
-in the loop.
 
 If {\em new-variable-name} is missing or `\TT{*}',
 the element just gets the name `\TT{*}' to indicate that the
@@ -3285,7 +3282,8 @@ At assembly time, pushes into the variable stack an
 element with {\em new-variable-name} as its name.
 
 The search for {\em variable-name} begins with the entire variable
-stack and proceeds through the variable stacks of previously assembled modules
+stack and proceeds through the symbol table stack
+of previously assembled modules
 in most recently assembled first order.
 \TT{PUSH} assembles
 to the run-time instruction \TT{PUSHS}, \TT{PUSHL}, \TT{PUSHG},
@@ -3401,7 +3399,7 @@ At run-time this instruction's actions are as described in
 Figure~\itemref{BLOCK-AND-FUNCTION-INSTRUCTIONS}.
 At assembly-time,
 calls {\tt mexstack::endx}\pagnote{ENDX} to
-pop from the variable and function stacks all elements with the
+pop from the symbol table stack all elements with the
 same lexical level and depth as the \TT{END} instruction, reset
 {\tt run\_stack\_limit} to its value when the companion
 {\tt BEG} was encountered,
@@ -3497,7 +3495,7 @@ At run-time this instruction's actions are as described in
 Figure~\itemref{BLOCK-AND-FUNCTION-INSTRUCTIONS}.
 At assembly-time,
 calls {\tt mexstack::endx}\pagnote{ENDX} to
-pop from the variable and function stacks all elements with the
+pop from the symbol table stack all elements with the
 same lexical level as the \TT{ENDF} instruction,
 restore 
 {\tt run\_stack\_limit} and
@@ -3546,7 +3544,7 @@ of the module are present in this stack).
 	      {\em trace-message}\QMARK{}
 \begin{indpar}
 This instruction searches for the {\em function-name} first in the function
-stack and then in the function stacks of the previously assembled
+stack and then in the function symbol table of the previously assembled
 modules, in most recently assembled first order.  It then
 assembles to \TT{CALLM} or \TT{CALLG}.
 \end{indpar}
@@ -3759,7 +3757,9 @@ This statement just calls {\tt mexstack::jmp\_target} with the given
 
 \ttkey{STACKS}
 \begin{indpar}
-Prints the names in the assembly time variables and functions stacks.
+Prints the names in the assembly time symbol table stacks.
+Each name is preceeded by `{\tt $L$.$D$}' where $L$
+it the name's lexical level and $D$ is the name's depth.
 Used mostly for testing the assembler.
 \end{indpar}
 
