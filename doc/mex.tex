@@ -244,7 +244,7 @@
 
 \author{Robert L. Walton}
 
-\date{December 26, 2024}
+\date{December 27, 2024}
  
 \maketitle
 
@@ -642,16 +642,22 @@ the smallest incomplete function execution of level $L'$.
 \end{indpar}
 
 \begin{indpar}
-{\bf Proof of Theorem}: If the currently executing instruction is in $F$
+{\bf Proof of Theorem}: Since the currently executing instruction is in $F$
 it is in the smallest incomplete function execution, and this has level $L$.
 The largest incomplete function execution
-must have level $1$ and the last incomplete function execution has level
-$L$, and by hypothesis $1\leq L'<L$,
+has level $0$, the smallest
+incomplete function execution has level
+$L$, and by hypothesis $0\leq L'<L$,
 so by Corollary 2 there is an incomplete function execution of level $L'$
-and hence a smallest one $E'$.  Let $F''$ be its function.  Then all the
-incomplete function executions between $E'$ and the end of the sequence
-must have lexical level $>L'$, for otherwise applying Corollary 2 again
-there would be a smaller incomplete function execution of level $L'$.
+and hence a smallest one $E'$.  Let $F''$ be its function.
+
+Then all the incomplete function executions after $E'$ in the sequence
+of incomplete function executions
+must have lexical level $>L'$.  For if one had level $L'$, $E'$ would
+not be the smallest such, and if one had level $<L'$, applying Corollary 2
+to it and the smallest incomplete function execution which has level $L$ would
+yield an incomplete function execution of level $L'$ that was 
+smaller than $E'$.
 
 Then by applying Lemma 2 recursively to successive incomplete function
 executions after $E'$, we deduce that all are executions of functions
