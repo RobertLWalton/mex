@@ -2,7 +2,7 @@
 //
 // File:        mexas_compile_test_8.mex
 // Author:      Bob Walton (walton@acm.org)
-// Date:        Tue Aug 29 22:27:30 EDT 2023
+// Date:        Sun Dec 29 01:43:49 AM EST 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -218,6 +218,41 @@ PUSHI 10
     [105:102;2] PUSHI T_PUSH 0 0 0 10; *
 CALL SUM 2
     [106:103;0] CALLM T_CALLM 2 0 76; [< SUM >]
+
+// DEL Test
+//
+BEGF DELETE
+    [110:104;0] BEGF T_BEGF 0 1 0; [< DELETE >]
+    PUSHI 100 X
+    [111:105;1] PUSHI T_PUSH 0 0 0 100; X
+    PUSHI 200 Y
+    [112:106;2] PUSHI T_PUSH 0 0 0 200; Y
+    PUSHI 300 Z
+    [113:107;3] PUSHI T_PUSH 0 0 0 300; Z
+    DEL 1 2
+    [114:108;1] DEL T_POP 1 0 2
+    [115:109;2] PUSHS T_PUSH 0 0 0; [< Z * >]
+    TRACE 'Z BEING RETURNED' Z
+    [115:110;1] TRACE T_ALWAYS 1 0 0; [< "Z BEING RETURNED" Z >]
+    RET 1
+    [116:111;0] RET T_RET 0 1 1
+ENDF
+    [110:104;0] BEGF T_BEGF 0 1 9; [< DELETE >]
+    [117:112;0] ENDF T_ENDF 0 1 0
+SET_OPTIMIZE OFF
+    [118:113;0] SET_OPTIMIZE T_SET_OPTIMIZE 0 0 0
+CALL DELETE 0 Z
+    [119:114;1] CALLM T_CALLM 0 1 104; [< DELETE Z >]
+    [120:115;2] PUSHS T_PUSH 0 0 0; [< Z * >]
+TRACE 'Z HAS BEEN RETURNED' Z
+    [120:116;1] TRACE T_ALWAYS 1 0 0; [< "Z HAS BEEN RETURNED" Z >]
+SET_OPTIMIZE ON
+    [121:117;1] SET_OPTIMIZE T_SET_OPTIMIZE 1 0 0
+CALL DELETE 0 Z
+    [122:118;2] CALLM T_CALLM 0 1 104; [< DELETE Z >]
+    [123:119;3] PUSHS T_PUSH 0 0 0; [< Z * >]
+TRACE 'Z HAS BEEN RETURNED' Z
+    [123:120;2] TRACE T_ALWAYS 1 0 0; [< "Z HAS BEEN RETURNED" Z >]
 * {13:0,0,1} SET_TRACE: SET_OPTIMIZE
 * {14:1,0,2} SET_OPTIMIZE: OFF <= OFF
 *** {29:17,3,18} TRACE: "Z = MIN ( X, Y )", X=5.5, Y=3.4, Z=3.4
@@ -239,4 +274,10 @@ CALL SUM 2
 *** {97:94,4,252} TRACE: "S = SUM I FOR X <= I <= Y", S=55, X=1, Y=10
 * {103:100,0,254} SET_OPTIMIZE: ON <= OFF
 *** {97:94,4,377} TRACE: "S = SUM I FOR X <= I <= Y", S=55, X=1, Y=10
+* {118:113,0,380} SET_OPTIMIZE: OFF <= ON
+*** {115:110,1,387} TRACE: "Z BEING RETURNED", Z=300
+* {120:116,1,390} TRACE: "Z HAS BEEN RETURNED", Z=300
+* {121:117,1,391} SET_OPTIMIZE: ON <= OFF
+*** {115:110,2,398} TRACE: "Z BEING RETURNED", Z=300
+* {123:120,2,401} TRACE: "Z HAS BEEN RETURNED", Z=300
 mexas_compile_test_8.mex successfully compiled

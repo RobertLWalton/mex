@@ -2,7 +2,7 @@
 //
 // File:	mexas_compile_test_1.mex
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Oct 18 07:41:36 AM EDT 2024
+// Date:	Sun Dec 29 01:17:06 AM EST 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -23,6 +23,18 @@ SUB
 STACKS
 POP
 STACKS
+
+// DEL TEST
+//
+PUSHI 1 X
+PUSHI 2 Y
+PUSHI 3 Z
+STACKS
+DEL 1 2
+STACKS
+PUSH Z
+POP
+POP
 
 // JMP TEST 1
 // Z = MIN ( X, Y )

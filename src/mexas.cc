@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat Dec 28 08:48:46 PM EST 2024
+// Date:	Sun Dec 29 01:35:44 AM EST 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1166,7 +1166,7 @@ mex::module mexas::compile ( min::file file )
 			     + instr.immedC, pp ) )
 		    continue;
 
-		mexstack::run_stack_limit -=
+		mexstack::run_stack_length -=
 		   (int) instr.immedC;
 		mexstack::push_instr ( instr, pp );
 

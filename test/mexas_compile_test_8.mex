@@ -2,7 +2,7 @@
 //
 // File:	mexas_compile_test_8.mex
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Aug 29 22:27:30 EDT 2023
+// Date:	Sun Dec 29 01:43:49 AM EST 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -104,3 +104,20 @@ SET_OPTIMIZE ON
 PUSHI 1
 PUSHI 10
 CALL SUM 2
+
+// DEL Test
+//
+BEGF DELETE
+    PUSHI 100 X
+    PUSHI 200 Y
+    PUSHI 300 Z
+    DEL 1 2
+    TRACE 'Z BEING RETURNED' Z
+    RET 1
+ENDF
+SET_OPTIMIZE OFF
+CALL DELETE 0 Z
+TRACE 'Z HAS BEEN RETURNED' Z
+SET_OPTIMIZE ON
+CALL DELETE 0 Z
+TRACE 'Z HAS BEEN RETURNED' Z
