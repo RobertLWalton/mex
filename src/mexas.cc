@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Dec 22 03:25:57 AM EST 2024
+// Date:	Sat Dec 28 08:48:46 PM EST 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1148,6 +1148,36 @@ mex::module mexas::compile ( min::file file )
 		mexstack::push_instr
 		    ( instr, pp, trace_info );
 		break;
+	    }
+	    case mex::DEL:
+	    {
+		min::gen A = mexas::get_num ( index );
+		min::gen C = mexas::get_num ( index );
+		if ( ! mexas::check_parameter
+			    ( instr.immedA, A,
+			      pp, "immedA" ) )
+		    continue;
+		if ( ! mexas::check_parameter
+			    ( instr.immedC, C,
+			      pp, "immedC" ) )
+		    continue;
+		if ( ! check_pop
+			   (   instr.immedA
+			     + instr.immedC, pp ) )
+		    continue;
+
+		mexstack::run_stack_limit -=
+		   (int) instr.immedC;
+		mexstack::push_instr ( instr, pp );
+
+		min::uns32 sp = variables->length;
+		min::uns32 sp1 = sp - instr.immedA;
+		min::uns32 sp2 = sp1 - instr.immedC;
+		while ( sp1 < sp )
+		    variables[sp2++] = variables[sp1++];
+		min::pop ( variables, instr.immedC );
+
+	        break;
 	    }
 	    case mex::PUSHOBJ:
 	    {
