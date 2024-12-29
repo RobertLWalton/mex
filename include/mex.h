@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Dec 13 06:07:08 PM EST 2024
+// Date:	Sat Dec 28 07:49:25 PM EST 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -95,7 +95,7 @@ enum op_code {
     TAN, ATAN,
     ATAN2, ATAN2R,
     PUSHS, PUSHL, PUSHI, PUSHG,
-    POPS,
+    POPS, DEL,
     JMP,
     JMPEQ, JMPNEQ,
     JMPLT, JMPLEQ,

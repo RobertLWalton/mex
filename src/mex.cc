@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Dec 13 06:18:06 PM EST 2024
+// Date:	Sat Dec 28 07:49:46 PM EST 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -583,6 +583,19 @@ static bool optimized_run_process ( mex::process p )
 	        goto ERROR_EXIT;
 	    -- sp;
 	    sp[-(int)i] = * sp;
+	    break;
+	}
+	case mex::DEL:
+	{
+	    min::uns32 i = pc->immedA;
+	    min::uns32 j = pc->immedC;
+	    if (    sp < spbegin
+	         || i + j > sp - spbegin )
+	        goto ERROR_EXIT;
+	    min::gen * sp1 = sp - (int) i;
+	    min::gen * sp2 = sp1 - (int) j;
+	    while ( sp1 < sp ) * sp2 ++ = * sp1 ++;
+	    sp = sp2;
 	    break;
 	}
 	case mex::PUSHOBJ:
@@ -1517,6 +1530,7 @@ mex::op_info mex::op_infos [ mex::NUMBER_OF_OP_CODES ] =
     { mex::PUSHI, NONA, T_PUSH, NULL, "PUSHI", NULL },
     { mex::PUSHG, NONA, T_PUSH, NULL, "PUSHG", NULL },
     { mex::POPS, NONA, T_POP, NULL, "POPS", NULL },
+    { mex::DEL, NONA, T_POP, NULL, "DEL", NULL },
     { mex::JMP, J, T_JMP, NULL, "JMP", NULL },
     { mex::JMPEQ, J2, T_JMPS, NULL, "JMPEQ", "==" },
     { mex::JMPNEQ, J2, T_JMPS, NULL, "JMPNEQ", "!=" },
@@ -2716,6 +2730,18 @@ bool mex::run_process ( mex::process p )
 		value = sp[-1];
 		sp_change = -1;
 		break;
+	    case mex::DEL:
+	        if ( sp < spbegin
+		     ||
+		     immedA + immedC > sp - spbegin )
+		{
+		    message = "DEL: immedA + immedB"
+		              " larger than stack"
+		              " length";
+		    goto INNER_FATAL;
+		}
+		sp_change = - (int ) immedC;
+		break;
 	    case mex::PUSHOBJ:
 		if ( sp >= spend )
 		    goto STACK_LIMIT_STOP;
@@ -3306,6 +3332,24 @@ bool mex::run_process ( mex::process p )
 			              ( value );
 		    break;
 		}
+		case mex::DEL:
+		{
+		    if ( immedA > 0 && immedC > 0 )
+			p->printer << " sp[-"
+				   << immedA + immedC
+				   << "..-"
+				   << immedC - 1
+				   << "] <= sp[-"
+				   << immedA
+				   << "..-1]";
+		    else if ( immedC > 0 )
+			p->printer << " pop sp[-"
+				   << immedC
+				   << "..-1]";
+		    else
+			p->printer << " do nothing";
+		    break;
+		}
 		case mex::PUSHOBJ:
 		{
 		    p->printer << ": "
@@ -3550,6 +3594,14 @@ bool mex::run_process ( mex::process p )
 		-- sp;
 		sp[-(int)immedA] = value;
 		MUP::acc_write_update ( p, value );
+		break;
+	    }
+	    case mex::DEL:
+	    {
+	        min::gen * sp1 = sp - (int) immedA;
+		min::gen * sp2 = sp1 - (int) immedC;
+		while ( sp1 < sp ) * sp2 ++ = * sp1 ++;
+		sp += sp_change;
 		break;
 	    }
 	    case mex::VPOP:
