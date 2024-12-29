@@ -244,7 +244,7 @@
 
 \author{Robert L. Walton}
 
-\date{December 27, 2024}
+\date{December 29, 2024}
  
 \maketitle
 
@@ -1174,6 +1174,10 @@ the logical values `true' and `false':
     & Store the top value in the stack into \TT{sp[- immedA - 1]}, and \\
     & then pop the stack once; so \TT{immedA} = 0 discards the top value.
 \\\hline
+\ttkey{DEL}
+    & Delete from the stack the \TT{immedC} values just below the top \\
+    & \TT{immedA} values.  \TT{immedC} == 0 does nothing.
+\\\hline
 \ttkey{JMP}
     & Subtract \TT{immedA} from \TT{sp} (popping the stack \TT{immedA} times),
       \\
@@ -1770,6 +1774,27 @@ and $V$ is the value at the top of the stack
 \end{center}
 If \TT{module->\EOL trace\_\EOL info[i]} is not a MIN string,
 {\em to-variable} is taken to be \TT{*}.
+
+\subsubsection{DEL Instruction Tracing}
+\label{DEL-INSTRUCTION-TRACING}
+
+If \TT{immedA} > 0 and \TT{immedC} > 0 the trace message has the form:
+\begin{center}
+{\em trace-header}\TT{:} \TT{sp[-$n1$..-$n2$] <= sp[-$n3$..-1]}
+\end{center}
+where $n1$ = \TT{immedA + immedC}, $n2$ = \TT{immedC + 1},
+$n3$ = \TT{immedA}.
+
+If \TT{immedA} == 0 and \TT{immedC} > 0 the trace message has the form:
+\begin{center}
+{\em trace-header}\TT{:} \TT{popped sp[-$n$..-1]}
+\end{center}
+where $n$ = \TT{immedC}.
+
+If \TT{immedA} == 0 and \TT{immedC} == 0 the trace message has the form:
+\begin{center}
+{\em trace-header}\TT{:} \TT{no operation}
+\end{center}
 
 \subsubsection{Object Instruction Tracing}
 \label{OBJECT-INSTRUCTION-TRACING}
@@ -3325,6 +3350,17 @@ Note that \TT{POPL}, \TT{POPG}, and \TT{POPA} do
 \underline{not} exist as you cannot write
 variables that are arguments, or at a different lexical level,
 or in a different module.
+\end{indpar}
+
+\ttkey{DEL} ~ {\em immedA} ~ {\em immedC}
+\begin{indpar}
+At run-time, executes the \TT{DEL} instruction from
+Figure~\itemref{STACK-AND-FLOW-CONTROL-INSTRUCTIONS}.
+
+At assembly time, deletes from the variables stack the {\em immedC}
+variables that are immediately below the top {\em immedA} variables
+in the stack.
+
 \end{indpar}
 
 \ttkey{JMP} ~ {\em jmp-target}

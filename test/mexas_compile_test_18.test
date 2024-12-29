@@ -1,0 +1,37 @@
+// MEXAS Compile Test 18 Input
+//
+// File:        mexas_compile_test_18.mex
+// Author:      Bob Walton (walton@acm.org)
+// Date:        Sun Dec 29 02:28:07 AM EST 2024
+//
+// The authors have placed this program in the public
+// domain; they make no warranty and accept no liability
+// for this program.
+
+
+// DEL Tests
+//
+PUSHI 100 X
+    [14:0;1] PUSHI T_PUSH 0 0 0 100; X
+PUSHI 200 Y
+    [15:1;2] PUSHI T_PUSH 0 0 0 200; Y
+PUSHI 300 Z
+    [16:2;3] PUSHI T_PUSH 0 0 0 300; Z
+DEL 3 0
+    [17:3;3] DEL T_POP 3 0 0
+DEL 1 2
+    [18:4;1] DEL T_POP 1 0 2
+    [19:5;2] PUSHS T_PUSH 0 0 0; [< Z * >]
+TRACE 'Z =' Z
+    [19:6;1] TRACE T_ALWAYS 1 0 0; [< "Z =" Z >]
+DEL 0 1
+    [20:7;0] DEL T_POP 0 0 1
+* {14:0,1,1} PUSHI: X <= 100
+* {15:1,2,2} PUSHI: Y <= 200
+* {16:2,3,3} PUSHI: Z <= 300
+* {17:3,3,4} DEL do nothing
+* {18:4,1,5} DEL sp[-3..-3] <= sp[-1..-1]
+* {19:5,2,6} PUSHS: * <= Z = 300
+* {19:6,1,7} TRACE: "Z =", Z=300
+* {20:7,0,8} DEL pop sp[-1..-1]
+mexas_compile_test_18.mex successfully compiled

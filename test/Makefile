@@ -2,7 +2,7 @@
 #
 # File:		Makefile
 # Author:	Bob Walton (walton@acm.org)
-# Date:		Thu Dec 12 07:13:59 PM EST 2024
+# Date:		Sun Dec 29 02:27:27 AM EST 2024
 #
 # The authors have placed this program in the public
 # domain; they make no warranty and accept no liability
@@ -46,6 +46,7 @@ TESTS = mexas_scanner_test_1 \
         mexas_compile_test_15 \
         mexas_compile_test_16 \
         mexas_compile_test_17 \
+        mexas_compile_test_18 \
         mexas_joint_test_1 \
         mexas_joint_test_2 \
         mexas_time_test_1 \

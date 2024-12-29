@@ -1,0 +1,20 @@
+// MEXAS Compile Test 18 Input
+//
+// File:	mexas_compile_test_18.mex
+// Author:	Bob Walton (walton@acm.org)
+// Date:	Sun Dec 29 02:28:07 AM EST 2024
+//
+// The authors have placed this program in the public
+// domain; they make no warranty and accept no liability
+// for this program.
+
+
+// DEL Tests
+//
+PUSHI 100 X
+PUSHI 200 Y
+PUSHI 300 Z
+DEL 3 0
+DEL 1 2
+TRACE 'Z =' Z
+DEL 0 1

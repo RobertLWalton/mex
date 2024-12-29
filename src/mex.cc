@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat Dec 28 07:49:46 PM EST 2024
+// Date:	Sun Dec 29 02:22:51 AM EST 2024
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -3338,7 +3338,7 @@ bool mex::run_process ( mex::process p )
 			p->printer << " sp[-"
 				   << immedA + immedC
 				   << "..-"
-				   << immedC - 1
+				   << immedC + 1
 				   << "] <= sp[-"
 				   << immedA
 				   << "..-1]";
