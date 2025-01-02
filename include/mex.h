@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat Dec 28 07:49:25 PM EST 2024
+// Date:	Thu Jan  2 11:01:32 AM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -30,7 +30,6 @@
 
 namespace mex {
 
-extern min::locatable_gen ZERO;
 extern min::locatable_gen NOT_A_NUMBER;
 extern min::locatable_gen FALSE;
 extern min::locatable_gen TRUE;
@@ -373,7 +372,7 @@ struct ret
     const mex::pc saved_pc;
     min::uns32 saved_level;
     min::uns32 saved_fp;
-    min::uns32 saved_nargs;
+    min::uns32 saved_ap;
     min::uns32 nresults;
 };
 
@@ -389,7 +388,7 @@ struct process_header
     mex::return_stack return_stack;
     min::uns32 level;
     min::uns32 fp[mex::max_lexical_level + 1];
-    min::uns32 nargs[mex::max_lexical_level + 1];
+    min::uns32 ap[mex::max_lexical_level + 1];
     min::uns32 trace_depth;
     min::uns32 trace_flags;
     int excepts_mask;
