@@ -1490,15 +1490,15 @@ Arithmetic instructions (Figure~\itemref{ARITHMETIC-INSTRUCTIONS})
 may raise the exceptions in Figure~\itemref{EXCEPTIONS}.
 When an exception is raised, a flag bit associated with the
 exception is turned on the process's \TT{excepts\_\EOL accumulator}
-member.  This bit is usually never turned off, and so can be used at the
-end of an execution to determine what types of exception
+member.  This bit is never turned off, so it can be used at the
+end of an execution to determine whether the exception
 occurred during the execution.
 
 In C/C++ the flag bit associated with exception \TT{XX}
 is defined as a bit mask macro \TT{FE\_XX} in \TT{fenv.h}
 (see fenv(3) in the UNIX manual):
 
-\begin{boxedfigure}[b!]
+\begin{boxedfigure}[t!]
 \begin{center}
 \begin{tabular}{|l|l|}
 \hline
@@ -1548,10 +1548,9 @@ In both modes, when a process terminates and there is any exception
 bit on in both the process's \TT{excepts\_\EOL accumulator}
 and \TT{excepts\_mask} member, an error message is printed.
 
-\needspace{5\baselineskip}
-
-The \TT{mexas} program's (see \itemref{THE-MEXAS-PROGRAM}) initial setting of
-a process's \TT{excepts\_mask} member is:
+The initial setting of a process's \TT{excepts\_mask} member is
+provided by the \TT{mex::\EOL run\_\EOL excepts\_\EOL mask}
+global variable\pagnote{RUN-EXCEPTS-MASK}, whose default value is:
 \begin{center}
 \TT{DIVBYZERO} ~~ \TT{INVALID} ~~ \TT{OVERFLOW}
 \end{center}
@@ -1596,7 +1595,10 @@ Notice that all arithmetic instructions have the same
 trace class, all \TT{PUSH\ldots} instructions have the same trace
 class, and all conditional \TT{JMP\ldots} instructions have the
 same two trace classes, one for a successful jump and one for
-a failed jump.  Other instructions each have their own trace class,
+a failed jump.  Object instructions have the \TT{SET} trace class for
+instructions that create or modify objects, and the \TT{GET} trace
+class for instructions that read objects.
+Other instructions each have their own trace class,
 except for those with the \TT{ALWAYS} class.
 
 In C++ code trace class \TT{XX} is a number that is the value of
@@ -2108,7 +2110,8 @@ are set respectively from:
 \verb|min::uns32 mex::| & \MEXKEY{run\_trace\_flags} \\
                         & \verb|// Default == 1 << mex::T_ALWAYS|
 \\[0.5ex]
-\verb|int mex::| & \MEXKEY{run\_excepts\_mask} \\
+\verb|int mex::| & \MEXKEY{run\_excepts\_mask}%
+		\label{RUN-EXCEPTS-MASK} \\
             & \verb+// Default == FE_DIVBYZERO|FE_INVALID|FE_OVERFLOW+
 \\[0.5ex]
 \verb|bool mex::| & \MEXKEY{run\_optimize} \\
