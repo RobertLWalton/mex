@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Jan  3 06:03:39 AM EST 2025
+// Date:	Fri Jan  3 06:38:47 PM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -2209,7 +2209,7 @@ bool mex::run_process ( mex::process p )
 
 		if ( op_code == mex::PUSHV )
 		    p->printer
-		        << " <= sp[ap["
+		        << " <= stack[ap["
 			<< pc->immedB
 			<< "]+"
 			<< min::pgen_quote ( arg1 )
@@ -3396,6 +3396,9 @@ bool mex::run_process ( mex::process p )
 		    break;
 		}
 		case mex::GET:
+		    if ( immedB != 0 )
+		        p->printer << "*";
+		    // Fall Through
 		case mex::GETI:
 		{
 		    p->printer << ":";
@@ -3418,6 +3421,9 @@ bool mex::run_process ( mex::process p )
 		    break;
 		}
 		case mex::SET:
+		    if ( immedB != 0 )
+		        p->printer << "*";
+		    // Fall Through
 		case mex::SETI:
 		{
 		    p->printer << ":";

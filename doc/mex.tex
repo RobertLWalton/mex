@@ -1722,15 +1722,13 @@ The trace message of an arithmetic instruction has the form:
                     \TT{<=} {\em value}\QMARK{}
                     {\em operator} {\em value}
 \end{center}
-If {\em new-variable-name} is not given in the instruction,
-\TT{*} is used instead.
-Note that arithmetic instructions are usually not traced.
-
 For an arithmetic instruction the value of
 \TT{module->\EOL trace\_\EOL info[i]} is {\em new-variable-name}
 as a MIN string (this may be \TT{*}).
 If \TT{module->\EOL trace\_\EOL info[i]} is not a MIN string,
 \TT{*} is used as {\em new-variable-name}.
+
+Note that arithmetic instructions are usually not traced.
 
 \subsubsection{Jump Tracing}
 \label{JUMP-TRACING}
@@ -1801,13 +1799,15 @@ They are:
 \bf Op Code & \bf \em from-variable
 \\\hline
 \TT{PUSHNARGS} & \TT{nargs[$L$]} \\
-\TT{PUSHV}     & \TT{sp[fp[$L$]-nargs[$L$]+$V$-1]}
+\TT{PUSHV}     & \TT{stack[ap[$L$]+$V$]}
 \end{tabular}
 \\[1ex]
-where $L$ is the lexical level \\
-and $V$ is the value at the top of the stack
+where $L$ is the lexical level, \\
+$V$ is the value at the top of the stack, \\
+and \TT{nargs[$L$] = fp[$L$] - ap[$L$]}
 \end{center}
-If \TT{module->\EOL trace\_\EOL info[i]} is not a MIN string,
+For these two case,
+if \TT{module->\EOL trace\_\EOL info[i]} is not a MIN string,
 {\em to-variable} is taken to be \TT{*}.
 
 \subsubsection{DEL Instruction Tracing}
@@ -1875,6 +1875,13 @@ For these instructions,
 where one of the two variables is {\em object-variable}.
 If \TT{module->\EOL trace\_\EOL info[i]} does not have the right form,
 {\em from-variable} and {\em to-variable} are taken to be \TT{*}.
+
+Also, for \TT{GET} and \TT{SET} the operation code that ends the
+{\em trace-header} is followed by \TT{*}
+if the instruction \TT{immedB} value is non-zero (indicating that
+\TT{GET} replaces the top stack value instead of pushing the value
+read, and \TT{SET} pops two values instead of just one:
+see Figure~\itemref{OBJECT-INSTRUCTIONS}).
 
 
 \subsubsection{Trace-Packet Based Trace Messages}
