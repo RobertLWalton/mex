@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Jan  3 12:09:28 AM EST 2025
+// Date:	Fri Jan  3 12:17:00 AM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -24,7 +24,7 @@
 # include <cfenv>
 
 # define L mexstack::lexical_level
-# define SP mexstack::run_stack_length
+# define SP mexstack::stack_length
 # define LEVEL_AND_DEPTH \
     (   ( (min::uns32) L << 16 ) \
       + (min::uns32) mexstack::depth[L] )
@@ -195,7 +195,7 @@ bool mexas::check_new_name
     if ( name == mexas::star ) return true;
 
     if (    mexas::search
-                ( name, mexstack::run_stack_limit )
+                ( name, mexstack::stack_limit )
          == mexas::NOT_FOUND )
         return true;
 
@@ -485,7 +485,7 @@ bool mexas::check_parameter
 static bool check_pop
 	( min::uns32 nvars, min::phrase_position pp )
 {
-    if ( SP < mexstack::run_stack_limit + nvars )
+    if ( SP < mexstack::stack_limit + nvars )
     {
 	mexcom::compile_error
 	    ( pp, "stack locations"
@@ -784,10 +784,10 @@ mex::module mexas::compile ( min::file file )
 	    goto NON_ARITHMETIC;
 	case mex::A2:
 	case mex::A2R:
-	    if ( SP < mexstack::run_stack_limit + 2 )
+	    if ( SP < mexstack::stack_limit + 2 )
 	        goto STACK_TOO_SHORT;
 	    min::pop ( variables, 2 );
-	    mexstack::run_stack_length -= 2;
+	    mexstack::stack_length -= 2;
 	    goto ARITHMETIC;
 
 	case mex::A2I:
@@ -802,25 +802,25 @@ mex::module mexas::compile ( min::file file )
 	    }
 	    /* FALLTHRU */
 	case mex::A1:
-	    if ( SP < mexstack::run_stack_limit + 1 )
+	    if ( SP < mexstack::stack_limit + 1 )
 	        goto STACK_TOO_SHORT;
 	    if ( op_code == mex::PUSHV )
 	        goto NON_ARITHMETIC;
 		    // PUSHV executes as A1 and
 		    // compiles mostly as NONA.
 	    min::pop ( variables );
-	    mexstack::run_stack_length -= 1;
+	    mexstack::stack_length -= 1;
 	    goto ARITHMETIC;
 
 	case mex::J1:
-	    if ( SP < mexstack::run_stack_limit + 1 )
+	    if ( SP < mexstack::stack_limit + 1 )
 	        goto STACK_TOO_SHORT;
 	    if ( mexas::get_star ( index )
 	         ==
 		 mexas::star )
 		instr.immedB = 1;
 	    min::pop ( variables, 1 );
-	    mexstack::run_stack_length -= 1;
+	    mexstack::stack_length -= 1;
 	    goto JUMP;
 
 	case mex::JS:
@@ -848,7 +848,7 @@ mex::module mexas::compile ( min::file file )
 	    goto JUMP;
 
 	case mex::J2:
-	    if ( SP < mexstack::run_stack_limit + 2 )
+	    if ( SP < mexstack::stack_limit + 2 )
 	        goto STACK_TOO_SHORT;
 	    if ( mexas::get_star ( index )
 	         ==
@@ -861,7 +861,7 @@ mex::module mexas::compile ( min::file file )
 		instr.immedB = 1;
 	    }
 	    min::pop ( variables, 2 );
-	    mexstack::run_stack_length -= 2;
+	    mexstack::stack_length -= 2;
 	    // Fall through.
 	case mex::J:
 	    goto JUMP;
@@ -972,7 +972,7 @@ mex::module mexas::compile ( min::file file )
 		{
 		    min::uns32 limit =
 			( L == 0 ?
-			  mexstack::run_stack_limit :
+			  mexstack::stack_limit :
 			  mexstack::ap[1] );
 		    min::uns32 j =
 		        search ( name, limit );
@@ -1136,7 +1136,7 @@ mex::module mexas::compile ( min::file file )
 		min::gen old_name =
 		    ( mexas::variables
 		      +
-		      ( mexstack::run_stack_length
+		      ( mexstack::stack_length
 		        - 1 ) )
 		    ->name;
 		min::gen labbuf[2] = { old_name, name };
@@ -1144,7 +1144,7 @@ mex::module mexas::compile ( min::file file )
 		    ( min::new_lab_gen ( labbuf, 2 ) );
 
 		min::pop ( mexas::variables );
-	        mexstack::run_stack_length -= 1;
+	        mexstack::stack_length -= 1;
 		mexstack::push_instr
 		    ( instr, pp, trace_info );
 		break;
@@ -1166,7 +1166,7 @@ mex::module mexas::compile ( min::file file )
 			     + instr.immedC, pp ) )
 		    continue;
 
-		mexstack::run_stack_length -=
+		mexstack::stack_length -=
 		   (int) instr.immedC;
 		mexstack::push_instr ( instr, pp );
 
@@ -1254,7 +1254,7 @@ mex::module mexas::compile ( min::file file )
 		min::gen old_name =
 		    ( mexas::variables
 		      +
-		      ( mexstack::run_stack_length
+		      ( mexstack::stack_length
 			- 1 ) )
 		    ->name;
 		min::gen labbuf[2] =
@@ -1263,7 +1263,7 @@ mex::module mexas::compile ( min::file file )
 		    ( min::new_lab_gen ( labbuf, 2 ) );
 
 		min::pop ( mexas::variables );
-		mexstack::run_stack_length -= 1;
+		mexstack::stack_length -= 1;
 
 		mexstack::push_instr
 		    ( instr, pp, trace_info );
@@ -1420,7 +1420,7 @@ mex::module mexas::compile ( min::file file )
 		    if ( instr.immedB != 0 )
 		    {
 			min::pop ( mexas::variables );
-			mexstack::run_stack_length -= 1;
+			mexstack::stack_length -= 1;
 		    }
 
 		    mexas::push_variable
@@ -1433,7 +1433,7 @@ mex::module mexas::compile ( min::file file )
 		    min::gen old_name =
 			( mexas::variables
 			  +
-			  ( mexstack::run_stack_length
+			  ( mexstack::stack_length
 			    - 1 ) )
 			->name;
 		    min::gen labbuf[2] =
@@ -1442,12 +1442,12 @@ mex::module mexas::compile ( min::file file )
 			min::new_lab_gen ( labbuf, 2 );
 
 		    min::pop ( mexas::variables );
-		    mexstack::run_stack_length -= 1;
+		    mexstack::stack_length -= 1;
 
 		    if ( instr.immedB != 0 )
 		    {
 			min::pop ( mexas::variables );
-			mexstack::run_stack_length -= 1;
+			mexstack::stack_length -= 1;
 		    }
 		}
 		mexstack::push_instr
@@ -1506,7 +1506,7 @@ mex::module mexas::compile ( min::file file )
                         << "VARIABLES: "
 		        << min::place_indent ( 0 );
 		for ( min::uns32 i =
-		          mexstack::run_stack_length;
+		          mexstack::stack_length;
 		      0 < i; )
 		{
 		    -- i;
@@ -1733,7 +1733,7 @@ mex::module mexas::compile ( min::file file )
 		    continue;
 
 		if (   nnext
-		     > SP - mexstack::run_stack_limit )
+		     > SP - mexstack::stack_limit )
 		{
 		    mexcom::compile_error
 			( pp, "portion of stack in the"
@@ -1741,7 +1741,7 @@ mex::module mexas::compile ( min::file file )
 			      " smaller than the number"
 			      " of next-variables" );
 		    nnext =
-		        SP - mexstack::run_stack_limit;
+		        SP - mexstack::stack_limit;
 			    // To protect against
 			    // excessively large nvars
 			    // values.
@@ -1788,8 +1788,8 @@ mex::module mexas::compile ( min::file file )
 		min::locatable_gen trace_info
 		    ( min::new_lab_gen
 		          ( labbuf, nnext + 1 ) );
-		min::uns32 pre_run_stack_limit =
-		    mexstack::run_stack_limit;
+		min::uns32 pre_stack_limit =
+		    mexstack::stack_limit;
 		mexstack::begx
 		    ( instr, nnext, 0, trace_info, pp );
 
@@ -1798,9 +1798,9 @@ mex::module mexas::compile ( min::file file )
 		{
 		    MIN_ASSERT
 			(    nnext
-			  <= SP - pre_run_stack_limit,
+			  <= SP - pre_stack_limit,
 			  "BEGL: mexstack::"
-			  "run_stack_limit violation"
+			  "stack_limit violation"
 			);
 		    min::locatable_gen name
 			( (   mexas::variables
@@ -1933,7 +1933,7 @@ mex::module mexas::compile ( min::file file )
 		instr.immedB = L;
 		instr.immedC = nresults;
 		min::pop ( mexas::variables, nresults );
-	        mexstack::run_stack_length -= nresults;
+	        mexstack::stack_length -= nresults;
 		mexstack::push_instr ( instr, pp );
 		break;
 	    }
@@ -2139,7 +2139,7 @@ mex::module mexas::compile ( min::file file )
 		instr.immedC = begf_location;
 
 		min::pop ( mexas::variables, nargs );
-	        mexstack::run_stack_length -= nargs;
+	        mexstack::stack_length -= nargs;
 		for ( min::uns32 i = 0; i < nresults;
 		                        ++ i )
 		    mexas::push_variable
