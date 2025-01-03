@@ -2,7 +2,7 @@
 //
 // File:	mexstack.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Jan  2 06:49:36 PM EST 2025
+// Date:	Fri Jan  3 12:09:48 AM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -30,7 +30,7 @@ min::uns32 mexstack::run_stack_length = 0;
 
 min::uns8 mexstack::lexical_level;
 min::uns8 mexstack::depth[mex::max_lexical_level+1];
-min::uns32 mexstack::lp[mex::max_lexical_level+1];
+min::uns32 mexstack::ap[mex::max_lexical_level+1];
 min::uns32 mexstack::fp[mex::max_lexical_level+1];
 
 static min::packed_vec<mexstack::block_element>
@@ -74,7 +74,7 @@ void mexstack::init ( void )
     mexstack::run_stack_length		= 0;
     mexstack::lexical_level		= 0;
     mexstack::depth[0]			= 0;
-    mexstack::lp[0]			= 0;
+    mexstack::ap[0]			= 0;
     mexstack::fp[0]			= 0;
     mexstack::run_stack_limit		= 0;
 
@@ -329,8 +329,8 @@ void mexstack::begx ( mex::instr & instr,
 
 	++ L;
 	mexstack::depth[L] = 0;
-	mexstack::lp[L] = mexstack::run_stack_length;
-	mexstack::fp[L] = mexstack::lp[L] + nvars;
+	mexstack::ap[L] = mexstack::run_stack_length;
+	mexstack::fp[L] = mexstack::ap[L] + nvars;
 
 	instr.immedA = nvars;
 	instr.immedB = L;
@@ -530,7 +530,7 @@ void mexstack::push_push_instr
     new_lab_gen ( labbuf, 2 );
 
     min::uns32 k = L;
-    while ( index < mexstack::lp[k] ) -- k;
+    while ( index < mexstack::ap[k] ) -- k;
     if ( k == L  && index >= mexstack::fp[k] )
     {
 	instr.op_code = mex::PUSHS;
@@ -548,7 +548,7 @@ void mexstack::push_push_instr
     {
 	instr.op_code = mex::PUSHA;
 	instr.trace_class = mex::T_PUSH;
-	instr.immedA = index - mexstack::lp[k];
+	instr.immedA = index - mexstack::ap[k];
 	instr.immedB = k;
     }
     mexstack::push_instr

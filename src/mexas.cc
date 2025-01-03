@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Dec 29 01:35:44 AM EST 2024
+// Date:	Fri Jan  3 12:09:28 AM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -973,7 +973,7 @@ mex::module mexas::compile ( min::file file )
 		    min::uns32 limit =
 			( L == 0 ?
 			  mexstack::run_stack_limit :
-			  mexstack::lp[1] );
+			  mexstack::ap[1] );
 		    min::uns32 j =
 		        search ( name, limit );
 		    if ( j == mexas::NOT_FOUND )
