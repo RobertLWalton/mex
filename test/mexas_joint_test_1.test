@@ -16,20 +16,20 @@ BEGF MIN ARG1 ARG2
                        1.0 ARG1
             FUNCTIONS: 0.0 MIN
     PUSH ARG1
-    [15:1;3] PUSHS T_PUSH 1 0 0; [< ARG1 * >]
+    [15:1;3] PUSHA T_PUSH 0 1 0; [< ARG1 * >]
     PUSH ARG2
-    [16:2;4] PUSHS T_PUSH 1 0 0; [< ARG2 * >]
+    [16:2;4] PUSHA T_PUSH 1 1 0; [< ARG2 * >]
     JMPLT ITS-ARG1
     [17:3;2] JMPLT T_JMPS 0 0 0; ITS-ARG1
     PUSH ARG2
-    [18:4;3] PUSHS T_PUSH 0 0 0; [< ARG2 * >]
+    [18:4;3] PUSHA T_PUSH 1 1 0; [< ARG2 * >]
     RET 1
     [19:5;2] RET T_RET 0 1 1
     LABEL ITS-ARG1
     [20:6;2] LABEL ITS-ARG1
     [17:3;2] JMPLT T_JMPS 0 0 3; ITS-ARG1
     PUSH ARG1
-    [21:6;3] PUSHS T_PUSH 1 0 0; [< ARG1 * >]
+    [21:6;3] PUSHA T_PUSH 0 1 0; [< ARG1 * >]
     RET 1
     [22:7;2] RET T_RET 0 1 1
 ENDF
@@ -107,10 +107,10 @@ TRACE 'R = MIN(Z,X)' Z X R
 * {11:0,1,1} PUSHG: * <= X in mexas_joint_test_1a = 23
 * {12:1,2,2} PUSHG: * <= Y in mexas_joint_test_1a = 157
 * {13:2,2,3} CALLG to BEGF: MIN, ARG1=23, ARG2=157
-*** {15:1,3,4} PUSHS: * <= ARG1 = 23
-*** {16:2,4,5} PUSHS: * <= ARG2 = 157
+*** {15:1,3,4} PUSHA: * <= ARG1 = 23
+*** {16:2,4,5} PUSHA: * <= ARG2 = 157
 *** {17:3,2,6} JMPLT ITS-ARG1 is successful: true <= 23 < 157
-*** {21:6,3,7} PUSHS: * <= ARG1 = 23
+*** {21:6,3,7} PUSHA: * <= ARG1 = 23
 *** {22:7,1,8} RET to CALLG: MIN, R=23
 * {14:3,2,9} PUSHG: * <= X in mexas_joint_test_1a = 23
 * {14:4,3,10} PUSHG: * <= Y in mexas_joint_test_1a = 157
@@ -119,10 +119,10 @@ TRACE 'R = MIN(Z,X)' Z X R
 * {16:7,2,13} PUSHG: * <= Y in mexas_joint_test_1a = 157
 * {17:8,3,14} PUSHG: * <= Z in mexas_joint_test_1a = -58
 * {18:9,3,15} CALLG to BEGF: MIN, ARG1=157, ARG2=-58
-*** {15:1,4,16} PUSHS: * <= ARG1 = 157
-*** {16:2,5,17} PUSHS: * <= ARG2 = -58
+*** {15:1,4,16} PUSHA: * <= ARG1 = 157
+*** {16:2,5,17} PUSHA: * <= ARG2 = -58
 *** {17:3,3,18} JMPLT ITS-ARG1 is UNsuccessful: false <= 157 < -58
-*** {18:4,4,19} PUSHS: * <= ARG2 = -58
+*** {18:4,4,19} PUSHA: * <= ARG2 = -58
 *** {19:5,2,20} RET to CALLG: MIN, R=-58
 * {19:10,3,21} PUSHG: * <= Y in mexas_joint_test_1a = 157
 * {19:11,4,22} PUSHG: * <= Z in mexas_joint_test_1a = -58
@@ -131,10 +131,10 @@ TRACE 'R = MIN(Z,X)' Z X R
 * {21:14,3,25} PUSHG: * <= Z in mexas_joint_test_1a = -58
 * {22:15,4,26} PUSHG: * <= X in mexas_joint_test_1a = 23
 * {23:16,4,27} CALLG to BEGF: MIN, ARG1=-58, ARG2=23
-*** {15:1,5,28} PUSHS: * <= ARG1 = -58
-*** {16:2,6,29} PUSHS: * <= ARG2 = 23
+*** {15:1,5,28} PUSHA: * <= ARG1 = -58
+*** {16:2,6,29} PUSHA: * <= ARG2 = 23
 *** {17:3,4,30} JMPLT ITS-ARG1 is successful: true <= -58 < 23
-*** {21:6,5,31} PUSHS: * <= ARG1 = -58
+*** {21:6,5,31} PUSHA: * <= ARG1 = -58
 *** {22:7,3,32} RET to CALLG: MIN, R=-58
 * {24:17,4,33} PUSHG: * <= Z in mexas_joint_test_1a = -58
 * {24:18,5,34} PUSHG: * <= X in mexas_joint_test_1a = 23

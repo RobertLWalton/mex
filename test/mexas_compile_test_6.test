@@ -2,7 +2,7 @@
 //
 // File:        mexas_compile_test_6.mex
 // Author:      Bob Walton (walton@acm.org)
-// Date:        Wed Aug 23 03:50:47 EDT 2023
+// Date:        Thu Jan  2 07:02:34 PM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -24,17 +24,17 @@ BEGF F1 F1ARG1
     [18:5;9] PUSHI T_PUSH 0 0 0 -3; IMMED3
 
             PUSH F1ARG1
-    [20:6;10] PUSHA T_PUSH 1 1 0; [< F1ARG1 * >]
+    [20:6;10] PUSHA T_PUSH 0 1 0; [< F1ARG1 * >]
             PUSH F2ARG1
-    [21:7;11] PUSHA T_PUSH 2 2 0; [< F2ARG1 * >]
+    [21:7;11] PUSHA T_PUSH 0 2 0; [< F2ARG1 * >]
             PUSH F2ARG2
     [22:8;12] PUSHA T_PUSH 1 2 0; [< F2ARG2 * >]
             PUSH F3ARG1
-    [23:9;13] PUSHS T_PUSH 6 0 0; [< F3ARG1 * >]
+    [23:9;13] PUSHA T_PUSH 0 3 0; [< F3ARG1 * >]
             PUSH F3ARG1
-    [24:10;14] PUSHS T_PUSH 7 0 0; [< F3ARG1 * >]
+    [24:10;14] PUSHA T_PUSH 0 3 0; [< F3ARG1 * >]
             PUSH F3ARG1
-    [25:11;15] PUSHS T_PUSH 8 0 0; [< F3ARG1 * >]
+    [25:11;15] PUSHA T_PUSH 0 3 0; [< F3ARG1 * >]
 
             PUSH IMMED1
     [27:12;16] PUSHL T_PUSH 0 1 0; [< IMMED1 * >]
@@ -58,30 +58,30 @@ BEGF F1 F1ARG1
             PUSHNARGS -2
     [37:21;25] PUSHNARGS T_PUSH 0 1 0; *
 
-            PUSHI 1
-    [39:22;26] PUSHI T_PUSH 0 0 0 1; *
+            PUSHI 0
+    [39:22;26] PUSHI T_PUSH 0 0 0 0; *
             PUSHV
     [40:23;27] PUSHV T_PUSH 0 3 0; *
-            PUSHI 2
-    [41:24;28] PUSHI T_PUSH 0 0 0 2; *
+            PUSHI 1
+    [41:24;28] PUSHI T_PUSH 0 0 0 1; *
             PUSHV 0
     [42:25;29] PUSHV T_PUSH 0 3 0; *
-            PUSHI 3
-    [43:26;30] PUSHI T_PUSH 0 0 0 3; *
+            PUSHI 2
+    [43:26;30] PUSHI T_PUSH 0 0 0 2; *
             PUSHV
     [44:27;31] PUSHV T_PUSH 0 3 0; *
 
-            PUSHI 1
-    [46:28;32] PUSHI T_PUSH 0 0 0 1; *
+            PUSHI 0
+    [46:28;32] PUSHI T_PUSH 0 0 0 0; *
             PUSHV -1
     [47:29;33] PUSHV T_PUSH 0 2 0; *
-            PUSHI 2
-    [48:30;34] PUSHI T_PUSH 0 0 0 2; *
+            PUSHI 1
+    [48:30;34] PUSHI T_PUSH 0 0 0 1; *
             PUSHV 2
     [49:31;35] PUSHV T_PUSH 0 2 0; *
 
-            PUSHI 1
-    [51:32;36] PUSHI T_PUSH 0 0 0 1; *
+            PUSHI 0
+    [51:32;36] PUSHI T_PUSH 0 0 0 0; *
             PUSHV 1
     [52:33;37] PUSHV T_PUSH 0 1 0; *
 
@@ -132,9 +132,9 @@ CALL F1 1
 ******* {20:6,10,16} PUSHA: * <= F1ARG1 = 1001
 ******* {21:7,11,17} PUSHA: * <= F2ARG1 = 2001
 ******* {22:8,12,18} PUSHA: * <= F2ARG2 = 2002
-******* {23:9,13,19} PUSHS: * <= F3ARG1 = 3001
-******* {24:10,14,20} PUSHS: * <= F3ARG1 = 3001
-******* {25:11,15,21} PUSHS: * <= F3ARG1 = 3001
+******* {23:9,13,19} PUSHA: * <= F3ARG1 = 3001
+******* {24:10,14,20} PUSHA: * <= F3ARG1 = 3001
+******* {25:11,15,21} PUSHA: * <= F3ARG1 = 3001
 ******* {27:12,16,22} PUSHL: * <= IMMED1 = -1
 ******* {28:13,17,23} PUSHL: * <= IMMED2 = -2
 ******* {29:14,18,24} PUSHS: * <= IMMED3 = -3
@@ -145,18 +145,18 @@ CALL F1 1
 ******* {35:19,23,29} PUSHNARGS: * <= nargs[3] = 3
 ******* {36:20,24,30} PUSHNARGS: * <= nargs[2] = 2
 ******* {37:21,25,31} PUSHNARGS: * <= nargs[1] = 1
-******* {39:22,26,32} PUSHI: * <= 1
-******* {40:23,26,33} PUSHV: * <= sp[fp[3]-nargs[3]+1-1] = 3001
-******* {41:24,27,34} PUSHI: * <= 2
-******* {42:25,27,35} PUSHV: * <= sp[fp[3]-nargs[3]+2-1] = 3002
-******* {43:26,28,36} PUSHI: * <= 3
-******* {44:27,28,37} PUSHV: * <= sp[fp[3]-nargs[3]+3-1] = 3003
-******* {46:28,29,38} PUSHI: * <= 1
-******* {47:29,29,39} PUSHV: * <= sp[fp[2]-nargs[2]+1-1] = 2001
-******* {48:30,30,40} PUSHI: * <= 2
-******* {49:31,30,41} PUSHV: * <= sp[fp[2]-nargs[2]+2-1] = 2002
-******* {51:32,31,42} PUSHI: * <= 1
-******* {52:33,31,43} PUSHV: * <= sp[fp[1]-nargs[1]+1-1] = 1001
+******* {39:22,26,32} PUSHI: * <= 0
+******* {40:23,26,33} PUSHV: * <= sp[ap[3]+0] = 3001
+******* {41:24,27,34} PUSHI: * <= 1
+******* {42:25,27,35} PUSHV: * <= sp[ap[3]+1] = 3002
+******* {43:26,28,36} PUSHI: * <= 2
+******* {44:27,28,37} PUSHV: * <= sp[ap[3]+2] = 3003
+******* {46:28,29,38} PUSHI: * <= 0
+******* {47:29,29,39} PUSHV: * <= sp[ap[2]+0] = 2001
+******* {48:30,30,40} PUSHI: * <= 1
+******* {49:31,30,41} PUSHV: * <= sp[ap[2]+1] = 2002
+******* {51:32,31,42} PUSHI: * <= 0
+******* {52:33,31,43} PUSHV: * <= sp[ap[1]+0] = 1001
 ******* {55:34,5,44} ENDF to CALLM: F3
 ***** {60:39,2,45} ENDF to CALLM: F2
 *** {64:43,0,46} ENDF to CALLM: F1

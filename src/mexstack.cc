@@ -2,7 +2,7 @@
 //
 // File:	mexstack.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Dec 22 03:27:30 AM EST 2024
+// Date:	Thu Jan  2 06:49:36 PM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -531,7 +531,7 @@ void mexstack::push_push_instr
 
     min::uns32 k = L;
     while ( index < mexstack::lp[k] ) -- k;
-    if ( k == L )
+    if ( k == L  && index >= mexstack::fp[k] )
     {
 	instr.op_code = mex::PUSHS;
 	instr.trace_class = mex::T_PUSH;
@@ -548,7 +548,7 @@ void mexstack::push_push_instr
     {
 	instr.op_code = mex::PUSHA;
 	instr.trace_class = mex::T_PUSH;
-	instr.immedA = mexstack::fp[k] - index;
+	instr.immedA = index - mexstack::lp[k];
 	instr.immedB = k;
     }
     mexstack::push_instr

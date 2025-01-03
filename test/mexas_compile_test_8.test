@@ -21,13 +21,13 @@ BEGF MIN X Y
     BEG
     [17:4;3] BEG T_BEG 0 0 0
         PUSH X
-    [18:5;4] PUSHS T_PUSH 2 0 0; [< X * >]
+    [18:5;4] PUSHA T_PUSH 0 1 0; [< X * >]
         PUSH Y
-    [19:6;5] PUSHS T_PUSH 2 0 0; [< Y * >]
+    [19:6;5] PUSHA T_PUSH 1 1 0; [< Y * >]
         JMPGT ITS-Y
     [20:7;3] JMPGT T_JMPS 0 0 0; ITS-Y
         PUSH X
-    [21:8;4] PUSHS T_PUSH 2 0 0; [< X * >]
+    [21:8;4] PUSHA T_PUSH 0 1 0; [< X * >]
         POP Z
     [22:9;3] POPS T_POP 1 0 0; [< * Z >]
         JMP DONE
@@ -36,7 +36,7 @@ BEGF MIN X Y
     [24:11;3] LABEL ITS-Y
     [20:7;3] JMPGT T_JMPS 0 0 4; ITS-Y
         PUSH Y
-    [25:11;4] PUSHS T_PUSH 1 0 0; [< Y * >]
+    [25:11;4] PUSHA T_PUSH 1 1 0; [< Y * >]
         POP Z
     [26:12;3] POPS T_POP 1 0 0; [< * Z >]
     END
@@ -44,8 +44,8 @@ BEGF MIN X Y
     LABEL DONE
     [28:14;3] LABEL DONE
     [23:10;3] JMP T_JMP[1] 0 0 4; DONE
-    [29:14;4] PUSHS T_PUSH 2 0 0; [< X * >]
-    [29:15;5] PUSHS T_PUSH 2 0 0; [< Y * >]
+    [29:14;4] PUSHA T_PUSH 0 1 0; [< X * >]
+    [29:15;5] PUSHA T_PUSH 1 1 0; [< Y * >]
     [29:16;6] PUSHS T_PUSH 2 0 0; [< Z * >]
     TRACE "Z = MIN ( X, Y )" X Y Z
     [29:17;3] TRACE T_ALWAYS 3 0 0; [< "Z = MIN ( X, Y )" X Y Z >]
@@ -73,65 +73,65 @@ CALL MIN 2
 BEGF TEST-BASIC-ARITHMETIC X Y
     [42:26;2] BEGF T_BEGF 2 1 0; [< TEST-BASIC-ARITHMETIC X Y >]
     PUSH X
-    [43:27;3] PUSHS T_PUSH 1 0 0; [< X * >]
+    [43:27;3] PUSHA T_PUSH 0 1 0; [< X * >]
     PUSH Y
-    [44:28;4] PUSHS T_PUSH 1 0 0; [< Y * >]
+    [44:28;4] PUSHA T_PUSH 1 1 0; [< Y * >]
     ADD Z
     [45:29;3] ADD T_AOP 0 0 0; Z
-    [46:30;4] PUSHS T_PUSH 2 0 0; [< X * >]
-    [46:31;5] PUSHS T_PUSH 2 0 0; [< Y * >]
+    [46:30;4] PUSHA T_PUSH 0 1 0; [< X * >]
+    [46:31;5] PUSHA T_PUSH 1 1 0; [< Y * >]
     [46:32;6] PUSHS T_PUSH 2 0 0; [< Z * >]
     TRACE 'Z = X + Y' X Y Z
     [46:33;3] TRACE T_ALWAYS 3 0 0; [< "Z = X + Y" X Y Z >]
     POP
     [47:34;2] POPS T_POP 0 0 0; [< Z * >]
     PUSH X
-    [48:35;3] PUSHS T_PUSH 1 0 0; [< X * >]
+    [48:35;3] PUSHA T_PUSH 0 1 0; [< X * >]
     PUSH Y
-    [49:36;4] PUSHS T_PUSH 1 0 0; [< Y * >]
+    [49:36;4] PUSHA T_PUSH 1 1 0; [< Y * >]
     SUB Z
     [50:37;3] SUB T_AOP 0 0 0; Z
-    [51:38;4] PUSHS T_PUSH 2 0 0; [< X * >]
-    [51:39;5] PUSHS T_PUSH 2 0 0; [< Y * >]
+    [51:38;4] PUSHA T_PUSH 0 1 0; [< X * >]
+    [51:39;5] PUSHA T_PUSH 1 1 0; [< Y * >]
     [51:40;6] PUSHS T_PUSH 2 0 0; [< Z * >]
     TRACE 'Z = X - Y' X Y Z
     [51:41;3] TRACE T_ALWAYS 3 0 0; [< "Z = X - Y" X Y Z >]
     POP
     [52:42;2] POPS T_POP 0 0 0; [< Z * >]
     PUSH X
-    [53:43;3] PUSHS T_PUSH 1 0 0; [< X * >]
+    [53:43;3] PUSHA T_PUSH 0 1 0; [< X * >]
     PUSH Y
-    [54:44;4] PUSHS T_PUSH 1 0 0; [< Y * >]
+    [54:44;4] PUSHA T_PUSH 1 1 0; [< Y * >]
     MUL Z
     [55:45;3] MUL T_AOP 0 0 0; Z
-    [56:46;4] PUSHS T_PUSH 2 0 0; [< X * >]
-    [56:47;5] PUSHS T_PUSH 2 0 0; [< Y * >]
+    [56:46;4] PUSHA T_PUSH 0 1 0; [< X * >]
+    [56:47;5] PUSHA T_PUSH 1 1 0; [< Y * >]
     [56:48;6] PUSHS T_PUSH 2 0 0; [< Z * >]
     TRACE 'Z = X * Y' X Y Z
     [56:49;3] TRACE T_ALWAYS 3 0 0; [< "Z = X * Y" X Y Z >]
     POP
     [57:50;2] POPS T_POP 0 0 0; [< Z * >]
     PUSH X
-    [58:51;3] PUSHS T_PUSH 1 0 0; [< X * >]
+    [58:51;3] PUSHA T_PUSH 0 1 0; [< X * >]
     PUSH Y
-    [59:52;4] PUSHS T_PUSH 1 0 0; [< Y * >]
+    [59:52;4] PUSHA T_PUSH 1 1 0; [< Y * >]
     DIV Z
     [60:53;3] DIV T_AOP 0 0 0; Z
-    [61:54;4] PUSHS T_PUSH 2 0 0; [< X * >]
-    [61:55;5] PUSHS T_PUSH 2 0 0; [< Y * >]
+    [61:54;4] PUSHA T_PUSH 0 1 0; [< X * >]
+    [61:55;5] PUSHA T_PUSH 1 1 0; [< Y * >]
     [61:56;6] PUSHS T_PUSH 2 0 0; [< Z * >]
     TRACE 'Z = X / Y' X Y Z
     [61:57;3] TRACE T_ALWAYS 3 0 0; [< "Z = X / Y" X Y Z >]
     POP
     [62:58;2] POPS T_POP 0 0 0; [< Z * >]
     PUSH X
-    [63:59;3] PUSHS T_PUSH 1 0 0; [< X * >]
+    [63:59;3] PUSHA T_PUSH 0 1 0; [< X * >]
     PUSH Y
-    [64:60;4] PUSHS T_PUSH 1 0 0; [< Y * >]
+    [64:60;4] PUSHA T_PUSH 1 1 0; [< Y * >]
     MOD Z
     [65:61;3] MOD T_AOP 0 0 0; Z
-    [66:62;4] PUSHS T_PUSH 2 0 0; [< X * >]
-    [66:63;5] PUSHS T_PUSH 2 0 0; [< Y * >]
+    [66:62;4] PUSHA T_PUSH 0 1 0; [< X * >]
+    [66:63;5] PUSHA T_PUSH 1 1 0; [< Y * >]
     [66:64;6] PUSHS T_PUSH 2 0 0; [< Z * >]
     TRACE 'Z = X MOD Y' X Y Z
     [66:65;3] TRACE T_ALWAYS 3 0 0; [< "Z = X MOD Y" X Y Z >]
@@ -165,13 +165,13 @@ BEGF SUM X Y
     PUSHI 0 S
     [82:77;3] PUSHI T_PUSH 0 0 0 0; S
     PUSH X I
-    [83:78;4] PUSHS T_PUSH 2 0 0; [< X I >]
+    [83:78;4] PUSHA T_PUSH 0 1 0; [< X I >]
     BEGL 2
     [84:79;6] BEGL T_BEGL 0 2 0; [< LOOP S I >]
         PUSH I
     [85:80;7] PUSHS T_PUSH 2 0 0; [< I * >]
         PUSH Y
-    [86:81;8] PUSHS T_PUSH 5 0 0; [< Y * >]
+    [86:81;8] PUSHA T_PUSH 1 1 0; [< Y * >]
         JMPGT DONE
     [87:82;6] JMPGT T_JMPS 0 0 0; DONE
         PUSH S
@@ -194,8 +194,8 @@ BEGF SUM X Y
     [96:91;4] LABEL DONE
     [87:82;4] JMPGT T_JMPS[1] 2 0 9; DONE
     [97:91;5] PUSHS T_PUSH 1 0 0; [< S * >]
-    [97:92;6] PUSHS T_PUSH 4 0 0; [< X * >]
-    [97:93;7] PUSHS T_PUSH 4 0 0; [< Y * >]
+    [97:92;6] PUSHA T_PUSH 0 1 0; [< X * >]
+    [97:93;7] PUSHA T_PUSH 1 1 0; [< Y * >]
     TRACE 'S = SUM I FOR X <= I <= Y' S X Y
     [97:94;4] TRACE T_ALWAYS 3 0 0; [< "S = SUM I FOR X <= I <= Y" S X
               Y >]
