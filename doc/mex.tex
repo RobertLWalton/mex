@@ -240,11 +240,11 @@
 \begin{document}
         
 \title{Minimal Run-time System\\[2ex]Execution Engine\\[2ex]MEX\\[2ex]
-       (Version 2)}
+       (Version 3)}
 
 \author{Robert L. Walton}
 
-\date{December 29, 2024}
+\date{January 3, 2025}
  
 \maketitle
 
@@ -263,7 +263,7 @@
 This document describes MEX,
 the Minimal Run-time System Execution Engine.
 
-MEX is layered on top of the Minimal Run-time System.
+MEX is layered on top of the MIN Minimal Run-time System.
 
 MEX is stack-oriented and block-oriented.  It computes with
 \ttkey{min::gen} values.
@@ -530,7 +530,7 @@ If the function $F$ is not inside any other function, $F$ has
 level 1.
 
 If the function $F$ is inside a function and $F'$ is the smallest
-function containing $F$, and if $F'$ has level $L'$, then $F$
+function lexically containing $F$, and if $F'$ has level $L'$, then $F$
 has level $L=L'+1$.
 
 If $F$ is a function lexically inside another function $F'$, then instructions
@@ -645,13 +645,16 @@ the smallest incomplete function execution of level $L'$.
 {\bf Proof of Theorem}: Since the currently executing instruction is in $F$
 it is in the smallest incomplete function execution, and this has level $L$.
 The largest incomplete function execution
-has level $0$, the smallest
+has level $1$, the smallest
 incomplete function execution has level
-$L$, and by hypothesis $0\leq L'<L$,
+$L$, and by hypothesis $1\leq L'<L$,
 so by Corollary 2 there is an incomplete function execution of level $L'$
 and hence a smallest one $E'$.  Let $F''$ be its function.
+If we can prove that $F''$ lexically contains $F$, then we will be done,
+since there is only one function of level $L' < L$ that contains $F$,
+so we would have $F'' = F'$.
 
-Then all the incomplete function executions after $E'$ in the sequence
+First, all the incomplete function executions after $E'$ in the sequence
 of incomplete function executions
 must have lexical level $>L'$.  For if one had level $L'$, $E'$ would
 not be the smallest such, and if one had level $<L'$, applying Corollary 2
@@ -676,6 +679,8 @@ incomplete function execution of level $L'$,
 and therefore
 during the execution of instructions in $F$, \TT{fp[$L'$]} is the
 frame pointer of $F'$.
+Similarly MEX computes \TT{ap[$L'$]} as the argument pointer of
+the smallest incomplete execution of level $L'$.
 
 If follows that during an execution of an instruction in $F$
 the variables of $F'$ can be accessed by
@@ -684,8 +689,8 @@ the variables of $F'$ can be accessed by
 and the arguments of $F'$ can be
 accessed by \TT{PUSHA} with \TT{immedB} = $L'$
 (Figure~\itemref{STACK-AND-HOUSEKEEPING-INSTRUCTIONS}).
-If we set \TT{fp[0] = 0},
-the global variables can be accessed by \TT{PUSHL} with \TT{immedB} = $0$
+MEX sets \TT{fp[0] = 0},
+so the global variables can be accessed by \TT{PUSHL} with \TT{immedB} = $0$
 or by \TT{PUSHG}
 (Figure~\itemref{STACK-AND-FLOW-CONTROL-INSTRUCTIONS}).
 
@@ -702,6 +707,7 @@ The syntactic structure of a code vector is:
 		  ::= & {\em arithmetic-instruction} \\
 		  $|$ & {\em stack-and-flow-control-instruction} \\
 		  $|$ & {\em block-and-function-instruction} \\
+		  $|$ & {\em object-instruction} \\
 		  $|$ & {\em stack-and-housekeeping-instruction} \\
 		  $|$ & {\em normal-block} \\
 		  $|$ & {\em loop-block} \\
@@ -718,7 +724,12 @@ The syntactic structure of a code vector is:
 \\[0.5ex]
 \emkey{block-and-function-instruction} ::= \\
 \hspace*{3em}
-     instructions in Figure \itemref{BLOCK-AND-FUNCTION-INSTRUCTIONS}
+     instructions in Figure \itemref{BLOCK-AND-FUNCTION-INSTRUCTIONS},
+     except for \TT{BEG\ldots} and \TT{END\ldots} instructions
+\\[0.5ex]
+\emkey{object-instruction} ::= \\
+\hspace*{3em}
+     instructions in Figure \itemref{OBJECT-INSTRUCTIONS}
 \\[0.5ex]
 \emkey{stack-and-housekeeping-instruction} ::= \\
 \hspace*{3em}
@@ -748,7 +759,7 @@ The interface to a MEX module and its code vector is:
 \begin{indpar}
 
 \begin{tabular}{@{}r@{}l}
-\verb|struct         mex::| & \MEXKEY{instr}
+\verb|struct         mex::| & \MEXKEY{instr}\verb|          // Instruction|
 \LABEL{MEX::INSTR} \\
 \verb|{                   | \\
 \verb|    min::uns8 | & \TTMKEY{op\_code}{in {\tt mex::instr}} \\
@@ -798,7 +809,7 @@ The \ttmkey{position}{of module} member of the \TT{module} gives a
 \TT{min::\EOL phrase\_\EOL position} for every \TT{mex::instr}
 element of the \TT{module} vector, and also gives the
 \TT{position->\EOL file->\EOL file\_\EOL name} of the source
-file of the \TT{module} (may be \TT{min::MISSING()} is input was
+file of the \TT{module} (may be \TT{min::MISSING()} if input was
 from standard input).  In particular, the \TT{min::phrase\_\EOL position}
 of instruction \TT{m[i]} is \TT{m->position[i]}.
 This information can be used to
@@ -828,7 +839,7 @@ a return stack, and other parameters.  Specifically:
 \begin{indpar}
 
 \begin{tabular}{@{}r@{}l}
-\verb|struct         mex::| & \MEXKEY{pc}%
+\verb|struct         mex::| & \MEXKEY{pc}\verb|          // Program Counter|%
 \LABEL{MEX::PC} \\
 \verb|{                   | \\
 \verb|mex::module | & \TTMKEY{module}{in {\tt mex::pc}} \\
@@ -837,13 +848,14 @@ a return stack, and other parameters.  Specifically:
 \end{tabular}
 
 \begin{tabular}{@{}r@{}l}
-\verb|struct         mex::| & \MEXKEY{ret}%
+\verb|struct         mex::|
+    & \MEXKEY{ret}\verb|          // Return Stack Entry|%
 \LABEL{MEX::ret} \\
 \verb|{                   | \\
 \verb|mex::pc | & \TTMKEY{saved\_pc}{in {\tt mex::ret}} \\
 \verb|min::uns32 | & \TTMKEY{saved\_level}{in {\tt mex::ret}} \\
 \verb|min::uns32 | & \TTMKEY{saved\_fp}{in {\tt mex::ret}} \\
-\verb|min::uns32 | & \TTMKEY{saved\_nargs}{in {\tt mex::ret}} \\
+\verb|min::uns32 | & \TTMKEY{saved\_ap}{in {\tt mex::ret}} \\
 \verb|min::uns32 | & \TTMKEY{nresults}{in {\tt mex::ret}} \\
 \verb|}                   | \\
 \end{tabular}
@@ -865,7 +877,7 @@ a return stack, and other parameters.  Specifically:
 \verb|min::uns32 | & \TTMKEY{level}{in {\tt mex::process\_header}} \\
 \verb|min::uns32 | & \TTMKEY{fp}{in {\tt mex::process\_header}}%
                      \TT{[mex::max\_lexical\_level+1]} \\
-\verb|min::uns32 | & \TTMKEY{nargs}{in {\tt mex::process\_header}}%
+\verb|min::uns32 | & \TTMKEY{ap}{in {\tt mex::process\_header}}%
                      \TT{[mex::max\_lexical\_level+1]} \\
 \verb|min::uns32 | & \TTMKEY{trace\_depth}{in {\tt mex::process\_header}} \\
 \verb|min::uns32 | & \TTMKEY{trace\_flags}{in {\tt mex::process\_header}} \\
@@ -930,15 +942,29 @@ process (\TT{p->pc}) is the \key{current program counter} of that process.
 The value of \TT{p->level} is the current lexical level of the
 process, i.e., the lexical level of the instruction pointed at
 by \TT{p->pc}.  \TT{p->fp[$L$]} is the frame pointer for the
-most recently started currently executing function of level $L$.
-\TT{p->nargs[$L$]} is the number of arguments passed to this
-function.  Note that the list of currently executing functions
+most recently started currently executing function of level $L$,
+and \TT{p->ap[$L$]} is argument pointer (pointer at first argument)
+for this function.
+Note that the list of currently executing functions
 in order of being called is not monotonic in level: a function
 of level $L$ may call a function of level $\leq L+1$.
 
+The actual number of arguments to the most recent
+currently executing function of
+level $L$ is:
+\hspace*{1in}\TT{p->fp[$L$] - p->ap[$L$]} \\
+\TT{p->ap[$L$]} points at the first argument and
+\TT{p->fp[$L$]} points just \underline{after} the last argument.
+Arguments are pushed into the stack in left-to-right lexical
+order.\footnote{Unlike languages which do not have an argument
+pointer separate from the frame pointer.}
+
 The process's frame pointer member \TT{fp[\ldots]}
-is further explained in Nested Functions,
-\itemref{NESTED-FUNCTIONS}.  The value of \TT{fp[0]}, the frame pointer
+and argument pointer member \TT{ap[\ldots]}
+are further explained in Nested Functions,
+\itemref{NESTED-FUNCTIONS}.
+
+The value of \TT{fp[0]}, the frame pointer
 for lexical level \TT{0} (outside all functions), is always \TT{0}.
 
 The \ttkey{return\_stack} is used by \TT{CALL} and \TT{RET}
@@ -960,8 +986,8 @@ by \TT{1}.
 The \TT{CALL} also changes the process \TT{level} to the lexical level
 of the function being called (determined by the function's \TT{BEGF}
 instruction) and if this level is $L$, changes \TT{fp[$L$]} to the
-frame pointer of that function and \TT{nargs[$L$]} to the number of
-arguments passed to that function.  Before making changes the \TT{CALL}
+frame pointer of that function and \TT{ap[$L$]} to the argument pointer
+of that function.  Before making changes the \TT{CALL}
 saves these values in the \TT{mex::ret} value.
 The \TT{nresults} member of \TT{mex::ret}
 is the number of function results expected by the call.
@@ -980,8 +1006,14 @@ it has no limit and is for information purposes only.
 When the process terminates, \TT{state} is set.  For details
 see \TT{mex::run\_process}, \pagref{MEX::RUN_PROCESS},
 
-The \TT{trace\_depth}, \TT{trace\_flags}, \TT{excepts\_mask},
-\TT{excepts\_accumulator}, and \TT{optimize}
+A process runs in \key{optimized} or \key{non-optimized} mode
+according to the setting of the process's \TT{optimize} member.
+Optimized execution is faster but surpresses tracing.
+However, if the next instruction in optimized mode would have
+any error, the instruction is executed in non-optimized mode.
+
+The \TT{trace\_depth}, \TT{trace\_flags}, \TT{excepts\_mask}, and
+\TT{excepts\_accumulator}
 members of a process
 are explained in Arithmetic Exceptions, \itemref{ARITHMETIC-EXCEPTIONS}
 and Instruction Tracing, \itemref{INSTRUCTION-TRACING}.
