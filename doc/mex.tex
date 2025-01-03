@@ -1065,6 +1065,9 @@ Figure~\itemref{BLOCK-AND-FUNCTION-INSTRUCTIONS}.
 See Nested Functions, \itemref{NESTED-FUNCTIONS},
 for details concerning nested functions.
 
+The object instruction set creates and modifies MIN objects.
+See Figure~\itemref{OBJECT-INSTRUCTIONS}.
+
 The stack and housekeeping instruction set is in
 Figure~\itemref{STACK-AND-HOUSEKEEPING-INSTRUCTIONS}.
 
@@ -1072,7 +1075,6 @@ Some instructions use the values of the following parameters to represent
 the logical values `true' and `false':
 
 \hspace*{0.3in}\begin{tabular}{rll}
-\tt min::gen mex::& \ttkey{ZERO}  & \tt // Default: the MIN number 0. \\
 \tt min::gen mex::& \ttkey{FALSE} & \tt // Default: the MIN string "FALSE". \\
 \tt min::gen mex::& \ttkey{TRUE}  & \tt // Default: the MIN string "TRUE".  \\
 \end{tabular}
@@ -1273,7 +1275,7 @@ the logical values `true' and `false':
 \ttkey{BEG}/\ttkey{END}
     & Subtract \TT{immedA} from
       \TT{sp} (popping the stack \TT{immedA} times). \\
-    & The values popped are always trace values.
+    & The values popped include trace values.
 \\\hline
 \ttkey{BEGL}
     & Subtract \TT{immedA} from
@@ -1316,9 +1318,9 @@ the logical values `true' and `false':
       function's lexical \\
     & level $L$ from the \TT{BEGF} \TT{immedB} value, and save
       \TT{p->\{level,fp[$L$],} \\
-    & \TT{nargs[$L$]\}} in \TT{$e$.saved\_\{level,fp,nargs\}}.
+    & \TT{ap[$L$]\}} in \TT{$e$.saved\_\{level,fp,ap\}}.
        Next set \TT{p->level} \\
-    & to $L$, \TT{p->fp[$L$]} to \TT{sp}, \TT{p->nargs[$L$]} to \TT{immedA},
+    & to $L$, \TT{p->fp[$L$]} to \TT{sp}, \TT{p->ap[$L$]} to \TT{sp - immedA},
       and \TT{$e$.nresults} \\
     & to \TT{immedB}.
     \\[0.5ex]
@@ -1335,13 +1337,11 @@ the logical values `true' and `false':
     & the return stack and check that \TT{immedC} equals
        \TT{$e$.nresults}.  Next \\
     & pop \TT{immedC} values from the stack and save them.  Set \TT{sp} to \\
-    & \TT{fp[immedB] - nargs[immedB]} (popping the
-      current function \\
-    & execution stack values).  Then push the saved values into the stack. \\
-    & Lastly, restore the process members saved in \\
-    & \TT{$e$.saved\_\{pc,level,fp,nargs\}}, and increment the 
-      restored \TT{pc} \\
-    & by \TT{1}.
+    & \TT{ap[immedB]} (popping the
+      current function execution stack values).  \\
+    & Then push the saved values into the stack. Lastly, restore the \\
+    & process members saved in \TT{$e$.saved\_\{pc,level,fp,ap\}}, \\
+    & and increment the restored \TT{pc} by \TT{1}.
 \\\hline
 \end{tabular}
 \end{center}
@@ -1386,7 +1386,7 @@ the logical values `true' and `false':
     & push \TT{min::NONE()} into the stack instead.  If \TT{immedB}
     	is non-zero, \\
     & \TT{immedC} is required to be zero, and the value X is popped from \\
-    & the stack after it is read, before the value read is pushed.
+    & the stack just before the attribute value read is pushed.
 \\\hline
 \ttkey{GETI}
     & Read the attribute labelled by \TT{immedD}, which must be a string \\
@@ -1431,25 +1431,26 @@ the logical values `true' and `false':
 \begin{tabular}{|l|l|}
 \hline
 \ttkey{PUSHA}
-    & Push the stack vector value with index \TT{fp[immedB] - immedA}. \\
-    & \TT{immedA} must be 
-      in the range \TT{[1,p->nargs[immedB]]}.
+    & Push the stack vector value with index \TT{ap[immedB] + immedA}. \\
+    & \TT{immedA} must be in the range \TT{[0, nargs)} where \\
+    & \TT{nargs = p->fp[immedB] - p->ap[immedB]}.
 \\\hline
 \ttkey{PUSHNARGS}
-    & Push \TT{p->nargs[immedB]} (which is a natural number)
-      converted \\
-    & to IEEE 64-bit floating point.
+    & Push \TT{nargs = p->fp[immedB] - p->ap[immedB]}
+        (which is a natural \\
+    & number) converted to IEEE 64-bit floating point.
 \\\hline
 \ttkey{PUSHV}
-    & Replace the top stack value \TT{V} with the value of the stack element \\
-    & with index \TT{p->fp[immedB] - p->nargs[immedB] + V - 1}. \\ 
-    & \TT{V} must convert to an integer in the
-      range \TT{[1,p->nargs[immedB]]}, \\
+    & Replace the top stack value \TT{V} with the value of the stack element
+      with \\
+    & index \TT{p->ap[immedB] + V}. \TT{V} must convert to an integer
+      in the range \\
+    & \TT{[0,nargs)}, where \TT{nargs = p->fp[immedB] - p->ap[immedB]}, \\
     & else an invalid exception is raised and the result is a \TT{NaN}.
 \\\hline
 \ttkey{SET\_TRACE}
     & The process \TT{trace\_flags} member is set to \TT{immedA} with its\\
-    & \TT{T\_ALWAYS} flag turned on and its \TT{T\_NEVER} flag forced off. \\
+    & \TT{T\_ALWAYS} flag forced on and its \TT{T\_NEVER} flag forced off. \\
     & This instruction is in the \TT{ALWAYS} trace class.
 \\\hline
 \ttkey{NOP}/\ttkey{TRACE}

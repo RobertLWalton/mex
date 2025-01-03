@@ -2,7 +2,7 @@
 //
 // File:	mexas_compile_test_4.mex
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Nov 24 02:57:28 AM EST 2024
+// Date:	Fri Jan  3 06:07:46 AM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -74,6 +74,23 @@ POP
 PUSHI 1000
 PUSHI 4567
 MODR
+POP
+
+PUSHI 5
+PUSHI 2
+MOD
+POP
+PUSHI -5
+PUSHI 2
+MOD
+POP
+PUSHI 5
+PUSHI -2
+MOD
+POP
+PUSHI -5
+PUSHI -2
+MOD
 POP
 
 PUSHI 2

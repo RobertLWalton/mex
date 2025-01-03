@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Jan  2 12:24:15 PM EST 2025
+// Date:	Fri Jan  3 06:03:39 AM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -346,25 +346,25 @@ static bool optimized_run_process ( mex::process p )
 	    break;
 	case mex::MOD:
 	    CHECK2;
-	    sp[-2] = GF ( fmod ( FG ( arg1 ),
-		                 FG ( arg2 ) ) );
+	    sp[-2] = GF ( mex::fmod ( FG ( arg1 ),
+		                      FG ( arg2 ) ) );
 	    -- sp;
 	    break;
 	case mex::MODI:
 	    CHECK1I;
-	    sp[-1] = GF ( fmod ( FG ( arg1 ),
-		                 FG ( arg2 ) ) );
+	    sp[-1] = GF ( mex::fmod ( FG ( arg1 ),
+		                      FG ( arg2 ) ) );
 	    break;
 	case mex::MODR:
 	    CHECK2R;
-	    sp[-2] = GF ( fmod ( FG ( arg1 ),
-		                 FG ( arg2 ) ) );
+	    sp[-2] = GF ( mex::fmod ( FG ( arg1 ),
+		                      FG ( arg2 ) ) );
 	    -- sp;
 	    break;
 	case mex::MODRI:
 	    CHECK1RI;
-	    sp[-1] = GF ( fmod ( FG ( arg1 ),
-		                 FG ( arg2 ) ) );
+	    sp[-1] = GF ( mex::fmod ( FG ( arg1 ),
+		                      FG ( arg2 ) ) );
 	    break;
 	case mex::POW:
 	    CHECK2;
@@ -2031,7 +2031,7 @@ bool mex::run_process ( mex::process p )
 	    case mex::MODI:
 	    case mex::MODR:
 	    case mex::MODRI:
-	        fresult = fmod ( farg1, farg2 );
+	        fresult = mex::fmod ( farg1, farg2 );
 		break;
 	    case mex::POW:
 	    case mex::POWI:

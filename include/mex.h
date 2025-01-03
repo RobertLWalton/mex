@@ -27,6 +27,7 @@
 // Inclusions.
 //
 # include <min.h>
+# include <cmath>
 
 namespace mex {
 
@@ -61,6 +62,17 @@ inline int isnan ( const min::float64 & v )
     min::uns64 & u = * (min::uns64 *) & v;
     return   (u & 0x7FFFFFFFFFFFFFFFull)
            > 0x7FF0000000000000ull;
+}
+
+// Performs true mod, rounding toward minus infinity.
+//
+inline min::float64 fmod
+	( min::float64 farg1, min::float64 farg2 )
+{
+    min::float64 fresult = std::floor ( farg1 / farg2 );
+    if ( ! mex::isnan ( fresult ) )
+        fresult = farg1 - fresult * farg2;
+    return fresult;
 }
 
 
