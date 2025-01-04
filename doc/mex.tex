@@ -244,7 +244,7 @@
 
 \author{Robert L. Walton}
 
-\date{January 3, 2025}
+\date{January 4, 2025}
  
 \maketitle
 
@@ -2126,7 +2126,7 @@ are set respectively from:
 \end{tabular}\end{indpar}
 
 The \TT{pc} member is set to \TT{\{min::NULL\_STUB,0\}}.
-The \TT{fp[\ldots]}, \TT{nargs[\ldots]}, \TT{level}, \TT{trace\_\EOL depth},
+The \TT{fp[\ldots]}, \TT{ap[\ldots]}, \TT{level}, \TT{trace\_\EOL depth},
 \TT{counter}, \TT{optimized\_\EOL counter}, and \TT{excepts\_\EOL accumulator}
 members are set to \TT{0}.
 The \TT{state} is set to \TT{NEVER\_\EOL STARTED}.
@@ -2143,7 +2143,7 @@ Return the process.
 
 The \TT{pc} member is set to \TT{\{m,0\}}.
 
-The \TT{fp[\ldots]}, \TT{nargs[\ldots]}, \TT{level}, \TT{trace\_\EOL depth},
+The \TT{fp[\ldots]}, \TT{ap[\ldots]}, \TT{level}, \TT{trace\_\EOL depth},
 \TT{counter}, \TT{optimized\_\EOL counter}, and
 \TT{excepts\_\EOL accumula\-tor} members are set to \TT{0}.
 The \TT{state} is set to \TT{NEVER\_\EOL STARTED}.
@@ -2164,8 +2164,8 @@ value, which must point at a \TT{BEGF} instruction with \TT{immedB == 1}
 (i.e., lexical level = 1).
 This creates a \TT{return\_stack} entry whose
 \TT{saved\_pc} is \TT{\{min::NULL\_STUB,0\}}, so a return
-will terminate the process normally.  The \TT{nargs} and \TT{nresults} members
-are set to \TT{0}.
+will terminate the process normally.  The \TT{saved\_\ldots}
+and \TT{nresults} members are set to \TT{0}.
 
 If there is an error in pointing at a \TT{BEGF} instruction of level 1,
 then instead the process \TT{pc} member is set to the illegal value
@@ -2208,7 +2208,7 @@ set as follows to indicate cause of termination:
     & \TT{ERROR} instruction with \TT{immedB != 0} \\
 \verb|mex::|\MEXKEY{JMP\_ERROR}
     & conditional \TT{JMP\ldots}~instruction with \\
-    & invalid operand(s) (either a \TT{NaN} or \\
+    & invalid operand(s) (e.g., either a \TT{NaN} or \\
     & both infinities of the same sign) \\
 \verb|mex::|\MEXKEY{FORMAT\_ERROR}
     & program formatting error \\
@@ -2412,17 +2412,18 @@ block.
 The MEX stack compiler component ({\tt mexstack}) assumes that the compiler
 maintains a virtual stack that mirrors the process run-time stack.
 If there are no function executions, this mirror is exact with the value of
-{\tt mexstack::\EOL run\_\EOL stack\_\EOL length}
+{\tt mexstack::\EOL stack\_\EOL length}
 when an instruction is compiled equaling the value of
 {\tt process->length}, the run-time stack pointer, when the
 instruction is executed.
 
-When compiling a function, the virtual stack location of the function's
-frame pointer is recorded as the {\tt mexstack::\EOL run\_\EOL stack\_\EOL
-length} just before the function's {\tt BEGF} instruction is output by the
-compiler.  If the function is of level $L$, this corresponds to the
-run-time frame pointer of the most recent execution of the function
-recorded in {\tt process->fp[$L$]}.
+At the beginning of a function, the compiler sets the
+function's virtual argument pointer
+to the current virtual stack length and the function's virtual
+frame pointer to this plus the number of arguments expected by the
+function (this can be less than the number of actual run-time arguments).
+These virtual pointers correspond to the function's run-time argument
+and frame pointers.
 
 The compiler maintains one or more symbol tables of variables
 and functions.  For variables the location of the variable value
@@ -2460,18 +2461,18 @@ communicate through the following variables:
 \verb|min::uns8 mexstack::| &
     \MEXSTACKKEY{depth}\verb|[mex::max_lexical_level+1]| \\
 \verb|min::uns32 mexstack::| &
-    \MEXSTACKKEY{lp}\verb|[mex::max_lexical_level+1]| \\
+    \MEXSTACKKEY{ap}\verb|[mex::max_lexical_level+1]| \\
 \verb|min::uns32 mexstack::| &
     \MEXSTACKKEY{fp}\verb|[mex::max_lexical_level+1]| \\
-\verb|min::uns32 mexstack::| & \MEXSTACKKEY{run\_stack\_length} \\
+\verb|min::uns32 mexstack::| & \MEXSTACKKEY{stack\_length} \\
 \end{tabular}
 
 \begin{indpar}
 The {\tt mexstack::init} function (see below) zeros {\tt lexical\_level},
-{\tt depth[0]}, {\tt lp[0]}, {\tt fp[0]}, and {\tt run\_stack\_length}.
+{\tt depth[0]}, {\tt ap[0]}, {\tt fp[0]}, and {\tt stack\_length}.
 
 If \TT{mexstack::lexical\_level} = $L$
-when an instruction is assembled,
+when an instruction is compiled,
 then it will be true that {\tt process->level} == $L$ when the instruction
 is executed.\pagnote{LEXICAL-LEVEL}
 {\tt mexstack::\EOL lexical\_\EOL level} is incremented when a {\tt BEGF}
@@ -2479,29 +2480,29 @@ instruction is compiled and decremented when an {\tt ENDF}
 instruction is compiled.
 
 If \TT{mexstack::depth[$L$]} = $D$\label{DEPTH}
-when an instruction is assembled,
+when an instruction is compiled,
 then the instruction is inside $D$ subblocks of the current function.
 {\tt mexstack::depth[$L$]} is incremented when a {\tt BEG} of {\tt BEGL}
 instruction is compiled at lexical level $L$, and decremented when
 an {\tt END} or {\tt ENDL} instruction is compiled at lexical level $L$.
 
-If the absence of function executions, if
-\TT{mexstack::run\_stack\_length} = $S$\label{RUN-STACK-LENGTH}
-when an instruction is assembled,
+In the absence of function executions, if
+\TT{mexstack::stack\_length} = $S$\label{STACK-LENGTH}
+when an instruction is compiled,
 then it will be true that {\tt process->length} == $S$ (the process run-time
 stack length) when the instruction is executed.
 
 The location (a.k.a., index) of a variable in the compile-time virtual stack
 is the value of
-{\tt mexstack::\EOL run\_\EOL stack\_\EOL length - 1} (top of stack)
+{\tt mexstack::\EOL stack\_\EOL length - 1} (top of stack)
 just after the {\tt PUSH...}
 instruction that creates the variable is compiled, or just after
-the subexpression that creates the variable's value in the run-time
+the subexpression that pushes the variable's value into the run-time
 stack is compiled.
 Similarly the location of a variable at run time is the value of
 {\tt process->length - 1} just after the {\tt PUSH...}
 instruction that creates the variable's value executes, or just after
-the subexpression that creates the variable's value executes.
+the subexpression that pushes the variable's value executes.
 
 The lexical level of a variable at compile time is the lexical
 level of the instruction that creates the variable value in
@@ -2514,18 +2515,18 @@ and runtime location $\ell'$, then:\label{FP} \\
 
 At compile time variables with lexical level $L$ have locations in
 the range:\label{LP} \\
-\hspace*{1in}{\tt [ mexstack::lp[$L$], mexstack::lp[$L$+1] )}, \\
+\hspace*{1in}{\tt [ mexstack::ap[$L$], mexstack::ap[$L$+1] )}, \\
 where if $L$ is the current compile time lexical level the second
-limit is replace by {\tt mexstack::run\_lime\_length}.
+limit is replace by {\tt mexstack::stack\_length}.
 For lexical level $L$: \\
-\hspace*{1in}{\tt mexstack::lp[$L$] ==  mexstack::fp[$L$] - nargs} \\
+\hspace*{1in}{\tt mexstack::ap[$L$] ==  mexstack::fp[$L$] - nargs} \\
 where {\tt nargs} is the minimum number of arguments expected
 by the {\tt BEGF} instruction at level $L$.
 At run-time variables with lexical level $L$ have
 locations in the range: \\
 \hspace*{1in}{\tt [ \begin{tabular}[t]{l}
-                    process->fp[$L$] - process->nargs[$L$], \\
-                    process->fp[$L$+1] - process->nargs[$L$+1] ) \\
+                    process->ap[$L$], \\
+                    process->ap[$L$+1] ) \\
 		    \end{tabular} } \\
 where if $L$ is the current run-time lexical level the second
 limit is replaced by {\tt process->\EOL length} (length of run-time stack).
@@ -2538,14 +2539,14 @@ of arguments expected by the function's {\tt BEGF}.
 \end{indpar}
 
 \begin{tabular}{@{}r@{~~~}l}
-\verb|min::uns32 mexstack::| & \MEXSTACKKEY{run\_stack\_limit} \\
+\verb|min::uns32 mexstack::| & \MEXSTACKKEY{stack\_limit} \\
 \end{tabular}
 
 \begin{indpar}
 \TT{Run\_stack\_limit} is used by the MEXAS assembler, but likely will not be
 used by compilers.
 It is set so that for a variable of index
-{\tt $i$ < run\_stack\_limit}\label{RUN-STACK-LIMIT}:
+{\tt $i$ < stack\_limit}\label{STACK-LIMIT}:
 \begin{enumerate}
 \item The variable cannot be popped from the stack by instructions
 that do \underline{not} decrease either {\tt lexical\_level} or
@@ -2560,24 +2561,24 @@ compiler -- they are not enforced
 by {\tt mexstack}.
 
 An intuitive way of putting this is that the working part of the
-stack consists of variables of index {\tt $i$ $\geq$ run\_stack\_limit}.
+stack consists of variables of index {\tt $i$ $\geq$ stack\_limit}.
 
-More specifically, {\tt run\_stack\_limit} is set by {\tt BEG\ldots}
+More specifically, {\tt stack\_limit} is set by {\tt BEG\ldots}
 instructions (via the {\tt mexstack::\EOL begx} function below) as follows: \\
 \hspace*{3em}\begin{tabular}{@{}ll}
-\tt BEG & \tt run\_stack\_length \\
-\tt BEGL & \tt run\_stack\_length + {\rm instruction} immedB \\
+\tt BEG & \tt stack\_length \\
+\tt BEGL & \tt stack\_length + {\rm instruction} immedB \\
          & ({\tt immedB} is number of loop next variables) \\
-\tt BEGF & \tt run\_stack\_length + {\rm instruction} immedA \\
+\tt BEGF & \tt stack\_length + {\rm instruction} immedA \\
          & ({\tt immedA} is minimum number of expected arguments) \\
 \end{tabular} \\
-Here {\tt run\_stack\_length} is the value just before the {\tt BEG\ldots}
+Here {\tt stack\_length} is the value just before the {\tt BEG\ldots}
 instruction is compiled.
 The {\tt END\ldots} instructions (via the {\tt mexstack::endx} function below)
-restore {\tt run\_\EOL stack\_\EOL limit} to its previous value, the value
+restore {\tt stack\_\EOL limit} to its previous value, the value
 just before the corresponding {\tt BEG\ldots} was compiled.
 
-The {\tt mexstack::init} function (see below) zeros {\tt run\_stack\_limit}.
+The {\tt mexstack::init} function (see below) zeros {\tt stack\_limit}.
 \end{indpar}
 
 \begin{tabular}{@{}r@{~~~}l}
@@ -2631,20 +2632,20 @@ The instruction printout has the syntax:
 \\[0.5ex]
 \emkey{printout-header}\label{PRINTOUT-HEADER} ::=
     \TT{[}{\em line-number}\TT{:}{\em code-vector-location}%
-                        \TT{,}{\em var-stack-length} \TT{]}
+                        \TT{,}{\em stack-length} \TT{]}
 \end{indpar}
 The source code is defined by {\tt mexcom::ouput\_module->position[location]}.
 The {\em line-number} is the number of the \underline{last} source code
 line (the first file line is
 number \TT{1}).  The first {\em code-vector-location} is \TT{0}.
-{\em Var-stack-length} equals {\tt run\_stack\_length}\pagnote{RUN-STACK-LENGTH}
+{\em Var-stack-length} equals {\tt stack\_length}\pagnote{STACK-LENGTH}
 plus {\tt stack\_offset} and is the compiler variable stack length
 \underline{after} the instruction is ouput.  In particular,
 for {\tt PUSH\ldots} instructions
 that push {\em trace-variables}\pagnote{TRACE-VARIABLE}
 {\tt stack\_offset} is set to
 the number of {\em trace-variables} pushed so far, as
-these instructions do not update {\tt run\_stack\_length}.
+these instructions do not update {\tt stack\_length}.
 {\em Trace-depth} is printed only if it is not zero,
 {\em immedD} is printed only if it is not \TT{min::MISSING()},
 and {\em trace-info} is printed only if it is not \TT{min::MISSING()}.
@@ -2678,7 +2679,7 @@ Then push the given parts of an instruction into the corresponding
 
 Lastly call {\tt mexstack::print\_instr} with the instruction
 location and the {\tt no\_source} and {\tt stack\_offset}
-arguments.  For this to work, {\tt mex::run\_stack\_length}
+arguments.  For this to work, {\tt mex::stack\_length}
 must be set \underline{before} {\tt push\_instr} is called
 so that it plus {\tt stack\_offset} (usually {\tt 0})
 is the variable stack length
@@ -2708,13 +2709,13 @@ trace class {\tt mex::T\_PUSH}, phrase position {\tt pp},
 trace info equal to a label whose components are {\tt old\_name}
 and {\tt new\_name} in that order, and the following:
 
-If {\tt lp[L] <= index}: \\
+If {\tt ap[L] <= index}: \\
 \hspace*{3em}\verb|op_code = mex::PUSHS, immedA = SP + stack_offset - index - 1|
 
-If for {\tt K<L},~~~{\tt fp[$K$] <= index < lp[$K$+1]}: \\
+If for {\tt K<L},~~~{\tt fp[$K$] <= index < ap[$K$+1]}: \\
 \hspace*{3em}\verb|op_code = mex::PUSHL, immedA = index - fp[K], immedB = K|
 
-If for {\tt K<L},~~~{\tt lp[$K$] <= index < fp[$K$]}: \\
+If for {\tt K<L},~~~{\tt ap[$K$] <= index < fp[$K$]}: \\
 \hspace*{3em}\verb|op_code = mex::PUSHA, immedA = fp[K] - index, immedB = K|
 
 where \\
@@ -2737,7 +2738,7 @@ mexstack::func_stack_length
 mexstack::func_var_stack_length
 mexstack::lexical_level
 mexstack::depth[0]
-mexstack::lp[0]
+mexstack::ap[0]
 mexstack::fp[0]
 mexstack::stack_limit
 \end{verbatim}\end{indpar}
@@ -2796,8 +2797,9 @@ the {\tt tvars} parameter of the above functions.
 
 Also, in the case of the {\tt BEGL} instruction, the compiler must
 push the `{\tt next}' variables into the variables stack.
-This is done before calling {\tt begx} because these variables should
-be given the value of {\tt mexstack::depth[.]} \underline{before} it is
+This is done \underline{after} calling {\tt begx} because these
+variables should
+be given the value of {\tt mexstack::depth[.]} after it is
 incremented by {\tt begx}.
 
 Then the compiler must call {\tt begx} for an {\tt BEG\ldots} instruction,
@@ -2821,16 +2823,16 @@ block stack a block description containing:
 \begin{enumerate}
 \item The {\tt BEG\ldots}~{\tt op\_code}
 \item The corresponding {\tt END\ldots}~{\tt op\_code} for checking purposes.
-\item Saved value of {\tt run\_stack\_limit}.
+\item Saved value of {\tt stack\_limit}.
 \item The {\tt nvars} argument
 \item The location of the {\tt BEG\ldots} instruction
 \end{enumerate}
 This block description is popped from the block stack by the {\tt endx}
 function, which uses information in the description to fill in parts of the
 {\tt BEG\ldots}~and {\tt END\ldots}~instructions and to restore the compiler's
-values of {\tt run\_stack\_limit} and {\tt run\_stack\_length} (which equals
-{\tt run\_stack\_limit} - {\tt nvars} for {\tt ENDF} and {\tt ENDL}
-and {\tt run\_stack\_limit} for {\tt END}).
+values of {\tt stack\_limit} and {\tt stack\_length} (which equals
+{\tt stack\_limit} - {\tt nvars} for {\tt ENDF} and {\tt ENDL}
+and {\tt stack\_limit} for {\tt END}).
 
 The {\tt cont} function searches back through block descriptions to find
 the {\tt loop\_depth}'th {\tt BEGL} description and uses it
@@ -2891,7 +2893,7 @@ when its target is found.
       encountered since the {\tt JMP\ldots} instruction was encountered.
       $MD\le D$.
 \item The length $S$ of the variable stack (i.e., the value of
-      {\tt run\_stack\_length}) just after the {\tt JMP\ldots}
+      {\tt stack\_length}) just after the {\tt JMP\ldots}
       instruction pops its operands from the stack.
 \item The minimum $MS$ of $S$ and all the variable stack lengths immediately
       after any {\tt END} or {\tt ENDL} instructions encountered
@@ -2913,7 +2915,7 @@ is the same as the smallest function containing the {\tt JMP\ldots}
 Equivalently, the smallest block containing the {\tt jmp\_target}
 also contains the {\tt JMP\ldots}~instruction (which may be in an even
 smaller block).
-\item The value of {\tt run\_stack\_length} when {\tt jmp\_target}
+\item The value of {\tt stack\_length} when {\tt jmp\_target}
 is called \underline{equals} $MS$.
 \end{enumerate}
 
@@ -3046,8 +3048,8 @@ The label printout has the syntax:
 In {\em printout-header}\pagnote{PRINTOUT-HEADER}
 the {\em code-vector-location} is
 {\tt mexcom::ouput\_module->length} and
-the {\em var-stack-length} equals the current value of
-{\tt mexstack::run\_stack\_length}\pagnote{RUN-STACK-LENGTH}
+the {\em stack-length} equals the current value of
+{\tt mexstack::stack\_length}\pagnote{STACK-LENGTH}
 plus {\tt stack\_offset} (usually {\tt 0}).
 \end{indpar}
 
@@ -3073,12 +3075,12 @@ pending jumps are sorted by ascending lexical level in the pending jump list.
 For all pending jumps with the current lexical level $L$ decrease
 their minimum depth $MD$ if necessary to {\tt mexstack::depth[$L$]}
 and decrease their minimum stack $MS$ if necessary to 
-{\tt mexstack::run\_stack\_length}.  Return the number of elements
+{\tt mexstack::stack\_length}.  Return the number of elements
 of lexical level $L$, even those not modified.
 
 This function is called by {\tt mexstack::endx} for {\tt END} and
 {\tt ENDL} instructions just after {\tt mexstack::depth[$L$]}
-and {\tt mexstack::run\_stack\_length} have been decremented
+and {\tt mexstack::stack\_length} have been decremented
 (restored to their values just before the corresponding {\tt BEG} or
 {\tt BEGL} instructions were output).
 
@@ -3219,7 +3221,7 @@ as that of an argument of a function,
 or the same name as a \TT{next-} variable of a loop\pagnote{NEXT-VARIABLE}
 (specifically, must not have the same
 name as a variable whose index is
-{\tt < mexstack::run\_stack\_limit}\pagnote{RUN-STACK-LIMIT}).
+{\tt < mexstack::stack\_limit}\pagnote{STACK-LIMIT}).
 
 If {\em new-variable-name} is missing or `\TT{*}',
 the element just gets the name `\TT{*}' to indicate that the
@@ -3469,7 +3471,7 @@ At run-time this instruction's actions are as described in
 Figure~\itemref{BLOCK-AND-FUNCTION-INSTRUCTIONS}.  At assembly-time,
 calls {\tt mexstack::begx}\pagnote{BEGX} to
 increment the depth and set
-{\tt run\_stack\_limit}\pagnote{RUN-STACK-LIMIT}.
+{\tt stack\_limit}\pagnote{STACK-LIMIT}.
 \end{indpar}
 
 \ttkey{END} ~ {\em trace-packet}\QMARK{}
@@ -3480,7 +3482,7 @@ At assembly-time,
 calls {\tt mexstack::endx}\pagnote{ENDX} to
 pop from the symbol table stack all elements with the
 same lexical level and depth as the \TT{END} instruction, reset
-{\tt run\_stack\_limit} to its value when the companion
+{\tt stack\_limit} to its value when the companion
 {\tt BEG} was encountered,
 decrement the depth, and update the pending jmp list.
 \end{indpar}
@@ -3506,7 +3508,7 @@ name.
 Then this instruction calls
 {\tt mexstack::begx}\pagnote{BEGX} to increment
 the current instruction depth and set the
-{\tt run\_stack\_limit}\pagnote{RUN-STACK-LIMIT}.
+{\tt stack\_limit}\pagnote{STACK-LIMIT}.
 
 Thus for example, if the top two stack elements have names
 \TT{X} and \TT{Y} and {\em nnext} is \TT{2}, the two elements
@@ -3557,8 +3559,8 @@ to the function\pagnote{CALL-TO-BEGF}.
 
 Next this instruction calls {\tt mexstack::begx}\pagnote{BEGX}
 to increment the current lexical level to $L$, set the current depth to zero,
-and set {\tt run\_stack\_limit}\pagnote{RUN-STACK-LIMIT},
-{\tt lp[$L$]}\pagnote{LP}, and {\tt fp[$L$]}\pagnote{FP}.
+and set {\tt stack\_limit}\pagnote{STACK-LIMIT},
+{\tt ap[$L$]}\pagnote{LP}, and {\tt fp[$L$]}\pagnote{FP}.
 
 Lastly this instruction pushes one element with each
 of the {\em variable-names} into the variable stack (they
@@ -3577,7 +3579,7 @@ calls {\tt mexstack::endx}\pagnote{ENDX} to
 pop from the symbol table stack all elements with the
 same lexical level as the \TT{ENDF} instruction,
 restore 
-{\tt run\_stack\_limit} and
+{\tt stack\_limit} and
 the current lexical level and depth to what they were before
 the associated \TT{BEGF} instruction, and clear the pending jmp list.
 \end{indpar}
