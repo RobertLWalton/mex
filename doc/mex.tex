@@ -2509,32 +2509,53 @@ level of the instruction that creates the variable value in
 the process stack, and this equals the lexical level of the variable
 at run time.
 
-If a variable has lexical level $L$, compile time location $\ell$,
-and runtime location $\ell'$, then:\label{FP} \\
-\hspace*{1in}{\tt $\ell$ - mexstack::fp[$L$] == $\ell'$ - process->fp[$L$]}
+Argument variables are pushed into
+the compiler symbol table by a \TT{BEGF} instruction.
+During run-time, argument variable values are transfered from the
+calling code to the function by the \TT{CALL\ldots} instruction.
 
-At compile time variables with lexical level $L$ have locations in
+'Next' variables inside a loop are pushed into the compiler symbol
+table by a \TT{BEGL} instruction, and at run-time, their values are
+pushed into the stack by the same \TT{BEGL}.
+
+Consider a variable that has lexical level $L$,
+compile time location $\ell$,
+and run-time location $\ell'$ for the variable value in the most recently
+started execution of its containing function.
+Then if the variable is a non-argument variable:\label{FP} \\
+\hspace*{1in}{\tt $\ell$ - mexstack::fp[$L$] == $\ell'$ - process->fp[$L$]}, \\
+and if the variable is an argument variable:\label{AP} \\
+\hspace*{1in}{\tt $\ell$ - mexstack::ap[$L$] == $\ell'$ - process->ap[$L$]}
+
+At compile-time variables with lexical level $L$ have locations in
 the range:\label{LP} \\
 \hspace*{1in}{\tt [ mexstack::ap[$L$], mexstack::ap[$L$+1] )}, \\
 where if $L$ is the current compile time lexical level the second
 limit is replace by {\tt mexstack::stack\_length}.
-For lexical level $L$: \\
-\hspace*{1in}{\tt mexstack::ap[$L$] ==  mexstack::fp[$L$] - nargs} \\
-where {\tt nargs} is the minimum number of arguments expected
-by the {\tt BEGF} instruction at level $L$.
-At run-time variables with lexical level $L$ have
-locations in the range: \\
-\hspace*{1in}{\tt [ \begin{tabular}[t]{l}
-                    process->ap[$L$], \\
-                    process->ap[$L$+1] ) \\
-		    \end{tabular} } \\
-where if $L$ is the current run-time lexical level the second
-limit is replaced by {\tt process->\EOL length} (length of run-time stack).
-Here {\tt process->nargs[$L$]} is the actual number of arguments
-of the last call to a function of lexical level $L$, and this
-is at least as large but may be larger then the minimum number
-of arguments expected by the function's {\tt BEGF}.
+Argument variables have the subrange: \\
+\hspace*{1in}{\tt [ mexstack::ap[$L$], mexstack::fp[$L$] )}, \\
+and non-argument variables have the subrange: \\
+\hspace*{1in}{\tt [ mexstack::fp[$L$], mexstack::ap[$L$+1] )}
 
+At run-time values of variables in the most recently started
+function of lexical level $L$ have locations in
+the range: \\
+\hspace*{1in}{\tt [ process->ap[$L$], process->ap[$L$+1] )}, \\
+where if $L$ is the current run-time lexical level the second
+limit is replace by {\tt process->\EOL length}.
+Values of argument variables have the subrange: \\
+\hspace*{1in}{\tt [ process->ap[$L$], process->fp[$L$] )}, \\
+and values of non-argument variables have the subrange: \\
+\hspace*{1in}{\tt [ process->fp[$L$], process->ap[$L$+1] )}
+
+The minimum number of arguments expected by a \TT{BEGF} instruction
+of level $L$
+is at compile time: \\
+\hspace*{1in}{\tt mexstack::ap[$L$] - mexstack::fp[$L$]} \\
+The actual run-time  number of arguments passed to the \TT{BEGF} instruction
+of the most recently started function of level $L$
+is: \\
+\hspace*{1in}{\tt process->ap[$L$] - process->fp[$L$]}
 
 \end{indpar}
 
@@ -2543,10 +2564,10 @@ of arguments expected by the function's {\tt BEGF}.
 \end{tabular}
 
 \begin{indpar}
-\TT{Run\_stack\_limit} is used by the MEXAS assembler, but likely will not be
+\TT{Stack\_limit} is used by the MEXAS assembler, but likely will not be
 used by compilers.
-It is set so that for a variable of index
-{\tt $i$ < stack\_limit}\label{STACK-LIMIT}:
+It is set so that for a variable of location
+{\tt $\ell$ < stack\_limit}\label{STACK-LIMIT}:
 \begin{enumerate}
 \item The variable cannot be popped from the stack by instructions
 that do \underline{not} decrease either {\tt lexical\_level} or
@@ -2561,7 +2582,7 @@ compiler -- they are not enforced
 by {\tt mexstack}.
 
 An intuitive way of putting this is that the working part of the
-stack consists of variables of index {\tt $i$ $\geq$ stack\_limit}.
+stack consists of variables of location {\tt $\ell$ $\geq$ stack\_limit}.
 
 More specifically, {\tt stack\_limit} is set by {\tt BEG\ldots}
 instructions (via the {\tt mexstack::\EOL begx} function below) as follows: \\
@@ -2594,6 +2615,12 @@ tables all entries with lexical level greater than
 also all entries with lexical level $L$ equal to
 {\tt mexstack::\EOL lexical\_\EOL level} and 
 depth greater than {\tt mexstack::\EOL depth[$L$]}.
+
+Note that when called by a \TT{ENDF} instruction, the argument
+variables are popped because they have the lexical level of
+the function that is ending.  Similarly when called by a \TT{ENDL},
+the `next' variables are popped because they have the depth of the
+loop that is ending.
 \end{indpar}
 
 \subsubsection{MEX Stack Component Utility Functions}
@@ -3050,7 +3077,7 @@ the {\em code-vector-location} is
 {\tt mexcom::ouput\_module->length} and
 the {\em stack-length} equals the current value of
 {\tt mexstack::stack\_length}\pagnote{STACK-LENGTH}
-plus {\tt stack\_offset} (usually {\tt 0}).
+plus {\tt stack\_\EOL offset} (usually {\tt 0}).
 \end{indpar}
 
 \verb|min::uns32 mexstack:| \MEXSTACKKEY{jmp\_clear} \verb|( void )|
