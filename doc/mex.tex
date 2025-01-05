@@ -2557,6 +2557,42 @@ of the most recently started function of level $L$
 is: \\
 \hspace*{1in}{\tt process->ap[$L$] - process->fp[$L$]}
 
+When a \TT{BEGF} instruction of level $L$ expecting \TT{nargs} arguments
+(its \TT{immedA}) is compiled, \TT{mexstack::ap[$L$]}
+is set to \TT{mexstack::stack\_length}, \TT{mexstack::sp[$L$]} is set
+to \TT{mexstack::stack\_length + nargs}, and then \TT{nargs} argument
+variables are pushed into the symbol table and for each
+\TT{mexstack::stack\_length} is incremented so when all are done it equals
+\TT{mexstack::fp[$L$]}.
+
+When a \TT{CALL\ldots} instruction with \TT{nargs} arguments
+(its \TT{immedA}) expecting \TT{nresults} return values is compiled,
+any symbol table entries referring to the \TT{nargs} arguments
+are popped from the stack, and \TT{nargs} is substracted from
+\TT{mexstack::stack\_length}.  Then a result variable is pushed into the
+symbol table for every return value, and \TT{mexstack::stack\_length}
+is incremented for every such result variable.
+
+When a \TT{CALL\ldots} instruction with \TT{nargs} arguments
+(its \TT{immedA}) is executed with a level $L$ target \TT{BEGF},
+\TT{process->fp[$L$]} is set to \TT{process->length} and
+\TT{process->ap[$L$]} is set to \TT{process->length - nargs}.
+Upon return, \TT{process->length} set set to \TT{process->ap[$L$]}
+plus the number of values returned (\TT{CALL\ldots} \TT{immedB}).
+
+When a \TT{BEGL} instruction of level $L$ with \TT{nvars} loop
+variables (its \TT{immedA}) is compiled, \TT{mexstack::depth[$L$]}
+is incremented, and then
+\TT{nvars} `next' loop variables are
+pushed into the symbol table and for each
+\TT{mexstack::stack\_length} is incremented.
+
+When a \TT{BEGL} instruction of level $L$ with \TT{nvars} loop
+variables (its \TT{immedA}) is executed, it copies the top
+\TT{nvars} variable values into the stack (so there are two copies
+of these) incrementing \TT{process->length} by \TT{nvars} in the
+process.
+
 \end{indpar}
 
 \begin{tabular}{@{}r@{~~~}l}
