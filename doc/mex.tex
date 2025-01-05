@@ -2748,7 +2748,7 @@ location and the {\tt no\_source} and {\tt stack\_offset}
 arguments.  For this to work, {\tt mexstack::stack\_length}
 must be set \underline{before} {\tt push\_instr} is called
 so that it plus {\tt stack\_offset} (usually {\tt 0})
-is the compiler variable stack length
+is the compiler virtual stack length
 \underline{after} the instruction is ouput.
 \end{indpar}
 
@@ -2859,27 +2859,31 @@ Note that these trace values are \underline{not} recorded in the
 compiler variable stack.  The number of these trace values becomes
 the {\tt tvars} parameter of the above functions.
 
-Also, in the case of the {\tt BEGL} instruction, the compiler must
-push the `{\tt next}' variables into the variables stack.
-This is done \underline{after} calling {\tt begx} because these
-variables should
-be given the value of {\tt mexstack::depth[.]} after it is
-incremented by {\tt begx}.
-
 Then the compiler must call {\tt begx} for an {\tt BEG\ldots} instruction,
 {\tt endx} for an {\tt END\ldots} instruction, and {\tt cont} for
 a {\tt CONT} instruction.  For {\tt BEGF} {\tt nvars} is the minimum number
 of arguments expected (will become value of instruction {\tt immedA}).
 For {\tt BEGL} {\tt nvars} is the number of loop `{\tt next}' variables
 (will become value of instruction {\tt immedB}).  For {\tt BEG} {\tt nvars}
-is ignored.
+is ignored.  For {\tt BEGF}, {\tt tvars} must be zero (the variables traced
+by {\tt trace\_info} are the expected argument values).
 
-After calling {\tt begx} for an {\tt BEGF} instruction, the compiler
-must push variables into the variable stack for the minimum number of
-expected argments (equals {\tt nargs} parameter to the {\tt begx} function).
-This is done after calling {\tt begx} because these variables should
-be given the value of {\tt mexstack::lexical\_level} \underline{after} it is
-incremented by {\tt begx}.
+For {\tt BEGF}, {\tt begx} increments {\tt lexical\_level},
+sets {\tt depth[lexical\_level]} to 0,
+sets {\tt ap[lexical\_level]} equal to {\tt stack\_length},
+and sets {\tt fp[lexical\_level]} equal to {\tt stack\_length + nvars}.
+Then after calling {\tt begx}, the compiler
+must push {\tt nvars} argument variables into the symbol table
+incrementing {\tt stack\_length} for each push.  These variables
+take their the lexical level and depth after {\tt begx} is called.
+
+For {\tt BEGL}, {\tt begx} increments {\tt depth[lexical\_level]}.
+Then after calling {\tt begx}, the compiler
+must push {\tt nvars} `next' variables into the symbol table
+incrementing {\tt stack\_\EOL length} for each push.  These variables,
+which are the write-only loop variables updatable by `next variable = ...'
+or `POP next-variable' statements inside the loop block,
+take their depth after {\tt begx} is called.
 
 All these functions fill in parts of {\tt instr} and end by calling
 {\tt mexstack::push\_instr}.  To do this, {\tt begx} pushes into the
@@ -2898,15 +2902,6 @@ values of {\tt stack\_limit} and {\tt stack\_length} (which equals
 {\tt stack\_limit} - {\tt nvars} for {\tt ENDF} and {\tt ENDL}
 and {\tt stack\_limit} for {\tt END}).
 
-The {\tt cont} function searches back through block descriptions to find
-the {\tt loop\_depth}'th {\tt BEGL} description and uses it
-to fill in parts of the {\tt CONT} instruction.  The {\tt cont} instruction
-also increments {\tt instr.trace\_depth} (assumed initially {\tt 0})
-once for very block description
-it skips over in this search.  This function returns {\tt true} on success,
-but if it cannot find {\tt loop\_depth} {\tt BEGL} descriptions, it does
-nothing but return {\tt false}.
-
 {\tt Begx} and {\tt endx} also adjust the current lexical level and
 depth as required by the {\tt BEG\ldots}~and {\tt END\ldots}~instructions
 (e.g., {\tt BEGL} increments the depth and {\tt ENDL} decrements it).
@@ -2915,6 +2910,20 @@ to clear the symbol tables of variables and functions with
 lexical level above the current lexical level, or lexical level
 equal to the current lexical level and depth above the current depth
 for that level.
+
+A {\tt CONT} instruction is like a {\tt JMP} instruction except that it can
+jump backwards.
+The {\tt cont} function searches back through block descriptions to find
+the {\tt loop\_depth}'th {\tt BEGL} description and uses it
+to fill in parts of the {\tt CONT} instruction.  The {\tt cont} instruction
+also increments {\tt instr.trace\_depth} (assumed initially {\tt 0})
+once for very block description
+it skips over in this search.
+This function has no affect on {\tt stack\_length}, {\tt lexical\_level},
+etc.
+It returns {\tt true} on success,
+but if it cannot find {\tt loop\_depth} {\tt BEGL} descriptions, it does
+nothing but return {\tt false}.
 \end{indpar}
 
 

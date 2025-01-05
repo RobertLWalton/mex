@@ -2,7 +2,7 @@
 //
 // File:	mexstack.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Jan  3 12:15:19 AM EST 2025
+// Date:	Sun Jan  5 02:34:15 AM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -492,17 +492,18 @@ bool mexstack::cont ( mex::instr & instr,
 {
     min::uns32 i = mexstack::blocks->length;
     min::ptr<mexstack::block_element> bp;
+    min::uns8 trace_depth = 0;
     while ( true )
     {
         if ( i == 0 ) return false;
 	bp = mexstack::blocks + ( -- i );
 	if ( bp->begin_op_code != mex::BEGL )
 	{
-	    ++ instr.trace_depth;
+	    ++ trace_depth;
 	    continue;
 	}
         if ( -- loop_depth == 0 ) break;
-	++ instr.trace_depth;
+	++ trace_depth;
     }
 
     instr.immedA = mexstack::stack_length
@@ -510,6 +511,7 @@ bool mexstack::cont ( mex::instr & instr,
     instr.immedB = bp->nvars;
     instr.immedC = mexcom::output_module->length
 		 - bp->begin_location - 1;
+    instr.trace_depth = trace_depth;
 
     mexstack::push_instr ( instr, pp, trace_info );
     return true;
