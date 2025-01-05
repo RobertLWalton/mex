@@ -244,7 +244,7 @@
 
 \author{Robert L. Walton}
 
-\date{January 4, 2025}
+\date{January 5, 2025}
  
 \maketitle
 
@@ -2703,24 +2703,25 @@ The source code is defined by {\tt mexcom::ouput\_module->position[location]}.
 The {\em line-number} is the number of the \underline{last} source code
 line (the first file line is
 number \TT{1}).  The first {\em code-vector-location} is \TT{0}.
-{\em Var-stack-length} equals {\tt stack\_length}\pagnote{STACK-LENGTH}
-plus {\tt stack\_offset} and is the compiler variable stack length
+{\em Stack-length} equals {\tt mexstack::stack\_length}\pagnote{STACK-LENGTH}
+plus {\tt stack\_offset} and is the compiler virtual stack length
 \underline{after} the instruction is ouput.  In particular,
 for {\tt PUSH\ldots} instructions
 that push {\em trace-variables}\pagnote{TRACE-VARIABLE}
-{\tt stack\_offset} is set to
+{\tt stack\_\EOL offset} is set to
 the number of {\em trace-variables} pushed so far, as
-these instructions do not update {\tt stack\_length}.
+these instructions do not update {\tt mexstack::stack\_length}.
 {\em Trace-depth} is printed only if it is not zero,
 {\em immedD} is printed only if it is not \TT{min::MISSING()},
 and {\em trace-info} is printed only if it is not \TT{min::MISSING()}.
 
-In some cases assembling an instruction or declaration
-(e.g., \TT{MEXAS LABEL}\pagnote{LABEL})
-modifies a previously assembled instruction.  In these cases the
+In some cases compiling an instruction or declaration
+(e.g., \TT{MEXAS LABEL}\pagnote{LABEL} which calls
+{\tt mexstack::\EOL jmp\_\EOL target}\pagnote{JMP-TARGET})
+modifies a previously compiled instruction.  In these cases the
 convention is to print the
-modified previously assembled instruction (without its source)
-just before the instruction currently being assembled.
+modified previously compiled instruction (without its source)
+just before the instruction currently being compiled.
 \end{indpar}
 
 \verb|bool mexstack::| \MEXCOMKEY{trace\_never} \verb|= false| \\
@@ -2744,17 +2745,17 @@ Then push the given parts of an instruction into the corresponding
 
 Lastly call {\tt mexstack::print\_instr} with the instruction
 location and the {\tt no\_source} and {\tt stack\_offset}
-arguments.  For this to work, {\tt mex::stack\_length}
+arguments.  For this to work, {\tt mexstack::stack\_length}
 must be set \underline{before} {\tt push\_instr} is called
 so that it plus {\tt stack\_offset} (usually {\tt 0})
-is the variable stack length
+is the compiler variable stack length
 \underline{after} the instruction is ouput.
 \end{indpar}
 
 \verb|void mexstack:| \MEXSTACKKEY{push\_push\_instr}
                       \label{PUSH-PUSH-INSTR} \\
 \verb|    ( min::gen new_name, min::gen old_name,| \\
-\verb|      min::ins32 index,| \\
+\verb|      min::ins32 location,| \\
 \verb|      const min::phrase_position & pp =| \\
 \verb|          min::MISSING_PHRASE_POSITION,| \\
 \verb|      bool no_source = false,| \\
@@ -2763,7 +2764,7 @@ is the variable stack length
 This function creates a {\tt PUSH\ldots} instruction that pushes
 into the process stack\pagnote{PROCESS-STACK}
 the value of the variable referenced by the variable stack entry
-with the given {\tt index}, and executes {\tt mexstack::push\_instr}
+with the given {\tt location}, and executes {\tt mexstack::push\_instr}
 to push that instruction into the {\tt mexcom::\EOL output\_\EOL module}
 code vector.  The {\tt pp}, {\tt no\_source},
 and {\tt stack\_offset} parameters
@@ -2774,18 +2775,18 @@ trace class {\tt mex::T\_PUSH}, phrase position {\tt pp},
 trace info equal to a label whose components are {\tt old\_name}
 and {\tt new\_name} in that order, and the following:
 
-If {\tt ap[L] <= index}: \\
-\hspace*{3em}\verb|op_code = mex::PUSHS, immedA = SP + stack_offset - index - 1|
+If {\tt fp[L] <= location}: \\
+\hspace*{3em}\verb|op_code = mex::PUSHS, immedA = SP + stack_offset - location - 1|
 
-If for {\tt K<L},~~~{\tt fp[$K$] <= index < ap[$K$+1]}: \\
-\hspace*{3em}\verb|op_code = mex::PUSHL, immedA = index - fp[K], immedB = K|
+For {\tt K$\leq$L},~~~{\tt ap[$K$] <= location < fp[$K$]}: \\
+\hspace*{3em}\verb|op_code = mex::PUSHA, immedA = location - ap[K], immedB = K|
 
-If for {\tt K<L},~~~{\tt ap[$K$] <= index < fp[$K$]}: \\
-\hspace*{3em}\verb|op_code = mex::PUSHA, immedA = fp[K] - index, immedB = K|
+For {\tt K<L},~~~{\tt fp[K] <= location < ap[K+1]}: \\
+\hspace*{3em}\verb|op_code = mex::PUSHL, immedA = location - fp[K], immedB = K|
 
 where \\
 \hspace*{3em}\verb|L = mexstack::lexical_level| \\
-\hspace*{3em}\verb|SP = mexstack::var_stack_length| \\
+\hspace*{3em}\verb|SP = mexstack::stack_length| \\
 \hspace*{3em}({\tt stack\_offset} corrects {\tt SP} when pushing trace values
 							      because \\
 \hspace*{3em}~trace values are not recorded in the compiler variable stack)
@@ -2798,9 +2799,7 @@ The following function initializes the {\tt mexstack} data described above:
 This function initializes {\tt mexstack} data at the beginning
 of the compilation of a module.  Specifically this function zeros:
 \begin{indpar}\begin{verbatim}
-mexstack::var_stack_length
-mexstack::func_stack_length
-mexstack::func_var_stack_length
+mexstack::stack_length
 mexstack::lexical_level
 mexstack::depth[0]
 mexstack::ap[0]
@@ -3074,7 +3073,7 @@ Lastly this function creates an element of the pending jump list
 for the newly output {\tt JMP\ldots} instruction.
 \end{indpar}
 
-\verb|min::uns32 mexstack:| \MEXSTACKKEY{jmp\_target}
+\verb|min::uns32 mexstack:| \MEXSTACKKEY{jmp\_target}\label{JMP-TARGET}
     \verb|( min::gen target )|
 \begin{indpar}
 Resolve all pending jumps that have the current lexical level, a minimum
