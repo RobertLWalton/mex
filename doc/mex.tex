@@ -2559,19 +2559,21 @@ is: \\
 
 When a \TT{BEGF} instruction of level $L$ expecting \TT{nargs} arguments
 (its \TT{immedA}) is compiled, \TT{mexstack::ap[$L$]}
-is set to \TT{mexstack::stack\_length}, \TT{mexstack::sp[$L$]} is set
+is set to \TT{mexstack::stack\_length}, \TT{mexstack::fp[$L$]} is set
 to \TT{mexstack::stack\_length + nargs}, and then \TT{nargs} argument
 variables are pushed into the symbol table and for each
 \TT{mexstack::stack\_length} is incremented so when all are done it equals
 \TT{mexstack::fp[$L$]}.
 
 When a \TT{CALL\ldots} instruction with \TT{nargs} arguments
-(its \TT{immedA}) expecting \TT{nresults} return values is compiled,
+(its \TT{immedA}) expecting \TT{nresults} return values (its \TT{immedB}) is compiled,
 any symbol table entries referring to the \TT{nargs} arguments
 are popped from the stack, and \TT{nargs} is substracted from
-\TT{mexstack::stack\_length}.  Then a result variable is pushed into the
-symbol table for every return value, and \TT{mexstack::stack\_length}
+\TT{mexstack::\EOL stack\_\EOL length}.  Then a result variable is pushed into the
+symbol table for every return value, and \TT{mexstack::\EOL stack\_\EOL length}
 is incremented for every such result variable.
+So when all is done, \TT{nargs} has been subtracted from \TT{mexstack::stack\_length}
+and then \TT{nresults} has been added to \TT{mexstack::stack\_length}.
 
 When a \TT{CALL\ldots} instruction with \TT{nargs} arguments
 (its \TT{immedA}) is executed with a level $L$ target \TT{BEGF},
