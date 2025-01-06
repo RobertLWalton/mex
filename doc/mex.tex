@@ -244,7 +244,7 @@
 
 \author{Robert L. Walton}
 
-\date{January 5, 2025}
+\date{January 6, 2025}
  
 \maketitle
 
@@ -2936,13 +2936,14 @@ a code vector index value which can be used by \TT{JMP\ldots}
 instructions as the point in the code vector to jump to.
 
 \TT{JMP\ldots} instructions are pushed into the code vector
-using the {\tt mexstack::jmpx} function, and their targets are
+using the {\tt mexstack::push\_jmp\_instr} function, and their targets are
 declared by the {\tt mexstack::jmp\_target} function.
 \TT{JMP\ldots} instructions are forward-referencing: their
 {\em jmp-targets} are declared after the \TT{JMP\ldots} instruction
-(only {\tt ENDL} instructions can jump backwards).
+(only {\tt ENDL} and {\tt CONT} instructions can jump backwards).
 To manage \TT{JMP\ldots} instructions and their targets,
-{\tt mexstack::jumpx} pushes an element into a list of \skey{pending jumps}:
+{\tt mexstack::push\_jmp\_instr}
+pushes an element into a list of \skey{pending jumps}:
 that is, jumps whose {\em jmp-target} has not yet been
 declared.  When {\tt mexstack::jmp\_target} is called,
 the pending jump list is searched for jumps with the given
@@ -2963,14 +2964,16 @@ when its target is found.
 \item The depth $D$ of the {\tt JMP\ldots} instruction.
 \item The minimum $MD$ of $D$ and
       the depths immediately after any {\tt END} or {\tt ENDL} instructions
-      encountered since the {\tt JMP\ldots} instruction was encountered.
+      encountered since the {\tt JMP\ldots} instruction.
       $MD\le D$.
-\item The length $S$ of the variable stack (i.e., the value of
-      {\tt stack\_length}) just after the {\tt JMP\ldots}
-      instruction pops its operands from the stack.
-\item The minimum $MS$ of $S$ and all the variable stack lengths immediately
+\item The length $S$ of the compiler virtual stack (i.e., the value of
+      {\tt mexstack::stack\_length}) just after the {\tt JMP\ldots}
+      instruction pops its operands from the stack in the case that
+      the {\tt JMP\ldots} is successful.
+\item The minimum $MS$ of $S$ and all the compiler virtual stack lengths
+      (i.e., values of {\tt mexstack::stack\_length}) immediately
       after any {\tt END} or {\tt ENDL} instructions encountered
-      since the {\tt JMP\ldots} instruction was encountered.
+      since the {\tt JMP\ldots} instruction.
       $MS\le S$.
 \end{enumerate}
 
@@ -2988,7 +2991,7 @@ is the same as the smallest function containing the {\tt JMP\ldots}
 Equivalently, the smallest block containing the {\tt jmp\_target}
 also contains the {\tt JMP\ldots}~instruction (which may be in an even
 smaller block).
-\item The value of {\tt stack\_length} when {\tt jmp\_target}
+\item The value of {\tt mexstack::stack\_length} when {\tt jmp\_target}
 is called \underline{equals} $MS$.
 \end{enumerate}
 
@@ -3135,8 +3138,8 @@ were deleted.  Return the number of deleted pending jumps.
 
 This is called by {\tt mexstack::endx} for each {\tt ENDF} instruction.
 
-It must also be called by the compiler at the end of compiling a
-module.
+{\bf This function must also be called by the compiler
+at the end of compiling a module.}
 
 Pending jumps are added at the end of the pending jump list, and
 as this function is called whenever the lexical level decreases by one,
