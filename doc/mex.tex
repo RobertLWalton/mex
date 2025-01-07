@@ -2661,34 +2661,62 @@ the `next' variables are popped because they have the depth of the
 loop that is ending.
 \end{indpar}
 
-\subsubsection{Compiling Instructions with MEX Stack}
-\label{COMPILING-INSTRUCTIONS-WITH-MEX-STACK}
+\subsubsection{MEX Stack Component Instruction Compilation}
+\label{MEX-STACK-COMPONENT-INSTRUCTION-COMPILATION}
 
-In order to output an instruction, a compiler using {\tt mexstack} does the
-following:
+In order to output an instruction, a compiler using {\tt mexstack} can
+do the following:
 
 \begin{enumerate}
-\item Adjusts {\tt mexstack::stack\_length} to the value it will have
+\item Adjust {\tt mexstack::stack\_length} to the value it will have
 \underline{after} the instruction is pushed into the
 {\tt mexcom::output\_module}'s code vector.
-
-TBD
 
 \item Push the instruction into the code vector using one of the
 functions:
 \begin{indpar}[1in]
 {\tt mexstack::push\_instr}\pagnote{PUSH-INSTR} \\
 {\tt mexstack::push\_push\_instr}\pagnote{PUSH-PUSH-INSTR} \\
-{\tt mexstack::begx}\pagnote{BEGX} \\
-{\tt mexstack::endx}\pagnote{ENDX} \\
 {\tt mexstack::push\_jmp\_instr}\pagnote{PUSH-JMP-INSTR}
 \end{indpar}
+
+\item Note that for {\em push\_jmp\_instr}, \,{\tt mexstack::stack\_length}
+is set to what it should be if the {\tt JMP\ldots} is
+UNsuccessful.  If {\tt JMP\ldots} is successful, the value of $S$
+in the pending jump list entry\pagnote{PENDING-JUMP-LIST} is: \\
+\hspace*{1in}{\tt mexstack::stack\_length + successful\_stack\_offset}. \\
+where {\em successful\_stack\_offset} is an argument of
+{\tt push\_jmp\_offset}.
+
+\end{enumerate}
+
+Alternatively, the compiler can do the following
+
+\begin{enumerate}
+\item Push the instruction into the code vector using one of the
+functions:
+\begin{indpar}[1in]
+{\tt mexstack::begx}\pagnote{BEGX} \\
+{\tt mexstack::cont}\pagnote{CONT} \\
+{\tt mexstack::endx}\pagnote{ENDX}
+\end{indpar}
+\item These functions adjust {\tt mexstack::stack\_length} using
+their function arguments and information saved in the
+block stack\pagnote{BLOCK-STACK}.  For example, for a {\tt BEGF}
+instruction the {\tt nargs} argument to {\tt begx} is added by
+{\tt begx} to {\tt mexstack::stack\_length}, and for the {\tt ENDF}
+instruction {\tt endx} restores {\tt mexstack::stack\_length}
+to its value just before the corresponding {\tt begx} was called.
+
 \end{enumerate}
 
 The compiler variable symbol table is only updated at the end of
-a compiler language statement or block.  At the end of assignment
+a compiler language statement or just after a block beginning or block end.
+At the end of assignment
 statements, the variables created by the assignment statement are
-pushed into the symbol table.  At the end of a block,
+pushed into the symbol table.  Just after beginning a block,
+argument variables or loop `next' variables are pushed into the symbol table.
+At the end of a block,
 {\tt mexstack::pop\_stacks} is called by {\tt mexstack::endx}
 to pop the block's variables from the symbol table.
 
@@ -2918,7 +2946,7 @@ take their depth after {\tt begx} is called.
 
 All these functions fill in parts of {\tt instr} and end by calling
 {\tt mexstack::push\_instr}.  To do this, {\tt begx} pushes into the
-block stack a block description containing:
+block stack\label{BLOCK-STACK} a block description containing:
 \begin{enumerate}
 \item The {\tt BEG\ldots}~{\tt op\_code}
 \item The corresponding {\tt END\ldots}~{\tt op\_code} for checking purposes.
@@ -2986,7 +3014,9 @@ process stack elements the \TT{JMP\ldots} should pop.
 \TT{JMP\ldots} instructions
 are allowed to pop stack elements, but cannot push them.
 
-To permit this, an element of the pending jump list contains:
+To permit this, an element of the pending jump list%
+\label{PENDING-JUMP-LIST}
+contains:
 \begin{enumerate}
 \item The location of the jump instruction so it can be updated
 when its target is found.
