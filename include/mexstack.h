@@ -2,7 +2,7 @@
 //
 // File:	mexstack.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Jan  3 12:07:53 AM EST 2025
+// Date:	Tue Jan  7 02:05:31 AM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -176,7 +176,7 @@ inline void push_instr
 
 void push_push_instr
         ( min::gen new_name, min::gen old_name,
-	  min::uns32 index,
+	  min::uns32 location,
 	  const min::phrase_position & pp =
 	      min::MISSING_PHRASE_POSITION,
 	  bool no_source = false,
@@ -188,14 +188,14 @@ inline void push_jmp_instr
 	  const min::phrase_position & pp =
 	      min::MISSING_PHRASE_POSITION,
 	  bool no_source = false,
-	  min::int32 stack_offset = 0 )
+	  min::int32 success_stack_offset = 0 )
 {
     mexstack::push_instr
-        ( instr, pp, target, no_source, stack_offset );
+        ( instr, pp, target, no_source, 0 );
     min::uns8 L = mexstack::lexical_level,
               D = mexstack::depth[L];
     min::uns32 S = mexstack::stack_length
-                 + stack_offset;
+                 + success_stack_offset;
     mexstack::jump_element je = {
         target,
 	mexcom::output_module->length - 1,

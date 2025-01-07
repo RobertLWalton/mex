@@ -2,7 +2,7 @@
 //
 // File:	mexstack.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Jan  5 02:34:15 AM EST 2025
+// Date:	Tue Jan  7 02:06:21 AM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -520,7 +520,7 @@ bool mexstack::cont ( mex::instr & instr,
 
 void mexstack::push_push_instr
         ( min::gen new_name, min::gen name,
-	  min::uns32 index,
+	  min::uns32 location,
 	  const min::phrase_position & pp,
 	  bool no_source,
 	  min::int32 stack_offset )
@@ -532,25 +532,25 @@ void mexstack::push_push_instr
     new_lab_gen ( labbuf, 2 );
 
     min::uns32 k = L;
-    while ( index < mexstack::ap[k] ) -- k;
-    if ( k == L  && index >= mexstack::fp[k] )
+    while ( location < mexstack::ap[k] ) -- k;
+    if ( k == L  && location >= mexstack::fp[k] )
     {
 	instr.op_code = mex::PUSHS;
 	instr.trace_class = mex::T_PUSH;
-	instr.immedA = SP + stack_offset - index - 2;
+	instr.immedA = SP + stack_offset - location - 2;
     }
-    else if ( index >= mexstack::fp[k] )
+    else if ( location >= mexstack::fp[k] )
     {
 	instr.op_code = mex::PUSHL;
 	instr.trace_class = mex::T_PUSH;
-	instr.immedA = index - mexstack::fp[k];
+	instr.immedA = location - mexstack::fp[k];
 	instr.immedB = k;
     }
     else
     {
 	instr.op_code = mex::PUSHA;
 	instr.trace_class = mex::T_PUSH;
-	instr.immedA = index - mexstack::ap[k];
+	instr.immedA = location - mexstack::ap[k];
 	instr.immedB = k;
     }
     mexstack::push_instr

@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Jan  3 12:17:00 AM EST 2025
+// Date:	Tue Jan  7 02:07:21 AM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -777,6 +777,8 @@ mex::module mexas::compile ( min::file file )
 
 	min::gen top_name = min::NONE();
 	    // If not NONE, JUMP does extra push at end.
+	min::int32 success_stack_offset = 0;
+	    // For JUMP.
 
 	switch ( op_type )
 	{
@@ -859,9 +861,12 @@ mex::module mexas::compile ( min::file file )
 			 + ( variables->length - 1 ) ) )
 		    ->name;
 		instr.immedB = 1;
+		success_stack_offset = -1;
+		mexstack::stack_length -= 1;
 	    }
+	    else
+		mexstack::stack_length -= 2;
 	    min::pop ( variables, 2 );
-	    mexstack::stack_length -= 2;
 	    // Fall through.
 	case mex::J:
 	    goto JUMP;
@@ -905,12 +910,16 @@ mex::module mexas::compile ( min::file file )
 		target = min::MISSING();
 	    }
 	    mexstack::push_jmp_instr
-		( instr, target, pp );
+		( instr, target, pp,
+		  false, success_stack_offset );
 
 	    if ( top_name != min::NONE() )
+	    {
+	        -- mexstack::stack_length;
 		mexas::push_variable
 		    ( mexas::variables, top_name,
 		      LEVEL_AND_DEPTH );
+	    }
 	    goto EXTRA_STUFF_CHECK;
 	}
 	NON_ARITHMETIC:

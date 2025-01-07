@@ -244,7 +244,7 @@
 
 \author{Robert L. Walton}
 
-\date{January 6, 2025}
+\date{January 7, 2025}
  
 \maketitle
 
@@ -2661,6 +2661,37 @@ the `next' variables are popped because they have the depth of the
 loop that is ending.
 \end{indpar}
 
+\subsubsection{Compiling Instructions with MEX Stack}
+\label{COMPILING-INSTRUCTIONS-WITH-MEX-STACK}
+
+In order to output an instruction, a compiler using {\tt mexstack} does the
+following:
+
+\begin{enumerate}
+\item Adjusts {\tt mexstack::stack\_length} to the value it will have
+\underline{after} the instruction is pushed into the
+{\tt mexcom::output\_module}'s code vector.
+
+TBD
+
+\item Push the instruction into the code vector using one of the
+functions:
+\begin{indpar}[1in]
+{\tt mexstack::push\_instr}\pagnote{PUSH-INSTR} \\
+{\tt mexstack::push\_push\_instr}\pagnote{PUSH-PUSH-INSTR} \\
+{\tt mexstack::begx}\pagnote{BEGX} \\
+{\tt mexstack::endx}\pagnote{ENDX} \\
+{\tt mexstack::push\_jmp\_instr}\pagnote{PUSH-JMP-INSTR}
+\end{indpar}
+\end{enumerate}
+
+The compiler variable symbol table is only updated at the end of
+a compiler language statement or block.  At the end of assignment
+statements, the variables created by the assignment statement are
+pushed into the symbol table.  At the end of a block,
+{\tt mexstack::pop\_stacks} is called by {\tt mexstack::endx}
+to pop the block's variables from the symbol table.
+
 \subsubsection{MEX Stack Component Utility Functions}
 \label{MEX-STACK-COMPONENT-UTILITY-FUNCTIONS}
 
@@ -2725,7 +2756,7 @@ just before the instruction currently being compiled.
 \end{indpar}
 
 \verb|bool mexstack::| \MEXCOMKEY{trace\_never} \verb|= false| \\
-\verb|inline void mexstack::| \MEXCOMKEY{push\_instr} \\
+\verb|inline void mexstack::| \MEXCOMKEY{push\_instr}\label{PUSH-INSTR} \\
 \verb|        ( mex::instr & instr,| \\
 \verb|          const min::phrase_position & pp =| \\
 \verb|              min::MISSING_PHRASE_POSITION,| \\
@@ -3066,23 +3097,24 @@ management functions:
 \verb|          const min::phrase_position & pp =| \\
 \verb|              min::MISSING_PHRASE_POSITION,| \\
 \verb|          bool no_source = false,| \\
-\verb|          min::int32 stack_offset = 0 )|
+\verb|          min::int32 sucess_stack_offset = 0 )|
 \begin{indpar}
 {\tt Instr.op\_code} must be set to {\tt JMP\ldots}
 and {\tt instr.trace\_class} may be set or may be {\tt 0}.
 This function executes {\tt mexstack::push\_instr}
 to push that instruction into the {\tt mexcom::\EOL output\_\EOL module}
-code vector.  The {\tt pp}, {\tt no\_source}, and {\tt stack\_offset}
+code vector.  The {\tt pp} and {\tt no\_source}
 parameters are passed to {\tt mexstack::\EOL push\_\EOL instr}.
 The instruction {\tt trace\_info} is set equal to the {\tt target}.
 
-If the {\tt JMP\ldots} instruction takes operands from the process stack,
-these should be popped from the compiler variables stack before this
-function is called,  and {\tt stack\_\EOL offset} should be allowed
-to default to {\tt 0}.
-
 Lastly this function creates an element of the pending jump list
 for the newly output {\tt JMP\ldots} instruction.
+
+Before calling this function, set {\tt mexstack::stack\_length} to the
+value it should have it the {\tt JMP\ldots} \underline{fails}.  This
+plus {\tt success\_stack\_offset} becomes the $S$ value in the jump list entry,
+the effective virtual stack length if the {\tt JMP\ldots}
+succeeds.
 \end{indpar}
 
 \verb|min::uns32 mexstack:| \MEXSTACKKEY{jmp\_target}\label{JMP-TARGET}
