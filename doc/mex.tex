@@ -3430,23 +3430,16 @@ and some have \emkey{trace-packet} arguments, where:
 These specify the {\em trace-info} for the instructions:
 see Trace-Packet Based Trace Messages,
 \itemref{TRACE-PACKET-BASED-TRACE-MESSAGES}.
-\item To assemble a run-time instruction, MEXAS first adjusts the
-variable stack to correspond its desired state \underline{after}
-the instruction executes, and \underline{then} calls a {\tt mexstack} function
-(such as {\tt push\_instr} or {\tt begx}) to push the instruction
-into the module code vector.
+\item To assemble a run-time instruction, {\tt MEXAS} first adjusts
+{\tt mexstack::stack\_length} and pushes the instruction to
+the end of the {\tt mexcom::output\_module} code vector.
+Then {\tt MEXAS} adjusts the variable and function stacks.
 
-One exception is the {\tt BEGF} instruction: the argument variables are
-pushed into the variables stack \underline{after} calling {\tt begx}
-(which calls {\tt push\_instr}).
-
-The other exception involves trace variables.  These are handled by
+If an instruction takes trace variables, these are pushed into the stack by
 calling {\tt push\_push\_\EOL instr} for each trace variable \underline{before}
-assembling the run-time instruction.  Trace variables are \underline{not}
-pushed into the assembler variable stack.
-Each call to {\tt push\_push\_instr} has a {\tt stack\_offset} argument
-equal to the number of trace variables pushed so far for the run-time
-instruction, beginning with the number {\tt 1} for the first trace variable.
+assembling the run-time instruction.  The variable stack does \underline{not}
+have elements corresponding to trace variables - they are in a sense
+invisible to the regular assembly process.
 \item
 In describing the MEXAS statements that output a run-time instruction,
 we describe what the assembler does to the variable stack, pending
@@ -3478,10 +3471,10 @@ Then one element is pushed to the variable stack with
 \begin{indpar}
 Here {\em aop}\TT{I} is any immediate arithmetic operation code from
 Figure~\itemref{ARITHMETIC-INSTRUCTIONS} (e.g., {\tt ADDI})
-with \TT{immedD} is set to {\tt number}.
+with \TT{immedD} set to {\tt number}.
 The run-time
 action of the instruction is specified in
-Figure~\ref{ARITHMETIC-INSTRUCTIONS}.
+Figure~\itemref{ARITHMETIC-INSTRUCTIONS}.
 
 At assembly-time one element is popped from the variable stack and then
 one element is pushed to the variable stack with
@@ -3536,13 +3529,15 @@ is called.  Otherwise {\tt PUSHG} is used.)
 \end{indpar}
 
 \ttkey{PUSHI} ~ {\em number} ~ {\em new-variable-name}\QMARK{} \\
-\ttkey{PUSHI} ~ {\em string} ~ {\em new-variable-name}\QMARK{} \\
+\ttkey{PUSHI} ~ {\em attrubute-label} ~ {\em new-variable-name}\QMARK{} \\
 \ttkey{PUSHI} ~ \TT{TRUE} ~ {\em new-variable-name}\QMARK{} \\
 \ttkey{PUSHI} ~ \TT{FALSE} ~ {\em new-variable-name}\QMARK{} \\
 \ttkey{PUSHI} ~ \TT{NONE} ~ {\em new-variable-name}\QMARK{}
 \begin{indpar}
 At run-time, pushes into the process stack a copy of
-the {\em number}\pagnote{NUMBER}, or the {\em string}\pagnote{STRING},
+the {\em number}\pagnote{NUMBER}, or
+the {\em attibute-label}\pagnote{ATTRIBUTE-LABEL} (which might be
+a {\em string}),
 or \TT{mex::TRUE}, or \TT{mex::FALSE}, or \TT{min::NONE()}.
 At assembly time, pushes into the variable stack an
 element with {\em new-variable-name} as its name.
@@ -3559,7 +3554,8 @@ At assembly time, pops the variable stack.
 The variable stack search for {\em variable-name} is restricted to
 elements with the same lexical level as the \TT{POP} instruction
 that are not arguments to that lexical level and that are of
-lesser depth than the \TT{POP} instruction.
+lesser depth than the \TT{POP} instruction or are
+loop `{\tt next-\ldots}' variables.
 
 \ttkey{POP} assembles to the run-time instruction \TT{POPS}.
 Note that \TT{POPL}, \TT{POPG}, and \TT{POPA} do

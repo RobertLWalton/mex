@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Jan  7 02:07:21 AM EST 2025
+// Date:	Wed Jan  8 06:36:48 PM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1059,7 +1059,7 @@ mex::module mexas::compile ( min::file file )
 	        min::locatable_gen D;
 		D = mexas::get_num ( index );
 		if ( D == min::NONE() )
-		    D = mexas::get_str ( index );
+		    D = mexas::get_label ( index );
 		if ( D == min::NONE() )
 		{
 		    D = mexas::get_name ( index );
