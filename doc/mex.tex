@@ -3373,8 +3373,12 @@ the top of the stack hides the element lower down.
 \item A \emkey{function-name} is a name of a function stack element.
 If two elements have the same {\em function-name}, the element nearer
 the top of the stack hides the element lower down.
-\item Stack searches always proceed from the topmost stack element
-to the bottom-most, and accept the first element found with the desired name.
+\item Stack searches always proceed from a higher stack element
+to the bottom-most stack element,
+and accept the first element found with the desired name.
+Most searches start at the top of the stack, but searches restricted
+to level 0 variables or functions start with the upper-most level
+0 variable or function.
 \item Modules are named by the name of the file assembled to produce
 the module, with the suffix \TT{.mex} deleted.  Such a name is
 a \emkey{module-name}.
@@ -3391,11 +3395,12 @@ name as a variable whose index is
 
 If {\em new-variable-name} is missing or `\TT{*}',
 the element just gets the name `\TT{*}' to indicate that the
-element has no name.
+variable stack element has no name.
 
 \item A variable cannot be written if it has a lexical level less than
 that of the writing instruction, or is a function argument variable,
-or has depth equal to the writing instruction.
+or has depth equal to the writing instruction and the variable is not
+a loop `{\tt next-\ldots}' variable.
 \item The operands that take integer values must have values in the
 range $[0,2^{32})$ (so they will fit into \TT{immedA}, \TT{immedB},
 or \TT{immedC} instruction
