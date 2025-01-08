@@ -244,7 +244,7 @@
 
 \author{Robert L. Walton}
 
-\date{January 7, 2025}
+\date{January 8, 2025}
  
 \maketitle
 
@@ -3316,17 +3316,45 @@ current lexeme or comment.  An error message accompanies such replacement.
 {\tt MEXAS} uses the concepts, data, and functions of the
 {\tt mexcom} and {\tt mexstack} MEX compiler components
 
-Specifically {\tt MEXAS} implements a variable stack and a function stack.
-{\tt MEXAS} does not have function variables, but does permit functions
-with no arguments to be referenced in {\tt CALL} statements.
+Specifically {\tt MEXAS} implements a variable stack that serves
+as the variable symbol table and a separate function stack that serves
+as the function symbol table.
 
-A variable in the variable stack has an index as specified by the
-{\tt mexstack} component.  A function in the function stack
-has an index equal the location of its {\tt BEGF} instruction.
+Unlike a typical compiler symbol table, the {\tt MEXAS} variable stack has
+one entry for every location in the range {\tt [0, mexstack::stack\_length)}.
+Many of these entries are \skey{dummy variable}s, indicated by
+giving them the `name' {\tt "*"}, which is not a variable name,
+and these correspond to locations that are not assigned to any
+real variable.
+
+Between {\tt MEXAS} statements, the length of the variable stack
+is equal to {\tt mexstack::\EOL stack\_\EOL length}.
+
+A typical {\tt MEXAS} instruction, which during run-time pops a few
+values from the process run-time stack and pushes a value, at assembly
+time pops the variable stack a few times and then pushes an entry,
+often a dummy variable, into the variable stack.
+
+This differs from the typical compiler, which pushes variables into
+the symbol table only for assignment statements and
+at the beginning of blocks (arguments and next variables).
+
+More explicitly, {\tt MEXAS} assembles most instructions by first
+setting {\tt mexstack::stack\_length} to the value it will have
+at the end of the instruction, second pushing the instruction into
+the {\tt mexcom::output\_module} code vector, and third, popping
+and pushing the variable stack.
+
+
+The location of a {\tt MEXAS} variable is its index in the
+variable stack when that stack is viewed as a vector.
+The location of a {\tt MEXAS} function
+is the index of its {\tt BEGF} instruction in the current module
+code vector.
 After a module is assembled,
 it is executed, and then the variable and function stacks are
 encoded in the module interface that maps variable and function names
-to indices.
+to locations.
 
 
 \subsection{MEXAS Instructions}
