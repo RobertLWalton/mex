@@ -244,7 +244,7 @@
 
 \author{Robert L. Walton}
 
-\date{January 8, 2025}
+\date{January 9, 2025}
  
 \maketitle
 
@@ -3664,24 +3664,21 @@ to {\em nnext}.
 
 At assembly-time, this instruction first checks that the
 top {\em nnext} variable stack elements have the current lexical level
-and depth,
-then pushes {\em nnext} variable stack elements with current lexical
+and depth and are not dummy variables.  It then adds
+{\em nnext} to {\tt mexstack::stack\_length}, increments
+the current depth, and outputs the instruction.
+Lastly it pushes {\em nnext} variable stack elements with current lexical
 level and depth
 and with names derived from their {\em nnext}'th predecessor
 in the stack by adding the prefix `\TT{next-}'\label{NEXT-VARIABLE}
-to the predecessor's
-name.
+to the predecessor's name.  These {\tt next-\ldots}~variables are
+marked write-only, which allows them to be identified
+as loop {\tt next-\ldots} variables by {\tt POP}.
 
-Then this instruction calls
-{\tt mexstack::begx}\pagnote{BEGX} to increment
-the current instruction depth and set the
-{\tt stack\_limit}\pagnote{STACK-LIMIT}.
-
-Thus for example, if the top two stack elements have names
-\TT{X} and \TT{Y} and {\em nnext} is \TT{2}, the two elements
-pushed would have names \TT{next-X} and \TT{next-Y}, and
-all 4 stack elements would have depth one less than the depth
-of instructions inside the \TT{BEGL/ENDL} block.
+Thus, for example, if the top two stack elements have names
+\TT{X} and \TT{Y} and depth $D$, and {\em nnext} is \TT{2}, the two elements
+pushed would have names \TT{next-X} and \TT{next-Y}, depth $D+1$,
+and would be marked write-only.
 \end{indpar}
 
 \ttkey{ENDL}
@@ -3700,7 +3697,7 @@ which does nothing but fill in instruction fields and push the instruction
 into the module code vector).
 
 The {\tt mexstack::cont} function
-searches the block stack for the {\tt loop\_depth}'th {\tt BEGL ...~ENDL}
+searches the block stack for the {\em loop\_depth}'th {\tt BEGL ...~ENDL}
 loop block and uses that to create an appropriate instruction.
 {\tt Loop\_depth} defaults to {\tt 1}, which continues the innermost
 loop (exiting any non-loop blocks inside the innermost loop).
@@ -3712,29 +3709,26 @@ the next to innermost loop, etc.
 	{\em trace-message}\QMARK{}
 \begin{indpar}
 At run-time this instruction's actions are as described in
-Figure~\itemref{BLOCK-AND-FUNCTION-INSTRUCTIONS}.  At assembly-time,
-this instruction first pushes into the function stack
+Figure~\itemref{BLOCK-AND-FUNCTION-INSTRUCTIONS}, with the number
+of {\em variable-names} as \TT{immedA} (the minimum number of
+arguments expected).
+
+At assembly-time, this instruction first adds
+to {\tt mexstack::\EOL stack\_\EOL length}
+the number of {\em variable-names},
+increments the current lexical level, zeroes the current depth,
+and outputs the instruction.  Then this instruction pushes
+entries into the variable stack with the given {\em variable-names},
+and pushes into the function stack
 an element with the {\em function-name} and location of the {\tt BEGF}
 instruction.
 
-This instruction then computes its {\tt trace-info}
+This instruction computes its {\tt trace-info}
 consisting of the {\em trace-message} followed by the list of
 {\em variable-names} (which are the function argument names).
 This {\tt trace-info} is used at run-time by the
 {\tt CALL\ldots} instruction to trace the arguments
 to the function\pagnote{CALL-TO-BEGF}.
-
-Next this instruction calls {\tt mexstack::begx}\pagnote{BEGX}
-to increment the current lexical level to $L$, set the current depth to zero,
-and set {\tt stack\_limit}\pagnote{STACK-LIMIT},
-{\tt ap[$L$]}\pagnote{LP}, and {\tt fp[$L$]}\pagnote{FP}.
-
-Lastly this instruction pushes one element with each
-of the {\em variable-names} into the variable stack (they
-represent the arguments to the function).
-The number of {\em variable-names} can be less than,
-but may \underline{not} be greater than, the number of actual
-arguments.
 \end{indpar}
 
 \ttkey{ENDF} ~ {\em trace-message}\QMARK{}
@@ -3864,7 +3858,9 @@ If {\em attribute-label-variable-name}
 is \TT{*}, the attribute name is popped from the stack
 (\TT{immedB} != 0, \TT{immedC} == 0).
 
-At assembly time, pushes into the variable stack an
+At assembly time, pops one entry from the variable stack if the
+{\em attribute-lable-variable-name} was \TT{*},
+and then pushes into the variable stack an
 element with {\em new-variable-name} as its name.
 
 The variable stack searches for {\em object-variable-name} 
@@ -3999,8 +3995,8 @@ this instruction does nothing.
 
 \ttkey{LABEL}\label{LABEL} ~ {\em jmp-target}
 \begin{indpar}
-This statement just calls {\tt mexstack::jmp\_target} with the given
-{\tt jmp-target} name.
+This statement just calls {\tt mexstack::jmp\_target}\pagnote{JMP-TARGET}
+with the given {\em jmp-target} name.
 \end{indpar}
 
 \ttkey{STACKS}
