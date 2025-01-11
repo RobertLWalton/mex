@@ -2,7 +2,7 @@
 %
 % File:         mex-macros.tex
 % Author:       Bob Walton (walton@acm.org)
-% Date:		Sat Jan 11 03:31:02 AM EST 2025
+% Date:		Sat Jan 11 03:53:03 AM EST 2025
   
 
 \usepackage[T1]{fontenc}
@@ -157,8 +157,12 @@
 \newcommand{\MUPindex}[1]{\ttindex{MUP::#1}\ttindex{#1}}
 
 \newcommand{\itemref}[1]{\ref{#1}$\,^{p\pageref{#1}}$}
+\newcommand{\mexref}[1]{\ref{#1}$\,^{mex\pageref{#1}}$}
+\newcommand{\mexasref}[1]{\ref{#1}$\,^{mexas\pageref{#1}}$}
 \newcommand{\pagref}[1]{p\pageref{#1}}
 \newcommand{\pagnote}[1]{$\,^{p\pageref{#1}}$}
+\newcommand{\mexnote}[1]{$\,^{mex\pageref{#1}}$}
+\newcommand{\mexasnote}[1]{$\,^{mexas\pageref{#1}}$}
 
 \newcommand{\EOL}{\penalty \exhyphenpenalty}
 
