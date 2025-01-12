@@ -14,11 +14,11 @@
 \begin{document}
         
 \title{Minimal Run-time System\\[2ex]Execution Engine\\[2ex]MEX\\[2ex]
-       (Version 3)}
+       (Version 4)}
 
 \author{Robert L. Walton}
 
-\date{January 9, 2025}
+\date{January 11, 2025}
  
 \maketitle
 
@@ -42,6 +42,10 @@ MEX is layered on top of the MIN Minimal Run-time System.
 MEX is stack-oriented and block-oriented.  It computes with
 \ttkey{min::gen} values.
 
+References to pages in this document have the form p\# (e.g., p5)
+whereas references to pages in the MEX Assember (MEXAS) document have the
+form mexas\# (e.g., mexas13).
+
 \section{Abbreviations}
 \label{ABBREVIATIONS}
 
@@ -50,6 +54,7 @@ and the corresponding code:
 
 \begin{indpar}
 \begin{tabular}{p{0.8in}l}
+\ttmkey{ap}{abbreviation}	& argument pointer \\
 \ttmkey{except}{abbreviation}	& exception \\
 \ttmkey{fp}{abbreviation}	& frame pointer \\
 \ttmkey{immed}{abbreviation}	& immediate \\
@@ -58,6 +63,7 @@ and the corresponding code:
 \ttmkey{jmp}{abbreviation}	& jump (go to) \\
 \ttmkey{nargs}{abbreviation}	& number of arguments \\
 \ttmkey{nresults}{abbreviation}	& number of results \\
+\ttmkey{nnext}{abbreviation}	& number of loop next variables \\
 \ttmkey{pc}{abbreviation}	& program counter \\
 \ttmkey{ret}{abbreviation}	& return \\
 \ttmkey{sp}{abbreviation}	& stack pointer \\
@@ -91,7 +97,7 @@ directories:
 MEX is layered on top of MIN, the Minimal Run-time System, and
 includes \ttkey{min.h}.
 
-The C++ data and functions described in this document can be
+The C++ data and functions of MEX can be
 accessed by C++ code that contains the following inclusion:
 
 \begin{center}\ttindex{mex.h}
@@ -182,7 +188,8 @@ The arguments and all the values the function pushes into the
 stack are called the function's \key{frame}.  The stack pointer
 value when the function begins is called the function's
 \key{frame pointer}, and points just after the last argument
-of the function.
+of the function.  The pointer to the first argument is called
+the \key{argument pointer}.
 
 Builtin instructions behave like function calls: for example,
 the \TT{ADD} instruction pops its two arguments from the stack
@@ -195,7 +202,8 @@ a copy of the final execution stack.
 
 Backward jumps are only allowed at the end of a loop blocks.
 These pop the values pushed into the stack by the loop block.
-Forward jumps are the only means of exiting a loop block.  These
+Forward jumps can be used to exit any block and
+are the only means of exiting a loop block.  These
 pop all values pushed into the stack by blocks that are exited.
 
 There are special considerations involving the stack if the
@@ -310,13 +318,14 @@ has level $L=L'+1$.
 If $F$ is a function lexically inside another function $F'$, then instructions
 in $F$ can reference the variables of $F'$ that could be referenced by
 an instruction located where $F$ is defined.
-To locate these variables, knowing the frame pointer for the
-execution of $F'$ is sufficient.  The frame pointer is defined as the
-stack pointer that points just after the last argument to $F'$,
-or equivalently, the stack
-pointer when $F'$ is called.
+To locate these variables, knowing the frame pointer and argument
+pointer for the
+execution of $F'$ is sufficient.  The frame pointer is the
+stack pointer when $F'$ is called, and this points just after the last
+argument to $F'$.  The argument pointer is
+the pointer to the first argument for $F'$ when $F'$ is called.
 
-So how do we compute the frame pointer of $F'$?  To see how,
+So how do we compute the frame and argument pointers of $F'$?  To see how,
 we need to analyze the situation in more detail.
 
 We define the level of an instruction to be the level of the
