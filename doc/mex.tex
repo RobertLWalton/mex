@@ -1062,10 +1062,7 @@ the logical values `true' and `false':
     & The values popped include trace values.
 \\\hline
 \ttkey{BEGL}
-    & Subtract \TT{immedA} from
-      \TT{sp} (popping the stack \TT{immedA} times). \\
-    & The values popped are always trace values.  Then \\
-    & take the top \TT{immedB} values in the stack and push a copy of \\
+    & Take the top \TT{immedB} values in the stack and push a copy of \\
     & them all into the stack, preserving stack ordering.
 \\\hline
 \ttkey{ENDL}/\ttkey{CONT}
@@ -1317,7 +1314,7 @@ can raise exceptions.
 
 In non-optimized mode, i.e.~when a process's \TT{optimize} member is \TT{false},
 an instruction that raises an exception prints
-an error message if the instruction exception is one whose bit
+an error message if that exception is one whose bit
 is on in the process's \TT{excepts\_mask}\label{EXCEPTS-MASK} member.
 This error message is always followed by a trace of the instruction
 (regardless of the process trace flag settings): see
@@ -1361,7 +1358,7 @@ Instructions in the \ttkey{NEVER} trace class are never
 traced.  Typically there are compiler switches that will
 change to \TT{NEVER} the trace class stored in every instruction that
 does not have the \TT{ALWAYS} class
-(see The MEXAS Program \TT{-tcnever} option, page \mexasref{-TCNEVER}).
+(see The {\tt MEXAS} Program \TT{-tcnever} option\mexasnote{-TCNEVER}).
 
 The trace classes are given in Figure \itemref{TRACE-CLASSES-AND-GROUPS}.
 Also given there are trace groups that can be used for convenience
@@ -1369,9 +1366,10 @@ to set the trace flags of a process to include
 a pre-defined group of trace classes.
 Trace class names and trace group names are used by compiler switches
 which set the initial trace flags of processes
-(see The MEXAS Program \TT{-tc:\ldots} option, page \mexasref{-TC:}),
-and by the
-\TT{SET\_\EOL TRACE} instruction that sets the current trace flags
+(see The {\tt MEXAS} Program \TT{-tc:\ldots} option\mexasnote{-TC:}),
+and by the {\tt MEXAS}
+\TT{SET\_\EOL TRACE} instruction\mexasnote{SET-TRACE}
+that sets the current trace flags
 of a process.
 
 Notice that all arithmetic instructions have the same
@@ -1413,7 +1411,7 @@ is \TT{mex::T\_AOP}.
     \itemref{STACK-AND-FLOW-CONTROL-INSTRUCTIONS} and
     \itemref{STACK-AND-HOUSEKEEPING-INSTRUCTIONS}.
 \\\hline
-\ttmkey{POP}{trace class} & The \TT{POP} instruction in Figure
+\ttmkey{POP}{trace class} & The \TT{POPS} instruction in Figure
     \itemref{STACK-AND-FLOW-CONTROL-INSTRUCTIONS}.
 \\\hline
 \ttmkey{JMP}{trace class} & The \TT{JMP} instruction.
@@ -1559,11 +1557,6 @@ have the form:
                     \TT{<=} {\em from-variable} \TT{=} {\em value}
 \end{center}
 
-For \TT{PUSH\ldots} the {\em to-variable} is the {\em new-variable}
-and the {\em from-variable} is the instruction {\tt variable}.
-For \TT{POP} the {\em to-variable} is the instruction {\em variable}
-and the {\em from-variable} is the name of the top of the stack.
-
 As always in tracing, `\TT{*}' is used for a missing variable name.
 
 For a \TT{PUSH\ldots} or \TT{POP} instruction
@@ -1652,10 +1645,12 @@ Figure~\itemref{OBJECT-INSTRUCTIONS} are:
 \end{tabular}
 \end{center}
 
-For these instructions,
+For all these instructions but {\tt PUSHOBJ},
 \TT{module->\EOL trace\_\EOL info[i]} is the MIN label
 \TT{[<} {\em from-variable} ~ {\em to-variable} \TT{>]},
 where one of the two variables is {\em object-variable}.
+But for {\tt PUSHOBJ}
+\TT{module->\EOL trace\_\EOL info[i]} is just {\em to-variable}.
 If \TT{module->\EOL trace\_\EOL info[i]} does not have the right form,
 {\em from-variable} and {\em to-variable} are taken to be \TT{*}.
 
@@ -1752,7 +1747,7 @@ match the names actually used in source code to refer to the loop
 variables, and similarly for \TT{BEGF} and arguments and \TT{CALL\ldots}
 and return values.
 But MEX knows nothing of names used in source code.
-To see how MEXAS handles this look at MEXAS Instructions,
+To see how {\tt MEXAS} handles this look at {\tt MEXAS} Instructions
 \mexasref{MEXAS-INSTRUCTIONS}.
 
 
@@ -2385,7 +2380,7 @@ process.
 \end{tabular}
 
 \begin{indpar}
-\TT{Stack\_limit} is used by the MEXAS assembler, but likely will not be
+\TT{Stack\_limit} is used by the {\tt MEXAS} assembler, but likely will not be
 used by compilers.
 It is set so that for a variable of location
 {\tt $\ell$ < stack\_limit}\label{STACK-LIMIT}:
@@ -2843,10 +2838,10 @@ A \TT{JMP\ldots} instruction for which a legal target exists
 is called \key{resolvable}.  Other \TT{JMP\ldots} instructions
 are \key{unresolvable} and are in error.
 
-The following MEXAS assembler programs illustrate this
+The following {\tt MEXAS} assembler programs illustrate this
 rule when the jump does \underline{not}
 reduce depth and $M$ = the variables stack length just after the
-\TT{JMP\ldots} is compiled (in MEXAS a {\tt LABEL} statement
+\TT{JMP\ldots} is compiled (in {\tt MEXAS} a {\tt LABEL} statement
 just calls {\tt jmp\_target}):
 
 Example 1:

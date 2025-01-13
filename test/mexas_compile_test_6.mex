@@ -2,7 +2,7 @@
 //
 // File:	mexas_compile_test_6.mex
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Jan  2 07:02:34 PM EST 2025
+// Date:	Mon Jan 13 08:46:05 AM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -41,6 +41,8 @@ BEGF F1 F1ARG1
 	    PUSHI 1
 	    PUSHV 0
 	    PUSHI 2
+	    PUSHV
+	    PUSHI 3
 	    PUSHV
 
 	    PUSHI 0

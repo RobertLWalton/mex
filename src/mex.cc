@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Jan 13 03:18:15 AM EST 2025
+// Date:	Mon Jan 13 09:13:11 AM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -140,6 +140,8 @@ inline min::printer operator <<
     ( min::printer p, const ::pvar & pvar )
 {
     if ( pvar.value == ::STAR )
+        return p << "*";
+    else if ( ! min::is_name ( pvar.value ) )
         return p << "*";
     else
         return p << min::pgen_name ( pvar.value );
@@ -1137,15 +1139,11 @@ static bool optimized_run_process ( mex::process p )
 	}
 	case mex::BEGL:
 	{
-	    min::uns32 immedA = pc->immedA;
 	    min::uns32 immedB = pc->immedB;
-	    if ( immedA + immedB < immedA )
+	    if ( immedB > sp - spbegin )
 	        goto ERROR_EXIT;
-	    if ( immedA + immedB > sp - spbegin )
+	    if ( sp + immedB > spend )
 	        goto ERROR_EXIT;
-	    if ( sp + immedB > spend + immedA )
-	        goto ERROR_EXIT;
-	    sp -= (int) immedA;
 	    min::gen * q1 = sp - (int) immedB;
 	    min::gen * q2 = sp;
 	    while ( q1 < q2 )
@@ -2991,17 +2989,15 @@ bool mex::run_process ( mex::process p )
 		break;
 	    }
 	    case mex::BEGL:
-	        if ( immedA + immedB < immedA
-		     ||
-	             immedA + immedB > sp - spbegin )
+	        if ( immedB > sp - spbegin )
 		{
-		    message = "BEGL: immedA+immedB"
+		    message = "BEGL: immedB"
 		              " larger than stack size";
 		    goto INNER_FATAL;
 		}
-		if ( sp + immedB > spend + immedA )
+		if ( sp + immedB > spend )
 		    goto STACK_LIMIT_STOP;
-		sp_change = - (int) immedA + immedB;
+		sp_change = immedB;
 	        break;
 	    case mex::ENDL:
 	    case mex::CONT:
@@ -3657,7 +3653,6 @@ bool mex::run_process ( mex::process p )
 		break;
 	    case mex::BEGL:
 	    {
-		sp -= (int) immedA;
 		min::gen * q1 = sp - (int) immedB;
 		min::gen * q2 = sp;
 		while ( q1 < q2 )
