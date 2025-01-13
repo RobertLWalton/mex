@@ -18,7 +18,7 @@
 
 \author{Robert L. Walton}
 
-\date{January 11, 2025}
+\date{January 13, 2025}
  
 \maketitle
 
@@ -729,7 +729,7 @@ most recently started currently executing function of level $L$,
 and \TT{p->ap[$L$]} is argument pointer (pointer at first argument)
 for this function.
 Note that the list of currently executing functions
-in order of being called is not monotonic in level: a function
+in order of being called is \underline{not} monotonic in level: a function
 of level $L$ may call a function of level $\leq L+1$.
 
 The actual number of arguments to the most recent
@@ -798,8 +798,9 @@ any error, the instruction is executed in non-optimized mode.
 The \TT{trace\_depth}, \TT{trace\_flags}, \TT{excepts\_mask}, and
 \TT{excepts\_accumulator}
 members of a process
-are explained in Arithmetic Exceptions, \itemref{ARITHMETIC-EXCEPTIONS}
-and Instruction Tracing, \itemref{INSTRUCTION-TRACING}.
+are explained in
+Instruction Tracing \itemref{INSTRUCTION-TRACING}
+and Arithmetic Exceptions \itemref{ARITHMETIC-EXCEPTIONS}.
 
 
 \section{Instructions}
@@ -824,7 +825,7 @@ mex::instr an_add_immediate_instruction =
         {mex::ADDI,mex::T_AOP,,,,,,3.14159};
     // Add 3.14159 to top value.
 mex::instr a_begin_instruction = {mex::BEG, mex::T_BEG};
-    // Do nothing.
+    // Do nothing. (Marks block beginning for compiler.)
 mex::instr an_end_instruction = {mex::END,mex::T_END,,,10};
     // Pop 10 values and discard them.
 mex::instr a_jump_instruction = {mex::JMP,mex::T_JMP,1,,10,,32};
@@ -858,8 +859,8 @@ Some instructions use the values of the following parameters to represent
 the logical values `true' and `false':
 
 \hspace*{0.3in}\begin{tabular}{rll}
-\tt min::gen mex::& \ttkey{FALSE} & \tt // Default: the MIN string "FALSE". \\
-\tt min::gen mex::& \ttkey{TRUE}  & \tt // Default: the MIN string "TRUE".  \\
+\tt min::gen mex::& \ttkey{FALSE} & \tt // Default: min::FALSE(). \\
+\tt min::gen mex::& \ttkey{TRUE}  & \tt // Default: min::TRUE().  \\
 \end{tabular}
 
 \pagebreak
@@ -913,8 +914,8 @@ the logical values `true' and `false':
     & remainder of \TT{immedD} divided by the top value.
 \\\hline
 \ttkey{POW}/\ttkey{POWR}
-    & Pop 2 values, then push the first/second popped to the \\
-    & second/first power.
+    & Pop 2 values, then push the second/first popped to the \\
+    & first/second popped power.
 \\\hline
 \ttkey{POWI}
     & Replace the top value by the the top value to the \\
@@ -924,8 +925,8 @@ the logical values `true' and `false':
     & Replace the top value by \TT{immedD} to the top value power.
 \\\hline
 \ttkey{LSH}/\ttkey{LSHI}/\ttkey{RSH}/\ttkey{RSHI}
-    & Pop 2 values, then push the first times 2 to the \\
-    & second/\TT{immedD}/minus-second/minus-\TT{immedD} power.
+    & Pop 2 values, then push the second popped times 2 to the \\
+    & first/\TT{immedD}/minus-first/minus-\TT{immedD} power.
 \\\hline
 \ttkey{FLOOR}/\ttkey{CEIL}
     & Replace the top value by the an integer equal to the \\
@@ -952,9 +953,9 @@ the logical values `true' and `false':
     & Replace the top value by its arc- sin/cos/tan.
 \\\hline
 \ttkey{ATAN2}/\ttkey{ATAN2R}
-    & Pop 2 values, then push the arc-tangent of the first/second \\
-    & popped (x value) divided by the second/first popped \\
-    & (y value).
+    & Pop 2 values, then push the arc-tangent of the second/first \\
+    & popped (y value) divided by the first/second popped \\
+    & (x value).
 \\\hline
 \end{tabular}
 \end{center}
@@ -974,10 +975,10 @@ the logical values `true' and `false':
     & stack; so \TT{immedA} = 0 duplicates the top value.
 \\\hline
 \ttkey{PUSHL}
-    & Push the stack vector value with index \TT{fp[immedB] + immedA}. \\
-    & But if \TT{immedB == 0} and \TT{m->globals} is not \TT{min::NULL\_STUB} \\
-    & for the module \TT{m} of the current program counter, push \\
-    & \TT{m->globals[immedA]} instead.  Note \TT{fp[0] == 0}.
+    & Read the value at \TT{fp[immedB] + immedA} and push it into the \\
+    & stack.  But if \TT{immedB == 0} and \TT{m->globals} is not \TT{min::} \\
+    & \TT{NULL\_STUB} for the module \TT{m} of the current program counter, \\
+    & push \TT{m->globals[immedA]} instead.  Note \TT{fp[0] == 0}.
 \\\hline
 \ttkey{PUSHI}
     & Push \TT{immedD} into the stack.  \TT{immedD} should \underline{not} be \\
@@ -1003,21 +1004,21 @@ the logical values `true' and `false':
     & It is illegal for \TT{immedC} = 0 (\TT{JMP} would jump to itself).
 \\\hline
 \ttkey{JMPEQ}/\ttkey{JMPNEQ}
-    & Pop 2 values and arithmetically compare them.  If they are \\
-    & equal/not-equal continue as per the \TT{JMP} instruction.  Otherwise \\
-    & if \TT{immedB} == 0, do nothing more, but if \TT{immedB} == 1, \\
-    & push the first value popped back into the stack.
+    & Pop 2 values and compare them.  If they are \TT{==}/\TT{!=} as \\
+    & \TT{min::gen} values, continue as per the \TT{JMP} instruction.  \\
+    & Otherwise if \TT{immedB} == 0, do nothing more, but if \\
+    & \TT{immedB} == 1, push the first value popped back into the stack.
 \\\hline
 \ttkey{JMPLT}/\ttkey{JMPLEQ}
-    & Ditto, but \TT{JMP} if the second popped is \\
+    & Ditto, but \TT{JMP} if the second popped is arithmetically \\
     & less-than/less-than-or-equal-to the first popped.
 \\\hline
 \ttkey{JMPGT}/\ttkey{JMPGEQ}
-    & Ditto, but \TT{JMP} if the second popped is \\
+    & Ditto, but \TT{JMP} if the second popped is arithmetically \\
     & greater-than/greater-than-or-equal-to the first popped.
 \\\hline
 \ttkey{JMPTRUE}
-    & Pop 1 value and respectively test whether it equals \TT{mex::TRUE}, \\
+    & Pop 1 value and respectively test whether it: equals \TT{mex::TRUE}, \\
 \ttkey{JMPFALSE}
     & equals \TT{mex::FALSE}, \\
 \ttkey{JMPNONE}
@@ -1026,8 +1027,8 @@ the logical values `true' and `false':
     & is an integer in the range (-1e15,+1e15), \\
 \ttkey{JMPFIN}/\ttkey{JMPINF}
     & is a finite number, is an infinite number, \\
-\ttkey{JMPNUM}
-    & is a MIN number (includes NaNs), \\
+\ttkey{JMPNAN}/\ttkey{JMPNUM}
+    & is an arithmetic NaN, is a MIN number (includes NaNs), \\
 \ttkey{JMPTRUTH}
     & equals mex::TRUE or mex::FALSE, \\
 \ttkey{JMPSTR}/\ttkey{JMPOBJ}
@@ -1087,7 +1088,7 @@ the logical values `true' and `false':
     & Same as a \TT{RET} instruction (below) with \TT{immedC} = 0. 
 \\\hline
 \ttkey{CALLM}
-    & Push a \TT{mex::ret} value $e$ into the return stack, setting
+    & Push a \TT{mex::ret} entry $e$ into the return stack, setting
       \TT{$e$.saved\_pc} \\
     & to point to the \TT{CALLM} instruction, and then
       set the \TT{index} \\
@@ -1214,9 +1215,9 @@ the logical values `true' and `false':
 \begin{tabular}{|l|l|}
 \hline
 \ttkey{PUSHA}
-    & Push the stack vector value with index \TT{ap[immedB] + immedA}. \\
-    & \TT{immedA} must be in the range \TT{[0, nargs)} where \\
-    & \TT{nargs = p->fp[immedB] - p->ap[immedB]}.
+    & Read the stack vector value with index \TT{ap[immedB] + immedA} \\
+    & and push it into the stack.  \TT{immedA} must be in the range \\
+    & \TT{[0, nargs)} where \TT{nargs = p->fp[immedB] - p->ap[immedB]}.
 \\\hline
 \ttkey{PUSHNARGS}
     & Push \TT{nargs = p->fp[immedB] - p->ap[immedB]}
@@ -1226,10 +1227,11 @@ the logical values `true' and `false':
 \ttkey{PUSHV}
     & Replace the top stack value \TT{V} with the value of the stack element
       with \\
-    & index \TT{p->ap[immedB] + V}. \TT{V} must convert to an integer
-      in the range \\
-    & \TT{[0,nargs)}, where \TT{nargs = p->fp[immedB] - p->ap[immedB]}, \\
-    & else an invalid exception is raised and the result is a \TT{NaN}.
+    & index \TT{p->ap[immedB] + V}. \TT{V} must convert to a non-negative
+      integer.   \\
+    & If \TT{V >= nargs} where
+      \TT{nargs = p->fp[immedB] - p->ap[immedB]}, \\
+    & \TT{min::NONE()} replaces the top value.
 \\\hline
 \ttkey{SET\_TRACE}
     & The process \TT{trace\_flags} member is set to \TT{immedA} with its\\
@@ -1311,9 +1313,7 @@ is defined as a bit mask macro \TT{FE\_XX} in \TT{fenv.h}
 \end{boxedfigure}
 
 Only arithmetic instructions in Figure~\itemref{ARITHMETIC-INSTRUCTIONS}
-and the \TT{PUSHV} instruction in
-Figure~\itemref{STACK-AND-FLOW-CONTROL-INSTRUCTIONS} can raise
-exceptions.
+can raise exceptions.
 
 In non-optimized mode, i.e.~when a process's \TT{optimize} member is \TT{false},
 an instruction that raises an exception prints
@@ -1590,7 +1590,7 @@ $V$ is the value at the top of the stack, \\
 and \TT{nargs[$L$] = fp[$L$] - ap[$L$]}
 \end{center}
 For these two case,
-if \TT{module->\EOL trace\_\EOL info[i]} is not a MIN string,
+if \TT{module->\EOL trace\_\EOL info[i]} is not a MIN string or MIN label,
 {\em to-variable} is taken to be \TT{*}.
 
 \subsubsection{DEL Instruction Tracing}

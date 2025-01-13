@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Jan  3 06:38:47 PM EST 2025
+// Date:	Mon Jan 13 03:18:15 AM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -559,16 +559,13 @@ static bool optimized_run_process ( mex::process p )
 	    if ( sp <= spbegin )
 	        goto ERROR_EXIT;
 	    min::float64 f = FG ( sp[-1] );
+	    if ( ! mex::isfinite ( f ) )
+	        goto ERROR_EXIT;
 	    min::float64 ff = floor ( f );
-	    if ( mex::isnan ( ff )
-	         ||
-	         f != ff
-		 ||
-	         ff < 0 || ff >= p->fp[j] - k )
-	    {
-	        sp[-1] = GF ( NAN );
-	        feraiseexcept ( FE_INVALID );
-	    }
+	    if ( f != ff || ff < 0 )
+	        goto ERROR_EXIT;
+	    if ( ff >= p->fp[j] - k )
+	        sp[-1] = min::NONE();
 	    else
 		sp[-1] = spbegin[k + (int) ff];
 	    break;
@@ -1571,7 +1568,7 @@ mex::op_info mex::op_infos [ mex::NUMBER_OF_OP_CODES ] =
     { mex::PUSHA, NONA, T_PUSH, NULL, "PUSHA", NULL },
     { mex::PUSHNARGS, NONA, T_PUSH, NULL,
       "PUSHNARGS", NULL },
-    { mex::PUSHV, A1, T_PUSH, NULL, "PUSHV", "pushv" },
+    { mex::PUSHV, NONA, T_PUSH, NULL, "PUSHV", NULL },
     { mex::SET_TRACE, NONA, T_ALWAYS,
                       NULL, "SET_TRACE", NULL },
     { mex::TRACE, NONA, T_ALWAYS, NULL, "TRACE", NULL },
@@ -2120,36 +2117,10 @@ bool mex::run_process ( mex::process p )
 	    case mex::ATAN2R:
 	        fresult = atan2 ( farg1, farg2 );
 		break;
-	    case mex::PUSHV:
-	    {
-		min::uns32 j = pc->immedB;
-		if ( j < 1 || j > p->level )
-		{
-		    message = "PUSHV immedB is 0 or"
-		              " greater than current"
-			      " lexical level";
-		    goto INNER_FATAL;
-		}
-		min::uns32 k = p->ap[j];
-		min::float64 ff = floor ( farg1 );
-		if ( mex::isnan ( ff )
-		     ||
-		     farg1 != ff
-		     ||
-		     ff < 0 || ff >= ( p->fp[j] - k ) )
-		{
-		    result = NOT_A_NUMBER;
-		    feraiseexcept ( FE_INVALID );
-		}
-		else
-		    result = spbegin[k + (int) ff];
-
-		break;
-	    }
 	    } // end switch ( op_code )
 
-	    if ( op_code != mex::PUSHV )
-		result = min::new_num_gen ( fresult );
+	    result = min::new_num_gen ( fresult );
+
 	}
 
 	ARITHMETIC_TRACE:
@@ -2207,16 +2178,7 @@ bool mex::run_process ( mex::process p )
 		else
 		    p->printer << "*";
 
-		if ( op_code == mex::PUSHV )
-		    p->printer
-		        << " <= stack[ap["
-			<< pc->immedB
-			<< "]+"
-			<< min::pgen_quote ( arg1 )
-			<< "] = "
-			<< min::pgen_quote ( result );
-
-		else if ( op_info->op_type == mex::A1 )
+		if ( op_info->op_type == mex::A1 )
 		    p->printer
 		        << " = "
 			<< min::pgen_quote ( result )
@@ -2566,6 +2528,8 @@ bool mex::run_process ( mex::process p )
 	    min::locatable_gen value;
 	        // Value to be pushed or popped.
 		// Computed early for tracing.
+	    min::gen arg;
+	        // Argment computed for tracing.
 
 	    min::uns32 location = pc - pcbegin;
 	    min::gen tinfo  = min::MISSING();
@@ -2708,6 +2672,46 @@ bool mex::run_process ( mex::process p )
 		    ( p->fp[immedB] - p->ap[immedB] );
 		sp_change = +1;
 		break;
+	    case mex::PUSHV:
+	    {
+		if ( sp <= spbegin )
+		{
+		    message =
+		        "PUSHV: cannot pop an empty"
+			" stack";
+		    goto INNER_FATAL;
+		}
+		min::uns32 j = pc->immedB;
+		if ( j < 1 || j > p->level )
+		{
+		    message = "PUSHV immedB is 0 or"
+		              " greater than current"
+			      " lexical level";
+		    goto INNER_FATAL;
+		}
+		min::uns32 k = p->ap[j];
+		arg = sp[-1];
+		min::float64 farg = FG ( arg );
+		if ( ! mex::isfinite ( farg ) )
+		{
+		    message = "top of stack is not a"
+		              " non-negative integer";
+		    goto INNER_FATAL;
+		}
+		min::float64 ff = floor ( farg );
+		if ( farg != ff || ff < 0 )
+		{
+		    message = "top of stack is not a"
+		              " non-negative integer";
+		    goto INNER_FATAL;
+		}
+		if ( ff >= p->fp[j] - k )
+		    value = min::NONE();
+		else
+		    value = spbegin[k + (int) ff];
+
+		break;
+	    }
 	    case mex::POPS:
 		if ( sp <= spbegin )
 		{
@@ -3327,6 +3331,23 @@ bool mex::run_process ( mex::process p )
 			              ( value );
 		    break;
 		}
+		case mex::PUSHV:
+		{
+		    p->printer << ": ";
+		    if ( tinfo != min::MISSING()  )
+			p->printer
+			    << ::pvar ( tinfo );
+		    else
+			p->printer << "*";
+		    p->printer
+		        << " <= stack[ap["
+			<< immedB
+			<< "]+"
+			<< min::pgen ( arg )
+			<< "] = "
+			<< min::pgen_quote ( value );
+		    break;
+		}
 		case mex::DEL:
 		{
 		    if ( immedA > 0 && immedC > 0 )
@@ -3590,6 +3611,9 @@ bool mex::run_process ( mex::process p )
 		    ( p, sp, value );
 		break;
 	    }
+	    case mex::PUSHV:
+	        sp[-1] = value;
+		break;
 	    case mex::POPS:
 	    {
 		-- sp;
