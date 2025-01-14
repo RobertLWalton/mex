@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Jan 13 09:13:11 AM EST 2025
+// Date:	Tue Jan 14 12:57:11 PM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -202,16 +202,28 @@ static bool optimized_run_process ( mex::process p )
     min::uns32 i = p->pc.index;
     if ( m == min::NULL_STUB ) return i == 0;
     if ( i >= m->length ) return i == m->length;
-    const mex::instr * pcbegin =
-        ~ min::begin_ptr_of ( m );
-    const mex::instr * pc = pcbegin + i;
-    const mex::instr * pcend = pcbegin + m->length;
-
     i = p->length;
     if ( i > p->max_length ) return false;
-    min::gen * spbegin = ~ min::begin_ptr_of ( p );
-    min::gen * sp = spbegin + i;
-    min::gen * spend = spbegin + p->max_length;
+
+    const mex::instr * pcbegin;
+    const mex::instr * pc;
+    const mex::instr * pcend;
+    min::gen * spbegin;
+    min::gen * sp;
+    min::gen * spend;
+
+#   define RESTORE \
+	pcbegin = ~ min::begin_ptr_of ( m ); \
+	pc = pcbegin + p->pc.index; \
+        pcend = pcbegin + m->length; \
+	spbegin = ~ min::begin_ptr_of ( p ); \
+	sp = spbegin + p->length; \
+	spend = spbegin + p->max_length;
+#   define SAVE \
+	RW_UNS32 p->pc.index = pc - pcbegin; \
+	RW_UNS32 p->length = sp - spbegin;
+
+    RESTORE;
 
     min::uns32 limit = p->counter_limit;
     if ( p->counter >= limit ) return false;
@@ -598,9 +610,11 @@ static bool optimized_run_process ( mex::process p )
 	{
 	    if ( sp >= spend )
 	        goto ERROR_EXIT;
+	    SAVE;
 	    min::locatable_gen value
 	        ( min::new_obj_gen
 		      ( pc->immedA, pc->immedC ) );
+	    RESTORE;
 	    sp = mex::process_push
 	        ( p, sp, value );
 	    break;
@@ -621,13 +635,18 @@ static bool optimized_run_process ( mex::process p )
 		               min::dot_initiator )
 		 == pc->immedD )
 	    {
+	        SAVE;
 	        min::obj_vec_ptr vp1 = value;
 		min::uns32 s = min::size_of ( vp1 );
 		for ( min::uns32 i = 0; i < s; ++ i )
 		    min::attr_push ( vp ) = vp1[i];
 	    }
 	    else
+	    {
+	        SAVE;
 	        min::attr_push ( vp ) = value;
+	    }
+	    RESTORE;
 
 	    break;
 	}
@@ -791,7 +810,10 @@ static bool optimized_run_process ( mex::process p )
 		min::gen obj = sp[-(int)i-1];
 		if ( ! min::is_obj ( obj ) )
 		    goto ERROR_EXIT;
-		min::set ( obj, label, * -- sp );
+		min::gen v = * -- sp;
+		SAVE;
+		min::set ( obj, label, v );
+		RESTORE;
 	    }
 	    else
 	        goto ERROR_EXIT;
@@ -816,7 +838,10 @@ static bool optimized_run_process ( mex::process p )
 	         ||
 		 ! min::is_name ( label ) )
 	        goto ERROR_EXIT;
-	    min::set ( obj, label, * -- sp );
+	    min::gen v = * -- sp;
+	    SAVE;
+	    min::set ( obj, label, v );
+	    RESTORE;
 	    break;
 	}
 	case mex::JMP:
@@ -1410,6 +1435,8 @@ RET_EXIT:
     p->counter = p->counter_limit - limit;
     return result;
 
+#   undef RESTORE
+#   undef SAVE
 #   undef CHECK1
 #   undef CHECK1I
 #   undef CHECK1RI
@@ -1432,6 +1459,7 @@ min::uns32 mex::run_trace_flags = 1 << mex::T_ALWAYS;
 int mex::run_excepts_mask =
     FE_DIVBYZERO|FE_INVALID|FE_OVERFLOW;
 bool mex::run_optimize = false;
+min::uns32 mex::run_test = 0;
 
 // Operation Information Table.
 //
@@ -1755,8 +1783,8 @@ inline min::printer print_header
 
 bool mex::run_process ( mex::process p )
 {
-    mex::module m = p->pc.module;
-    min::uns32 i = p->pc.index;
+    mex::module m;
+    min::uns32 i;
     const mex::instr * pcbegin;
     const mex::instr * pc;
     const mex::instr * pcend;
@@ -1774,16 +1802,19 @@ bool mex::run_process ( mex::process p )
     int sp_change;
     min::uns32 trace_flags; 
 
+    m = p->pc.module;
+    i = p->pc.index;
+
     if ( m == min::NULL_STUB && i != 0 )
     {
 	message = "Illegal PC: no module and index > 0";
-	goto FATAL;
+	goto PERMANENTLY_FATAL;
     }
     if ( i > m->length )
     {
 	message = "Illegal PC: PC index greater than"
 	          " module length";
-	goto FATAL;
+	goto PERMANENTLY_FATAL;
     }
     pcbegin = ~ min::begin_ptr_of ( m );
     pc = pcbegin + i;
@@ -1794,7 +1825,7 @@ bool mex::run_process ( mex::process p )
     {
 	message = "Illegal SP: too large; process"
 	          " length > process max_length";
-	goto FATAL;
+	goto PERMANENTLY_FATAL;
     }
     spbegin = ~ min::begin_ptr_of ( p );
     sp = spbegin + i;
@@ -1833,6 +1864,9 @@ bool mex::run_process ( mex::process p )
 	sp = spbegin + p->length; \
 	spend = spbegin + p->max_length; \
         limit = p->counter_limit - p->counter;
+
+TEST_LOOP:	// Come here after fatal error processed
+		// if p->test > 0.
 
     p->state = mex::RUNNING;
 
@@ -1874,7 +1908,7 @@ bool mex::run_process ( mex::process p )
 		}
 		message = "Illegal PC: no module and"
 		          " index > 0";
-		goto FATAL;
+		goto PERMANENTLY_FATAL;
 	    }
 	    if ( oi >= m->length )
 	    {
@@ -1885,7 +1919,7 @@ bool mex::run_process ( mex::process p )
 		}
 		message = "Illegal PC: PC index greater"
 			  " than module length";
-		goto FATAL;
+		goto PERMANENTLY_FATAL;
 	    }
 
 	    if ( p->counter >= p->counter_limit )
@@ -3821,6 +3855,11 @@ bool mex::run_process ( mex::process p )
 
     } // end loop
 
+// Come on error that does not allow test continuation.
+//
+PERMANENTLY_FATAL:
+    p->test = 0;
+
 // Come here with fatal error `message'.  At this point
 // there is no instruction to pin the blame on - its a
 // process state error - which can only happen if the
@@ -3950,7 +3989,15 @@ FATAL:
 	       << p->level
 	       << min::eom;
 		        
-    return false;
+    if ( p->test == 0 ) return false;
+    -- p->test;
+    p->printer << "SKIPPING INSTRUCTION AND CONTINUING"
+                  " BECAUSE PROCESS->TEST > 0"
+	       << min::eol;	  
+    RESTORE;
+    ++ pc; -- limit;
+    goto TEST_LOOP;
+
 
 } // mex::run_process
 
@@ -4001,6 +4048,7 @@ mex::process mex::create_process
     mex::pc pc = { min::NULL_STUB, 0 };
     mex::set_pc ( p, pc );
     p->optimize = mex::run_optimize;
+    p->test = mex::run_test;
     p->trace_flags = mex::run_trace_flags;
     p->excepts_mask = mex::run_excepts_mask;
     p->counter_limit = mex::run_counter_limit;

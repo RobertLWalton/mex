@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Jan  2 11:01:32 AM EST 2025
+// Date:	Tue Jan 14 12:55:29 PM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -322,6 +322,7 @@ extern min::uns32 run_counter_limit;
 extern min::uns32 run_trace_flags;
 extern int run_excepts_mask;
 extern bool run_optimize;
+extern min::uns32 run_test;
 
 enum state
 {
@@ -406,6 +407,7 @@ struct process_header
     int excepts_mask;
     int excepts_accumulator;
     bool optimize;
+    min::uns32 test;
     min::uns32 counter;
     min::uns32 optimized_counter;
     min::uns32 counter_limit;
