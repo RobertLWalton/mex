@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Jan 14 12:55:29 PM EST 2025
+// Date:	Tue Jan 14 07:10:10 PM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -335,6 +335,7 @@ enum state
     RETURN_STACK_LIMIT_STOP,
     ERROR_STOP,
     JMP_ERROR,
+    PERMANENT_ERROR,
     FORMAT_ERROR,
     NUMBER_OF_STATES
 };

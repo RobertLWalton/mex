@@ -18,7 +18,7 @@
 
 \author{Robert L. Walton}
 
-\date{January 13, 2025}
+\date{January 14, 2025}
  
 \maketitle
 
@@ -690,6 +690,7 @@ a return stack, and other parameters.  Specifically:
 \verb|mex::| & \TTMKEY{RETURN\_STACK\_LIMIT\_STOP}{in {\tt mex::state}} \\
 \verb|mex::| & \TTMKEY{ERROR\_STOP}{in {\tt mex::state}} \\
 \verb|mex::| & \TTMKEY{JMP\_ERROR}{in {\tt mex::state}} \\
+\verb|mex::| & \TTMKEY{PERMANENT\_ERROR}{in {\tt mex::state}} \\
 \verb|mex::| & \TTMKEY{FORMAT\_ERROR}{in {\tt mex::state}} \\
 \verb|}                 | \\
 \end{tabular}
@@ -1988,6 +1989,9 @@ set as follows to indicate cause of termination:
     & conditional \TT{JMP\ldots}~instruction with \\
     & invalid operand(s) (e.g., either a \TT{NaN} or \\
     & both infinities of the same sign) \\
+\verb|mex::|\MEXKEY{PERMANENT\_ERROR}
+    & erroneous pc or stack pointer \\
+    & (likely a compiler error) \\
 \verb|mex::|\MEXKEY{FORMAT\_ERROR}
     & program formatting error \\
     & (likely a compiler error) \\

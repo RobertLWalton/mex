@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Jan 14 12:57:11 PM EST 2025
+// Date:	Tue Jan 14 07:14:29 PM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -782,7 +782,7 @@ static bool optimized_run_process ( mex::process p )
 		    goto ERROR_EXIT;
 		-- new_sp;
 	    }
-	    if ( new_sp < spbegin )
+	    if ( new_sp <= spbegin )
 	        goto ERROR_EXIT;
 	    min::gen label = sp[-(int)j-1];
 	    if ( min::is_num ( label ) )
@@ -811,9 +811,11 @@ static bool optimized_run_process ( mex::process p )
 		if ( ! min::is_obj ( obj ) )
 		    goto ERROR_EXIT;
 		min::gen v = * -- sp;
+		int sp_change = new_sp - sp;
 		SAVE;
 		min::set ( obj, label, v );
 		RESTORE;
+		new_sp = sp_change + sp;
 	    }
 	    else
 	        goto ERROR_EXIT;
@@ -1684,6 +1686,9 @@ mex::state_info mex::state_infos
                   "ERROR instruction executed" },
     { JMP_ERROR, "JMP_ERROR",
                  "invalid operand to JMP instruction" },
+    { PERMANENT_ERROR, "PERMANENT_ERROR",
+                    "bad program counter or"
+		    " stack pointer" },
     { FORMAT_ERROR, "FORMAT_ERROR",
                     "bad program format" }
 };
@@ -1808,13 +1813,13 @@ bool mex::run_process ( mex::process p )
     if ( m == min::NULL_STUB && i != 0 )
     {
 	message = "Illegal PC: no module and index > 0";
-	goto PERMANENTLY_FATAL;
+	goto PERMANENT_ERROR;
     }
     if ( i > m->length )
     {
 	message = "Illegal PC: PC index greater than"
 	          " module length";
-	goto PERMANENTLY_FATAL;
+	goto PERMANENT_ERROR;
     }
     pcbegin = ~ min::begin_ptr_of ( m );
     pc = pcbegin + i;
@@ -1825,7 +1830,7 @@ bool mex::run_process ( mex::process p )
     {
 	message = "Illegal SP: too large; process"
 	          " length > process max_length";
-	goto PERMANENTLY_FATAL;
+	goto PERMANENT_ERROR;
     }
     spbegin = ~ min::begin_ptr_of ( p );
     sp = spbegin + i;
@@ -1908,7 +1913,7 @@ TEST_LOOP:	// Come here after fatal error processed
 		}
 		message = "Illegal PC: no module and"
 		          " index > 0";
-		goto PERMANENTLY_FATAL;
+		goto PERMANENT_ERROR;
 	    }
 	    if ( oi >= m->length )
 	    {
@@ -1919,7 +1924,7 @@ TEST_LOOP:	// Come here after fatal error processed
 		}
 		message = "Illegal PC: PC index greater"
 			  " than module length";
-		goto PERMANENTLY_FATAL;
+		goto PERMANENT_ERROR;
 	    }
 
 	    if ( p->counter >= p->counter_limit )
@@ -2713,7 +2718,7 @@ TEST_LOOP:	// Come here after fatal error processed
 			" stack";
 		    goto INNER_FATAL;
 		}
-		min::uns32 j = pc->immedB;
+		min::uns32 j = immedB;
 		if ( j < 1 || j > p->level )
 		{
 		    message = "PUSHV immedB is 0 or"
@@ -2726,15 +2731,17 @@ TEST_LOOP:	// Come here after fatal error processed
 		min::float64 farg = FG ( arg );
 		if ( ! mex::isfinite ( farg ) )
 		{
-		    message = "top of stack is not a"
-		              " non-negative integer";
+		    message = "PUSHV: top of stack is"
+		              " not a non-negative"
+			      " integer";
 		    goto INNER_FATAL;
 		}
 		min::float64 ff = floor ( farg );
 		if ( farg != ff || ff < 0 )
 		{
-		    message = "top of stack is not a"
-		              " non-negative integer";
+		    message = "PUSHV: top of stack is"
+		              " not a non-negative"
+			      " integer";
 		    goto INNER_FATAL;
 		}
 		if ( ff >= p->fp[j] - k )
@@ -2777,8 +2784,10 @@ TEST_LOOP:	// Come here after fatal error processed
 	    case mex::PUSHOBJ:
 		if ( sp >= spend )
 		    goto STACK_LIMIT_STOP;
+		SAVE;
 		value = min::new_obj_gen
 		    ( immedA, immedC );
+		RESTORE;
 		sp_change = +1;
 		break;
 	    case mex::VPUSH:
@@ -2795,8 +2804,9 @@ TEST_LOOP:	// Come here after fatal error processed
 		value = sp[-1];
 		if (    min::get ( value,
 				   min::dot_initiator )
-		     == pc->immedD )
+		     == immedD )
 		{
+		    SAVE;
 		    min::obj_vec_ptr vp1 = value;
 		    min::uns32 s = min::size_of ( vp1 );
 		    for ( min::uns32 i = 0;
@@ -2804,7 +2814,11 @@ TEST_LOOP:	// Come here after fatal error processed
 			min::attr_push ( vp ) = vp1[i];
 		}
 		else
+		{
+		    SAVE;
 		    min::attr_push ( vp ) = value;
+		}
+		RESTORE;
 
 		sp_change = -1;
 		break;
@@ -2974,8 +2988,10 @@ TEST_LOOP:	// Come here after fatal error processed
 		{
 		    if ( ! min::is_obj ( obj ) )
 			goto NOT_AN_OBJECT;
+		    SAVE;
 		    min::set ( obj, label, value );
 		        // Executed before trace.
+		    RESTORE;
 		}
 		else
 		    goto NOT_A_LABEL;
@@ -2996,8 +3012,10 @@ TEST_LOOP:	// Come here after fatal error processed
 		if (    ! min::is_name ( label )
 		     || min::is_num ( label ) )
 		    goto NOT_A_LABEL;
+		SAVE;
 		min::set ( obj, label, value );
 		    // Executed before trace.
+	        RESTORE;
 		break;
 	    case mex::END:
 	        if ( p->trace_depth == 0 )
@@ -3239,7 +3257,7 @@ TEST_LOOP:	// Come here after fatal error processed
 	    {
 		mex::module cm =
 		    ( op_code == mex::CALLG ?
-		      pc->immedD :
+		      immedD :
 		      m );
 		if ( cm == min::NULL_STUB )
 		{
@@ -3769,7 +3787,7 @@ TEST_LOOP:	// Come here after fatal error processed
 	    {
 		mex::module cm =
 		    ( op_code == mex::CALLG ?
-		      pc->immedD :
+		      immedD :
 		      m );
 		const mex::instr * target =
 		    ~ ( cm + immedC );
@@ -3857,8 +3875,17 @@ TEST_LOOP:	// Come here after fatal error processed
 
 // Come on error that does not allow test continuation.
 //
-PERMANENTLY_FATAL:
-    p->test = 0;
+PERMANENT_ERROR:
+    p->state = mex::PERMANENT_ERROR;
+    p->printer << min::bom
+               << "!!! FATAL PROGRAM PERMANENT ERROR:"
+	       << min::eol
+	       << message
+	       << min::eol
+	       << "instruction counter = "
+	       << p->counter
+	       << min::eom;
+    return false;
 
 // Come here with fatal error `message'.  At this point
 // there is no instruction to pin the blame on - its a
