@@ -2,7 +2,7 @@
 //
 // File:	mexas_main.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Oct 25 06:27:14 AM EDT 2024
+// Date:	Wed Jan 15 01:47:43 AM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -77,6 +77,15 @@ int main ( int argc, char * argv[] )
 	    mex::run_return_stack_limit =
 	        (min::uns32) L;
 
+	}
+	else if ( strcmp ( "-test", arg ) == 0 )
+	{
+	    num = argv[i++];
+	    long L = std::strtol ( num, & q, 10 );
+	    if (    * q != 0
+	         || L < 0 || L >= 10000 )
+	        goto BAD_NUMBER;
+	    mex::run_test = (min::uns32) L;
 	}
 
 	else if ( strncmp ( "-tc:", arg, 4 ) == 0 )

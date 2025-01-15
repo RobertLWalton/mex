@@ -18,7 +18,7 @@
 
 \author{Robert L. Walton}
 
-\date{January 11, 2025}
+\date{January 15, 2025}
  
 \maketitle
 
@@ -858,6 +858,7 @@ appear in its arguments.  The syntax is:
                                            {\tt counter\_limit}] \\
     \ttkey{-stack} $L$		        & [set process stack size] \\
     \ttkey{-return-stack} $L$	        & [set process return stack size] \\
+    \ttkey{-test} $L$	        	& [set process test counter] \\
     \ttkey{-r} {\em function-name}	& [run named function] \\
     \end{tabular}
 \\[0.5ex]
@@ -948,6 +949,14 @@ Details are:
 \TT{-return-stack} $L$
 		    & Sets the process \TT{return\_stack->max\_length}
 		      (return stack size) to integer $L$.
+\\[0.5ex]
+\TT{-test} $L$
+		    & Sets the process \TT{test} counter to $L$.
+		      This allows $L$ fatal errors to be output by
+		      making each transgressing instruction into
+		      a no operation.  Used only to test detection
+		      of program errors that are really compiler
+		      bugs.
 \end{tabular}\end{indpar}
 \begin{indpar}\begin{tabular}{p{1.3in}p{4.4in}}
 \TT{-r} {\em function-name}

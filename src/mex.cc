@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Jan 14 07:14:29 PM EST 2025
+// Date:	Wed Jan 15 02:57:58 AM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -3888,84 +3888,46 @@ PERMANENT_ERROR:
     return false;
 
 // Come here with fatal error `message'.  At this point
-// there is no instruction to pin the blame on - its a
-// process state error - which can only happen if the
-// compiler has made a mistake.
+// the blame is on the current instruction.
 //
 FATAL:
     p->state = mex::FORMAT_ERROR;
-    char fatal_buffer[100];
-    char instr_buffer_1[1000];
-    char instr_buffer_2[1000] = { 0 };
-    char * q = instr_buffer_1;
-    q += sprintf ( q, "OP CODE = " );
-    if ( p->pc.module == min::NULL_STUB
-         ||
-	 p->pc.index >= p->pc.module->length )
-	q += sprintf ( q, "<NOT AVAILABLE>" );
-    else
-    {
-        const mex::instr * instr =
-	    ~ ( p->pc.module + p->pc.index );
-	op_code = instr->op_code;
-	op_info =
-	    ( op_code < NUMBER_OF_OP_CODES ?
-	      op_infos + op_code : NULL );
-	if ( op_info != NULL )
-	    q += sprintf ( q, "%s", op_info->name );
-	else
-	    q += sprintf
-	        ( q, "%u (TOO LARGE)", op_code );
-	q += sprintf
-	    ( q, ", TRACE CLASS = %u",
-	         instr->trace_class );
-	q += sprintf
-	    ( q, ", TRACE DEPTH = %u,",
-	         instr->trace_depth );
-	q = instr_buffer_2;
-	q += sprintf
-	    ( q, "IMMEDA = %u", instr->immedA );
-	q += sprintf
-	    ( q, ", IMMEDB = %u", instr->immedB );
-	q += sprintf
-	    ( q, ", IMMEDC = %u", instr->immedC );
-	if ( min::is_stub ( instr->immedD ) )
-	{
-	    mex::module im =
-	        (mex::module) instr->immedD;
-	    if ( im == min::NULL_STUB )
-	        q += sprintf
-		    ( q, ", IMMEDD = <UNKNOWN STUB>" );
-	    else if ( im->position == min::NULL_STUB
-	              ||
-	                 im->position->file
-		      == min::NULL_STUB
-		      ||
-		      ! min::is_str
-		            ( im->position->file
-			                  ->file_name )
-		    )
-	        q += sprintf
-		    ( q, ", IMMEDD = UNNAMED MODULE" );
-	    else
-	    {
-	        min::str_ptr sp =
-		    im->position->file->file_name;
-		q += sprintf
-		    ( q, ", IMMEDD = MODULE %s",
-		         ~ min::begin_ptr_of ( sp ) );
-	    }
-	}
-	else
-	    q += sprintf
-		( q, ", IMMEDD = %.15g",
-		     MUP::direct_float_of
-		         ( instr->immedD ) );
-    }
 
-    p->printer << min::bol
+    m = p->pc.module;
+    i = p->pc.index;
+    pc = ~ ( m + i );
+
+    op_code = pc->op_code;
+    trace_class = pc->trace_class;
+    min::uns8 trace_depth = pc->trace_depth;
+    min::uns32 immedA = pc->immedA;
+    min::uns32 immedB = pc->immedB;
+    min::uns32 immedC = pc->immedC;
+    min::gen immedD = pc->immedD;
+
+    const char * op_name =
+        ( op_code >= mex::NUMBER_OF_OP_CODES ?
+          "UNKNOWN-OP-CODE" :
+           op_infos[op_code].name );
+    const char * trace_class_name =
+        ( trace_class >= mex::NUMBER_OF_TRACE_CLASSES ?
+          "UNKNOWN-TRACE-CLASS" :
+           trace_class_infos[trace_class].name );
+
+    char trace_depth_buffer[100] = { 0 };
+    if ( trace_depth != 0 )
+        sprintf ( trace_depth_buffer,
+	          " [%u]", trace_depth );
+
+    min::phrase_position pp =
+	i < m->position->length ?
+	m->position[i] :
+	min::MISSING_PHRASE_POSITION;
+
+    p->printer << min::bom
+	       << min::place_indent ( 4 )
                << "!!! FATAL PROGRAM FORMAT ERROR: "
-               << min::bom
+	       << min::indent
                << message
 	       << min::indent
 	       << "PC->MODULE = "
@@ -3983,18 +3945,18 @@ FATAL:
 		        ( "<NO FILE NAME>" ):
 		    p->pc.module->position->file
 		                ->file_name )
-	       << ", PC INDEX = " << p->pc.index
-	       << min::indent
-	       << "MODULE LENGTH (CODE VECTOR SIZE) = "
-	       << ( p->pc.module == min::NULL_STUB ?
-	                "<NOT AVAILABLE>" :
-		    ( sprintf ( fatal_buffer, "%u",
-		                p->pc.module->length ),
-		      fatal_buffer ) )
-	       << min::indent
-	       << instr_buffer_1;
-    if ( instr_buffer_2[0] != 0 )
-	p->printer << min::indent << instr_buffer_2;
+		<< min::bol;
+
+    print_header ( p, pp, 0 )
+	<< " " << op_name
+	<< " " << trace_class_name
+	<< trace_depth_buffer
+	<< " " << immedA
+	<< " " << immedB
+	<< " " << immedC
+	<< " " << min::pgen ( immedD )
+	<< min::bol << min::place_indent ( 4 );
+
     p->printer << min::indent
     	       << "ARG1 = " << min::pgen_quote ( arg1 )
 	       << min::indent
@@ -4017,10 +3979,13 @@ FATAL:
 	       << min::eom;
 		        
     if ( p->test == 0 ) return false;
-    -- p->test;
-    p->printer << "SKIPPING INSTRUCTION AND CONTINUING"
-                  " BECAUSE PROCESS->TEST > 0"
+    p->printer << min::bol
+               << "SKIPPING INSTRUCTION AND CONTINUING"
+                  " BECAUSE PROCESS->TEST == "
+	       << p->test
+	       << " > 0"
 	       << min::eol;	  
+    -- p->test;
     RESTORE;
     ++ pc; -- limit;
     goto TEST_LOOP;

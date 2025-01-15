@@ -2,7 +2,7 @@
 #
 # File:		Makefile
 # Author:	Bob Walton (walton@acm.org)
-# Date:		Sun Dec 29 02:27:27 AM EST 2024
+# Date:		Wed Jan 15 01:53:48 AM EST 2025
 #
 # The authors have placed this program in the public
 # domain; they make no warranty and accept no liability
@@ -175,6 +175,8 @@ mexas_compile_test_10.out: \
     TRACE = -ex:INVALID -pasource -tc:ALL
 mexas_compile_test_11.out: \
     TRACE = -tc:FUNC
+mexas_compile_test_13.out: \
+    TRACE = -pasource -tc:ALL -test 100
 mexas_time_test_1.out: \
     RUN = -stack 20000000 -return-stack 1000002 \
           -counter 20000000
