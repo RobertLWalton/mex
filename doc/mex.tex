@@ -18,7 +18,7 @@
 
 \author{Robert L. Walton}
 
-\date{January 14, 2025}
+\date{January 15, 2025}
  
 \maketitle
 
@@ -1984,17 +1984,18 @@ set as follows to indicate cause of termination:
 \multicolumn{2}{c}{\bf And Also print An Error Message}
 \\[1ex]
 \verb|mex::|\MEXKEY{ERROR\_STOP}
-    & \TT{ERROR} instruction with \TT{immedB != 0} \\
+    & \TT{ERROR} instruction stopped program \\
 \verb|mex::|\MEXKEY{JMP\_ERROR}
     & conditional \TT{JMP\ldots}~instruction with \\
     & invalid operand(s) (e.g., either a \TT{NaN} or \\
     & both infinities of the same sign) \\
 \verb|mex::|\MEXKEY{PERMANENT\_ERROR}
     & erroneous pc or stack pointer \\
-    & (likely a compiler error) \\
+    & (almost certainly a compiler error) \\
 \verb|mex::|\MEXKEY{FORMAT\_ERROR}
-    & program formatting error \\
-    & (likely a compiler error) \\
+    & current instruction cannot execute \\
+    & due to a program format error \\
+    & (almost certainly a compiler error) \\
 \end{tabular}
 \end{center}
 
@@ -2016,6 +2017,10 @@ to run the code of \TT{m}.  Then after \TT{MODULE\_END},
 you can add to the end of \TT{m}
 and call \TT{run\_process} again to continue the execution of the code
 of \TT{m} (i.e., execute the added code).
+\item If a {\tt FORMAT\_ERROR} occurs when {\tt p->test > 0},
+after printing detailed error information, the program decrements
+{\tt p->test}, skips the instruction that cannot execute, and continues.
+This is only used to test erroneous format checks.
 \end{enumerate}
 
 {\tt bool mex::}\MEXKEY{excepts\_check} \verb|( mex::process p )|%
