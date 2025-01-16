@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Jan 15 02:57:58 AM EST 2025
+// Date:	Thu Jan 16 03:04:27 AM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -2362,6 +2362,8 @@ TEST_LOOP:	// Come here after fatal error processed
 	              ||
 		      ! min::is_num ( arg2 ) )
 	    {
+	        MIN_REQUIRE
+		    ( op_info->op_type == mex::J2 );
 		immedB = pc->immedB;
 		if ( immedB > 1 )
 		{
@@ -2388,6 +2390,9 @@ TEST_LOOP:	// Come here after fatal error processed
 	    }
 	    else
 	    {
+	        MIN_REQUIRE
+		    ( op_info->op_type == mex::J2 );
+
 		min::float64 farg1 = FG ( arg1 );
 		min::float64 farg2 = FG ( arg2 );
 
@@ -2429,6 +2434,8 @@ TEST_LOOP:	// Come here after fatal error processed
 		    break;
 		}
 	    }
+
+	    if ( bad_jmp ) execute_jmp = false;
 
 	    if ( execute_jmp
 	         &&
@@ -2495,15 +2502,9 @@ TEST_LOOP:	// Come here after fatal error processed
 			   (& m[index])->immedC;
 
 		if ( bad_jmp )
-		{
 		    p->printer << " with invalid"
-		                  " operand(s)"
-			       << min::eom;
-		    p->state = mex::JMP_ERROR;
-		    return false;
-		}
-
-		if ( op_code != mex::JMP )
+		                  " operand(s)";
+		else if ( op_code != mex::JMP )
 		{
 		    if ( execute_jmp )
 			p->printer
@@ -2548,6 +2549,26 @@ TEST_LOOP:	// Come here after fatal error processed
 		-- pc;
 	    }
 	    sp += sp_change;
+
+	    if ( bad_jmp )
+	    {
+	    	SAVE;
+		if ( p->test == 0 )
+		{
+		    p->state = mex::JMP_ERROR;
+		    return false;
+		}
+		p->printer
+		    << min::bol
+		    << "TREATING JMP AS UNSUCCESSFUL"
+		       " AND CONTINUING BECAUSE"
+		       " PROCESS->TEST == "
+		    << p->test
+		    << " > 0"
+		    << min::eol;	  
+		-- p->test;
+		RESTORE;
+	    }
 
 	    goto LOOP;
 	}

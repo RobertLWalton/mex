@@ -18,7 +18,7 @@
 
 \author{Robert L. Walton}
 
-\date{January 15, 2025}
+\date{January 16, 2025}
  
 \maketitle
 
@@ -2017,10 +2017,13 @@ to run the code of \TT{m}.  Then after \TT{MODULE\_END},
 you can add to the end of \TT{m}
 and call \TT{run\_process} again to continue the execution of the code
 of \TT{m} (i.e., execute the added code).
-\item If a {\tt FORMAT\_ERROR} occurs when {\tt p->test > 0},
+\item If a \TT{FORMAT\_ERROR} occurs when {\tt p->test > 0},
 after printing detailed error information, the program decrements
 {\tt p->test}, skips the instruction that cannot execute, and continues.
-This is only used to test erroneous format checks.
+The same is done for \TT{JMP\_ERROR} except that instead of
+skiping the instruction it is treated as an unsuccessful \TT{JMP\ldots}
+instruction that failed to jump.
+This feature is only used to test error checks.
 \end{enumerate}
 
 {\tt bool mex::}\MEXKEY{excepts\_check} \verb|( mex::process p )|%
