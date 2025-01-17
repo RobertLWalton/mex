@@ -2,7 +2,7 @@
 //
 // File:	mexas_compile_test_13.mex
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Jan 17 01:51:44 AM EST 2025
+// Date:	Fri Jan 17 08:59:58 AM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -12,7 +12,13 @@
 // Empty stack test
 //
 PUSHI 100
-TEST_INSTRUCTION ADD
-TEST_INSTRUCTION JMP
+TEST_INSTRUCTION ADD  // stack too small
+TEST_INSTRUCTION JMP  // immedC = 0
 PUSHI "HELLO"
-TEST_INSTRUCTION JMPGEQ 0 0 1
+TEST_INSTRUCTION JMPGEQ 0 0 1 // invalid arg
+TEST_INSTRUCTION JMP 100 0 1 // immedA too large
+TEST_INSTRUCTION JMP 0 0 1000000 // immedC too large
+PUSHI +INF
+TEST_INSTRUCTION JMPCNT 0 0 1 1 // INF count
+PUSHI 5
+TEST_INSTRUCTION JMPCNT 0 0 1 // immedD <= 0

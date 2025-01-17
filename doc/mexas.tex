@@ -18,7 +18,7 @@
 
 \author{Robert L. Walton}
 
-\date{January 15, 2025}
+\date{January 17, 2025}
  
 \maketitle
 
@@ -794,6 +794,31 @@ At assembly-time,
 this instruction does nothing.
 \end{indpar}
 
+\ttkey{TEST\_INSTRUCTION} ~
+    \begin{tabular}[t]{@{}l@{}}
+    {\em op-code} ~ {\em trace-class}\QMARK{}
+                  ~ \{ \TT{[} {\em trace-depth} \TT{]} \}\QMARK{}
+		  ~ \TT{\textbackslash} \\
+    {\em immedA} ~ {\em immedB} ~ {\em immedC} ~ {\em immedD} \\
+    \end{tabular}
+\begin{indpar}
+Fields may be omitted from the end of the instruction.
+
+Outputs an instruction with the given fields, and does nothing
+else at assembly time.  Used for testing \TT{FORMAT\_ERROR}
+and \TT{JMP\_ERROR},
+since otherwise such errors are (seem to be, should be) impossible
+because of assembler checks.
+
+The {\em op-code} and {\em trace-class} are names.
+{\em immedD} may be a number,
+{\em attribute-label}\pagnote{ATTRIBUTE-LABEL} (includes strings),
+module name, or one of the special value names
+\TT{TRUE} for {\tt mex::TRUE}, \TT{FALSE} for {\tt mex::FALSE},
+or \TT{NONE} for {\tt min::NONE()}.
+The other fields are integers in the range $[0,2^{32})$.
+\end{indpar}
+
 \section{MEXAS Declarations}
 \label{MEXAS-DECLARATIONS}
 
@@ -809,25 +834,6 @@ Prints the names in the assembly time symbol table stacks.
 Each name is preceeded by `{\tt $L$.$D$}' where $L$
 it the name's lexical level and $D$ is the name's depth.
 Used mostly for testing the assembler.
-\end{indpar}
-
-\ttkey{TEST\_INSTRUCTION} ~
-    \begin{tabular}[t]{@{}l@{}}
-    {\em op-code} ~ {\em trace-class} ~ {\em trace-depth} ~
-                 \TT{\textbackslash} \\
-    {\em immedA} ~ {\em immedB} ~ {\em immedC} ~ {\em immedD} \\
-    \end{tabular}
-\begin{indpar}
-Outputs an instruction with the given fields, and does nothing
-else at assembly time.  Used for testing \TT{FORMAT\_ERROR},
-since otherwise such errors are (seem to be, should be) impossible
-because of assembler checks.
-
-The {\em op-code} and {\em trace-class} are names.
-{\em immedD} may be a number or module name.
-The other fields are integers.
-
-Fields may be omitted from the end of the instruction.
 \end{indpar}
 
 

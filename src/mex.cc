@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Jan 17 01:50:22 AM EST 2025
+// Date:	Fri Jan 17 08:44:48 AM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -946,6 +946,8 @@ static bool optimized_run_process ( mex::process p )
 	        goto ERROR_EXIT;
 	    min::float64 immedD = FG ( pc->immedD );
 	    if ( ! mex::isfinite ( immedD ) )
+	        goto ERROR_EXIT;
+	    if ( immedD <= 0 )
 	        goto ERROR_EXIT;
 	    if ( farg <= 0 )
 	        goto EXECUTE_JMP;
@@ -2289,11 +2291,13 @@ TEST_LOOP:	// Come here after fatal error processed
 	        /* do nothing */;
 	    else if ( op_code == mex::JMPCNT )
 	    {
-		min::float64 immedD = FG ( pc->immedD );
-		if ( ! mex::isfinite ( immedD ) )
+		arg2 = pc->immedD;
+		min::float64 immedD = FG ( arg2 );
+		if (    ! mex::isfinite ( immedD )
+		     || immedD <= 0 )
 		{
 		    message = "JMPCNT immedD is not"
-			      " a finite number";
+			      " a finite number > 0";
 		    goto INNER_FATAL;
 		}
 		min::float64 farg1 = FG ( arg1 );
@@ -2478,6 +2482,7 @@ TEST_LOOP:	// Come here after fatal error processed
 		p->printer << min::bol;
 		if ( bad_jmp )
 		    p->printer
+		        << min::bol << min::eol
 		        << "!!! FATAL ERROR: "
 			   " invalid operands to a"
 			   " conditional jump"
@@ -2588,7 +2593,7 @@ TEST_LOOP:	// Come here after fatal error processed
 		    return false;
 		}
 		p->printer
-		    << min::bol << min::eol
+		    << min::bol
 		    << "TREATING JMP AS UNSUCCESSFUL"
 		       " AND CONTINUING BECAUSE"
 		       " PROCESS->TEST == "
@@ -3899,7 +3904,7 @@ TEST_LOOP:	// Come here after fatal error processed
 	    return false;
 
 	STACK_TOO_SMALL:
-	    message = "illegal SP: stack to small"
+	    message = "illegal SP: stack too small"
 		      " for instruction";
 	    goto INNER_FATAL;
 
@@ -3974,7 +3979,7 @@ FATAL:
 	m->position[i] :
 	min::MISSING_PHRASE_POSITION;
 
-    p->printer << min::bom
+    p->printer << min::bom << min::eol
 	       << min::place_indent ( 4 )
                << "!!! FATAL PROGRAM FORMAT ERROR: "
 	       << min::indent
@@ -4020,7 +4025,7 @@ FATAL:
     p->printer << min::eom;
 		        
     if ( p->test == 0 ) return false;
-    p->printer << min::bol << min::eol
+    p->printer << min::bol
                << "SKIPPING INSTRUCTION AND CONTINUING"
                   " BECAUSE PROCESS->TEST == "
 	       << p->test
