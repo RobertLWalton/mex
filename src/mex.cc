@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Jan 16 03:04:27 AM EST 2025
+// Date:	Fri Jan 17 01:50:22 AM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -111,6 +111,9 @@ min::locatable_gen mex::FALSE;
 min::locatable_gen mex::TRUE;
 static min::locatable_gen ZERO;
 static min::locatable_gen STAR;
+static min::gen VOID;
+    // Has GEN_ILLEGAL value distinct from every other
+    // min::gen value.
 static void check_op_infos ( void );
 static void check_trace_class_infos ( void );
 static void check_state_infos ( void );
@@ -1802,7 +1805,9 @@ bool mex::run_process ( mex::process p )
     min::uns8 op_code;
     min::uns8 trace_class;
     op_info * op_info;
-    min::gen arg1, arg2, obj, label;
+    min::gen arg1, arg2;
+#   define obj arg1
+#   define label arg2
     min::locatable_gen result;
     int sp_change;
     min::uns32 trace_flags; 
@@ -1957,6 +1962,8 @@ TEST_LOOP:	// Come here after fatal error processed
 	switch ( op_info->op_type )
 	{
 	case NONA:
+	    arg1 = ::VOID;
+	    arg2 = ::VOID;
 	    goto NON_ARITHMETIC;
 	case A2:
 	    sp_change = -1;
@@ -1996,11 +2003,13 @@ TEST_LOOP:	// Come here after fatal error processed
 	    if ( sp - 1 < spbegin )
 	        goto STACK_TOO_SMALL;
 	    arg1 = sp[-1];
+	    arg2 = ::VOID;
 	    goto JUMP;
 	case JS:
 	    if ( pc->immedB >= sp - spbegin )
 	        goto STACK_TOO_SMALL;
 	    arg1 = sp[-(int)pc->immedB-1];
+	    arg2 = ::VOID;
 	    goto JUMP;
 	case J2:
 	    sp_change = -2;
@@ -2010,6 +2019,8 @@ TEST_LOOP:	// Come here after fatal error processed
 	    arg2 = sp[-1];
 	    goto JUMP;
 	case J:
+	    arg1 = ::VOID;
+	    arg2 = ::VOID;
 	    goto JUMP;
 	default:
 	    message = "internal system error:"
@@ -2502,8 +2513,26 @@ TEST_LOOP:	// Come here after fatal error processed
 			   (& m[index])->immedC;
 
 		if ( bad_jmp )
+		{
 		    p->printer << " with invalid"
 		                  " operand(s)";
+		    if (    arg1 != ::VOID
+		         || arg2 != ::VOID )
+		    {
+			p->printer
+			    << min::indent << "ARGS =";
+			if ( arg1 != ::VOID )
+			    p->printer
+				<< " "
+				<< min::pgen_quote
+				       ( arg1 );
+			if ( arg2 != ::VOID )
+			    p->printer
+				<< " "
+				<< min::pgen_quote
+				       ( arg2 );
+		    }
+		}
 		else if ( op_code != mex::JMP )
 		{
 		    if ( execute_jmp )
@@ -2559,7 +2588,7 @@ TEST_LOOP:	// Come here after fatal error processed
 		    return false;
 		}
 		p->printer
-		    << min::bol
+		    << min::bol << min::eol
 		    << "TREATING JMP AS UNSUCCESSFUL"
 		       " AND CONTINUING BECAUSE"
 		       " PROCESS->TEST == "
@@ -3978,29 +4007,20 @@ FATAL:
 	<< " " << min::pgen ( immedD )
 	<< min::bol << min::place_indent ( 4 );
 
-    p->printer << min::indent
-    	       << "ARG1 = " << min::pgen_quote ( arg1 )
-	       << min::indent
-    	       << "ARG2 = " << min::pgen_quote ( arg2 )
-	       << min::indent
-    	       << "RESULT = "
-	       << min::pgen_quote ( result )
-	       << min::indent
-	       << "STACK POINTER = " << p->length
-	       << ", PROCESS MAX_LENGTH = "
-	       << p->max_length
-	       << min::indent
-	       << "RETURN STACK POINTER = "
-	       << p->return_stack->length
-	       << ", RETURN STACK MAX_LENGTH = "
-	       << p->return_stack->max_length
-	       << min::indent
-	       << "PROCESS LEXICAL LEVEL = "
-	       << p->level
-	       << min::eom;
+    if ( arg1 != ::VOID || arg2 != ::VOID )
+    {
+	p->printer << min::indent << "ARGS =";
+	if ( arg1 != ::VOID )
+	    p->printer
+	        << " " << min::pgen_quote ( arg1 );
+	if ( arg2 != ::VOID )
+	    p->printer
+	        << " " << min::pgen_quote ( arg2 );
+    }
+    p->printer << min::eom;
 		        
     if ( p->test == 0 ) return false;
-    p->printer << min::bol
+    p->printer << min::bol << min::eol
                << "SKIPPING INSTRUCTION AND CONTINUING"
                   " BECAUSE PROCESS->TEST == "
 	       << p->test
