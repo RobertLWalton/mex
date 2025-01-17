@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Jan  3 12:13:32 AM EST 2025
+// Date:	Thu Jan 16 12:36:49 PM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -350,6 +350,24 @@ inline min::gen get_label ( min::uns32 & i )
 
     else
 	return min::NONE();
+}
+
+// Checks for '[', number, ']' and if found returns
+// number, else returns NONE.
+//
+inline min::gen get_trace_depth ( min::uns32 & i )
+{
+    if ( i + 2 >= mexas::statement->length
+         ||
+	 statement[i] != mexas::left_bracket
+         ||
+	 ! min::is_num ( statement[i+1] )
+         ||
+	 statement[i+2] != mexas::right_bracket )
+        return min::NONE();
+
+    i += 3;
+    return statement[i-2];
 }
 
 // If statement[i] exists and is a quote, return a MIN

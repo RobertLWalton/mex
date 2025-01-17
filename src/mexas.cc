@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Jan  8 06:36:48 PM EST 2025
+// Date:	Thu Jan 16 07:48:15 PM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1588,54 +1588,54 @@ mex::module mexas::compile ( min::file file )
 		    continue;
 		}
 		instr.op_code =
-		    (min::uns32)
+		    (min::uns8)
 		    min::int_of ( op_code );
 
 	        min::gen trace_class =
 		    mexas::get_name ( index );
-		if ( trace_class == min::NONE() )
-		{
-		    mexstack::push_instr ( instr, pp );
-		    break;
-		}
-		trace_class = min::get
-		    ( mexcom::trace_class_table,
-		      trace_class );
 		if ( trace_class != min::NONE() )
 		{
-		    min::float64 f =
-			min::direct_float_of
-			    ( trace_class );
-		    instr.trace_class = (min::uns8) f;
+		    trace_class = min::get
+			( mexcom::trace_class_table,
+			  trace_class );
+		    if ( trace_class != min::NONE() )
+		    {
+			min::float64 f =
+			    min::direct_float_of
+				( trace_class );
+			instr.trace_class =
+			    (min::uns8) f;
+		    }
+		    else
+		    {
+			mexcom::compile_error
+			    ( pp, "unrecognized trace"
+				  " class; statement"
+				  " ignored" );
+			continue;
+		    }
 		}
-		else
-		{
-		    mexcom::compile_error
-			( pp, "unrecognized trace"
-			      " class; "
-			      " statement ignored" );
-		    continue;
-		}
+
 	        min::gen trace_depth =
-		    mexas::get_num ( index );
-		if ( trace_depth == min::NONE() )
+		    mexas::get_trace_depth ( index );
+		if ( trace_depth != min::NONE() )
 		{
-		    mexstack::push_instr ( instr, pp );
-		    break;
+		    min::uns32 depth;
+		    if ( !  mexas::check_parameter
+				( depth, trace_depth,
+				  pp, "trace_depth" ) )
+			continue;
+		    if ( depth >= 255 )
+		    {
+			mexcom::compile_error
+			    ( pp, "trace_depth too"
+			          " large; statement"
+				  " ignored" );
+			continue;
+		    }
+		    instr.trace_depth =
+		        (min::uns8) depth;
 		}
-		min::uns32 depth;
-		if ( !  mexas::check_parameter
-		            ( depth, trace_depth,
-			      pp, "trace_depth" ) )
-		    continue;
-		if ( depth >= 265 )
-		{
-		    mexcom::compile_error
-			( pp, "trace_depth too large;"
-			      " statement ignored" );
-		    continue;
-		}
-		instr.trace_depth = (min::uns8) depth;
 
 	        min::gen immedA =
 		    mexas::get_num ( index );
@@ -1673,35 +1673,44 @@ mex::module mexas::compile ( min::file file )
 			      pp, "immedC" ) )
 		    continue;
 
-	        instr.immedD = mexas::get_num ( index );
-		if ( instr.immedD == min::NONE() )
+	        min::locatable_gen immedD 
+		    ( mexas::get_num ( index ) );
+		if ( immedD == min::NONE() )
+		    immedD = mexas::get_label ( index );
+		if ( immedD == min::NONE() )
 		{
-		    instr.immedD =
-		        mexas::get_name ( index );
-		    if ( instr.immedD == min::NONE() )
+		    immedD = mexas::get_name ( index );
+		    if ( immedD == min::NONE() )
+		        immedD = min::MISSING();
+		    else if ( immedD == ::TRUE )
+		        immedD = mex::TRUE;
+		    else if ( immedD == ::FALSE )
+		        immedD = mex::FALSE;
+		    else if ( immedD == ::NONE )
+		        immedD = min::NONE();
+		    else
 		    {
-			mexstack::push_instr
-			    ( instr, pp );
-			break;
+			mex::module m = ::module_search
+			    ( immedD );
+			if ( m == min::NULL_STUB )
+			{
+			    mexcom::compile_error
+				( pp, "",
+				      min::pgen
+					  ( immedD ),
+				      " does not name a"
+				      " module or"
+				      " special value;"
+				      " statement"
+				      "ignored" );
+			    continue;
+			}
+			immedD =
+			    min::new_stub_gen ( m );
 		    }
-		    mex::module m = ::module_search
-		        ( instr.immedD );
-		    if ( m == min::NULL_STUB )
-		    {
-			mexcom::compile_error
-			    ( pp, "",
-			          min::pgen
-				      ( instr.immedD ),
-			          " does not name a"
-				  " module;"
-				  " statement ignored"
-			    );
-			continue;
-		    }
-		    instr.immedD =
-		        min::new_stub_gen ( m );
 		}
 
+		instr.immedD = immedD;
 		mexstack::push_instr ( instr, pp );
 		break;
 	    }
