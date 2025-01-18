@@ -2,7 +2,7 @@
 //
 // File:	mexas_compile_test_13.mex
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Jan 17 08:59:58 AM EST 2025
+// Date:	Sat Jan 18 01:38:17 AM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -22,3 +22,31 @@ PUSHI +INF
 TEST_INSTRUCTION JMPCNT 0 0 1 1 // INF count
 PUSHI 5
 TEST_INSTRUCTION JMPCNT 0 0 1 // immedD <= 0
+PUSHI 0
+PUSHI +INF
+PUSHI +INF
+TEST_INSTRUCTION JMPGEQ 0 1 1 // invalid arg
+PUSHI NAN
+TEST_INSTRUCTION JMPGEQ 0 0 1 // invalid arg
+TEST_INSTRUCTION JMPGEQ 0 4 1 // immedB is not 0 or 1
+TEST_INSTRUCTION JMP [ 5 ] 0 0 1 // too big trace depth
+TEST_INSTRUCTION PUSHS 100  // too big immedA
+TEST_INSTRUCTION PUSHG  // no module
+TEST_INSTRUCTION PUSHL 0 1  // immedB > lexical level
+TEST_INSTRUCTION PUSHL 1000  // immedA > stack length
+
+BEGF PUSHA-TEST ARG1 ARG2
+    TEST_INSTRUCTION PUSHL 1000 1
+        // fp[1] + immedA > stack length
+    TEST_INSTRUCTION PUSHL 1000 0
+        // fp[0] + immedA > ap[1]
+    TEST_INSTRUCTION PUSHA 0 2  // immedB > p->level
+    TEST_INSTRUCTION PUSHA 3 1  // immedA > fp[1]
+    PUSHI "RESULT"
+    RET 1
+ENDF
+
+PUSHI "VALUE 1"
+PUSHI "VALUE 2"
+CALL PUSHA-TEST 2 RESULT
+

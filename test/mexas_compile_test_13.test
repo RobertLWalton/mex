@@ -2,7 +2,7 @@
 //
 // File:        mexas_compile_test_13.mex
 // Author:      Bob Walton (walton@acm.org)
-// Date:        Fri Jan 17 08:59:58 AM EST 2025
+// Date:        Sat Jan 18 01:38:17 AM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -33,6 +33,57 @@ PUSHI 5
     [23:9;4] PUSHI T_PUSH 0 0 0 5; *
 TEST_INSTRUCTION JMPCNT 0 0 1 // immedD <= 0
     [24:10;4] JMPCNT T_JMPS 0 0 1
+PUSHI 0
+    [25:11;5] PUSHI T_PUSH 0 0 0 0; *
+PUSHI +INF
+    [26:12;6] PUSHI T_PUSH 0 0 0 inf; *
+PUSHI +INF
+    [27:13;7] PUSHI T_PUSH 0 0 0 inf; *
+TEST_INSTRUCTION JMPGEQ 0 1 1 // invalid arg
+    [28:14;7] JMPGEQ T_JMPS 0 1 1
+PUSHI NAN
+    [29:15;8] PUSHI T_PUSH 0 0 0 nan; *
+TEST_INSTRUCTION JMPGEQ 0 0 1 // invalid arg
+    [30:16;8] JMPGEQ T_JMPS 0 0 1
+TEST_INSTRUCTION JMPGEQ 0 4 1 // immedB is not 0 or 1
+    [31:17;8] JMPGEQ T_JMPS 0 4 1
+TEST_INSTRUCTION JMP [ 5 ] 0 0 1 // too big trace depth
+    [32:18;8] JMP T_JMP[5] 0 0 1
+TEST_INSTRUCTION PUSHS 100  // too big immedA
+    [33:19;8] PUSHS T_PUSH 100 0 0
+TEST_INSTRUCTION PUSHG  // no module
+    [34:20;8] PUSHG T_PUSH 0 0 0
+TEST_INSTRUCTION PUSHL 0 1  // immedB > lexical level
+    [35:21;8] PUSHL T_PUSH 0 1 0
+TEST_INSTRUCTION PUSHL 1000  // immedA > stack length
+    [36:22;8] PUSHL T_PUSH 1000 0 0
+
+BEGF PUSHA-TEST ARG1 ARG2
+    [38:23;10] BEGF T_BEGF 2 1 0; [< PUSHA-TEST ARG1 ARG2 >]
+    TEST_INSTRUCTION PUSHL 1000 1
+    [39:24;10] PUSHL T_PUSH 1000 1 0
+        // fp[1] + immedA > stack length
+    TEST_INSTRUCTION PUSHL 1000 0
+    [41:25;10] PUSHL T_PUSH 1000 0 0
+        // fp[0] + immedA > ap[1]
+    TEST_INSTRUCTION PUSHA 0 2  // immedB > p->level
+    [43:26;10] PUSHA T_PUSH 0 2 0
+    TEST_INSTRUCTION PUSHA 3 1  // immedA > fp[1]
+    [44:27;10] PUSHA T_PUSH 3 1 0
+    PUSHI "RESULT"
+    [45:28;11] PUSHI T_PUSH 0 0 0 "RESULT"; *
+    RET 1
+    [46:29;10] RET T_RET 0 1 1
+ENDF
+    [38:23;10] BEGF T_BEGF 2 1 8; [< PUSHA-TEST ARG1 ARG2 >]
+    [47:30;8] ENDF T_ENDF 0 1 0
+
+PUSHI "VALUE 1"
+    [49:31;9] PUSHI T_PUSH 0 0 0 "VALUE 1"; *
+PUSHI "VALUE 2"
+    [50:32;10] PUSHI T_PUSH 0 0 0 "VALUE 2"; *
+CALL PUSHA-TEST 2 RESULT
+    [51:33;9] CALLM T_CALLM 2 1 23; [< PUSHA-TEST RESULT >]
 * {14:0,1,1} PUSHI: * <= 100
 
 !!! FATAL PROGRAM FORMAT ERROR:
@@ -80,4 +131,90 @@ TREATING JMP AS UNSUCCESSFUL AND CONTINUING BECAUSE PROCESS->TEST == 95
 * {24:10,2,11} JMPCNT JMPS 0 0 1 *MISSING*
     ARGS = 5 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 94 > 0
+* {25:11,3,12} PUSHI: * <= 0
+* {26:12,4,13} PUSHI: * <= inf
+* {27:13,5,14} PUSHI: * <= inf
+
+!!! FATAL ERROR:  invalid operands to a conditional jump instruction
+* {28:14,4,15} JMPGEQ* location 15 with invalid operand(s)
+               ARGS = inf inf
+TREATING JMP AS UNSUCCESSFUL AND CONTINUING BECAUSE PROCESS->TEST == 93
+    > 0
+* {29:15,5,16} PUSHI: * <= nan
+
+!!! FATAL ERROR:  invalid operands to a conditional jump instruction
+* {30:16,3,17} JMPGEQ location 17 with invalid operand(s)
+               ARGS = inf nan
+TREATING JMP AS UNSUCCESSFUL AND CONTINUING BECAUSE PROCESS->TEST == 92
+    > 0
+
+!!! FATAL PROGRAM FORMAT ERROR:
+    JMP immedB != 0 or 1; illegal
+    PC->MODULE = mexas_compile_test_13.mex
+* {31:17,3,18} JMPGEQ JMPS 0 4 1 *MISSING*
+    ARGS = 5 0
+SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 91 > 0
+
+!!! FATAL PROGRAM FORMAT ERROR:
+    if JMP were executed, trace_depth would become negative
+    PC->MODULE = mexas_compile_test_13.mex
+* {32:18,3,19} JMP JMP [5] 0 0 1 *MISSING*
+SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 90 > 0
+
+!!! FATAL PROGRAM FORMAT ERROR:
+    PUSHS immedA too large; variable location is before stack beginning
+    PC->MODULE = mexas_compile_test_13.mex
+* {33:19,3,20} PUSHS PUSH 100 0 0 *MISSING*
+SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 89 > 0
+
+!!! FATAL PROGRAM FORMAT ERROR:
+    PUSHG immedD is not a module
+    PC->MODULE = mexas_compile_test_13.mex
+* {34:20,3,21} PUSHG PUSH 0 0 0 *MISSING*
+SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 88 > 0
+
+!!! FATAL PROGRAM FORMAT ERROR:
+    PUSHL immedB larger than current lexical level
+    PC->MODULE = mexas_compile_test_13.mex
+* {35:21,3,22} PUSHL PUSH 0 1 0 *MISSING*
+SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 87 > 0
+
+!!! FATAL PROGRAM FORMAT ERROR:
+    PUSHL immedA too large; addresses variable beyond the end of the
+    function frame
+    PC->MODULE = mexas_compile_test_13.mex
+* {36:22,3,23} PUSHL PUSH 1000 0 0 *MISSING*
+SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 86 > 0
+* {38:23,3,24} BEGF
+* {49:31,4,25} PUSHI: * <= "VALUE 1"
+* {50:32,5,26} PUSHI: * <= "VALUE 2"
+* {51:33,5,27} CALLM to BEGF: PUSHA-TEST, ARG1="VALUE 1", ARG2="VALUE 2"
+
+!!! FATAL PROGRAM FORMAT ERROR:
+    PUSHL immedA too large; addresses variable beyond the end of the
+    function frame
+    PC->MODULE = mexas_compile_test_13.mex
+*** {39:24,5,28} PUSHL PUSH 1000 1 0 *MISSING*
+SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 85 > 0
+
+!!! FATAL PROGRAM FORMAT ERROR:
+    PUSHL immedA too large; addresses variable beyond the end of the
+    function frame
+    PC->MODULE = mexas_compile_test_13.mex
+*** {41:25,5,29} PUSHL PUSH 1000 0 0 *MISSING*
+SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 84 > 0
+
+!!! FATAL PROGRAM FORMAT ERROR:
+    PUSHA: invalid immedB; 0 or greater than current lexical level
+    PC->MODULE = mexas_compile_test_13.mex
+*** {43:26,5,30} PUSHA PUSH 0 2 0 *MISSING*
+SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 83 > 0
+
+!!! FATAL PROGRAM FORMAT ERROR:
+    PUSHA immedA too large; addresses non-extant argument
+    PC->MODULE = mexas_compile_test_13.mex
+*** {44:27,5,31} PUSHA PUSH 3 1 0 *MISSING*
+SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 82 > 0
+*** {45:28,6,32} PUSHI: * <= "RESULT"
+*** {46:29,4,33} RET to CALLM: PUSHA-TEST, RESULT="RESULT"
 mexas_compile_test_13.mex successfully compiled

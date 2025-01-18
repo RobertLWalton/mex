@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Jan 17 08:44:48 AM EST 2025
+// Date:	Sat Jan 18 01:31:49 AM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -2718,12 +2718,14 @@ TEST_LOOP:	// Come here after fatal error processed
 		    goto INNER_FATAL;
 		}
 		if (    p->fp[immedB] + immedA
-		     >= sp - spbegin )
+		     >= ( p->level == immedB ?
+		          sp - spbegin :
+			  p->ap[immedB+1] ) )
 		{
 		    message = "PUSHL immedA too large;"
 		              " addresses variable"
 			      " beyond the end of the"
-			      " stack";
+			      " function frame";
 		    goto INNER_FATAL;
 		}
 		value = spbegin[p->fp[immedB] + immedA];
