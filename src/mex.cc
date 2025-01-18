@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat Jan 18 01:31:49 AM EST 2025
+// Date:	Sat Jan 18 06:54:41 AM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -2642,11 +2642,12 @@ TEST_LOOP:	// Come here after fatal error processed
 	    switch ( op_code )
 	    {
 	    case mex::PUSHS:
-	        if ( immedA + 1 > sp - spbegin )
+	        if ( immedA >= ( sp - spbegin )
+		             - p->fp[p->level] )
 		{
-		    message = "PUSHS immedA too large;"
-		              " variable location is"
-			      " before stack beginning";
+		    message = "PUSHD: immedA equal to"
+		              " or larger than current"
+		              " frame length";
 		    goto INNER_FATAL;
 		}
 		if ( sp >= spend )
@@ -2768,13 +2769,6 @@ TEST_LOOP:	// Come here after fatal error processed
 		break;
 	    case mex::PUSHV:
 	    {
-		if ( sp <= spbegin )
-		{
-		    message =
-		        "PUSHV: cannot pop an empty"
-			" stack";
-		    goto INNER_FATAL;
-		}
 		min::uns32 j = immedB;
 		if ( j < 1 || j > p->level )
 		{
@@ -2812,15 +2806,16 @@ TEST_LOOP:	// Come here after fatal error processed
 		if ( sp <= spbegin )
 		{
 		    message =
-		        "POP: cannot pop an empty"
+		        "POPS: cannot pop an empty"
 			" stack";
 		    goto INNER_FATAL;
 		}
-	        if ( immedA >= sp - spbegin )
+	        if ( immedA >= ( sp - spbegin )
+		             - p->fp[p->level] )
 		{
-		    message = "POP: immedA equal to"
-		              " or larger than stack"
-		              " length";
+		    message = "POPS: immedA equal to"
+		              " or larger than current"
+		              " frame length";
 		    goto INNER_FATAL;
 		}
 		value = sp[-1];
@@ -2829,11 +2824,13 @@ TEST_LOOP:	// Come here after fatal error processed
 	    case mex::DEL:
 	        if ( sp < spbegin
 		     ||
-		     immedA + immedC > sp - spbegin )
+		       immedA + immedC
+		     >   ( sp - spbegin )
+		       - p->fp[p->level] )
 		{
-		    message = "DEL: immedA + immedB"
-		              " larger than stack"
-		              " length";
+		    message = "DEL: immedA + immedC"
+		              " larger than current"
+		              " frame length";
 		    goto INNER_FATAL;
 		}
 		sp_change = - (int ) immedC;

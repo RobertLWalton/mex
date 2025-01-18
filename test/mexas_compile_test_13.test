@@ -2,7 +2,7 @@
 //
 // File:        mexas_compile_test_13.mex
 // Author:      Bob Walton (walton@acm.org)
-// Date:        Sat Jan 18 01:38:17 AM EST 2025
+// Date:        Sat Jan 18 06:58:43 AM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -70,20 +70,33 @@ BEGF PUSHA-TEST ARG1 ARG2
     [43:26;10] PUSHA T_PUSH 0 2 0
     TEST_INSTRUCTION PUSHA 3 1  // immedA > fp[1]
     [44:27;10] PUSHA T_PUSH 3 1 0
+    TEST_INSTRUCTION PUSHNARGS  // immedB == 0
+    [45:28;10] PUSHNARGS T_PUSH 0 0 0
+    PUSHI 2.5
+    [46:29;11] PUSHI T_PUSH 0 0 0 2.5; *
+    TEST_INSTRUCTION PUSHV 0 2  // immedB > p->level
+    [47:30;11] PUSHV T_PUSH 0 2 0
+    TEST_INSTRUCTION PUSHV 0 1  // top not int >= 0
+    [48:31;11] PUSHV T_PUSH 0 1 0
+    TEST_INSTRUCTION POPS 10    // immedA > frame len
+    [49:32;11] POPS T_POP 10 0 0
+    TEST_INSTRUCTION DEL 10 0 1
+    [50:33;11] DEL T_POP 10 0 1
+        // immedA + immedC > frame length
     PUSHI "RESULT"
-    [45:28;11] PUSHI T_PUSH 0 0 0 "RESULT"; *
+    [52:34;12] PUSHI T_PUSH 0 0 0 "RESULT"; *
     RET 1
-    [46:29;10] RET T_RET 0 1 1
+    [53:35;11] RET T_RET 0 1 1
 ENDF
-    [38:23;10] BEGF T_BEGF 2 1 8; [< PUSHA-TEST ARG1 ARG2 >]
-    [47:30;8] ENDF T_ENDF 0 1 0
+    [38:23;11] BEGF T_BEGF 2 1 14; [< PUSHA-TEST ARG1 ARG2 >]
+    [54:36;8] ENDF T_ENDF 0 1 0
 
 PUSHI "VALUE 1"
-    [49:31;9] PUSHI T_PUSH 0 0 0 "VALUE 1"; *
+    [56:37;9] PUSHI T_PUSH 0 0 0 "VALUE 1"; *
 PUSHI "VALUE 2"
-    [50:32;10] PUSHI T_PUSH 0 0 0 "VALUE 2"; *
+    [57:38;10] PUSHI T_PUSH 0 0 0 "VALUE 2"; *
 CALL PUSHA-TEST 2 RESULT
-    [51:33;9] CALLM T_CALLM 2 1 23; [< PUSHA-TEST RESULT >]
+    [58:39;9] CALLM T_CALLM 2 1 23; [< PUSHA-TEST RESULT >]
 * {14:0,1,1} PUSHI: * <= 100
 
 !!! FATAL PROGRAM FORMAT ERROR:
@@ -162,7 +175,7 @@ SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 91 > 0
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 90 > 0
 
 !!! FATAL PROGRAM FORMAT ERROR:
-    PUSHS immedA too large; variable location is before stack beginning
+    PUSHD: immedA equal to or larger than current frame length
     PC->MODULE = mexas_compile_test_13.mex
 * {33:19,3,20} PUSHS PUSH 100 0 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 89 > 0
@@ -186,9 +199,9 @@ SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 87 > 0
 * {36:22,3,23} PUSHL PUSH 1000 0 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 86 > 0
 * {38:23,3,24} BEGF
-* {49:31,4,25} PUSHI: * <= "VALUE 1"
-* {50:32,5,26} PUSHI: * <= "VALUE 2"
-* {51:33,5,27} CALLM to BEGF: PUSHA-TEST, ARG1="VALUE 1", ARG2="VALUE 2"
+* {56:37,4,25} PUSHI: * <= "VALUE 1"
+* {57:38,5,26} PUSHI: * <= "VALUE 2"
+* {58:39,5,27} CALLM to BEGF: PUSHA-TEST, ARG1="VALUE 1", ARG2="VALUE 2"
 
 !!! FATAL PROGRAM FORMAT ERROR:
     PUSHL immedA too large; addresses variable beyond the end of the
@@ -215,6 +228,37 @@ SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 83 > 0
     PC->MODULE = mexas_compile_test_13.mex
 *** {44:27,5,31} PUSHA PUSH 3 1 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 82 > 0
-*** {45:28,6,32} PUSHI: * <= "RESULT"
-*** {46:29,4,33} RET to CALLM: PUSHA-TEST, RESULT="RESULT"
+
+!!! FATAL PROGRAM FORMAT ERROR:
+    PUSHNARGS: invalid immedB; 0 or greater than current lexical level
+    PC->MODULE = mexas_compile_test_13.mex
+*** {45:28,5,32} PUSHNARGS PUSH 0 0 0 *MISSING*
+SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 81 > 0
+*** {46:29,6,33} PUSHI: * <= 2.5
+
+!!! FATAL PROGRAM FORMAT ERROR:
+    PUSHV immedB is 0 or greater than current lexical level
+    PC->MODULE = mexas_compile_test_13.mex
+*** {47:30,6,34} PUSHV PUSH 0 2 0 *MISSING*
+SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 80 > 0
+
+!!! FATAL PROGRAM FORMAT ERROR:
+    PUSHV: top of stack is not a non-negative integer
+    PC->MODULE = mexas_compile_test_13.mex
+*** {48:31,6,35} PUSHV PUSH 0 1 0 *MISSING*
+SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 79 > 0
+
+!!! FATAL PROGRAM FORMAT ERROR:
+    POPS: immedA equal to or larger than current frame length
+    PC->MODULE = mexas_compile_test_13.mex
+*** {49:32,6,36} POPS POP 10 0 0 *MISSING*
+SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 78 > 0
+
+!!! FATAL PROGRAM FORMAT ERROR:
+    DEL: immedA + immedC larger than current frame length
+    PC->MODULE = mexas_compile_test_13.mex
+*** {50:33,6,37} DEL POP 10 0 1 *MISSING*
+SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 77 > 0
+*** {52:34,7,38} PUSHI: * <= "RESULT"
+*** {53:35,4,39} RET to CALLM: PUSHA-TEST, RESULT="RESULT"
 mexas_compile_test_13.mex successfully compiled

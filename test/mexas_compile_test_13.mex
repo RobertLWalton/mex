@@ -2,7 +2,7 @@
 //
 // File:	mexas_compile_test_13.mex
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat Jan 18 01:38:17 AM EST 2025
+// Date:	Sat Jan 18 06:58:43 AM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -42,6 +42,13 @@ BEGF PUSHA-TEST ARG1 ARG2
         // fp[0] + immedA > ap[1]
     TEST_INSTRUCTION PUSHA 0 2  // immedB > p->level
     TEST_INSTRUCTION PUSHA 3 1  // immedA > fp[1]
+    TEST_INSTRUCTION PUSHNARGS  // immedB == 0
+    PUSHI 2.5
+    TEST_INSTRUCTION PUSHV 0 2  // immedB > p->level
+    TEST_INSTRUCTION PUSHV 0 1  // top not int >= 0
+    TEST_INSTRUCTION POPS 10    // immedA > frame len
+    TEST_INSTRUCTION DEL 10 0 1
+        // immedA + immedC > frame length
     PUSHI "RESULT"
     RET 1
 ENDF
