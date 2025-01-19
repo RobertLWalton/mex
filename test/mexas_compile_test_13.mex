@@ -2,7 +2,7 @@
 //
 // File:	mexas_compile_test_13.mex
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat Jan 18 06:58:43 AM EST 2025
+// Date:	Sat Jan 18 06:49:15 PM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -35,7 +35,7 @@ TEST_INSTRUCTION PUSHG  // no module
 TEST_INSTRUCTION PUSHL 0 1  // immedB > lexical level
 TEST_INSTRUCTION PUSHL 1000  // immedA > stack length
 
-BEGF PUSHA-TEST ARG1 ARG2
+BEGF PUSH-POP-TEST ARG1 ARG2
     TEST_INSTRUCTION PUSHL 1000 1
         // fp[1] + immedA > stack length
     TEST_INSTRUCTION PUSHL 1000 0
@@ -55,5 +55,11 @@ ENDF
 
 PUSHI "VALUE 1"
 PUSHI "VALUE 2"
-CALL PUSHA-TEST 2 RESULT
+CALL PUSH-POP-TEST 2 RESULT
+
+PUSHI 10
+PUSHI 20
+TEST_INSTRUCTION VPUSH 1
+TEST_INSTRUCTION VPOP 1
+TEST_INSTRUCTION VSIZE 1
 

@@ -2,7 +2,7 @@
 //
 // File:        mexas_compile_test_13.mex
 // Author:      Bob Walton (walton@acm.org)
-// Date:        Sat Jan 18 06:58:43 AM EST 2025
+// Date:        Sat Jan 18 06:49:15 PM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -58,8 +58,8 @@ TEST_INSTRUCTION PUSHL 0 1  // immedB > lexical level
 TEST_INSTRUCTION PUSHL 1000  // immedA > stack length
     [36:22;8] PUSHL T_PUSH 1000 0 0
 
-BEGF PUSHA-TEST ARG1 ARG2
-    [38:23;10] BEGF T_BEGF 2 1 0; [< PUSHA-TEST ARG1 ARG2 >]
+BEGF PUSH-POP-TEST ARG1 ARG2
+    [38:23;10] BEGF T_BEGF 2 1 0; [< PUSH-POP-TEST ARG1 ARG2 >]
     TEST_INSTRUCTION PUSHL 1000 1
     [39:24;10] PUSHL T_PUSH 1000 1 0
         // fp[1] + immedA > stack length
@@ -88,15 +88,26 @@ BEGF PUSHA-TEST ARG1 ARG2
     RET 1
     [53:35;11] RET T_RET 0 1 1
 ENDF
-    [38:23;11] BEGF T_BEGF 2 1 14; [< PUSHA-TEST ARG1 ARG2 >]
+    [38:23;11] BEGF T_BEGF 2 1 14; [< PUSH-POP-TEST ARG1 ARG2 >]
     [54:36;8] ENDF T_ENDF 0 1 0
 
 PUSHI "VALUE 1"
     [56:37;9] PUSHI T_PUSH 0 0 0 "VALUE 1"; *
 PUSHI "VALUE 2"
     [57:38;10] PUSHI T_PUSH 0 0 0 "VALUE 2"; *
-CALL PUSHA-TEST 2 RESULT
-    [58:39;9] CALLM T_CALLM 2 1 23; [< PUSHA-TEST RESULT >]
+CALL PUSH-POP-TEST 2 RESULT
+    [58:39;9] CALLM T_CALLM 2 1 23; [< PUSH-POP-TEST RESULT >]
+
+PUSHI 10
+    [60:40;10] PUSHI T_PUSH 0 0 0 10; *
+PUSHI 20
+    [61:41;11] PUSHI T_PUSH 0 0 0 20; *
+TEST_INSTRUCTION VPUSH 1
+    [62:42;11] VPUSH T_SET 1 0 0
+TEST_INSTRUCTION VPOP 1
+    [63:43;11] VPOP T_GET 1 0 0
+TEST_INSTRUCTION VSIZE 1
+    [64:44;11] VSIZE T_GET 1 0 0
 * {14:0,1,1} PUSHI: * <= 100
 
 !!! FATAL PROGRAM FORMAT ERROR:
@@ -201,7 +212,8 @@ SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 86 > 0
 * {38:23,3,24} BEGF
 * {56:37,4,25} PUSHI: * <= "VALUE 1"
 * {57:38,5,26} PUSHI: * <= "VALUE 2"
-* {58:39,5,27} CALLM to BEGF: PUSHA-TEST, ARG1="VALUE 1", ARG2="VALUE 2"
+* {58:39,5,27} CALLM to BEGF: PUSH-POP-TEST, ARG1="VALUE 1",
+                              ARG2="VALUE 2"
 
 !!! FATAL PROGRAM FORMAT ERROR:
     PUSHL immedA too large; addresses variable beyond the end of the
@@ -260,5 +272,25 @@ SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 78 > 0
 *** {50:33,6,37} DEL POP 10 0 1 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 77 > 0
 *** {52:34,7,38} PUSHI: * <= "RESULT"
-*** {53:35,4,39} RET to CALLM: PUSHA-TEST, RESULT="RESULT"
+*** {53:35,4,39} RET to CALLM: PUSH-POP-TEST, RESULT="RESULT"
+* {60:40,5,40} PUSHI: * <= 10
+* {61:41,6,41} PUSHI: * <= 20
+
+!!! FATAL PROGRAM FORMAT ERROR:
+    object argument is not an object
+    PC->MODULE = mexas_compile_test_13.mex
+* {62:42,6,42} VPUSH SET 1 0 0 *MISSING*
+SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 76 > 0
+
+!!! FATAL PROGRAM FORMAT ERROR:
+    object argument is not an object
+    PC->MODULE = mexas_compile_test_13.mex
+* {63:43,6,43} VPOP GET 1 0 0 *MISSING*
+SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 75 > 0
+
+!!! FATAL PROGRAM FORMAT ERROR:
+    object argument is not an object
+    PC->MODULE = mexas_compile_test_13.mex
+* {64:44,6,44} VSIZE GET 1 0 0 *MISSING*
+SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 74 > 0
 mexas_compile_test_13.mex successfully compiled

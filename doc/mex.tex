@@ -18,7 +18,7 @@
 
 \author{Robert L. Walton}
 
-\date{January 17, 2025}
+\date{January 18, 2025}
  
 \maketitle
 
@@ -468,14 +468,14 @@ the smallest incomplete execution of level $L'$.
 If follows that during an execution of an instruction in $F$
 the variables of $F'$ can be accessed by
 \TT{PUSHL} with \TT{immedB} = $L'$
-(Figure~\itemref{STACK-AND-FLOW-CONTROL-INSTRUCTIONS}),
+(Figure~\itemref{STACK-INSTRUCTIONS}),
 and the arguments of $F'$ can be
 accessed by \TT{PUSHA} with \TT{immedB} = $L'$
-(Figure~\itemref{STACK-AND-HOUSEKEEPING-INSTRUCTIONS}).
+(Figure~\itemref{STACK-INSTRUCTIONS}).
 MEX sets \TT{fp[0] = 0},
 so the global variables can be accessed by \TT{PUSHL} with \TT{immedB} = $0$
 or by \TT{PUSHG}
-(Figure~\itemref{STACK-AND-FLOW-CONTROL-INSTRUCTIONS}).
+(Figure~\itemref{STACK-INSTRUCTIONS}).
 
 \section{Code Vectors}
 \label{CODE-VECTORS}
@@ -488,10 +488,11 @@ The syntactic structure of a code vector is:
 \\[0.5ex]
 \emkey{code-item} \begin{tabular}[t]{@{}rl} 
 		  ::= & {\em arithmetic-instruction} \\
-		  $|$ & {\em stack-and-flow-control-instruction} \\
+		  $|$ & {\em stack-instruction} \\
+		  $|$ & {\em jump-instruction} \\
 		  $|$ & {\em block-and-function-instruction} \\
 		  $|$ & {\em object-instruction} \\
-		  $|$ & {\em stack-and-housekeeping-instruction} \\
+		  $|$ & {\em housekeeping-instruction} \\
 		  $|$ & {\em normal-block} \\
 		  $|$ & {\em loop-block} \\
 		  $|$ & {\em function-block} \\
@@ -501,9 +502,13 @@ The syntactic structure of a code vector is:
 \hspace*{3em}
     instructions in Figure \itemref{ARITHMETIC-INSTRUCTIONS}
 \\[0.5ex]
-\emkey{stack-and-flow-control-instruction} ::= \\
+\emkey{stack-instruction} ::= \\
 \hspace*{3em}
-     instructions in Figure \itemref{STACK-AND-FLOW-CONTROL-INSTRUCTIONS}
+     instructions in Figure \itemref{STACK-INSTRUCTIONS}
+\\[0.5ex]
+\emkey{jump-instruction} ::= \\
+\hspace*{3em}
+     instructions in Figure \itemref{JUMP-INSTRUCTIONS}
 \\[0.5ex]
 \emkey{block-and-function-instruction} ::= \\
 \hspace*{3em}
@@ -514,9 +519,9 @@ The syntactic structure of a code vector is:
 \hspace*{3em}
      instructions in Figure \itemref{OBJECT-INSTRUCTIONS}
 \\[0.5ex]
-\emkey{stack-and-housekeeping-instruction} ::= \\
+\emkey{housekeeping-instruction} ::= \\
 \hspace*{3em}
-     instructions in Figure \itemref{STACK-AND-HOUSEKEEPING-INSTRUCTIONS}
+     instructions in Figure \itemref{HOUSEKEEPING-INSTRUCTIONS}
 \\[0.5ex]
 \emkey{normal-block} ::= \begin{tabular}[t]{@{}l}
 			 \TT{BEG} \\
@@ -841,9 +846,12 @@ library are used.  See Arithmetic Exceptions,
 \itemref{ARITHMETIC-EXCEPTIONS} for error
 handling.
 
-The stack and flow control instruction set is in
-Figure~\itemref{STACK-AND-FLOW-CONTROL-INSTRUCTIONS}.
+The stack instruction set is in
+Figure~\itemref{STACK-INSTRUCTIONS}.
 See Stacks, \itemref{STACKS}, for an overview of stack handling.
+
+The jump instruction set is in
+Figure~\itemref{JUMP-INSTRUCTIONS}.
 
 The block and function instruction set is in
 Figure~\itemref{BLOCK-AND-FUNCTION-INSTRUCTIONS}.
@@ -853,8 +861,8 @@ for details concerning nested functions.
 The object instruction set creates and modifies MIN objects.
 See Figure~\itemref{OBJECT-INSTRUCTIONS}.
 
-The stack and housekeeping instruction set is in
-Figure~\itemref{STACK-AND-HOUSEKEEPING-INSTRUCTIONS}.
+The housekeeping instruction set is in
+Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}.
 
 Some instructions use the values of the following parameters to represent
 the logical values `true' and `false':
@@ -973,11 +981,16 @@ the logical values `true' and `false':
 \hline
 \ttkey{PUSHS}
     & Read the value at \TT{sp[- immedA - 1]} and push it into the \\
-    & stack; so \TT{immedA} = 0 duplicates the top value.
+    & stack; so \TT{immedA} = 0 duplicates the top value.  Location read \\
+    & must be in the range {\tt [ fp[level], length )}.
 \\\hline
 \ttkey{PUSHL}
     & Read the value at \TT{fp[immedB] + immedA} and push it into the \\
-    & stack.  But if \TT{immedB == 0} and \TT{m->globals} is not \TT{min::} \\
+    & stack.  Location read must be in the range \\
+    & {\tt [ fp[immedB], ap[immedB+1])} if {\tt immedB != level}, \\
+    & or if {\tt immedB == level}, {\tt [ fp[immedB], length )}. \\
+    & \\
+    & But if \TT{immedB == 0} and \TT{m->globals} is not \TT{min::} \\
     & \TT{NULL\_STUB} for the module \TT{m} of the current program counter, \\
     & push \TT{m->globals[immedA]} instead.  Note \TT{fp[0] == 0}.
 \\\hline
@@ -991,12 +1004,45 @@ the logical values `true' and `false':
 \\\hline
 \ttkey{POPS}
     & Store the top value in the stack into \TT{sp[- immedA - 1]}, and \\
-    & then pop the stack once; so \TT{immedA} = 0 discards the top value.
+    & then pop the stack once; so \TT{immedA} = 0 discards the top value. \\
+    & Location written must be in the range {\tt [ fp[level], length )}.
 \\\hline
 \ttkey{DEL}
     & Delete from the stack the \TT{immedC} values just below the top \\
-    & \TT{immedA} values.  \TT{immedC} == 0 does nothing.
+    & \TT{immedA} values.  \TT{immedC} == 0 does nothing.  Locations deleted \\
+    & or copied must be in the range {\tt [ fp[level], length )}.
 \\\hline
+\ttkey{PUSHA}
+    & Read the stack vector value with index \TT{ap[immedB] + immedA} \\
+    & and push it into the stack.  \TT{immedA} must be in the range \\
+    & \TT{[0, nargs)} where \TT{nargs = fp[immedB] - ap[immedB]}.
+\\\hline
+\ttkey{PUSHNARGS}
+    & Push \TT{nargs = fp[immedB] - ap[immedB]}
+        (which is a \\
+    & natural number) converted to IEEE 64-bit floating point.
+\\\hline
+\ttkey{PUSHV}
+    & Replace the top stack value \TT{V} with the value of the stack element \\
+    & with index \TT{ap[immedB] + V}. \TT{V} must convert to \\
+    & a non-negative integer.  If \TT{V >= nargs} where \\
+    & \hspace*{0.5in}\TT{nargs = fp[immedB] - ap[immedB]}, \\
+    & \TT{min::NONE()} replaces the top value.
+\\\hline
+\end{tabular}
+\end{center}
+\vspace*{-3ex}
+\caption{Stack Instructions}
+\label{STACK-INSTRUCTIONS}
+\end{boxedfigure}
+
+\pagebreak
+
+\begin{boxedfigure}
+
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
 \ttkey{JMP}
     & Subtract \TT{immedA} from \TT{sp} (popping the stack \TT{immedA} times),
       \\
@@ -1046,8 +1092,8 @@ the logical values `true' and `false':
 \end{tabular}
 \end{center}
 \vspace*{-3ex}
-\caption{Stack and Flow Control Instructions}
-\label{STACK-AND-FLOW-CONTROL-INSTRUCTIONS}
+\caption{Jump Instructions}
+\label{JUMP-INSTRUCTIONS}
 \end{boxedfigure}
 
 \pagebreak
@@ -1212,25 +1258,6 @@ the logical values `true' and `false':
 \small
 \begin{tabular}{|l|l|}
 \hline
-\ttkey{PUSHA}
-    & Read the stack vector value with index \TT{ap[immedB] + immedA} \\
-    & and push it into the stack.  \TT{immedA} must be in the range \\
-    & \TT{[0, nargs)} where \TT{nargs = p->fp[immedB] - p->ap[immedB]}.
-\\\hline
-\ttkey{PUSHNARGS}
-    & Push \TT{nargs = p->fp[immedB] - p->ap[immedB]}
-        (which is a natural \\
-    & number) converted to IEEE 64-bit floating point.
-\\\hline
-\ttkey{PUSHV}
-    & Replace the top stack value \TT{V} with the value of the stack element
-      with \\
-    & index \TT{p->ap[immedB] + V}. \TT{V} must convert to a non-negative
-      integer.   \\
-    & If \TT{V >= nargs} where
-      \TT{nargs = p->fp[immedB] - p->ap[immedB]}, \\
-    & \TT{min::NONE()} replaces the top value.
-\\\hline
 \ttkey{SET\_TRACE}
     & The process \TT{trace\_flags} member is set to \TT{immedA} with its\\
     & \TT{T\_ALWAYS} flag forced on and its \TT{T\_NEVER} flag forced off. \\
@@ -1262,8 +1289,8 @@ the logical values `true' and `false':
 \end{tabular}
 \end{center}
 \vspace*{-3ex}
-\caption{Stack and Housekeeping Instructions}
-\label{STACK-AND-HOUSEKEEPING-INSTRUCTIONS}
+\caption{Housekeeping Instructions}
+\label{HOUSEKEEPING-INSTRUCTIONS}
 \end{boxedfigure}
 
 \section{Arithmetic Exceptions}
@@ -1281,7 +1308,7 @@ In C/C++ the flag bit associated with exception \TT{XX}
 is defined as a bit mask macro \TT{FE\_XX} in \TT{fenv.h}
 (see fenv(3) in the UNIX manual):
 
-\begin{boxedfigure}[t!]
+\begin{boxedfigure}[b!]
 \begin{center}
 \begin{tabular}{|l|l|}
 \hline
@@ -1388,7 +1415,7 @@ the \TT{mex::T\_XX} constant.  Thus the trace class of \TT{ADD}
 is \TT{mex::T\_AOP}.
 
 
-\begin{boxedfigure}[!h]
+\begin{boxedfigure}[!t]
 
 \begin{center}
 
@@ -1409,11 +1436,10 @@ is \TT{mex::T\_AOP}.
     \itemref{ARITHMETIC-INSTRUCTIONS}.
 \\\hline
 \ttmkey{PUSH}{trace class} & All \TT{PUSH\ldots} instructions in Figures
-    \itemref{STACK-AND-FLOW-CONTROL-INSTRUCTIONS} and
-    \itemref{STACK-AND-HOUSEKEEPING-INSTRUCTIONS}.
+    \itemref{STACK-INSTRUCTIONS}.
 \\\hline
 \ttmkey{POP}{trace class} & The \TT{POPS} instruction in Figure
-    \itemref{STACK-AND-FLOW-CONTROL-INSTRUCTIONS}.
+    \itemref{STACK-INSTRUCTIONS}.
 \\\hline
 \ttmkey{JMP}{trace class} & The \TT{JMP} instruction.
 \\\hline
@@ -1421,7 +1447,7 @@ is \TT{mex::T\_AOP}.
 \ttmkey{JMPS}{trace class} \\
 \ttmkey{JMPF}{trace class}
 \end{tabular} & \TT{JMP\ldots} instructions in
-	        Figure \itemref{STACK-AND-FLOW-CONTROL-INSTRUCTIONS}.
+	        Figure \itemref{JUMP-INSTRUCTIONS}.
 		When compiled the instruction is given the \TT{JMPS}
 		class.  When executed, if the jump test succeeds
 		(jump is taken),
@@ -1561,7 +1587,7 @@ have the form:
 As always in tracing, `\TT{*}' is used for a missing variable name.
 
 For a \TT{PUSH\ldots} or \TT{POP} instruction
-in Figure~\itemref{STACK-AND-FLOW-CONTROL-INSTRUCTIONS}
+in Figure~\itemref{STACK-INSTRUCTIONS}
 the value of
 \TT{module->\EOL trace\_\EOL info[i]} is the MIN label
 \TT{[<} {\em from-variable} ~ {\em to-variable} \TT{>]}.
