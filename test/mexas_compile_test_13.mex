@@ -2,7 +2,7 @@
 //
 // File:	mexas_compile_test_13.mex
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Jan 20 01:40:38 AM EST 2025
+// Date:	Mon Jan 20 08:26:52 AM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -67,20 +67,40 @@ BEGF GET-SET-TEST
     PUSHI 1
     PUSHI 2
     TEST_INSTRUCTION GET 10 0 0
+    TEST_INSTRUCTION SET 10 0 0
     TEST_INSTRUCTION GET 1 0 10
+    TEST_INSTRUCTION SET 1 0 10
     TEST_INSTRUCTION GET 1 1 1
+    TEST_INSTRUCTION SET 1 1 0
     TEST_INSTRUCTION GET 1 0 0
+    TEST_INSTRUCTION SET 1 0 0
     PUSHOBJ 10 5
     PUSHI 1e10
     TEST_INSTRUCTION GET 1 0 0
+    PUSHI 3
+    TEST_INSTRUCTION SET 2 0 1
+    POP
     POP
     PUSHI TRUE
     TEST_INSTRUCTION GET 1 0 0
+    PUSHI 3
+    TEST_INSTRUCTION SET 2 0 1
+    POP
+    POP
+    PUSHI 5
+    PUSHI 6
+    TEST_INSTRUCTION SET 2 0 1
+    POP
     POP
     TEST_INSTRUCTION GETI 10
     TEST_INSTRUCTION GETI 0
     PUSHI 5
     TEST_INSTRUCTION GETI 0 0 0 "foo"
+    TEST_INSTRUCTION SETI 10
+    PUSHI 6
+    TEST_INSTRUCTION SETI 1 0 0 "foo"
+    POP
+    TEST_INSTRUCTION SETI 1 0 0 TRUE
     RET 0
 ENDF
 
