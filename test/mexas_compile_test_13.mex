@@ -2,7 +2,7 @@
 //
 // File:	mexas_compile_test_13.mex
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat Jan 18 06:49:15 PM EST 2025
+// Date:	Mon Jan 20 01:40:38 AM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -63,3 +63,25 @@ TEST_INSTRUCTION VPUSH 1
 TEST_INSTRUCTION VPOP 1
 TEST_INSTRUCTION VSIZE 1
 
+BEGF GET-SET-TEST
+    PUSHI 1
+    PUSHI 2
+    TEST_INSTRUCTION GET 10 0 0
+    TEST_INSTRUCTION GET 1 0 10
+    TEST_INSTRUCTION GET 1 1 1
+    TEST_INSTRUCTION GET 1 0 0
+    PUSHOBJ 10 5
+    PUSHI 1e10
+    TEST_INSTRUCTION GET 1 0 0
+    POP
+    PUSHI TRUE
+    TEST_INSTRUCTION GET 1 0 0
+    POP
+    TEST_INSTRUCTION GETI 10
+    TEST_INSTRUCTION GETI 0
+    PUSHI 5
+    TEST_INSTRUCTION GETI 0 0 0 "foo"
+    RET 0
+ENDF
+
+CALL GET-SET-TEST 0

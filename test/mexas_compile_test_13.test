@@ -2,7 +2,7 @@
 //
 // File:        mexas_compile_test_13.mex
 // Author:      Bob Walton (walton@acm.org)
-// Date:        Sat Jan 18 06:49:15 PM EST 2025
+// Date:        Mon Jan 20 01:40:38 AM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -108,6 +108,51 @@ TEST_INSTRUCTION VPOP 1
     [63:43;11] VPOP T_GET 1 0 0
 TEST_INSTRUCTION VSIZE 1
     [64:44;11] VSIZE T_GET 1 0 0
+
+BEGF GET-SET-TEST
+    [66:45;11] BEGF T_BEGF 0 1 0; [< GET-SET-TEST >]
+    PUSHI 1
+    [67:46;12] PUSHI T_PUSH 0 0 0 1; *
+    PUSHI 2
+    [68:47;13] PUSHI T_PUSH 0 0 0 2; *
+    TEST_INSTRUCTION GET 10 0 0
+    [69:48;13] GET T_GET 10 0 0
+    TEST_INSTRUCTION GET 1 0 10
+    [70:49;13] GET T_GET 1 0 10
+    TEST_INSTRUCTION GET 1 1 1
+    [71:50;13] GET T_GET 1 1 1
+    TEST_INSTRUCTION GET 1 0 0
+    [72:51;13] GET T_GET 1 0 0
+    PUSHOBJ 10 5
+    [73:52;14] PUSHOBJ T_SET 10 0 5; *
+    PUSHI 1e10
+    [74:53;15] PUSHI T_PUSH 0 0 0 10000000000; *
+    TEST_INSTRUCTION GET 1 0 0
+    [75:54;15] GET T_GET 1 0 0
+    POP
+    [76:55;14] POPS T_POP 0 0 0; [< * * >]
+    PUSHI TRUE
+    [77:56;15] PUSHI T_PUSH 0 0 0 *TRUE*; *
+    TEST_INSTRUCTION GET 1 0 0
+    [78:57;15] GET T_GET 1 0 0
+    POP
+    [79:58;14] POPS T_POP 0 0 0; [< * * >]
+    TEST_INSTRUCTION GETI 10
+    [80:59;14] GETI T_GET 10 0 0
+    TEST_INSTRUCTION GETI 0
+    [81:60;14] GETI T_GET 0 0 0
+    PUSHI 5
+    [82:61;15] PUSHI T_PUSH 0 0 0 5; *
+    TEST_INSTRUCTION GETI 0 0 0 "foo"
+    [83:62;15] GETI T_GET 0 0 0 "foo"
+    RET 0
+    [84:63;15] RET T_RET 0 1 0
+ENDF
+    [66:45;15] BEGF T_BEGF 0 1 20; [< GET-SET-TEST >]
+    [85:64;11] ENDF T_ENDF 0 1 0
+
+CALL GET-SET-TEST 0
+    [87:65;11] CALLM T_CALLM 0 0 45; [< GET-SET-TEST >]
 * {14:0,1,1} PUSHI: * <= 100
 
 !!! FATAL PROGRAM FORMAT ERROR:
@@ -293,4 +338,74 @@ SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 75 > 0
     PC->MODULE = mexas_compile_test_13.mex
 * {64:44,6,44} VSIZE GET 1 0 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 74 > 0
+* {66:45,6,45} BEGF
+* {87:65,6,46} CALLM to BEGF: GET-SET-TEST
+*** {67:46,7,47} PUSHI: * <= 1
+*** {68:47,8,48} PUSHI: * <= 2
+
+!!! FATAL PROGRAM FORMAT ERROR:
+    GET: immedA equal to or larger than current frame length
+    PC->MODULE = mexas_compile_test_13.mex
+*** {69:48,8,49} GET GET 10 0 0 *MISSING*
+SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 73 > 0
+
+!!! FATAL PROGRAM FORMAT ERROR:
+    GET: immedC equal to or larger than current frame length
+    PC->MODULE = mexas_compile_test_13.mex
+*** {70:49,8,50} GET GET 1 0 10 *MISSING*
+SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 72 > 0
+
+!!! FATAL PROGRAM FORMAT ERROR:
+    GET: immedB !=0 but immedC != 0
+    PC->MODULE = mexas_compile_test_13.mex
+*** {71:50,8,51} GET GET 1 1 1 *MISSING*
+SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 71 > 0
+
+!!! FATAL PROGRAM FORMAT ERROR:
+    object argument is not an object
+    PC->MODULE = mexas_compile_test_13.mex
+*** {72:51,8,52} GET GET 1 0 0 *MISSING*
+    ARGS = 1 2
+SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 70 > 0
+*** {73:52,9,53} PUSHOBJ: * <= NEW OBJ ( 10, 5)
+*** {74:53,10,54} PUSHI: * <= 10000000000
+
+!!! FATAL PROGRAM FORMAT ERROR:
+    GET: numeric label is not integer in range (-1e9, +1e9)
+    PC->MODULE = mexas_compile_test_13.mex
+*** {75:54,10,55} GET GET 1 0 0 *MISSING*
+    ARGS = {} 10000000000
+SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 69 > 0
+*** {76:55,9,56} POPS: * <= * = 10000000000
+*** {77:56,10,57} PUSHI: * <= *TRUE*
+
+!!! FATAL PROGRAM FORMAT ERROR:
+    label argument is not a label
+    PC->MODULE = mexas_compile_test_13.mex
+*** {78:57,10,58} GET GET 1 0 0 *MISSING*
+    ARGS = {} *TRUE*
+SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 68 > 0
+*** {79:58,9,59} POPS: * <= * = *TRUE*
+
+!!! FATAL PROGRAM FORMAT ERROR:
+    GETI: immedA equal to or larger than current frame length
+    PC->MODULE = mexas_compile_test_13.mex
+*** {80:59,9,60} GETI GET 10 0 0 *MISSING*
+SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 67 > 0
+
+!!! FATAL PROGRAM FORMAT ERROR:
+    label argument is not a label
+    PC->MODULE = mexas_compile_test_13.mex
+*** {81:60,9,61} GETI GET 0 0 0 *MISSING*
+    ARGS = {} *MISSING*
+SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 66 > 0
+*** {82:61,10,62} PUSHI: * <= 5
+
+!!! FATAL PROGRAM FORMAT ERROR:
+    object argument is not an object
+    PC->MODULE = mexas_compile_test_13.mex
+*** {83:62,10,63} GETI GET 0 0 0 foo
+    ARGS = 5 "foo"
+SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 65 > 0
+*** {84:63,6,64} RET to CALLM: GET-SET-TEST
 mexas_compile_test_13.mex successfully compiled
