@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat Jan 18 06:54:41 AM EST 2025
+// Date:	Mon Jan 20 12:19:02 AM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1884,6 +1884,27 @@ TEST_LOOP:	// Come here after fatal error processed
 
     while ( true ) // Inner loop.
     {
+	if ( pc < pcbegin  )
+	{
+	    message = "Illegal PC: pc < pcbegin";
+	    goto PERMANENT_ERROR;
+	}
+	if ( pc > pcend  )
+	{
+	    message = "Illegal PC: pc > pcend";
+	    goto PERMANENT_ERROR;
+	}
+	if ( sp < spbegin  )
+	{
+	    message = "Illegal SP: sp < spbegin";
+	    goto PERMANENT_ERROR;
+	}
+	if ( sp > spend  )
+	{
+	    message = "Illegal SP: sp > spend";
+	    goto PERMANENT_ERROR;
+	}
+
         if ( pc == pcend )
 	{
 	    SAVE;
@@ -1919,7 +1940,8 @@ TEST_LOOP:	// Come here after fatal error processed
 		    return true;
 		}
 		message = "Illegal PC: no module and"
-		          " index > 0";
+		          " index > 0 after optimized"
+			  " run";
 		goto PERMANENT_ERROR;
 	    }
 	    if ( oi >= m->length )
@@ -1930,7 +1952,15 @@ TEST_LOOP:	// Come here after fatal error processed
 		    return true;
 		}
 		message = "Illegal PC: PC index greater"
-			  " than module length";
+			  " than module length after"
+			  " optimized run";
+		goto PERMANENT_ERROR;
+	    }
+	    if ( p->length > p->max_length )
+	    {
+		message = "Illegal SP: p->length >"
+			  " p->max_length after"
+			  " optimized run";
 		goto PERMANENT_ERROR;
 	    }
 
@@ -2822,9 +2852,7 @@ TEST_LOOP:	// Come here after fatal error processed
 		sp_change = -1;
 		break;
 	    case mex::DEL:
-	        if ( sp < spbegin
-		     ||
-		       immedA + immedC
+	        if (   immedA + immedC
 		     >   ( sp - spbegin )
 		       - p->fp[p->level] )
 		{
@@ -2846,9 +2874,14 @@ TEST_LOOP:	// Come here after fatal error processed
 		break;
 	    case mex::VPUSH:
 	    {
-		if (    sp < spbegin
-		     || immedA >= sp - spbegin )
-		    goto STACK_TOO_SMALL;
+	        if ( immedA >= ( sp - spbegin )
+		             - p->fp[p->level] )
+		{
+		    message = "VPUSH: immedA equal to"
+		              " or larger than current"
+		              " frame length";
+		    goto INNER_FATAL;
+		}
 
 		min::gen obj = sp[-(int)immedA-1];
 		if ( ! min::is_obj ( obj ) )
@@ -2880,9 +2913,14 @@ TEST_LOOP:	// Come here after fatal error processed
 	    case mex::VPOP:
 	    case mex::VSIZE:
 	    {
-		if (    sp < spbegin
-		     || immedA >= sp - spbegin )
-		    goto STACK_TOO_SMALL;
+	        if ( immedA >= ( sp - spbegin )
+		             - p->fp[p->level] )
+		{
+		    message = "VPOP/VSIZE: immedA equal"
+		              " to or larger than"
+		              " current frame length";
+		    goto INNER_FATAL;
+		}
 		if ( sp >= spend )
 		    goto STACK_LIMIT_STOP;
 
@@ -2909,12 +2947,22 @@ TEST_LOOP:	// Come here after fatal error processed
 		break;
 	    }
 	    case mex::GET:
-		if ( sp <= spbegin
-		     ||
-		     immedA >= sp - spbegin
-		     ||
-		     immedC >= sp - spbegin )
-		    goto STACK_TOO_SMALL;
+	        if ( immedA >= ( sp - spbegin )
+		             - p->fp[p->level] )
+		{
+		    message = "GET: immedA equal"
+		              " to or larger than"
+		              " current frame length";
+		    goto INNER_FATAL;
+		}
+	        if ( immedC >= ( sp - spbegin )
+		             - p->fp[p->level] )
+		{
+		    message = "GET: immedC equal"
+		              " to or larger than"
+		              " current frame length";
+		    goto INNER_FATAL;
+		}
 
 		sp_change = +1;
 		if ( immedB != 0 )
@@ -2969,12 +3017,17 @@ TEST_LOOP:	// Come here after fatal error processed
 
 		break;
 	    case mex::GETI:
+	        if ( immedA >= ( sp - spbegin )
+		             - p->fp[p->level] )
+		{
+		    message = "GETI: immedA equal"
+		              " to or larger than"
+		              " current frame length";
+		    goto INNER_FATAL;
+		}
+
 		if ( sp >= spend )
 		    goto STACK_LIMIT_STOP;
-		if ( sp <= spbegin
-		     ||
-		     immedA >= sp - spbegin )
-		    goto STACK_TOO_SMALL;
 
 		label = immedD;
 		obj = sp[-(int)immedA-1];
@@ -2987,6 +3040,23 @@ TEST_LOOP:	// Come here after fatal error processed
 		sp_change = +1;
 		break;
 	    case mex::SET:
+	        if ( immedA >= ( sp - spbegin )
+		             - p->fp[p->level] )
+		{
+		    message = "SET: immedA equal"
+		              " to or larger than"
+		              " current frame length";
+		    goto INNER_FATAL;
+		}
+	        if ( immedC >= ( sp - spbegin )
+		             - p->fp[p->level] )
+		{
+		    message = "SET: immedC equal"
+		              " to or larger than"
+		              " current frame length";
+		    goto INNER_FATAL;
+		}
+
 		sp_change = -1;
 		if ( immedB != 0 )
 		{
@@ -2998,11 +3068,7 @@ TEST_LOOP:	// Come here after fatal error processed
 			goto INNER_FATAL;
 		    }
 		}
-		if ( sp + sp_change < spbegin
-		     ||
-		     immedA >= sp - spbegin
-		     ||
-		     immedC >= sp - spbegin )
+		if ( sp + sp_change < spbegin )
 		    goto STACK_TOO_SMALL;
 
 		value = sp[-1];
@@ -3052,10 +3118,15 @@ TEST_LOOP:	// Come here after fatal error processed
 
 		break;
 	    case mex::SETI:
-		if ( sp <= spbegin
-		     ||
-		     immedA >= sp - spbegin )
-		    goto STACK_TOO_SMALL;
+	        if ( immedA >= ( sp - spbegin )
+		             - p->fp[p->level] )
+		{
+		    message = "SETI: immedA equal"
+		              " to or larger than"
+		              " current frame length";
+		    goto INNER_FATAL;
+		}
+
 		sp_change = -1;
 
 		value = sp[-1];
