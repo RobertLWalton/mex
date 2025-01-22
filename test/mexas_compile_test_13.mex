@@ -2,7 +2,7 @@
 //
 // File:	mexas_compile_test_13.mex
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Jan 20 08:26:52 AM EST 2025
+// Date:	Wed Jan 22 07:57:31 AM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -105,3 +105,20 @@ BEGF GET-SET-TEST
 ENDF
 
 CALL GET-SET-TEST 0
+
+TEST_INSTRUCTION END
+
+BEGF BEG-END-TEST
+    TEST_INSTRUCTION BEG 10
+    TEST_INSTRUCTION BEGL 0 10
+    TEST_INSTRUCTION ENDL 10
+    TEST_INSTRUCTION CONT 10
+    TEST_INSTRUCTION ENDL 0 5
+    TEST_INSTRUCTION CONT 0 5
+    TEST_INSTRUCTION ENDL 0 0 100
+    TEST_INSTRUCTION CONT 0 0 100
+    TEST_INSTRUCTION CONT [ 2 ]
+    RET 0
+ENDF
+
+CALL BEG-END-TEST 0

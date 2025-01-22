@@ -2,7 +2,7 @@
 //
 // File:        mexas_compile_test_13.mex
 // Author:      Bob Walton (walton@acm.org)
-// Date:        Mon Jan 20 08:26:52 AM EST 2025
+// Date:        Wed Jan 22 07:57:31 AM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -193,6 +193,38 @@ ENDF
 
 CALL GET-SET-TEST 0
     [107:85;11] CALLM T_CALLM 0 0 45; [< GET-SET-TEST >]
+
+TEST_INSTRUCTION END
+    [109:86;11] END T_END 0 0 0
+
+BEGF BEG-END-TEST
+    [111:87;11] BEGF T_BEGF 0 1 0; [< BEG-END-TEST >]
+    TEST_INSTRUCTION BEG 10
+    [112:88;11] BEG T_BEG 10 0 0
+    TEST_INSTRUCTION BEGL 0 10
+    [113:89;11] BEGL T_BEGL 0 10 0
+    TEST_INSTRUCTION ENDL 10
+    [114:90;11] ENDL T_ENDL 10 0 0
+    TEST_INSTRUCTION CONT 10
+    [115:91;11] CONT T_CONT 10 0 0
+    TEST_INSTRUCTION ENDL 0 5
+    [116:92;11] ENDL T_ENDL 0 5 0
+    TEST_INSTRUCTION CONT 0 5
+    [117:93;11] CONT T_CONT 0 5 0
+    TEST_INSTRUCTION ENDL 0 0 100
+    [118:94;11] ENDL T_ENDL 0 0 100
+    TEST_INSTRUCTION CONT 0 0 100
+    [119:95;11] CONT T_CONT 0 0 100
+    TEST_INSTRUCTION CONT [ 2 ]
+    [120:96;11] CONT T_CONT[2] 0 0 0
+    RET 0
+    [121:97;11] RET T_RET 0 1 0
+ENDF
+    [111:87;11] BEGF T_BEGF 0 1 12; [< BEG-END-TEST >]
+    [122:98;11] ENDF T_ENDF 0 1 0
+
+CALL BEG-END-TEST 0
+    [124:99;11] CALLM T_CALLM 0 0 87; [< BEG-END-TEST >]
 * {14:0,1,1} PUSHI: * <= 100
 
 !!! FATAL PROGRAM FORMAT ERROR:
@@ -524,4 +556,67 @@ SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 56 > 0
     ARGS = {} *TRUE*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 55 > 0
 *** {104:83,6,84} RET to CALLM: GET-SET-TEST
+
+!!! FATAL PROGRAM FORMAT ERROR:
+    END: trace depth would become negative if instruction was executed
+    PC->MODULE = mexas_compile_test_13.mex
+* {109:86,6,85} END END 0 0 0 *MISSING*
+SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 54 > 0
+* {111:87,6,86} BEGF
+* {124:99,6,87} CALLM to BEGF: BEG-END-TEST
+
+!!! FATAL PROGRAM FORMAT ERROR:
+    BEG/NOP/END: immedA larger than current frame length
+    PC->MODULE = mexas_compile_test_13.mex
+*** {112:88,6,88} BEG BEG 10 0 0 *MISSING*
+SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 53 > 0
+
+!!! FATAL PROGRAM FORMAT ERROR:
+    BEGL: immedB larger than current frame length
+    PC->MODULE = mexas_compile_test_13.mex
+*** {113:89,6,89} BEGL BEGL 0 10 0 *MISSING*
+SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 52 > 0
+
+!!! FATAL PROGRAM FORMAT ERROR:
+    ENDL/CONT: immedA larger than current frame length
+    PC->MODULE = mexas_compile_test_13.mex
+*** {114:90,6,90} ENDL ENDL 10 0 0 *MISSING*
+SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 51 > 0
+
+!!! FATAL PROGRAM FORMAT ERROR:
+    ENDL/CONT: immedA larger than current frame length
+    PC->MODULE = mexas_compile_test_13.mex
+*** {115:91,6,91} CONT CONT 10 0 0 *MISSING*
+SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 50 > 0
+
+!!! FATAL PROGRAM FORMAT ERROR:
+    ENDL/CONT: immedA + 2 * immedB larger than current frame length
+    PC->MODULE = mexas_compile_test_13.mex
+*** {116:92,6,92} ENDL ENDL 0 5 0 *MISSING*
+SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 49 > 0
+
+!!! FATAL PROGRAM FORMAT ERROR:
+    ENDL/CONT: immedA + 2 * immedB larger than current frame length
+    PC->MODULE = mexas_compile_test_13.mex
+*** {117:93,6,93} CONT CONT 0 5 0 *MISSING*
+SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 48 > 0
+
+!!! FATAL PROGRAM FORMAT ERROR:
+    ENDL/CONT: immedC too large; associated BEGL non-extant
+    PC->MODULE = mexas_compile_test_13.mex
+*** {118:94,6,94} ENDL ENDL 0 0 100 *MISSING*
+SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 47 > 0
+
+!!! FATAL PROGRAM FORMAT ERROR:
+    ENDL/CONT: immedC too large; associated BEGL non-extant
+    PC->MODULE = mexas_compile_test_13.mex
+*** {119:95,6,95} CONT CONT 0 0 100 *MISSING*
+SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 46 > 0
+
+!!! FATAL PROGRAM FORMAT ERROR:
+    CONT: trace depth would become negative if instruction was executed
+    PC->MODULE = mexas_compile_test_13.mex
+*** {120:96,6,96} CONT CONT [2] 0 0 0 *MISSING*
+SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 45 > 0
+*** {121:97,6,97} RET to CALLM: BEG-END-TEST
 mexas_compile_test_13.mex successfully compiled
