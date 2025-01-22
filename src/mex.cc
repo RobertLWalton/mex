@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Jan 22 12:57:56 AM EST 2025
+// Date:	Wed Jan 22 08:49:51 AM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -3241,15 +3241,15 @@ TEST_LOOP:	// Come here after fatal error processed
 	    case mex::SET_TRACE:
 	    case mex::SET_EXCEPTS:
 	    case mex::SET_OPTIMIZE:
+	    case mex::TRACE_EXCEPTS:
 	        break;
 	    case mex::TRACE:
-	    case mex::TRACE_EXCEPTS:
 	    case mex::WARN:
 	    case mex::ERROR:
 	        if ( immedA >  ( sp - spbegin )
 		              - p->fp[p->level] )
 		{
-		    message = "TRACE.../WARN/ERROR:"
+		    message = "TRACE/WARN/ERROR:"
 		              " immedA larger than"
 			      " current frame length";
 		    goto INNER_FATAL;
