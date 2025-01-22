@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Jan 20 12:19:02 AM EST 2025
+// Date:	Wed Jan 22 12:57:56 AM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -3155,21 +3155,24 @@ TEST_LOOP:	// Come here after fatal error processed
 	    case mex::BEG:
 	    case mex::NOP:
 	    {
-		if ( immedA > sp - spbegin )
+	        if ( immedA >  ( sp - spbegin )
+		              - p->fp[p->level] )
 		{
 		    message = "BEG/NOP/END: immedA"
-                              " larger than stack"
-			      " length";
+                              " larger than current"
+			      " frame length";
 		    goto INNER_FATAL;
 		}
 		sp_change = - (int) immedA;
 		break;
 	    }
 	    case mex::BEGL:
-	        if ( immedB > sp - spbegin )
+	        if ( immedB >  ( sp - spbegin )
+		              - p->fp[p->level] )
 		{
-		    message = "BEGL: immedB"
-		              " larger than stack size";
+		    message = "BEGL: immedB larger"
+		              " than current frame"
+			      " length";
 		    goto INNER_FATAL;
 		}
 		if ( sp + immedB > spend )
@@ -3179,20 +3182,24 @@ TEST_LOOP:	// Come here after fatal error processed
 	    case mex::ENDL:
 	    case mex::CONT:
 	    {
-	        if ( immedA > sp - spbegin )
+	        if ( immedA >   ( sp - spbegin )
+		              - p->fp[p->level] )
 		{
-		    message = "ENDL/CONT: immedA larger"
-		              " than stack size";
+		    message = "ENDL/CONT: immedA"
+                              " larger than current"
+			      " frame length";
 		    goto INNER_FATAL;
 		}
 	        if (    2 * immedB < immedB
 		     || immedA + 2 * immedB < immedA
 		     ||   immedA + 2 * immedB
-		        > sp - spbegin )
+		        >   ( sp - spbegin )
+		          - p->fp[p->level] )
 		{
 		    message =
 		        "ENDL/CONT: immedA + 2 * immedB"
-			" larger than stack size";
+			" larger than current frame"
+			" length";
 		    goto INNER_FATAL;
 		}
 		min::uns32 location = pc - pcbegin;
@@ -3239,10 +3246,12 @@ TEST_LOOP:	// Come here after fatal error processed
 	    case mex::TRACE_EXCEPTS:
 	    case mex::WARN:
 	    case mex::ERROR:
-		if ( immedA > sp - spbegin )
+	        if ( immedA >  ( sp - spbegin )
+		              - p->fp[p->level] )
 		{
-		    message =
-		        "immedA larger than stack size";
+		    message = "TRACE.../WARN/ERROR:"
+		              " immedA larger than"
+			      " current frame length";
 		    goto INNER_FATAL;
 		}
 		sp_change = - (int) immedA;
@@ -3307,9 +3316,8 @@ TEST_LOOP:	// Come here after fatal error processed
 		{
 		    // Not possible for ENDF.
 		    message =
-		        "RET: immedC is"
-			" larger than portion of stack"
-			" at current lexical level";
+		        "RET: immedC is larger than"
+			" current frame length";
 		    goto INNER_FATAL;
 		}
 		mex::module em = ret->saved_pc.module;
