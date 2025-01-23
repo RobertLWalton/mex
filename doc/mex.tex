@@ -2320,15 +2320,26 @@ Similarly the location of a variable at run time is the value of
 instruction that creates the variable's value executes, or just after
 the subexpression that pushes the variable's value executes.
 
-The lexical level of a variable at compile time is the lexical
+Except for arguments and results of functions,
+the lexical level of a variable at compile time is the lexical
 level of the instruction that creates the variable value in
 the process stack, and this equals the lexical level of the variable
-at run time.
+at run time.  The lexical level of an argument is the lexical level
+of its function, and the lexical level of a returned value is the
+lexical level of the call instruction that called the function.
 
 Argument variables are pushed into
 the compiler symbol table by a \TT{BEGF} instruction.
 During run-time, argument variable values are transfered from the
-calling code to the function by the \TT{CALL\ldots} instruction.
+calling code to the function by the \TT{CALL\ldots} instruction and
+given the lexical level of the \TT{BEGF} instruction.
+
+Function return valued variables are pushed into
+the compiler symbol table by a \TT{CALL\ldots} instruction
+(though often the return values are not given variable names).
+During run-time, return values are transfered from the
+function frame to the caller's stack by the \TT{RET} instruction and
+given the lexical level of the \TT{CALL\ldots} instruction.
 
 'Next' variables inside a loop are pushed into the compiler symbol
 table by a \TT{BEGL} instruction, and at run-time, their values are
@@ -2337,7 +2348,7 @@ pushed into the stack by the same \TT{BEGL}.
 Consider a variable that has lexical level $L$,
 compile time location $\ell$,
 and run-time location $\ell'$ for the variable value in the most recently
-started execution of its containing function.
+started \underline{incomplete} execution of its containing function.
 Then if the variable is a non-argument variable:\label{FP} \\
 \hspace*{1in}{\tt $\ell$ - mexstack::fp[$L$] == $\ell'$ - process->fp[$L$]}, \\
 and if the variable is an argument variable:\label{AP} \\
@@ -2353,8 +2364,8 @@ Argument variables have the subrange: \\
 and non-argument variables have the subrange: \\
 \hspace*{1in}{\tt [ mexstack::fp[$L$], mexstack::ap[$L$+1] )}
 
-At run-time values of variables in the most recently started
-function of lexical level $L$ have locations in
+At run-time values of variables in the most recently started incomplete
+function execution of lexical level $L$ have locations in
 the range: \\
 \hspace*{1in}{\tt [ process->ap[$L$], process->ap[$L$+1] )}, \\
 where if $L$ is the current run-time lexical level the second
@@ -2470,6 +2481,9 @@ also all entries with lexical level $L$ equal to
 {\tt mexstack::\EOL lexical\_\EOL level} and 
 depth greater than {\tt mexstack::\EOL depth[$L$]}.
 
+The {\tt mexstack::endx} function always calls this
+{\tt mexstack::pop\_stacks} function.
+
 Note that when called by a \TT{ENDF} instruction, the argument
 variables are popped because they have the lexical level of
 the function that is ending.  Similarly when called by a \TT{ENDL},
@@ -2538,16 +2552,19 @@ where {\em successful\_stack\_offset} is an argument of
 
 \end{enumerate}
 
-Alternatively, the compiler can do the following
+For \TT{BEG\ldots}, \TT{CONT}, and \TT{END\ldots} instructions
+the compiler can alternatively do the following:
 
 \begin{enumerate}
 \item Push the instruction into the code vector using one of the
 functions:
-\begin{indpar}[1in]
-{\tt mexstack::begx}\pagnote{BEGX} \\
-{\tt mexstack::cont}\pagnote{CONT} \\
-{\tt mexstack::endx}\pagnote{ENDX}
-\end{indpar}
+\begin{center}
+\begin{tabular}{l@{~~~~~}l}
+{\tt mexstack::begx}\pagnote{BEGX} & for \TT{BEG\ldots} instructions \\
+{\tt mexstack::cont}\pagnote{CONT} & for \TT{CONT} instructions \\
+{\tt mexstack::endx}\pagnote{ENDX} & for \TT{END\ldots} instructions \\
+\end{tabular}
+\end{center}
 \item These functions adjust {\tt mexstack::stack\_length} using
 their function arguments and information saved in the
 block stack\pagnote{BLOCK-STACK}.  For example, for a {\tt BEGF}
