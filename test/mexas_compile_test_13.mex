@@ -2,7 +2,7 @@
 //
 // File:	mexas_compile_test_13.mex
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Jan 22 07:10:26 PM EST 2025
+// Date:	Thu Jan 23 01:17:16 AM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -137,3 +137,6 @@ CALL BEG-END-TEST 1 X
 TEST_INSTRUCTION RET
 TEST_INSTRUCTION ENDF
 
+TEST_INSTRUCTION CALLG 
+TEST_INSTRUCTION CALLM 0 0 10000
+TEST_INSTRUCTION CALLM 0 0 0

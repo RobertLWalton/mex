@@ -2,7 +2,7 @@
 //
 // File:        mexas_compile_test_13.mex
 // Author:      Bob Walton (walton@acm.org)
-// Date:        Wed Jan 22 07:10:26 PM EST 2025
+// Date:        Thu Jan 23 01:17:16 AM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -252,6 +252,13 @@ TEST_INSTRUCTION RET
     [137:111;12] RET T_RET 0 0 0
 TEST_INSTRUCTION ENDF
     [138:112;12] ENDF T_ENDF 0 0 0
+
+TEST_INSTRUCTION CALLG
+    [140:113;12] CALLG T_CALLG 0 0 0
+TEST_INSTRUCTION CALLM 0 0 10000
+    [141:114;12] CALLM T_CALLM 0 0 10000
+TEST_INSTRUCTION CALLM 0 0 0
+    [142:115;12] CALLM T_CALLM 0 0 0
 * {14:0,1,1} PUSHI: * <= 100
 
 !!! FATAL PROGRAM FORMAT ERROR:
@@ -714,4 +721,22 @@ SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 35 > 0
     PC->MODULE = mexas_compile_test_13.mex
 * {138:112,7,110} ENDF ENDF 0 0 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 34 > 0
+
+!!! FATAL PROGRAM FORMAT ERROR:
+    CALL immedD is not a module
+    PC->MODULE = mexas_compile_test_13.mex
+* {140:113,7,111} CALLG CALLG 0 0 0 *MISSING*
+SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 33 > 0
+
+!!! FATAL PROGRAM FORMAT ERROR:
+    CALL immedC is equal to or larger than module length
+    PC->MODULE = mexas_compile_test_13.mex
+* {141:114,7,112} CALLM CALLM 0 0 10000 *MISSING*
+SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 32 > 0
+
+!!! FATAL PROGRAM FORMAT ERROR:
+    CALL target is not a BEGF
+    PC->MODULE = mexas_compile_test_13.mex
+* {142:115,7,113} CALLM CALLM 0 0 0 *MISSING*
+SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 31 > 0
 mexas_compile_test_13.mex successfully compiled
