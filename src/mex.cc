@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Jan 22 08:49:51 AM EST 2025
+// Date:	Wed Jan 22 07:07:54 PM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -3312,7 +3312,8 @@ TEST_LOOP:	// Come here after fatal error processed
 	        min::gen * new_sp =
 		    spbegin + p->ap[immedB];
 
-		if (  immedC > sp - new_sp )
+	        if ( immedC >  ( sp - spbegin )
+		              - p->fp[p->level] )
 		{
 		    // Not possible for ENDF.
 		    message =
