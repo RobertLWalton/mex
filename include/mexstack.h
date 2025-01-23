@@ -2,7 +2,7 @@
 //
 // File:	mexstack.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Jan  7 02:05:31 AM EST 2025
+// Date:	Thu Jan 23 02:23:41 AM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -34,11 +34,23 @@ extern min::uns8 lexical_level;
 extern min::uns8 depth[mex::max_lexical_level+1];
 
 extern min::uns32 stack_length;
-void pop_stacks ( void );
+extern min::uns32 stack_limit;
 
 extern min::uns32 ap[mex::max_lexical_level+1];
 extern min::uns32 fp[mex::max_lexical_level+1];
 
+struct compile_save_area
+{
+    min::uns32 error_count;
+    min::uns32 warning_count;
+    min::uns32 stack_length;
+    min::uns32 stack_limit;
+    min::uns32 code_length;
+};
+
+void pop_stacks ( void );
+void save ( mexstack::compile_save_area & area );
+bool restore ( mexstack::compile_save_area & area );
 
 // Block Stack
 //
@@ -55,7 +67,6 @@ typedef min::packed_vec_insptr<mexstack::block_element>
 extern min::locatable_var<mexstack::block_stack>
     blocks;
 
-extern min::uns32 stack_limit;
 
 struct jump_element
 {

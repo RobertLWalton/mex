@@ -2,7 +2,7 @@
 //
 // File:	mexstack.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Jan  7 02:06:21 AM EST 2025
+// Date:	Thu Jan 23 02:38:21 AM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -86,6 +86,42 @@ void mexstack::init ( void )
         { min::MISSING(), 0, 0, 0, 0, 0, 0, 0 };
     min::push ( mexstack::jumps ) = e;  // Free head.
     min::push ( mexstack::jumps ) = e;  // Active head.
+}
+
+void mexstack::save
+	( mexstack::compile_save_area & area )
+{
+    area.error_count = mexcom::error_count;
+    area.warning_count = mexcom::warning_count;
+    area.stack_length = mexstack::stack_length;
+    area.stack_limit = mexstack::stack_limit;
+    area.code_length = mexcom::output_module->length;
+}
+bool mexstack::restore
+	( mexstack::compile_save_area & area )
+{
+    if ( mexcom::error_count == area.error_count )
+        return false;
+    mexcom::error_count = area.error_count;
+    mexcom::warning_count = area.warning_count;
+    mexstack::stack_length = area.stack_length;
+    mexstack::stack_limit = area.stack_limit;
+    min::pop ( mexcom::output_module,
+    		 mexcom::output_module->length
+	       - area.code_length );
+    min::phrase_position_vec_insptr ppv =
+        ( min::phrase_position_vec_insptr )
+	mexcom::output_module->position;
+    if ( ppv->length > area.code_length )
+        min::pop
+	    ( ppv, ppv->length - area.code_length );
+    min::packed_vec_insptr<min::gen> tiv =
+        ( min::packed_vec_insptr<min::gen> )
+	mexcom::output_module->trace_info;
+    if ( tiv->length > area.code_length )
+        min::pop
+	    ( tiv, tiv->length - area.code_length );
+    return true;
 }
 
 void mexstack::print_instr

@@ -18,7 +18,7 @@
 
 \author{Robert L. Walton}
 
-\date{January 18, 2025}
+\date{January 23, 2025}
  
 \maketitle
 
@@ -2475,6 +2475,38 @@ variables are popped because they have the lexical level of
 the function that is ending.  Similarly when called by a \TT{ENDL},
 the `next' variables are popped because they have the depth of the
 loop that is ending.
+\end{indpar}
+
+\begin{tabular}{@{}r@{~~~}l}
+\verb|struct mexstack::| & \MEXSTACKKEY{compile\_save\_area} \\
+\verb|void mexstack::| & \MEXSTACKKEY{save}
+	{\tt ( mexstack::compile\_save\_area \& area )} \\
+\verb|bool mexstack::| & \MEXSTACKKEY{restore}
+	{\tt ( mexstack::compile\_save\_area \& area )}
+\end{tabular}
+\begin{indpar}
+These functions can be used when a module is compiled incrementally
+to allow the compilation to back up over an increment that had
+a compile error.  The {\tt save} function is called before compiling
+the increment.  The {\tt restore} function is called after compiling
+the increment.  This last function returns {\tt false} and does
+nothing if {\tt mexcom::error\_count} was \underline{not}
+incremented while compiling the increment.
+
+However, these functions do not save and restore the compiler
+symbol table size.  This must be done by the compiler, as only
+it knows how the symbol table is constructed.
+
+What is saved and restored are:
+\begin{indpar}[1.5in] \tt
+mexcom:: error\_count \\
+mexcom:: warning\_count \\
+mexstack::stack\_length \\
+mexstack::stack\_limit \\
+mexcom::output\_module->length \\
+mexcom::output\_module->position->length \\
+mexcom::output\_module->trace\_info->length
+\end{indpar}
 \end{indpar}
 
 \subsubsection{MEX Stack Component Instruction Compilation}
