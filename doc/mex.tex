@@ -18,7 +18,7 @@
 
 \author{Robert L. Walton}
 
-\date{January 23, 2025}
+\date{January 24, 2025}
  
 \maketitle
 
@@ -872,6 +872,13 @@ the logical values `true' and `false':
 \tt min::gen mex::& \ttkey{TRUE}  & \tt // Default: min::TRUE().  \\
 \end{tabular}
 
+
+The locations in the current function frame are in the range
+\TT{[ fp[level], length )}.
+A location addressed as \TT{sp[- immedX - 1]} must be in the
+current function frame.  Stack values popped or moved must be
+in the current function frame.
+
 \pagebreak
 
 
@@ -981,8 +988,7 @@ the logical values `true' and `false':
 \hline
 \ttkey{PUSHS}
     & Read the value at \TT{sp[- immedA - 1]} and push it into the \\
-    & stack; so \TT{immedA} = 0 duplicates the top value.  Location read \\
-    & must be in the range {\tt [ fp[level], length )}.
+    & stack; so \TT{immedA} = 0 duplicates the top value.
 \\\hline
 \ttkey{PUSHL}
     & Read the value at \TT{fp[immedB] + immedA} and push it into the \\
@@ -1004,13 +1010,11 @@ the logical values `true' and `false':
 \\\hline
 \ttkey{POPS}
     & Store the top value in the stack into \TT{sp[- immedA - 1]}, and \\
-    & then pop the stack once; so \TT{immedA} = 0 discards the top value. \\
-    & Location written must be in the range {\tt [ fp[level], length )}.
+    & then pop the stack once; so \TT{immedA} = 0 discards the top value.
 \\\hline
 \ttkey{DEL}
     & Delete from the stack the \TT{immedC} values just below the top \\
-    & \TT{immedA} values.  \TT{immedC} == 0 does nothing.  Locations deleted \\
-    & or copied must be in the range {\tt [ fp[level], length )}.
+    & \TT{immedA} values.  \TT{immedC} == 0 does nothing.
 \\\hline
 \ttkey{PUSHA}
     & Read the stack vector value with index \TT{ap[immedB] + immedA} \\
