@@ -134,8 +134,8 @@ global variables.
 Each module is compiled sequentially, and it is possible to add
 to the end of a pre-existing module.  Instructions are
 just added to the end of the module's code vector
-and variables are added to the end of
-the module's global variable stack.  The compiler should add
+and variable values are added to the end of
+the module's global stack.  The compiler should add
 interfaces to new global variables and new module functions, but
 this is a matter for the compiler, and not for MEX.
 
@@ -2687,7 +2687,7 @@ is the compiler virtual stack length
 \begin{indpar}
 This function creates a {\tt PUSH\ldots} instruction that pushes
 into the process stack\pagnote{PROCESS-STACK}
-the value of the variable referenced by the variable stack entry
+the value of the variable referenced by the stack entry
 with the given {\tt location}, and executes {\tt mexstack::push\_instr}
 to push that instruction into the {\tt mexcom::\EOL output\_\EOL module}
 code vector.  The {\tt pp}, {\tt no\_source},
@@ -2713,7 +2713,7 @@ where \\
 \hspace*{3em}\verb|SP = mexstack::stack_length| \\
 \hspace*{3em}({\tt stack\_offset} corrects {\tt SP} when pushing trace values
 							      because \\
-\hspace*{3em}~trace values are not recorded in the compiler variable stack)
+\hspace*{3em}~trace values are not recorded in the compiler virtual stack)
 \end{indpar}
 
 The following function initializes the {\tt mexstack} data described above:
@@ -2780,7 +2780,7 @@ compiler must output push instructions using
 {\tt mexstack::\EOL push\_\EOL push\_\EOL instr}
 to push the corresponding trace values into the process stack.
 Note that these trace values are \underline{not} recorded in the
-compiler variable stack.  The number of these trace values becomes
+compiler virtual stack.  The number of these trace values becomes
 the {\tt tvars} parameter of the above functions.
 
 Then the compiler must call {\tt begx} for an {\tt BEG\ldots} instruction,
@@ -2815,8 +2815,9 @@ block stack\label{BLOCK-STACK} a block description containing:
 \begin{enumerate}
 \item The {\tt BEG\ldots}~{\tt op\_code}
 \item The corresponding {\tt END\ldots}~{\tt op\_code} for checking purposes.
-\item Saved value of {\tt stack\_limit}.
-\item The {\tt nvars} argument
+\item Saved value of {\tt stack\_limit}
+      (equals {\tt mexstack::stack\_length + nvars}).
+\item The {\tt nvars} argument (set to 0 for \TT{BEG})
 \item The location of the {\tt BEG\ldots} instruction
 \end{enumerate}
 This block description is popped from the block stack by the {\tt endx}
