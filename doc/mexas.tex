@@ -18,7 +18,7 @@
 
 \author{Robert L. Walton}
 
-\date{January 17, 2025}
+\date{January 24, 2025}
  
 \maketitle
 
@@ -370,7 +370,7 @@ or in a different module.
 \ttkey{DEL} ~ {\em immedA} ~ {\em immedC}
 \begin{indpar}
 At run-time, executes the \TT{DEL} instruction from
-Figure~\mexref{STACK-AND-FLOW-CONTROL-INSTRUCTIONS}.
+Figure~\mexref{STACK-INSTRUCTIONS}.
 
 At assembly time, deletes from the variables stack the {\em immedC}
 variables that are immediately below the top {\em immedA} variables
@@ -381,7 +381,7 @@ in the stack.
 \ttkey{JMP} ~ {\em jmp-target}
 \begin{indpar}
 At run-time this instruction's actions are as described in
-Figure~\mexref{STACK-AND-FLOW-CONTROL-INSTRUCTIONS}.  At assembly-time,
+Figure~\mexref{JUMP-INSTRUCTIONS}.  At assembly-time,
 this instruction 
 calls {\tt mexstack::push\_\EOL jmp\_instr}\mexnote{PUSH-JMP-INSTR}
 to add an element to the pending jump list.
@@ -391,7 +391,7 @@ to add an element to the pending jump list.
      \ttkey{JMPGT}/\ttkey{JMPGEQ} ~ \TT{*}\QMARK{} {\em jmp-target}
 \begin{indpar}
 At run-time these instruction's actions are as described in
-Figure~\mexref{STACK-AND-FLOW-CONTROL-INSTRUCTIONS}, where the \TT{*}
+Figure~\mexref{JUMP-INSTRUCTIONS}, where the \TT{*}
 option sets \TT{immedB} = 1 (otherwise it is 0).  At assembly-time,
 these instructions first pop two elements from the variable stack,
 then
@@ -411,7 +411,7 @@ the two elements are popped (and before any element is pushed back).
 \hspace*{1in}\ttkey{*}\QMARK{} {\em jmp-target}
 \begin{indpar}
 At run-time these instructions' actions are as described in
-Figure~\mexref{STACK-AND-FLOW-CONTROL-INSTRUCTIONS}, where the \TT{*}
+Figure~\mexref{JUMP-INSTRUCTIONS}, where the \TT{*}
 option sets \TT{immedB} = 1 (otherwise it is 0).  At assembly-time,
 these instructions first pop one element from the variable stack and
 then call {\tt mexstack::\EOL push\_\EOL jmp\_instr}\mexnote{PUSH-JMP-INSTR}
@@ -426,7 +426,7 @@ the one element is popped.
 \ttkey{JMPCNT} ~ {\em variable-name} ~ {\em number}\QMARK{} ~ {\em jmp-target}
 \begin{indpar}
 At run-time this instruction's actions are as described in
-Figure~\mexref{STACK-AND-FLOW-CONTROL-INSTRUCTIONS}, where {\em variable-name}
+Figure~\mexref{JUMP-INSTRUCTIONS}, where {\em variable-name}
 names the stack location affected and {\em number} (defaults to
 {\tt 1}) is the value of {\tt immedD}.
 At assembly-time,
@@ -725,7 +725,7 @@ elements with the same lexical level as the \TT{SETI} instruction.
 \ttkey{PUSHNARGS} ~ {\em level}\QMARK{} ~ {\em new-variable-name}\QMARK{}
 \begin{indpar}
 At run-time this instruction's actions are as described in
-Figure~\mexref{STACK-AND-HOUSEKEEPING-INSTRUCTIONS} with \TT{immedB} set
+Figure~\mexref{STACK-INSTRUCTIONS} with \TT{immedB} set
 to the lexical level specified by {\em level} (see \pagref{LEVEL}).
 At assembly-time,
 this instruction pushes into the variable stack an element
@@ -735,7 +735,7 @@ with {\em new-variable-name} as its name.
 \ttkey{PUSHV} ~ {\em level}\QMARK{} ~ {\em new-variable-name}\QMARK{}
 \begin{indpar}
 At run-time this instruction's actions are as described in
-Figure~\mexref{STACK-AND-HOUSEKEEPING-INSTRUCTIONS} with \TT{immedB} set
+Figure~\mexref{STACK-INSTRUCTIONS} with \TT{immedB} set
 to the lexical level specified by {\em level} (see \pagref{LEVEL}).
 
 At assembly-time, this instruction first pops an element from the
@@ -763,7 +763,7 @@ At run-time these instructions do nothing except produce trace messages
 (if there is a {\em trace-packet}),
 except that the \TT{ERROR}
 instruction terminates the process
-(see Figure~\mexref{STACK-AND-HOUSEKEEPING-INSTRUCTIONS}).  At assembly-time,
+(see Figure~\mexref{HOUSEKEEPING-INSTRUCTIONS}).  At assembly-time,
 these instructions do nothing.
 
 All these instructions except \TT{NOP} are in the \TT{ALWAYS}
