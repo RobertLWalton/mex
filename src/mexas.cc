@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Jan 16 07:48:15 PM EST 2025
+// Date:	Fri Jan 24 03:36:49 PM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -209,51 +209,20 @@ bool mexas::check_new_name
 
 min::uns32 mexas::local_search
     ( min::gen name,
-      min::phrase_position pp,
-      bool argument_ok )
+      min::phrase_position pp )
 {
     min::uns32 j = search ( name, SP );
-    if ( j == mexas::NOT_FOUND )
-    {
-	mexcom::compile_error
-	    ( pp, "variable named ",
-		  min::pgen ( name ),
-		  " not defined within"
-		  " module; instruction"
-		  " ignored" );
-	return mexas::NOT_FOUND;
-    }
-    mexas::variable_element * ve =
-	~ ( mexas::variables + j );
-    if ( ve->level() < L )
-    {
-	mexcom::compile_error
-	    ( pp, "variable named ",
-		  min::pgen ( name ),
-		  " is of lower than"
-		  " current lexical"
-		  " level, and"
-		  " as such cannot"
-		  " legally be written;"
-		  " instruction"
-		  " ignored" );
-	return mexas::NOT_FOUND;
-    }
-    if ( ! argument_ok && j < mexstack::fp[L] )
-    {
-	mexcom::compile_error
-	    ( pp, "variable named ",
-		  min::pgen ( name ),
-		  " is an argument to"
-		  " the current"
-		  " function, and"
-		  " as such cannot"
-		  " legally be written;"
-		  " instruction"
-		  " ignored" );
-	return mexas::NOT_FOUND;
-    }
-    return j;
+    if ( j != mexas::NOT_FOUND
+         &&
+	 j >= mexstack::fp[mexstack::lexical_level] )
+        return j;
+
+    mexcom::compile_error
+	( pp, "variable named ",
+	      min::pgen ( name ),
+	      " not defined within current function"
+	      " frame; instruction ignored" );
+    return mexas::NOT_FOUND;
 }
 
 min::uns32 mexas::global_search
@@ -836,8 +805,8 @@ mex::module mexas::compile ( min::file file )
 			      " instruction ignored" );
 		    continue;
 		}
-		min::uns32 j = mexas::local_search
-				( name, pp );
+		min::uns32 j =
+		    mexas::local_search ( name, pp );
 		if ( j == mexas::NOT_FOUND )
 		    continue;
 		instr.immedB = SP - j - 1;
@@ -1237,8 +1206,7 @@ mex::module mexas::compile ( min::file file )
 		}
 
 		min::uns32 j =
-		    local_search
-		        ( obj_var_name, pp, true );
+		    local_search ( obj_var_name, pp );
 		if ( j == mexas::NOT_FOUND )
 		    continue;
 		instr.immedA = SP - j - 1;
@@ -1293,8 +1261,7 @@ mex::module mexas::compile ( min::file file )
 		}
 
 		min::uns32 j =
-		    local_search
-		        ( obj_var_name, pp, true );
+		    local_search ( obj_var_name, pp );
 		if ( j == mexas::NOT_FOUND )
 		    continue;
 		instr.immedA = SP - j - 1;
@@ -1342,8 +1309,7 @@ mex::module mexas::compile ( min::file file )
 		}
 
 		min::uns32 j =
-		    local_search
-		        ( obj_var_name, pp, true );
+		    local_search ( obj_var_name, pp );
 		if ( j == mexas::NOT_FOUND )
 		    continue;
 		instr.immedA = SP - j - 1;
@@ -1371,8 +1337,7 @@ mex::module mexas::compile ( min::file file )
 		    {
 			min::uns32 j =
 			    local_search
-				( attr_var_name, pp,
-				  true );
+				( attr_var_name, pp );
 			if ( j == mexas::NOT_FOUND )
 			    continue;
 			instr.immedC = SP - j - 1;

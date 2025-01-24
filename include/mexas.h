@@ -2,7 +2,7 @@
 //
 // File:	mexas.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Jan 16 12:36:49 PM EST 2025
+// Date:	Fri Jan 24 01:00:11 PM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -472,20 +472,13 @@ inline min::uns32 search ( min::gen name, min::uns32 i )
 extern min::locatable_gen V, F;  // global search types.
 
 min::uns32 local_search
-	( min::gen name, min::phrase_position pp,
-	  bool argument_ok = false );
+	( min::gen name, min::phrase_position pp );
     // Search variables stack for a variable of the
     // given name, and if there is no error, return
-    // its index.  If there is an error, output an
+    // its index.  If the variable is not found in
+    // the current function frame, output an
     // error message and return NOT_FOUND.  pp is
     // only use by error messages.
-    //
-    // The errors are:
-    //     (1) variable not found in stack
-    //     (2) variable of less than current lexical
-    //         level
-    //     (3) argument_ok == false and variable is
-    //         an argument of the current function
 
 min::uns32 global_search
 	( mex::module & m, min::gen module_name,
