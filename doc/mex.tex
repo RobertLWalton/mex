@@ -2500,20 +2500,27 @@ loop that is ending.
 \verb|void mexstack::| & \MEXSTACKKEY{save}
 	{\tt ( mexstack::compile\_save\_area \& area )} \\
 \verb|bool mexstack::| & \MEXSTACKKEY{restore}
-	{\tt ( mexstack::compile\_save\_area \& area )}
+	{\tt ( \begin{tabular}[t]{@{}l}
+	       mexstack::compile\_save\_area \& area, \\
+	       bool force = false )
+	       \end{tabular} }
 \end{tabular}
 \begin{indpar}
 These functions can be used when a module is compiled incrementally
-to allow the compilation to back up over an increment that had
-a compile error.  The {\tt save} function is called before compiling
+to save and restore the compilation state
+and allow the compilation to back up over an increment that had
+a compile error or run-time error.
+The {\tt save} function is called before compiling
 the increment.  The {\tt restore} function is called after compiling
 the increment.  This last function returns {\tt false} and does
 nothing if {\tt mexcom::error\_count} was \underline{not}
-incremented while compiling the increment.
+incremented while compiling the increment and if {\tt force}
+is {\tt false}.
 
 However, these functions do not save and restore the compiler
 symbol table size.  This must be done by the compiler, as only
-it knows how the symbol table is constructed.
+it knows how the symbol table is constructed.  These functions
+also do not save and restore the run-time stack length.
 
 What is saved and restored are:
 \begin{indpar}[1.5in] \tt

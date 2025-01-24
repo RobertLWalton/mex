@@ -2,7 +2,7 @@
 //
 // File:	mexstack.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Jan 23 02:23:41 AM EST 2025
+// Date:	Fri Jan 24 01:44:16 AM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -50,7 +50,8 @@ struct compile_save_area
 
 void pop_stacks ( void );
 void save ( mexstack::compile_save_area & area );
-bool restore ( mexstack::compile_save_area & area );
+bool restore ( mexstack::compile_save_area & area,
+               bool force = false );
 
 // Block Stack
 //

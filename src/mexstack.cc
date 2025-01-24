@@ -2,7 +2,7 @@
 //
 // File:	mexstack.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Jan 23 07:46:24 PM EST 2025
+// Date:	Fri Jan 24 01:44:34 AM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -98,9 +98,12 @@ void mexstack::save
     area.code_length = mexcom::output_module->length;
 }
 bool mexstack::restore
-	( mexstack::compile_save_area & area )
+	( mexstack::compile_save_area & area,
+	  bool force )
 {
-    if ( mexcom::error_count == area.error_count )
+    if ( mexcom::error_count == area.error_count
+         &&
+	 ! force )
         return false;
     mexcom::error_count = area.error_count;
     mexcom::warning_count = area.warning_count;
