@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Jan 22 07:07:54 PM EST 2025
+// Date:	Fri Jan 24 12:48:35 AM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1804,6 +1804,7 @@ bool mex::run_process ( mex::process p )
     const char * message;
     min::uns32 limit;
 
+    min::uns32 frame_length;
     min::uns8 op_code;
     min::uns8 trace_class;
     op_info * op_info;
@@ -1991,6 +1992,8 @@ TEST_LOOP:	// Come here after fatal error processed
 	    // will raise the invalid exception and
 	    // generate a non-signalling NaN result.
 
+	frame_length =
+		( sp - spbegin ) - p->fp[p->level];
 	switch ( op_info->op_type )
 	{
 	case NONA:
@@ -1999,54 +2002,54 @@ TEST_LOOP:	// Come here after fatal error processed
 	    goto NON_ARITHMETIC;
 	case A2:
 	    sp_change = -1;
-	    if ( sp - 2 < spbegin )
-	        goto STACK_TOO_SMALL;
+	    if ( 2 > frame_length )
+	        goto FRAME_TOO_SMALL;
 	    arg1 = sp[-2];
 	    arg2 = sp[-1];
 	    goto ARITHMETIC;
 	case A2R:
 	    sp_change = -1;
-	    if ( sp - 2 < spbegin )
-	        goto STACK_TOO_SMALL;
+	    if ( 2 > frame_length )
+	        goto FRAME_TOO_SMALL;
 	    arg1 = sp[-1];
 	    arg2 = sp[-2];
 	    goto ARITHMETIC;
 	case A2I:
-	    if ( sp - 1 < spbegin )
-	        goto STACK_TOO_SMALL;
+	    if ( 1 > frame_length )
+	        goto FRAME_TOO_SMALL;
 	    arg1 = sp[-1];
 	    arg2 = pc->immedD;
 	    goto ARITHMETIC;
 	case A2RI:
-	    if ( sp - 1 < spbegin )
-	        goto STACK_TOO_SMALL;
+	    if ( 1 > frame_length )
+	        goto FRAME_TOO_SMALL;
 	    arg1 = pc->immedD;
 	    arg2 = sp[-1];
 	    goto ARITHMETIC;
 	case A1:
-	    if ( sp - 1 < spbegin )
-	        goto STACK_TOO_SMALL;
+	    if ( 1 > frame_length )
+	        goto FRAME_TOO_SMALL;
 	    arg1 = sp[-1];
 	    arg2 = ::ZERO;
 	        // To avoid error detector.
 	    goto ARITHMETIC;
 	case J1:
 	    sp_change = -1;
-	    if ( sp - 1 < spbegin )
-	        goto STACK_TOO_SMALL;
+	    if ( 1 > frame_length )
+	        goto FRAME_TOO_SMALL;
 	    arg1 = sp[-1];
 	    arg2 = ::VOID;
 	    goto JUMP;
 	case JS:
-	    if ( pc->immedB >= sp - spbegin )
-	        goto STACK_TOO_SMALL;
+	    if ( pc->immedB >= frame_length )
+	        goto FRAME_TOO_SMALL;
 	    arg1 = sp[-(int)pc->immedB-1];
-	    arg2 = ::VOID;
+	    arg2 = pc->immedD;
 	    goto JUMP;
 	case J2:
 	    sp_change = -2;
-	    if ( sp - 2 < spbegin )
-	        goto STACK_TOO_SMALL;
+	    if ( 2 > frame_length )
+	        goto FRAME_TOO_SMALL;
 	    arg1 = sp[-2];
 	    arg2 = sp[-1];
 	    goto JUMP;
@@ -2672,14 +2675,8 @@ TEST_LOOP:	// Come here after fatal error processed
 	    switch ( op_code )
 	    {
 	    case mex::PUSHS:
-	        if ( immedA >= ( sp - spbegin )
-		             - p->fp[p->level] )
-		{
-		    message = "PUSHD: immedA equal to"
-		              " or larger than current"
-		              " frame length";
-		    goto INNER_FATAL;
-		}
+	        if ( immedA >= frame_length )
+		    goto FRAME_TOO_SMALL;
 		if ( sp >= spend )
 		    goto STACK_LIMIT_STOP;
 		value = sp[-(int)immedA-1];
@@ -2840,27 +2837,16 @@ TEST_LOOP:	// Come here after fatal error processed
 			" stack";
 		    goto INNER_FATAL;
 		}
-	        if ( immedA >= ( sp - spbegin )
-		             - p->fp[p->level] )
-		{
-		    message = "POPS: immedA equal to"
-		              " or larger than current"
-		              " frame length";
-		    goto INNER_FATAL;
-		}
+	        if ( immedA >= frame_length )
+		    goto FRAME_TOO_SMALL;
 		value = sp[-1];
 		sp_change = -1;
 		break;
 	    case mex::DEL:
-	        if (   immedA + immedC
-		     >   ( sp - spbegin )
-		       - p->fp[p->level] )
-		{
-		    message = "DEL: immedA + immedC"
-		              " larger than current"
-		              " frame length";
-		    goto INNER_FATAL;
-		}
+	        if ( immedA + immedC < immedA
+		     ||
+		     immedA + immedC > frame_length )
+		    goto FRAME_TOO_SMALL;
 		sp_change = - (int ) immedC;
 		break;
 	    case mex::PUSHOBJ:
@@ -2874,14 +2860,8 @@ TEST_LOOP:	// Come here after fatal error processed
 		break;
 	    case mex::VPUSH:
 	    {
-	        if ( immedA >= ( sp - spbegin )
-		             - p->fp[p->level] )
-		{
-		    message = "VPUSH: immedA equal to"
-		              " or larger than current"
-		              " frame length";
-		    goto INNER_FATAL;
-		}
+	        if ( immedA >= frame_length )
+		    goto FRAME_TOO_SMALL;
 
 		min::gen obj = sp[-(int)immedA-1];
 		if ( ! min::is_obj ( obj ) )
@@ -2913,14 +2893,8 @@ TEST_LOOP:	// Come here after fatal error processed
 	    case mex::VPOP:
 	    case mex::VSIZE:
 	    {
-	        if ( immedA >= ( sp - spbegin )
-		             - p->fp[p->level] )
-		{
-		    message = "VPOP/VSIZE: immedA equal"
-		              " to or larger than"
-		              " current frame length";
-		    goto INNER_FATAL;
-		}
+	        if ( immedA >= frame_length )
+		    goto FRAME_TOO_SMALL;
 		if ( sp >= spend )
 		    goto STACK_LIMIT_STOP;
 
@@ -2947,22 +2921,10 @@ TEST_LOOP:	// Come here after fatal error processed
 		break;
 	    }
 	    case mex::GET:
-	        if ( immedA >= ( sp - spbegin )
-		             - p->fp[p->level] )
-		{
-		    message = "GET: immedA equal"
-		              " to or larger than"
-		              " current frame length";
-		    goto INNER_FATAL;
-		}
-	        if ( immedC >= ( sp - spbegin )
-		             - p->fp[p->level] )
-		{
-		    message = "GET: immedC equal"
-		              " to or larger than"
-		              " current frame length";
-		    goto INNER_FATAL;
-		}
+	        if ( immedA >= frame_length )
+		    goto FRAME_TOO_SMALL;
+	        if ( immedC >= frame_length )
+		    goto FRAME_TOO_SMALL;
 
 		sp_change = +1;
 		if ( immedB != 0 )
@@ -3017,14 +2979,8 @@ TEST_LOOP:	// Come here after fatal error processed
 
 		break;
 	    case mex::GETI:
-	        if ( immedA >= ( sp - spbegin )
-		             - p->fp[p->level] )
-		{
-		    message = "GETI: immedA equal"
-		              " to or larger than"
-		              " current frame length";
-		    goto INNER_FATAL;
-		}
+	        if ( immedA >= frame_length )
+		    goto FRAME_TOO_SMALL;
 
 		if ( sp >= spend )
 		    goto STACK_LIMIT_STOP;
@@ -3040,22 +2996,10 @@ TEST_LOOP:	// Come here after fatal error processed
 		sp_change = +1;
 		break;
 	    case mex::SET:
-	        if ( immedA >= ( sp - spbegin )
-		             - p->fp[p->level] )
-		{
-		    message = "SET: immedA equal"
-		              " to or larger than"
-		              " current frame length";
-		    goto INNER_FATAL;
-		}
-	        if ( immedC >= ( sp - spbegin )
-		             - p->fp[p->level] )
-		{
-		    message = "SET: immedC equal"
-		              " to or larger than"
-		              " current frame length";
-		    goto INNER_FATAL;
-		}
+	        if ( immedA >= frame_length )
+		    goto FRAME_TOO_SMALL;
+	        if ( immedC >= frame_length )
+		    goto FRAME_TOO_SMALL;
 
 		sp_change = -1;
 		if ( immedB != 0 )
@@ -3068,8 +3012,9 @@ TEST_LOOP:	// Come here after fatal error processed
 			goto INNER_FATAL;
 		    }
 		}
-		if ( sp + sp_change < spbegin )
-		    goto STACK_TOO_SMALL;
+		if (   frame_length
+		     < (min::uns32) ( - sp_change ) )
+		    goto FRAME_TOO_SMALL;
 
 		value = sp[-1];
 		obj = sp[-(int)immedA-1];
@@ -3118,14 +3063,8 @@ TEST_LOOP:	// Come here after fatal error processed
 
 		break;
 	    case mex::SETI:
-	        if ( immedA >= ( sp - spbegin )
-		             - p->fp[p->level] )
-		{
-		    message = "SETI: immedA equal"
-		              " to or larger than"
-		              " current frame length";
-		    goto INNER_FATAL;
-		}
+	        if ( immedA >= frame_length )
+		    goto FRAME_TOO_SMALL;
 
 		sp_change = -1;
 
@@ -3155,26 +3094,14 @@ TEST_LOOP:	// Come here after fatal error processed
 	    case mex::BEG:
 	    case mex::NOP:
 	    {
-	        if ( immedA >  ( sp - spbegin )
-		              - p->fp[p->level] )
-		{
-		    message = "BEG/NOP/END: immedA"
-                              " larger than current"
-			      " frame length";
-		    goto INNER_FATAL;
-		}
+	        if ( immedA > frame_length )
+		    goto FRAME_TOO_SMALL;
 		sp_change = - (int) immedA;
 		break;
 	    }
 	    case mex::BEGL:
-	        if ( immedB >  ( sp - spbegin )
-		              - p->fp[p->level] )
-		{
-		    message = "BEGL: immedB larger"
-		              " than current frame"
-			      " length";
-		    goto INNER_FATAL;
-		}
+	        if ( immedB > frame_length )
+		    goto FRAME_TOO_SMALL;
 		if ( sp + immedB > spend )
 		    goto STACK_LIMIT_STOP;
 		sp_change = immedB;
@@ -3182,26 +3109,13 @@ TEST_LOOP:	// Come here after fatal error processed
 	    case mex::ENDL:
 	    case mex::CONT:
 	    {
-	        if ( immedA >   ( sp - spbegin )
-		              - p->fp[p->level] )
-		{
-		    message = "ENDL/CONT: immedA"
-                              " larger than current"
-			      " frame length";
-		    goto INNER_FATAL;
-		}
+	        if ( immedA > frame_length )
+		    goto FRAME_TOO_SMALL;
 	        if (    2 * immedB < immedB
 		     || immedA + 2 * immedB < immedA
 		     ||   immedA + 2 * immedB
-		        >   ( sp - spbegin )
-		          - p->fp[p->level] )
-		{
-		    message =
-		        "ENDL/CONT: immedA + 2 * immedB"
-			" larger than current frame"
-			" length";
-		    goto INNER_FATAL;
-		}
+		        >   frame_length )
+		    goto FRAME_TOO_SMALL;
 		min::uns32 location = pc - pcbegin;
 	        if ( immedC + 1 > location )
 		{
@@ -3246,14 +3160,8 @@ TEST_LOOP:	// Come here after fatal error processed
 	    case mex::TRACE:
 	    case mex::WARN:
 	    case mex::ERROR:
-	        if ( immedA >  ( sp - spbegin )
-		              - p->fp[p->level] )
-		{
-		    message = "TRACE/WARN/ERROR:"
-		              " immedA larger than"
-			      " current frame length";
-		    goto INNER_FATAL;
-		}
+	        if ( immedA > frame_length )
+		    goto FRAME_TOO_SMALL;
 		sp_change = - (int) immedA;
 	        break;
 	    case mex::BEGF:
@@ -3312,15 +3220,8 @@ TEST_LOOP:	// Come here after fatal error processed
 	        min::gen * new_sp =
 		    spbegin + p->ap[immedB];
 
-	        if ( immedC >  ( sp - spbegin )
-		              - p->fp[p->level] )
-		{
-		    // Not possible for ENDF.
-		    message =
-		        "RET: immedC is larger than"
-			" current frame length";
-		    goto INNER_FATAL;
-		}
+	        if ( immedC > frame_length )
+		    goto FRAME_TOO_SMALL;
 		mex::module em = ret->saved_pc.module;
 		min::uns32 new_pc = ret->saved_pc.index;
 
@@ -3982,8 +3883,8 @@ TEST_LOOP:	// Come here after fatal error processed
 	    p->state = mex::RETURN_STACK_LIMIT_STOP;
 	    return false;
 
-	STACK_TOO_SMALL:
-	    message = "illegal SP: stack too small"
+	FRAME_TOO_SMALL:
+	    message = "current frame too small"
 		      " for instruction";
 	    goto INNER_FATAL;
 

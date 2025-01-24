@@ -262,7 +262,7 @@ TEST_INSTRUCTION CALLM 0 0 0
 * {14:0,1,1} PUSHI: * <= 100
 
 !!! FATAL PROGRAM FORMAT ERROR:
-    illegal SP: stack too small for instruction
+    current frame too small for instruction
     PC->MODULE = mexas_compile_test_13.mex
 * {15:1,1,2} ADD AOP 0 0 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 100 > 0
@@ -337,7 +337,7 @@ SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 91 > 0
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 90 > 0
 
 !!! FATAL PROGRAM FORMAT ERROR:
-    PUSHD: immedA equal to or larger than current frame length
+    current frame too small for instruction
     PC->MODULE = mexas_compile_test_13.mex
 * {33:19,3,20} PUSHS PUSH 100 0 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 89 > 0
@@ -412,13 +412,13 @@ SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 80 > 0
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 79 > 0
 
 !!! FATAL PROGRAM FORMAT ERROR:
-    POPS: immedA equal to or larger than current frame length
+    current frame too small for instruction
     PC->MODULE = mexas_compile_test_13.mex
 *** {49:32,6,36} POPS POP 10 0 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 78 > 0
 
 !!! FATAL PROGRAM FORMAT ERROR:
-    DEL: immedA + immedC larger than current frame length
+    current frame too small for instruction
     PC->MODULE = mexas_compile_test_13.mex
 *** {50:33,6,37} DEL POP 10 0 1 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 77 > 0
@@ -450,25 +450,25 @@ SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 74 > 0
 *** {68:47,8,48} PUSHI: * <= 2
 
 !!! FATAL PROGRAM FORMAT ERROR:
-    GET: immedA equal to or larger than current frame length
+    current frame too small for instruction
     PC->MODULE = mexas_compile_test_13.mex
 *** {69:48,8,49} GET GET 10 0 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 73 > 0
 
 !!! FATAL PROGRAM FORMAT ERROR:
-    SET: immedA equal to or larger than current frame length
+    current frame too small for instruction
     PC->MODULE = mexas_compile_test_13.mex
 *** {70:49,8,50} SET SET 10 0 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 72 > 0
 
 !!! FATAL PROGRAM FORMAT ERROR:
-    GET: immedC equal to or larger than current frame length
+    current frame too small for instruction
     PC->MODULE = mexas_compile_test_13.mex
 *** {71:50,8,51} GET GET 1 0 10 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 71 > 0
 
 !!! FATAL PROGRAM FORMAT ERROR:
-    SET: immedC equal to or larger than current frame length
+    current frame too small for instruction
     PC->MODULE = mexas_compile_test_13.mex
 *** {72:51,8,52} SET SET 1 0 10 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 70 > 0
@@ -548,7 +548,7 @@ SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 61 > 0
 *** {94:73,9,74} POPS: * <= * = 5
 
 !!! FATAL PROGRAM FORMAT ERROR:
-    GETI: immedA equal to or larger than current frame length
+    current frame too small for instruction
     PC->MODULE = mexas_compile_test_13.mex
 *** {95:74,9,75} GETI GET 10 0 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 60 > 0
@@ -569,7 +569,7 @@ SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 59 > 0
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 58 > 0
 
 !!! FATAL PROGRAM FORMAT ERROR:
-    SETI: immedA equal to or larger than current frame length
+    current frame too small for instruction
     PC->MODULE = mexas_compile_test_13.mex
 *** {99:78,10,79} SETI SET 10 0 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 57 > 0
@@ -601,37 +601,37 @@ SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 54 > 0
 * {135:110,7,88} CALLM to BEGF: BEG-END-TEST, ARG1=100
 
 !!! FATAL PROGRAM FORMAT ERROR:
-    BEG/NOP/END: immedA larger than current frame length
+    current frame too small for instruction
     PC->MODULE = mexas_compile_test_13.mex
 *** {112:88,7,89} BEG BEG 10 0 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 53 > 0
 
 !!! FATAL PROGRAM FORMAT ERROR:
-    BEGL: immedB larger than current frame length
+    current frame too small for instruction
     PC->MODULE = mexas_compile_test_13.mex
 *** {113:89,7,90} BEGL BEGL 0 10 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 52 > 0
 
 !!! FATAL PROGRAM FORMAT ERROR:
-    ENDL/CONT: immedA larger than current frame length
+    current frame too small for instruction
     PC->MODULE = mexas_compile_test_13.mex
 *** {114:90,7,91} ENDL ENDL 10 0 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 51 > 0
 
 !!! FATAL PROGRAM FORMAT ERROR:
-    ENDL/CONT: immedA larger than current frame length
+    current frame too small for instruction
     PC->MODULE = mexas_compile_test_13.mex
 *** {115:91,7,92} CONT CONT 10 0 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 50 > 0
 
 !!! FATAL PROGRAM FORMAT ERROR:
-    ENDL/CONT: immedA + 2 * immedB larger than current frame length
+    current frame too small for instruction
     PC->MODULE = mexas_compile_test_13.mex
 *** {116:92,7,93} ENDL ENDL 0 5 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 49 > 0
 
 !!! FATAL PROGRAM FORMAT ERROR:
-    ENDL/CONT: immedA + 2 * immedB larger than current frame length
+    current frame too small for instruction
     PC->MODULE = mexas_compile_test_13.mex
 *** {117:93,7,94} CONT CONT 0 5 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 48 > 0
@@ -655,19 +655,19 @@ SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 46 > 0
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 45 > 0
 
 !!! FATAL PROGRAM FORMAT ERROR:
-    TRACE/WARN/ERROR: immedA larger than current frame length
+    current frame too small for instruction
     PC->MODULE = mexas_compile_test_13.mex
 *** {121:97,7,98} TRACE ALWAYS 10 0 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 44 > 0
 
 !!! FATAL PROGRAM FORMAT ERROR:
-    TRACE/WARN/ERROR: immedA larger than current frame length
+    current frame too small for instruction
     PC->MODULE = mexas_compile_test_13.mex
 *** {122:98,7,99} WARN ALWAYS 10 0 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 43 > 0
 
 !!! FATAL PROGRAM FORMAT ERROR:
-    TRACE/WARN/ERROR: immedA larger than current frame length
+    current frame too small for instruction
     PC->MODULE = mexas_compile_test_13.mex
 *** {123:99,7,100} ERROR ALWAYS 10 0 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 42 > 0
@@ -703,7 +703,7 @@ SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 38 > 0
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 37 > 0
 
 !!! FATAL PROGRAM FORMAT ERROR:
-    RET: immedC is larger than current frame length
+    current frame too small for instruction
     PC->MODULE = mexas_compile_test_13.mex
 *** {129:105,7,106} RET RET 0 1 1 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 36 > 0
