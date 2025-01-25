@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Jan 24 03:36:49 PM EST 2025
+// Date:	Fri Jan 24 06:19:49 PM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -458,7 +458,7 @@ static bool check_pop
     {
 	mexcom::compile_error
 	    ( pp, "stack locations"
-		  " to be popped"
+		  " to be popped or moved"
 		  " are arguments"
 		  " or below"
 		  " current lexical"
@@ -775,10 +775,6 @@ mex::module mexas::compile ( min::file file )
 	case mex::A1:
 	    if ( SP < mexstack::stack_limit + 1 )
 	        goto STACK_TOO_SHORT;
-	    if ( op_code == mex::PUSHV )
-	        goto NON_ARITHMETIC;
-		    // PUSHV executes as A1 and
-		    // compiles mostly as NONA.
 	    min::pop ( variables );
 	    mexstack::stack_length -= 1;
 	    goto ARITHMETIC;
@@ -1314,6 +1310,7 @@ mex::module mexas::compile ( min::file file )
 		    continue;
 		instr.immedA = SP - j - 1;
 
+		min::locatable_gen attr_label;
 		if ( op_code == mex::GET
 		     ||
 		     op_code == mex::SET )
@@ -1357,8 +1354,8 @@ mex::module mexas::compile ( min::file file )
 		else //    op_code == mex::GETI
 		     // || op_code == mex::SETI
 		{
-		    min::locatable_gen attr_label
-		        ( mexas::get_label ( index ) );
+		    attr_label =
+		        mexas::get_label ( index );
 		    if ( attr_label == min::NONE() )
 		    {
 			mexcom::compile_error
@@ -1415,14 +1412,12 @@ mex::module mexas::compile ( min::file file )
 		    trace_info =
 			min::new_lab_gen ( labbuf, 2 );
 
-		    min::pop ( mexas::variables );
-		    mexstack::stack_length -= 1;
-
-		    if ( instr.immedB != 0 )
-		    {
-			min::pop ( mexas::variables );
-			mexstack::stack_length -= 1;
-		    }
+		    unsigned pops =
+		        instr.immedB != 0 ? 2 : 1;
+		    if ( ! check_pop ( pops, pp ) )
+		        continue;
+		    min::pop ( mexas::variables, pops );
+		    mexstack::stack_length -= pops;
 		}
 		mexstack::push_instr
 		    ( instr, pp, trace_info );
