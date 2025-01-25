@@ -18,7 +18,7 @@
 
 \author{Robert L. Walton}
 
-\date{January 24, 2025}
+\date{January 25, 2025}
  
 \maketitle
 
@@ -202,8 +202,15 @@ variable stack element has no name.
 
 \item A variable cannot be written if it has a lexical level less than
 that of the writing instruction, or is a function argument variable,
-or has depth equal to the writing instruction and the variable is not
+or has depth equal to the writing instruction and is not
 a loop `{\tt next-\ldots}' variable.
+
+\item A stack location cannot be popped or moved in the stack unless
+it has the current lexical level and depth and is not a function argument
+or loop \TT{next-} variable.  Only \TT{CALL\ldots} and \TT{RET}
+instructions can move stack values from one lexical level and depth
+to another lexical level and depth.
+
 \item The operands that take integer values must have values in the
 range $[0,2^{32})$ (so they will fit into \TT{immedA}, \TT{immedB},
 or \TT{immedC} instruction
@@ -234,14 +241,16 @@ These specify the {\em trace-info} for the instructions:
 see Trace-Packet Based Trace Messages,
 \mexref{TRACE-PACKET-BASED-TRACE-MESSAGES}.
 \item To assemble a run-time instruction, {\tt MEXAS} first adjusts
-{\tt mexstack::stack\_length} and pushes the instruction to
-the end of the {\tt mexcom::output\_module} code vector.
-Then {\tt MEXAS} adjusts the variable and function stacks.
+{\tt mexstack::stack\_length} to what it will be \underline{after}
+the instruction, then pushes the instruction to
+the end of the {\tt mexcom::output\_module} code vector, and lastly
+adjusts the variable and function stacks.
 
 If an instruction takes trace variables, these are pushed into the stack by
 calling {\tt push\_push\_\EOL instr} for each trace variable \underline{before}
 assembling the run-time instruction.  The variable stack does \underline{not}
-have elements corresponding to trace variables - they are in a sense
+have elements corresponding to trace variables, and they are \underline{not}
+counted by {\tt mexstack::stack\_length}.  They are in a sense
 invisible to the regular assembly process.
 \item
 In describing the MEXAS statements that output a run-time instruction,
@@ -288,7 +297,9 @@ one element is pushed to the variable stack with
               {\em new-variable-name}\QMARK{}
 \begin{indpar}
 At run-time, pushes into the process stack a copy of the named
-lexical level 0 variable.
+lexical level 0 variable, using a \TT{PUSHL} instruction with
+\TT{immedB == 0} as per
+Figure~\mexref{STACK-INSTRUCTIONS}.
 At assembly time, pushes into the variable stack an
 element with {\em new-variable-name} as its name.
 
@@ -300,7 +311,8 @@ elements with the lexical level \TT{0}.
               {\em new-variable-name}\QMARK{}
 \begin{indpar}
 At run-time, pushes into the process stack a copy of the named
-global variable in the named module.
+global variable in the named module using the \TT{PUSHG} instruction
+from Figure~\mexref{STACK-INSTRUCTIONS}.
 At assembly time, pushes into the variable stack an
 element with {\em new-variable-name} as its name.
 
@@ -308,6 +320,10 @@ The variable stack searched for {\em variable-name} is the variable
 stack of the previously assembled module named, as it is at the
 end of the assembly of that module (only level 0, depth 0 variables
 of the module are present in this stack).
+
+If {\em module-name} is `\TT{*}', all modules are searched in most recently
+assembled first order, and the first module found with named variable
+is used.
 \end{indpar}
 
 \ttkey{PUSH} ~ {\em variable-name} ~
@@ -324,7 +340,8 @@ of previously assembled modules
 in most recently assembled first order.
 \TT{PUSH} assembles
 to the run-time instruction \TT{PUSHS}, \TT{PUSHL}, \TT{PUSHG},
-or \TT{PUSHA}, depending on the location of the variable.
+or \TT{PUSHA} from Figure~\mexref{STACK-INSTRUCTIONS},
+depending on the location of the variable.
 
 (If the variable name is in the variable stack,
 {\tt mexstack::push\_\EOL push\_instr}\mexnote{PUSH-PUSH-INSTR}
@@ -342,6 +359,8 @@ the {\em number}\pagnote{NUMBER}, or
 the {\em attibute-label}\pagnote{ATTRIBUTE-LABEL} (which might be
 a {\em string}),
 or \TT{mex::TRUE}, or \TT{mex::FALSE}, or \TT{min::NONE()}.
+\ttkey{PUSHI} assembles to the run-time instruction \TT{PUSHI}
+from Figure~\mexref{STACK-INSTRUCTIONS}.
 At assembly time, pushes into the variable stack an
 element with {\em new-variable-name} as its name.
 \end{indpar}
@@ -360,7 +379,8 @@ that are not arguments to that lexical level and that are of
 lesser depth than the \TT{POP} instruction or are
 loop `{\tt next-\ldots}' variables.
 
-\ttkey{POP} assembles to the run-time instruction \TT{POPS}.
+\ttkey{POP} assembles to the run-time instruction \TT{POPS}
+from Figure~\mexref{STACK-INSTRUCTIONS}.
 Note that \TT{POPL}, \TT{POPG}, and \TT{POPA} do
 \underline{not} exist as you cannot write
 variables that are arguments, or at a different lexical level,
