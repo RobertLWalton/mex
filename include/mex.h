@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Jan 14 07:10:10 PM EST 2025
+// Date:	Sun Jan 26 02:38:40 AM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -115,7 +115,7 @@ enum op_code {
     JMPTRUE, JMPFALSE, JMPNONE,
     JMPINT, JMPFIN, JMPINF, JMPNAN, JMPNUM,
     JMPTRUTH, JMPSTR, JMPOBJ,
-    BEG, NOP,
+    BEG,
     END,
     BEGL,
     ENDL, CONT,
@@ -126,7 +126,7 @@ enum op_code {
     PUSHNARGS,
     PUSHV,
     SET_TRACE,
-    TRACE, WARN, ERROR,
+    NOP, TRACE, DUMP, WARN, ERROR,
     SET_EXCEPTS,
     TRACE_EXCEPTS,
     SET_OPTIMIZE,

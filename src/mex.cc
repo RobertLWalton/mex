@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Jan 24 12:48:35 AM EST 2025
+// Date:	Sun Jan 26 02:38:58 AM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1212,6 +1212,7 @@ static bool optimized_run_process ( mex::process p )
 	}
 	case mex::SET_TRACE:
 	case mex::TRACE:
+	case mex::DUMP:
 	case mex::WARN:
 	case mex::ERROR:
 	case mex::SET_EXCEPTS:
@@ -1588,7 +1589,6 @@ mex::op_info mex::op_infos [ mex::NUMBER_OF_OP_CODES ] =
     { mex::JMPSTR, J1, T_JMPS, NULL, "JMPSTR", NULL },
     { mex::JMPOBJ, J1, T_JMPS, NULL, "JMPOBJ", NULL },
     { mex::BEG, NONA, T_BEG, NULL, "BEG", NULL },
-    { mex::NOP, NONA, T_NOP, NULL, "NOP", NULL },
     { mex::END, NONA, T_END, NULL, "END", NULL },
     { mex::BEGL, NONA, T_BEGL, NULL, "BEGL", NULL },
     { mex::ENDL, NONA, T_ENDL, NULL, "ENDL", NULL },
@@ -1604,7 +1604,9 @@ mex::op_info mex::op_infos [ mex::NUMBER_OF_OP_CODES ] =
     { mex::PUSHV, NONA, T_PUSH, NULL, "PUSHV", NULL },
     { mex::SET_TRACE, NONA, T_ALWAYS,
                       NULL, "SET_TRACE", NULL },
+    { mex::NOP, NONA, T_NOP, NULL, "NOP", NULL },
     { mex::TRACE, NONA, T_ALWAYS, NULL, "TRACE", NULL },
+    { mex::DUMP, NONA, T_ALWAYS, NULL, "DUMP", NULL },
     { mex::WARN, NONA, T_ALWAYS, NULL, "WARN", NULL },
     { mex::ERROR, NONA, T_ALWAYS, NULL, "ERROR", NULL },
     { mex::SET_EXCEPTS, NONA, T_SET_EXCEPTS,
@@ -3157,6 +3159,9 @@ TEST_LOOP:	// Come here after fatal error processed
 	    case mex::SET_OPTIMIZE:
 	    case mex::TRACE_EXCEPTS:
 	        break;
+	    case mex::DUMP:
+	        immedA = 0;
+		// Fall through
 	    case mex::TRACE:
 	    case mex::WARN:
 	    case mex::ERROR:
@@ -3774,6 +3779,7 @@ TEST_LOOP:	// Come here after fatal error processed
 	        p->optimize = ( immedA & 1 );
 	        break;
 	    case mex::TRACE:
+	    case mex::DUMP:
 	    case mex::TRACE_EXCEPTS:
 	    case mex::WARN:
 	    {

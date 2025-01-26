@@ -18,7 +18,7 @@
 
 \author{Robert L. Walton}
 
-\date{January 25, 2025}
+\date{January 26, 2025}
  
 \maketitle
 
@@ -200,6 +200,19 @@ If {\em new-variable-name} is missing or `\TT{*}',
 the element just gets the name `\TT{*}' to indicate that the
 variable stack element has no name.
 
+\item Unless otherwise noted, an instruction cannot read a variable
+unless the variable is in the
+current function frame\label{CURRENT-FUNCTION-FRAME}.  This means
+that the compile time location $\ell$ of the variable is in the range: \\
+\hspace*{0.5in}{\tt [ mexstack::fp[mexstack::lexical\_level],
+                    mexstack::stack\_length )} \\
+It also means that the run time location $\ell'$ of the variable is in the
+range: \\
+\hspace*{0.5in}{\tt [ process->fp[process->level], process->length )} \\
+and that: \\
+\hspace*{0.5in}{\tt    mexstack::stack\_length - $\ell$
+                    == process->length - $\ell'$ )}
+
 \item A variable cannot be written if it has a lexical level less than
 that of the writing instruction, or is a function argument variable,
 or has depth equal to the writing instruction and is not
@@ -365,6 +378,27 @@ At assembly time, pushes into the variable stack an
 element with {\em new-variable-name} as its name.
 \end{indpar}
 
+\ttkey{PUSHNARGS} ~ {\em level}\QMARK{} ~ {\em new-variable-name}\QMARK{}
+\begin{indpar}
+At run-time this instruction's actions are as described in
+Figure~\mexref{STACK-INSTRUCTIONS} with \TT{immedB} set
+to the lexical level specified by {\em level} (see \pagref{LEVEL}).
+At assembly-time,
+this instruction pushes into the variable stack an element
+with {\em new-variable-name} as its name.
+\end{indpar}
+
+\ttkey{PUSHV} ~ {\em level}\QMARK{} ~ {\em new-variable-name}\QMARK{}
+\begin{indpar}
+At run-time this instruction's actions are as described in
+Figure~\mexref{STACK-INSTRUCTIONS} with \TT{immedB} set
+to the lexical level specified by {\em level} (see \pagref{LEVEL}).
+
+At assembly-time, this instruction first pops an element from the
+variable stack, and then pushes into the variable stack an element
+with {\em new-variable-name} as its name.
+\end{indpar}
+
 \ttkey{POP} ~ {\em variable-name}\QMARK{}
 \begin{indpar}
 At run-time, pops the process stack and stores the value popped
@@ -453,6 +487,9 @@ At assembly-time,
 these instructions
 call {\tt mexstack::\EOL push\_\EOL jmp\_instr}\mexnote{PUSH-JMP-INSTR}
 to add an element to the pending jump list.
+
+{\em Variable-name} must name a variable in the current function
+frame\pagnote{CURRENT-FUNCTION-FRAME}.
 \end{indpar}
 
 \ttkey{BEG} ~ {\em trace-packet}\QMARK{}
@@ -646,8 +683,8 @@ a MIN string, label, or \TT{min::NONE()}
 
 At assembly time, pops the variable stack.
 
-The variable stack search for {\em object-variable-name} is restricted to
-elements with the same lexical level as the \TT{VPUSH} instruction.
+{\em Object-variable-name} must name a variable in the current function
+frame\pagnote{CURRENT-FUNCTION-FRAME}.
 \end{indpar}
 
 \ttkey{VPOP} ~ {\em object-variable-name} {\em new-variable-name}\QMARK{}
@@ -659,8 +696,8 @@ specifies the variable containing the object pointer.
 At assembly time, pushes into the variable stack an
 element with {\em new-variable-name} as its name.
 
-The variable stack search for {\em object-variable-name} is restricted to
-elements with the same lexical level as the \TT{VPOP} instruction.
+{\em Object-variable-name} must name a variable in the current function
+frame\pagnote{CURRENT-FUNCTION-FRAME}.
 \end{indpar}
 
 \ttkey{VSIZE} ~ {\em object-variable-name} {\em new-variable-name}\QMARK{}
@@ -686,9 +723,9 @@ At assembly time, pops one entry from the variable stack if the
 and then pushes into the variable stack an
 element with {\em new-variable-name} as its name.
 
-The variable stack searches for {\em object-variable-name} 
-and {\em attribute-label-variable-name} are restricted to
-elements with the same lexical level as the \TT{GET} instruction.
+{\em Object-variable-name} and {\em attribute-variable-name}
+must name variables in the current function
+frame\pagnote{CURRENT-FUNCTION-FRAME}.
 \end{indpar}
 
 \ttkey{GETI} ~ {\em object-variable-name} {\em attribute-label}
@@ -703,9 +740,8 @@ names the attribute (\TT{immedD} value).
 At assembly time, pushes into the variable stack an
 element with {\em new-variable-name} as its name.
 
-The variable stack search for {\em object-variable-name} 
-is restricted to
-elements with the same lexical level as the \TT{GETI} instruction.
+{\em Object-variable-name} must name a variable in the current function
+frame\pagnote{CURRENT-FUNCTION-FRAME}.
 \end{indpar}
 
 \ttkey{SET} ~ {\em object-variable-name} {\em attribute-label-variable-name}
@@ -722,9 +758,9 @@ the attribute label is popped from the stack
 At assembly time, pops the variable stack twice if
 {\tt attribute-label-variable-name} is \TT{*}, or once otherwise.
 
-The variable stack searches for {\em object-variable-name} 
-and {\em attribute-label-variable-name} are restricted to
-elements with the same lexical level as the \TT{SET} instruction.
+{\em Object-variable-name} and {\em attribute-variable-name}
+must name variables in the current function
+frame\pagnote{CURRENT-FUNCTION-FRAME}.
 \end{indpar}
 
 \ttkey{SETI} ~ {\em object-variable-name} {\em attribute-label}
@@ -737,30 +773,8 @@ specifies the variable containing the object pointer (\TT{immedA} value), and
 
 At assembly time, pops the variable stack once.
 
-The variable stack search for {\em object-variable-name} 
-is restricted to
-elements with the same lexical level as the \TT{SETI} instruction.
-\end{indpar}
-
-\ttkey{PUSHNARGS} ~ {\em level}\QMARK{} ~ {\em new-variable-name}\QMARK{}
-\begin{indpar}
-At run-time this instruction's actions are as described in
-Figure~\mexref{STACK-INSTRUCTIONS} with \TT{immedB} set
-to the lexical level specified by {\em level} (see \pagref{LEVEL}).
-At assembly-time,
-this instruction pushes into the variable stack an element
-with {\em new-variable-name} as its name.
-\end{indpar}
-
-\ttkey{PUSHV} ~ {\em level}\QMARK{} ~ {\em new-variable-name}\QMARK{}
-\begin{indpar}
-At run-time this instruction's actions are as described in
-Figure~\mexref{STACK-INSTRUCTIONS} with \TT{immedB} set
-to the lexical level specified by {\em level} (see \pagref{LEVEL}).
-
-At assembly-time, this instruction first pops an element from the
-variable stack, and then pushes into the variable stack an element
-with {\em new-variable-name} as its name.
+{\em Object-variable-name} must name a variable in the current function
+frame\pagnote{CURRENT-FUNCTION-FRAME}.
 \end{indpar}
 
 \ttkey{SET\_TRACE} ~ \{ {\em trace-class} $|$ {\em trace-class-group} \}\STAR{}%
@@ -776,7 +790,7 @@ At assembly-time,
 this instruction does nothing.
 \end{indpar}
 
-\ttkey{NOP}/\ttkey{TRACE}/\ttkey{WARN}/\ttkey{ERROR} ~
+\ttkey{NOP}/\ttkey{TRACE}/\ttkey{DUMP}/\ttkey{WARN}/\ttkey{ERROR} ~
     {\em trace-packet}\QMARK{}
 \begin{indpar}
 At run-time these instructions do nothing except produce trace messages
@@ -788,6 +802,12 @@ these instructions do nothing.
 
 All these instructions except \TT{NOP} are in the \TT{ALWAYS}
 trace class.
+
+The \TT{DUMP} instruction, which is used to dump the current
+top values in the run-time stack, is exceptional in that it does not
+push the {\em trace-variables} into the stack, but instead
+uses the existing top of stack as {\em trace-variable} values,
+and does \underline{not} pop the stack.  
 \end{indpar}
 
 \ttkey{SET\_EXCEPTS} ~ {\em except-name}\STAR{}
@@ -822,7 +842,10 @@ this instruction does nothing.
     {\em immedA} ~ {\em immedB} ~ {\em immedC} ~ {\em immedD} \\
     \end{tabular}
 \begin{indpar}
-Fields may be omitted from the end of the instruction.
+Fields after {\em op-code}
+may be omitted from the end of the instruction.  Omitted
+fields default to \TT{0}, except \TT{immedD} defaults to
+\TT{min::MISSING()}.
 
 Outputs an instruction with the given fields, and does nothing
 else at assembly time.  Used for testing \TT{FORMAT\_ERROR}
@@ -846,6 +869,26 @@ The other fields are integers in the range $[0,2^{32})$.
 \begin{indpar}
 This statement just calls {\tt mexstack::jmp\_target}\mexnote{JMP-TARGET}
 with the given {\em jmp-target} name.
+
+If the smallest block containing a \TT{JMP\ldots} instruction is also
+the smallest block containing the corresponding \TT{LABEL},
+the {\tt mexstack::stack\_length} of the \TT{LABEL} must equal
+the {\tt mexstack::stack\_length} just after the \TT{JMP\ldots}
+if the latter is successful.
+Note that for conditional jumps like \TT{JMPEQ} with \TT{immedB != 0},
+the {\tt mexstack::\EOL stack\_\EOL length} after a successful jump is 2 less
+that the {\tt mexstack::stack\_length} just before the \TT{JMPEQ},
+even if the {\tt mexstack::stack\_length} just after the unsuccessful
+jump is different (only 1 less).
+
+If the smallest block containing a \TT{JMP\ldots} instruction is strictly
+inside the smallest block containing the corresponding \TT{LABEL},
+the {\tt mexstack::stack\_length} of the \TT{LABEL} must equal
+the {\tt mexstack::stack\_length} just after the largest block
+that contains the \TT{JMP\ldots} and is also
+strictly inside the smallest block containing the \TT{LABEL}.
+
+All other cases are illegal.
 \end{indpar}
 
 \ttkey{STACKS}

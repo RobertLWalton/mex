@@ -2,7 +2,7 @@
 //
 // File:	mexas_compile_test_13.mex
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Jan 23 01:17:16 AM EST 2025
+// Date:	Sun Jan 26 02:57:41 AM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -34,6 +34,8 @@ TEST_INSTRUCTION PUSHS 100  // too big immedA
 TEST_INSTRUCTION PUSHG  // no module
 TEST_INSTRUCTION PUSHL 0 1  // immedB > lexical level
 TEST_INSTRUCTION PUSHL 1000  // immedA > stack length
+
+DUMP "Stack Dump" s0 s1 s2
 
 BEGF PUSH-POP-TEST ARG1 ARG2
     TEST_INSTRUCTION PUSHL 1000 1
