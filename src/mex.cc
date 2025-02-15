@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Jan 26 02:38:58 AM EST 2025
+// Date:	Sat Feb 15 01:58:49 AM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -176,9 +176,12 @@ bool mex::excepts_check ( mex::process p )
     if ( flags == 0 ) return true;
     p->printer
         << min::bom
-        << "!!! WARNING: TERMINATED PROCESS HAD"
-	   " EXCEPTS ERROR(S): "
-        << min::place_indent ( 0 );
+	<< "!!!!!!!!!!!!!!!!!!!!!!!!!"
+        << " WARNING: TERMINATED PROCESS HAD"
+	<< min::bol
+        << min::place_indent ( 4 )
+	<< min::indent
+	<< " EXCEPTS ERROR(S): ";
     mex::print_excepts ( p->printer, flags );
     p->printer << min::eom;
     return false;
@@ -2223,8 +2226,10 @@ TEST_LOOP:	// Come here after fatal error processed
 
 		if ( excepts != 0 )
 		{
-		    p->printer << min::bol
-			       << "!!! ERROR: ";
+		    p->printer
+		        << min::bol
+	                << "!!!!!!!!!!!!!!!!!!!!!!!!!"
+		        << " ERROR: ";
 		    if ( excepts & FE_INVALID )
 			p->printer
 			    << "invalid operand(s)";
@@ -2517,8 +2522,9 @@ TEST_LOOP:	// Come here after fatal error processed
 		p->printer << min::bol;
 		if ( bad_jmp )
 		    p->printer
-		        << min::bol << min::eol
-		        << "!!! FATAL ERROR: "
+		        << min::bol
+			<< "!!!!!!!!!!!!!!!!!!!!!!!!!"
+		        << " FATAL ERROR: "
 			   " invalid operands to a"
 			   " conditional jump"
 			   " instruction"
@@ -3365,7 +3371,8 @@ TEST_LOOP:	// Come here after fatal error processed
 		p->printer << min::bol;
 		if ( op_code == mex::ERROR )
 		    p->printer
-		        << "!!! FATAL ERROR: "
+			<< "!!!!!!!!!!!!!!!!!!!!!!!!!"
+		        << " FATAL ERROR: "
 			<< min::eol;
 
 		min::phrase_position pp =
@@ -3919,7 +3926,8 @@ TEST_LOOP:	// Come here after fatal error processed
 PERMANENT_ERROR:
     p->state = mex::PERMANENT_ERROR;
     p->printer << min::bom
-               << "!!! FATAL PROGRAM PERMANENT ERROR:"
+	       << "!!!!!!!!!!!!!!!!!!!!!!!!!"
+               << " FATAL PROGRAM PERMANENT ERROR:"
 	       << min::eol
 	       << message
 	       << min::eol
@@ -3965,29 +3973,24 @@ FATAL:
 	m->position[i] :
 	min::MISSING_PHRASE_POSITION;
 
-    p->printer << min::bom << min::eol
+    p->printer << min::bom
 	       << min::place_indent ( 4 )
-               << "!!! FATAL PROGRAM FORMAT ERROR: "
+	       << "!!!!!!!!!!!!!!!!!!!!!!!!!"
+               << " FATAL PROGRAM ERROR: "
 	       << min::indent
-               << message
-	       << min::indent
-	       << "PC->MODULE = "
-	       << ( p->pc.module == min::NULL_STUB ?
-	            min::new_str_gen
-		        ( "<NULL MODULE>"  ):
-		       p->pc.module->position->file
-		    == min::NULL_STUB ?
-		    min::new_str_gen
-		        ( "<NULL FILE>" ):
-		       p->pc.module->position->file
-		                   ->file_name
-		    == min::MISSING() ?
-		    min::new_str_gen
-		        ( "<NO FILE NAME>" ):
-		    p->pc.module->position->file
-		                ->file_name )
-		<< min::bol;
-
+               << message;
+    if ( p->pc.module == min::NULL_STUB )
+        p->printer << min::indent << "PC HAS NO MODULE";
+    else if (    p->pc.module->position->file
+              == min::NULL_STUB )
+        p->printer << min::indent
+	           << "PC MODULE HAS NO FILE";
+    else if (    p->pc.module->position->file->file_name
+              != min::MISSING() )
+        p->printer << min::indent
+	           << "PC MODULE FILE IS "
+		   << p->pc.module->position->file
+		                  ->file_name;
     print_header ( p, pp, 0 )
 	<< " " << op_name
 	<< " " << trace_class_name

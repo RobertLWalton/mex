@@ -51,8 +51,8 @@ END
 * {17:3,3,4} BEG
 *** {18:4,4,5} PUSHS: * <= X = inf
 *** {19:5,5,6} PUSHS: * <= Y = inf
-
-!!! FATAL ERROR:  invalid operands to a conditional jump instruction
+!!!!!!!!!!!!!!!!!!!!!!!!! FATAL ERROR:  invalid operands to a
+    conditional jump instruction
 *** {20:6,3,7} JMPLT ITS-X with invalid operand(s)
                ARGS = inf inf
 ERROR: module initialization process did not terminate normally at
