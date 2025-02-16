@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sat Feb 15 01:58:49 AM EST 2025
+// Date:	Sun Feb 16 03:31:33 PM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -634,6 +634,8 @@ static bool optimized_run_process ( mex::process p )
 	    min::gen obj = sp[-(int)i-1];
 	    if ( ! min::is_obj ( obj ) )
 		goto ERROR_EXIT;
+	    if ( min::public_flag_of ( obj ) )
+	        goto ERROR_EXIT;
 
 	    min::obj_vec_insptr vp = obj;
 	    min::locatable_gen value ( * -- sp );
@@ -666,6 +668,8 @@ static bool optimized_run_process ( mex::process p )
 	    min::gen obj = sp[-(int)i-1];
 	    if ( ! min::is_obj ( obj ) )
 		goto ERROR_EXIT;
+	    if ( min::public_flag_of ( obj ) )
+	        goto ERROR_EXIT;
 
 	    min::obj_vec_insptr vp = obj;
 	    if ( min::size_of ( vp ) == 0 )
@@ -790,12 +794,15 @@ static bool optimized_run_process ( mex::process p )
 	    }
 	    if ( new_sp <= spbegin )
 	        goto ERROR_EXIT;
+	    min::gen obj = sp[-(int)i-1];
+	    min::obj_vec_updptr vp = obj;
+	    if ( vp == min::NULL_STUB )
+		goto ERROR_EXIT;
+	    if ( min::public_flag_of ( vp ) )
+		goto ERROR_EXIT;
 	    min::gen label = sp[-(int)j-1];
 	    if ( min::is_num ( label ) )
 	    {
-		min::obj_vec_updptr vp = sp[-(int)i-1];
-		if ( vp == min::NULL_STUB )
-		    goto ERROR_EXIT;
 		min::uns32 s = min::size_of ( vp );
 
 		min::float64 flabel = FG ( label );
@@ -813,9 +820,7 @@ static bool optimized_run_process ( mex::process p )
 	    }
 	    else if ( min::is_name ( label ) )
 	    {
-		min::gen obj = sp[-(int)i-1];
-		if ( ! min::is_obj ( obj ) )
-		    goto ERROR_EXIT;
+		vp = min::NULL_STUB;
 		min::gen v = * -- sp;
 		int sp_change = new_sp - sp;
 		SAVE;
@@ -841,6 +846,8 @@ static bool optimized_run_process ( mex::process p )
 	    min::gen obj = sp[-(int)i-1];
 	    min::gen label = pc->immedD;
 	    if ( ! min::is_obj ( obj ) )
+	        goto ERROR_EXIT;
+	    if ( min::public_flag_of ( obj ) )
 	        goto ERROR_EXIT;
 	    if ( min::is_num ( label )
 	         ||
@@ -2874,7 +2881,13 @@ TEST_LOOP:	// Come here after fatal error processed
 		min::gen obj = sp[-(int)immedA-1];
 		if ( ! min::is_obj ( obj ) )
 		    goto NOT_AN_OBJECT;
-
+		 if ( min::public_flag_of ( obj ) )
+		{
+		    message =
+			"VPUSH: trying to change"
+			" read-only object";
+		    goto INNER_FATAL;
+		}
 		min::obj_vec_insptr vp = obj;
 		value = sp[-1];
 		if (    min::get ( value,
@@ -2912,6 +2925,13 @@ TEST_LOOP:	// Come here after fatal error processed
 
 		if ( op_code == mex::VPOP )
 		{
+		     if ( min::public_flag_of ( obj ) )
+		    {
+			message =
+			    "VPOP: trying to change"
+			    " read-only object";
+			goto INNER_FATAL;
+		    }
 		    min::obj_vec_insptr vp = obj;
 		    value = ( min::size_of ( vp ) == 0 ?
 		              min::NONE() :
@@ -3004,6 +3024,7 @@ TEST_LOOP:	// Come here after fatal error processed
 		sp_change = +1;
 		break;
 	    case mex::SET:
+	    {
 	        if ( immedA >= frame_length )
 		    goto FRAME_TOO_SMALL;
 	        if ( immedC >= frame_length )
@@ -3027,11 +3048,17 @@ TEST_LOOP:	// Come here after fatal error processed
 		value = sp[-1];
 		obj = sp[-(int)immedA-1];
 		label = sp[-(int)immedC-1];
+		min::obj_vec_updptr vp = obj;
+		if ( vp == min::NULL_STUB )
+		    goto NOT_AN_OBJECT;
+		if ( min::public_flag_of ( vp ) )
+		{
+		    message = "SET: trying to change"
+		              " read-only object";
+		    goto INNER_FATAL;
+		}
 		if ( min::is_num ( label ) )
 		{
-		    min::obj_vec_updptr vp = obj;
-		    if ( vp == min::NULL_STUB )
-		        goto NOT_AN_OBJECT;
 		    min::uns32 s = min::size_of ( vp );
 
 		    min::float64 flabel = FG ( label );
@@ -3059,8 +3086,7 @@ TEST_LOOP:	// Come here after fatal error processed
 		}
 		else if ( min::is_name ( label ) )
 		{
-		    if ( ! min::is_obj ( obj ) )
-			goto NOT_AN_OBJECT;
+		    vp = min::NULL_STUB;
 		    SAVE;
 		    min::set ( obj, label, value );
 		        // Executed before trace.
@@ -3070,7 +3096,9 @@ TEST_LOOP:	// Come here after fatal error processed
 		    goto NOT_A_LABEL;
 
 		break;
+	    }
 	    case mex::SETI:
+	    {
 	        if ( immedA >= frame_length )
 		    goto FRAME_TOO_SMALL;
 
@@ -3081,6 +3109,12 @@ TEST_LOOP:	// Come here after fatal error processed
 		obj = sp[-(int)immedA-1];
 		if ( ! min::is_obj ( obj ) )
 		    goto NOT_AN_OBJECT;
+		if ( min::public_flag_of ( obj ) )
+		{
+		    message = "SETI: trying to change"
+		              " read-only object";
+		    goto INNER_FATAL;
+		}
 		if (    ! min::is_name ( label )
 		     || min::is_num ( label ) )
 		    goto NOT_A_LABEL;
@@ -3089,6 +3123,7 @@ TEST_LOOP:	// Come here after fatal error processed
 		    // Executed before trace.
 	        RESTORE;
 		break;
+	    }
 	    case mex::END:
 	        if ( p->trace_depth == 0 )
 		{
