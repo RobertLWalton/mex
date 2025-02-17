@@ -774,10 +774,13 @@ At assembly time, pops one element from the variable stack and then
 pushes an element with {\em new-variable-name} as its name.
 \end{indpar}
 
-\ttkey{COPYI} ~ {\em new-variable-name}\QMARK{}
+\ttkey{COPYI} ~ {\em list-element}\STAR{} ~ {\em new-variable-name}\QMARK{}
 \begin{indpar}
 At run-time this instruction's actions are as described in
-Figure~\mexref{OBJECT-INSTRUCTIONS}.
+Figure~\mexref{OBJECT-INSTRUCTIONS}, where \TT{immedD} is a read-only
+list object of the form \TT{[~]} or
+\TT{[} {\em list-element} \{ \TT{,} {\em list-element} \}\STAR{} \TT{]}.
+{\em List-elements} may be numbers or strings.
 
 At assembly time,
 pushes an element with {\em new-variable-name} as its name.

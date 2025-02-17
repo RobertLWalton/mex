@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Feb 16 07:39:06 PM EST 2025
+// Date:	Mon Feb 17 03:57:25 PM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -149,6 +149,7 @@ min::locatable_gen mexas::single_quote;
 min::locatable_gen mexas::double_quote;
 min::locatable_gen mexas::left_bracket;
 min::locatable_gen mexas::right_bracket;
+static min::locatable_gen comma;
 static min::locatable_gen backslash;
 static min::locatable_gen on;
 static min::locatable_gen off;
@@ -166,6 +167,7 @@ static void initialize ( void )
     mexas::double_quote = min::new_str_gen ( "\"" );
     mexas::left_bracket = min::new_str_gen ( "[" );
     mexas::right_bracket = min::new_str_gen ( "]" );
+    ::comma = min::new_str_gen ( "," );
     ::backslash = min::new_str_gen ( "\\" );
     ::on = min::new_str_gen ( "ON" );
     ::off = min::new_str_gen ( "OFF" );
@@ -1169,6 +1171,69 @@ mex::module mexas::compile ( min::file file )
 		                ( instr.immedC, C,
 				  pp, "hash_size" ) )
 		    continue;
+		min::gen new_name =
+		    mexas::get_name ( index );
+		if ( new_name != min::NONE() )
+		    check_new_name ( new_name, pp );
+		else
+		    new_name =
+		        mexas::get_star ( index );
+		if ( new_name == min::NONE() )
+		    new_name = mexas::star;
+
+		mexas::push_variable
+		    ( mexas::variables, new_name,
+		      LEVEL_AND_DEPTH );
+		mexstack::push_instr
+		    ( instr, pp, new_name );
+		break;
+	    }
+	    case mex::COPY:
+	    {
+		min::gen new_name =
+		    mexas::get_name ( index );
+		if ( new_name != min::NONE() )
+		    check_new_name ( new_name, pp );
+		else
+		    new_name =
+		        mexas::get_star ( index );
+		if ( new_name == min::NONE() )
+		    new_name = mexas::star;
+
+		mexas::push_variable
+		    ( mexas::variables, new_name,
+		      LEVEL_AND_DEPTH );
+		mexstack::push_instr
+		    ( instr, pp, new_name );
+		break;
+	    }
+	    case mex::COPYI:
+	    {
+	        min::locatable_gen obj
+		    ( min::new_obj_gen ( 40, 5 ) );
+		min::obj_vec_insptr vp = obj;
+		min::locatable_gen element;
+		while ( true )
+		{
+		    element = mexas::get_num ( index );
+		    if ( element == min::NONE() )
+			element = mexas::get_str
+			    ( index );
+		    if ( element == min::NONE() )
+		        break;
+		    min::attr_push(vp) = element;
+		}
+		min::attr_insptr ap = vp;
+		min::locate ( ap, min::dot_initiator );
+		min::set ( ap, mexas::left_bracket );
+		min::locate ( ap, min::dot_terminator );
+		min::set ( ap, mexas::right_bracket );
+		min::locate ( ap, min::dot_separator );
+		min::set ( ap, ::comma );
+		min::set_public_flag_of ( vp );
+		vp = min::NULL_STUB;
+		instr.immedD = obj;
+
 		min::gen new_name =
 		    mexas::get_name ( index );
 		if ( new_name != min::NONE() )
