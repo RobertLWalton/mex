@@ -1694,14 +1694,6 @@ But for {\tt PUSHOBJ}
 If \TT{module->\EOL trace\_\EOL info[i]} does not have the right form,
 {\em from-variable} and {\em to-variable} are taken to be \TT{*}.
 
-Also, for \TT{GET} and \TT{SET} the operation code that ends the
-{\em trace-header} is followed by \TT{*}
-if the instruction \TT{immedB} value is non-zero (indicating that
-\TT{GET} replaces the top stack value instead of pushing the value
-read, and \TT{SET} pops two values instead of just one:
-see Figure~\itemref{OBJECT-INSTRUCTIONS}).
-
-
 \subsubsection{Trace-Packet Based Trace Messages}
 \label{TRACE-PACKET-BASED-TRACE-MESSAGES}
 

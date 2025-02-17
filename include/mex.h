@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Jan 26 02:38:40 AM EST 2025
+// Date:	Mon Feb 17 06:14:59 AM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -130,7 +130,7 @@ enum op_code {
     SET_EXCEPTS,
     TRACE_EXCEPTS,
     SET_OPTIMIZE,
-    PUSHOBJ,
+    PUSHOBJ, COPY, COPYI,
     VPUSH,
     VPOP,
     VSIZE,

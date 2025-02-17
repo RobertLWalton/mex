@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Feb 17 02:42:45 AM EST 2025
+// Date:	Mon Feb 17 06:52:37 AM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -623,6 +623,42 @@ static bool optimized_run_process ( mex::process p )
 	    min::locatable_gen value
 	        ( min::new_obj_gen
 		      ( pc->immedA, pc->immedC ) );
+	    RESTORE;
+	    sp = mex::process_push
+	        ( p, sp, value );
+	    break;
+	}
+	case mex::COPY:
+	{
+	    if ( sp < spbegin + 1 )
+	        goto ERROR_EXIT;
+	    min::obj_vec_ptr vp = sp[-1];
+	    if ( vp == min::NULL_STUB )
+	        goto ERROR_EXIT;
+	    SAVE;
+	    min::locatable_gen value
+	        ( min::copy
+		      ( vp,
+			  min::unused_size_of ( vp )
+			+ 20 ) );
+	    RESTORE;
+	    sp = mex::process_push
+	        ( p, sp - 1, value );
+	    break;
+	}
+	case mex::COPYI:
+	{
+	    if ( sp >= spend )
+	        goto ERROR_EXIT;
+	    min::obj_vec_ptr vp = pc->immedD;
+	    if ( vp == min::NULL_STUB )
+	        goto ERROR_EXIT;
+	    SAVE;
+	    min::locatable_gen value
+	        ( min::copy
+		      ( vp,
+			  min::unused_size_of ( vp )
+			+ 20 ) );
 	    RESTORE;
 	    sp = mex::process_push
 	        ( p, sp, value );
@@ -1609,6 +1645,8 @@ mex::op_info mex::op_infos [ mex::NUMBER_OF_OP_CODES ] =
                          NULL, "SET_OPTIMIZE", NULL },
     { mex::PUSHOBJ, NONA, T_SET,
                     NULL, "PUSHOBJ", NULL },
+    { mex::COPY, NONA, T_SET, NULL, "COPY", NULL },
+    { mex::COPYI, NONA, T_SET, NULL, "COPY", NULL },
     { mex::VPUSH, NONA, T_SET, NULL, "VPUSH", NULL },
     { mex::VPOP, NONA, T_GET, NULL, "VPOP", NULL },
     { mex::VSIZE, NONA, T_GET, NULL, "VSIZE", NULL },
@@ -2863,6 +2901,50 @@ TEST_LOOP:	// Come here after fatal error processed
 		RESTORE;
 		sp_change = +1;
 		break;
+	    case mex::COPY:
+	    {
+		if ( sp <= spbegin )
+		{
+		    message = "COPY: stack is empty";
+		    goto INNER_FATAL;
+		}
+		min::obj_vec_ptr vp = sp[-1];
+		if ( vp == min::NULL_STUB )
+		{
+		    message = "COPY: top of stack is"
+		              " not an object";
+		    goto INNER_FATAL;
+		}
+		SAVE;
+		value =
+		    ( min::copy
+			  ( vp,
+			      min::unused_size_of ( vp )
+			    + 20 ) );
+		RESTORE;
+		break;
+	    }
+	    case mex::COPYI:
+	    {
+		if ( sp >= spend )
+		    goto STACK_LIMIT_STOP;
+		min::obj_vec_ptr vp = immedD;
+		if ( vp == min::NULL_STUB )
+		{
+		    message = "COPYI: immedD is"
+		              " not an object";
+		    goto INNER_FATAL;
+		}
+		SAVE;
+		value =
+		    ( min::copy
+			  ( vp,
+			      min::unused_size_of ( vp )
+			    + 20 ) );
+		RESTORE;
+		sp_change = 1;
+		break;
+	    }
 	    case mex::VPUSH:
 	    {
 	        if ( immedA >= frame_length )
@@ -3470,6 +3552,16 @@ TEST_LOOP:	// Come here after fatal error processed
 			       << immedC << ")";
 		    break;
 		}
+		case mex::COPY:
+		case mex::COPYI:
+		{
+		    p->printer << ": "
+			       << ::pvar ( tinfo )
+			       << " <= "
+		               << min::pgen_quote
+			              ( value );
+		    break;
+		}
 		case mex::VPUSH:
 		{
 		    p->printer << ":";
@@ -3722,6 +3814,8 @@ TEST_LOOP:	// Come here after fatal error processed
 	    case mex::VSIZE:
 	    case mex::GET:
 	    case mex::GETI:
+	    case mex::COPY:
+	    case mex::COPYI:
 	    {
 		sp = mex::process_push
 		    ( p, sp + sp_change - 1, value );
