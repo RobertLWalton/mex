@@ -1659,6 +1659,9 @@ Figure~\itemref{OBJECT-INSTRUCTIONS} are:
                     \TT{<=} \TT{NEW OBJ (} {\em unused\_size}\TT{,}
 		    {\em hash\_size} \TT{)}
 \\[1ex]
+\TT{COPY}/\TT{COPYI} &
+{\em trace-header}\TT{:} {\em to-variable} \TT{<=} {\em value}
+\\[1ex]
 \TT{VPUSH} &
 {\em trace-header}\TT{:} \TT{PUSHED} {\em object-variable}
                     \TT{<=} {\em from-variable}
@@ -1689,7 +1692,7 @@ For all these instructions but {\tt PUSHOBJ},
 \TT{module->\EOL trace\_\EOL info[i]} is the MIN label
 \TT{[<} {\em from-variable} ~ {\em to-variable} \TT{>]},
 where one of the two variables is {\em object-variable}.
-But for {\tt PUSHOBJ}
+But for {\tt PUSHOBJ}, {\tt COPY}, and {\tt COPYI},
 \TT{module->\EOL trace\_\EOL info[i]} is just {\em to-variable}.
 If \TT{module->\EOL trace\_\EOL info[i]} does not have the right form,
 {\em from-variable} and {\em to-variable} are taken to be \TT{*}.
