@@ -18,7 +18,7 @@
 
 \author{Robert L. Walton}
 
-\date{January 26, 2025}
+\date{February 17, 2025}
  
 \maketitle
 
@@ -706,25 +706,19 @@ Same as \TT{VPOP} except the value pushed into the stack is the
 size of the vector of the object.
 \end{indpar}
 
-\ttkey{GET} ~ {\em object-variable-name} {\em attribute-label-variable-name}
+\ttkey{GET} ~ {\em object-variable-name}
 	      {\em new-variable-name}\QMARK{}
 \begin{indpar}
 At run-time this instruction's actions are as described in
 Figure~\mexref{OBJECT-INSTRUCTIONS}, where {\em object-variable-name}
-specifies the variable containing the object pointer (\TT{immedA} value), and
-{\em attribute-label-variable-name} specifies the variable containing the
-attribute label value \EOL (\TT{immedC} value).
-If {\em attribute-label-variable-name}
-is \TT{*}, the attribute name is popped from the stack
-(\TT{immedB} != 0, \TT{immedC} == 0).
+specifies the variable containing the object pointer (\TT{immedA} value).
 
-At assembly time, pops one entry from the variable stack if the
-{\em attribute-lable-variable-name} was \TT{*},
+At assembly time, pops one entry from the variable stack
 and then pushes into the variable stack an
 element with {\em new-variable-name} as its name.
 
-{\em Object-variable-name} and {\em attribute-variable-name}
-must name variables in the current function
+{\em Object-variable-name}
+must name a variable in the current function
 frame\pagnote{CURRENT-FUNCTION-FRAME}.
 \end{indpar}
 
@@ -744,22 +738,16 @@ element with {\em new-variable-name} as its name.
 frame\pagnote{CURRENT-FUNCTION-FRAME}.
 \end{indpar}
 
-\ttkey{SET} ~ {\em object-variable-name} {\em attribute-label-variable-name}
+\ttkey{SET} ~ {\em object-variable-name}
 \begin{indpar}
 At run-time this instruction's actions are as described in
 Figure~\mexref{OBJECT-INSTRUCTIONS}, where {\em object-variable-name}
-specifies the variable containing the object pointer (\TT{immedA} value), and
-{\em attribute-label-variable-name} specifies the variable containing the
-attribute label value \EOL (\TT{immedC} value).
-If {\em attribute-label-variable-name} is \TT{*},
-the attribute label is popped from the stack
-(\TT{immedB} != 0, \TT{immedC} == 1).
+specifies the variable containing the object pointer (\TT{immedA} value).
 
-At assembly time, pops the variable stack twice if
-{\tt attribute-label-variable-name} is \TT{*}, or once otherwise.
+At assembly time, pops the variable stack twice.
 
-{\em Object-variable-name} and {\em attribute-variable-name}
-must name variables in the current function
+{\em Object-variable-name}
+must name a variable in the current function
 frame\pagnote{CURRENT-FUNCTION-FRAME}.
 \end{indpar}
 
@@ -775,6 +763,24 @@ At assembly time, pops the variable stack once.
 
 {\em Object-variable-name} must name a variable in the current function
 frame\pagnote{CURRENT-FUNCTION-FRAME}.
+\end{indpar}
+
+\ttkey{COPY} ~ {\em new-variable-name}\QMARK{}
+\begin{indpar}
+At run-time this instruction's actions are as described in
+Figure~\mexref{OBJECT-INSTRUCTIONS}.
+
+At assembly time, pops one element from the variable stack and then
+pushes an element with {\em new-variable-name} as its name.
+\end{indpar}
+
+\ttkey{COPYI} ~ {\em new-variable-name}\QMARK{}
+\begin{indpar}
+At run-time this instruction's actions are as described in
+Figure~\mexref{OBJECT-INSTRUCTIONS}.
+
+At assembly time,
+pushes an element with {\em new-variable-name} as its name.
 \end{indpar}
 
 \ttkey{SET\_TRACE} ~ \{ {\em trace-class} $|$ {\em trace-class-group} \}\STAR{}%

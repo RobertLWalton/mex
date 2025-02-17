@@ -18,7 +18,7 @@
 
 \author{Robert L. Walton}
 
-\date{January 24, 2025}
+\date{February 17, 2025}
  
 \maketitle
 
@@ -860,6 +860,8 @@ for details concerning nested functions.
 
 The object instruction set creates and modifies MIN objects.
 See Figure~\itemref{OBJECT-INSTRUCTIONS}.
+It is an error if an object instruction tries to modify
+a public object.
 
 The housekeeping instruction set is in
 Figure~\itemref{HOUSEKEEPING-INSTRUCTIONS}.
@@ -1208,17 +1210,14 @@ in the current function frame.
     & \TT{sp[- immedA - 1]} into the stack.
 \\\hline
 \ttkey{GET}
-    & Read the attribute labelled by the value X
-        of \TT{sp[- immedC - 1]} from \\
-    & the object pointed to by \TT{sp[- immedA - 1]} and then push that value \\
-    & into the stack.  If X is an integer, read the X+1'st element of the \\
-    & vector of the object, while if X is a string or MIN label, read the \\
-    & labelled attribute of the object.  If the value to be read does not
-    		exist, \\
-    & push \TT{min::NONE()} into the stack instead.  If \TT{immedB}
-    	is non-zero, \\
-    & \TT{immedC} is required to be zero, and the value X is popped from \\
-    & the stack just before the attribute value read is pushed.
+    & Pop one value from the stack and use it as an attribute label X to read \\
+    & an attribute of the object pointed to by \TT{sp[- immedA - 1]}. Then \\
+    & push the attribute value read into the stack.  If X is an integer,
+      read the \\
+    & X+1'st element of the vector of the object, while if X is a string or \\
+    & MIN label, read the labelled attribute of the object.  If the value to
+      be \\
+    & read does not exist, push \TT{min::NONE()} into the stack instead.
 \\\hline
 \ttkey{GETI}
     & Read the attribute labelled by \TT{immedD}, which must be a string \\
@@ -1227,18 +1226,18 @@ in the current function frame.
     & not exist, push \TT{min::NONE()} into the stack instead.
 \\\hline
 \ttkey{SET}
-    & Write the top value in the stack to the attribute labelled by the value \\
-    & X of \TT{sp[- immedC - 1]} in the object pointed to by
-    	\TT{sp[- immedA - 1]}. \\
-    & If X is an integer, write the X+1'st element of the vector of the \\
-    & object, while if X is a string or MIN label, write to the labelled \\
-    & attribute in the object.  If X is an integer, the vector element is \\
-    & required to exist; otherwise if the attribute does not have a previous \\
-    & value, the attribute is created.  After the write, pop one value from \\
-    & the stack (the value written), and then if \TT{immedB} is non-zero, 
-        require \\
-    & \TT{immedC} to equal \TT{1} and pop a second value (X)
-	    from the stack.
+    & Pop two values from the stack and write the first popped to the
+      attribute \\
+    & labelled by the second popped of the object pointed to by
+      \TT{sp[- immedA - 1]}. \\
+    & If the attribute label X is an integer, write the X+1'st element
+      of the vector \\
+    & of the object, while if X is a string or MIN label, write to the 
+      labelled \\
+    & attribute in the object.  If X is an integer, the vector element is 
+      required \\
+    & to exist; otherwise if the attribute does not have a previous value, \\
+    & the attribute is created.
 \\\hline
 \ttkey{SETI}
     & Write the top value in the stack to the attribute labelled
@@ -1246,6 +1245,16 @@ in the current function frame.
     & which must be a string or MIN label, in the object pointed to by \\
     & \TT{sp[- immedA - 1]}.  Then pop one value (the value written) from the \\
     & stack.
+\\\hline
+\ttkey{COPY}
+    & Replace the top value in the stack, which must be an object,
+      by a copy \\
+    & of this object.  The copy is writable even if the object copied
+      was public.
+\\\hline
+\ttkey{COPYI}
+    & Push a writable copy of \TT{immedD}, which must be an object,
+      into the stack.
 \\\hline
 \end{tabular}
 \end{center}

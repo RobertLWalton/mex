@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Feb 16 07:21:13 PM EST 2025
+// Date:	Mon Feb 17 02:42:45 AM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -501,8 +501,11 @@ static bool optimized_run_process ( mex::process p )
 	{
 	    if ( sp >= spend )
 	        goto ERROR_EXIT;
-	    sp = mex::process_push
-	        ( p, sp, pc->immedD );
+	    min::gen v = pc->immedD;
+	    if (    min::is_obj ( v )
+	         && ! min::public_flag_of ( v ) )
+	        goto ERROR_EXIT;
+	    sp = mex::process_push ( p, sp, v );
 	    break;
 	}
 	case mex::PUSHG:
@@ -2680,6 +2683,14 @@ TEST_LOOP:	// Come here after fatal error processed
 		if ( sp >= spend )
 		    goto STACK_LIMIT_STOP;
 		value = immedD;
+		if (    min::is_obj ( value )
+		     && ! min::public_flag_of
+		              ( value ) )
+		{
+		    message = "PUSHI immedD is a"
+		              " writable object";
+		    goto INNER_FATAL;
+		}
 		sp_change = +1;
 		break;
 	    case mex::PUSHG:
