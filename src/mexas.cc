@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Jan 26 02:45:15 AM EST 2025
+// Date:	Sun Feb 16 07:39:06 PM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1290,10 +1290,6 @@ mex::module mexas::compile ( min::file file )
 	    case mex::SETI:
 	    case mex::SET:
 	    {
-	        MIN_REQUIRE ( instr.immedB == 0 );
-		    // No extra var pop unless immedB
-		    // set below.
-
 	        min::gen obj_var_name =
 		    mexas::get_name ( index );
 		if ( obj_var_name == min::NONE() )
@@ -1311,48 +1307,9 @@ mex::module mexas::compile ( min::file file )
 		instr.immedA = SP - j - 1;
 
 		min::locatable_gen attr_label;
-		if ( op_code == mex::GET
-		     ||
-		     op_code == mex::SET )
-		{
-		    min::gen attr_var_name =
-			mexas::get_name ( index );
-		    if ( attr_var_name == min::NONE() )
-			attr_var_name =
-			    mexas::get_star ( index );
-		    if ( attr_var_name == min::NONE() )
-		    {
-			mexcom::compile_error
-			    ( pp, "no attribute-label-"
-				  "variable-name;"
-				  " instruction"
-				  " ignored" );
-			continue;
-		    }
 
-		    if ( attr_var_name != mexas::star )
-		    {
-			min::uns32 j =
-			    local_search
-				( attr_var_name, pp );
-			if ( j == mexas::NOT_FOUND )
-			    continue;
-			instr.immedC = SP - j - 1;
-		    }
-		    else
-		    {
-			instr.immedB = 1;
-			instr.immedC = 
-			    ( op_code == mex::SET ?
-			      1 : 0 );
-			if ( ! check_pop
-			           ( instr.immedC + 1,
-				     pp ) )
-			    continue;
-		    }
-		}
-		else //    op_code == mex::GETI
-		     // || op_code == mex::SETI
+		if (    op_code == mex::GETI
+		     || op_code == mex::SETI )
 		{
 		    attr_label =
 		        mexas::get_label ( index );
@@ -1388,7 +1345,7 @@ mex::module mexas::compile ( min::file file )
 		    trace_info =
 			min::new_lab_gen ( labbuf, 2 );
 
-		    if ( instr.immedB != 0 )
+		    if ( op_code == mex::GET )
 		    {
 			min::pop ( mexas::variables );
 			mexstack::stack_length -= 1;
@@ -1413,7 +1370,7 @@ mex::module mexas::compile ( min::file file )
 			min::new_lab_gen ( labbuf, 2 );
 
 		    unsigned pops =
-		        instr.immedB != 0 ? 2 : 1;
+		        op_code == mex::SET ? 2 : 1;
 		    if ( ! check_pop ( pops, pp ) )
 		        continue;
 		    min::pop ( mexas::variables, pops );

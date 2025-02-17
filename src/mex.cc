@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Feb 16 03:31:33 PM EST 2025
+// Date:	Sun Feb 16 07:21:13 PM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -704,21 +704,11 @@ static bool optimized_run_process ( mex::process p )
 	    if ( sp <= spbegin )
 	        goto ERROR_EXIT;
 	    min::uns32 i = pc->immedA;
-	    min::uns32 j = pc->immedC;
-	    min::uns32 k = sp - spbegin;
-	    if ( i >= k || j >= k )
+	    min::uns32 j = sp - spbegin;
+	    if ( i >= j )
 	        goto ERROR_EXIT;
-	    min::gen label = sp[-(int)j-1];
 
-	    min::gen * new_sp = sp;
-	    if ( pc->immedB != 0 )
-	    {
-		if ( j != 0 )
-		    goto ERROR_EXIT;
-	        -- new_sp;
-	    }
-	    if ( new_sp >= spend )
-	        goto ERROR_EXIT;
+	    min::gen label = sp[-1];
 
 	    if ( min::is_num ( label ) )
 	    {
@@ -736,8 +726,8 @@ static bool optimized_run_process ( mex::process p )
 		     ||
 		     floor ( flabel ) != flabel )
 		    goto ERROR_EXIT;
-		new_sp = mex::process_push
-		    ( p, new_sp,
+		sp = mex::process_push
+		    ( p, -- sp,
 		      ( flabel < 0 || flabel >= s ) ?
 		      min::NONE() :
 		      vp[(int)flabel] );
@@ -747,14 +737,13 @@ static bool optimized_run_process ( mex::process p )
 		min::gen obj = sp[-(int)i-1];
 		if ( ! min::is_obj ( obj ) )
 		    goto ERROR_EXIT;
-		new_sp = mex::process_push
-		    ( p, new_sp,
+		sp = mex::process_push
+		    ( p, -- sp,
 		      min::get ( obj, label ) );
 	    }
 	    else
 	        goto ERROR_EXIT;
 
-	    sp = new_sp;
 	    break;
 	}
 	case mex::GETI:
@@ -779,28 +768,20 @@ static bool optimized_run_process ( mex::process p )
 	}
 	case mex::SET:
 	{
+	    if ( sp <= spbegin )
+	        goto ERROR_EXIT;
 	    min::uns32 i = pc->immedA;
-	    min::uns32 j = pc->immedC;
-	    min::uns32 k = sp - spbegin;
-	    if ( i >= k || j >= k )
+	    min::uns32 j = sp - spbegin;
+	    if ( i >= j || 2 > j )
 	        goto ERROR_EXIT;
 
-	    min::gen * new_sp = sp;
-	    if ( pc->immedB != 0 )
-	    {
-	    	if ( j != 1 )
-		    goto ERROR_EXIT;
-		-- new_sp;
-	    }
-	    if ( new_sp <= spbegin )
-	        goto ERROR_EXIT;
 	    min::gen obj = sp[-(int)i-1];
 	    min::obj_vec_updptr vp = obj;
 	    if ( vp == min::NULL_STUB )
 		goto ERROR_EXIT;
 	    if ( min::public_flag_of ( vp ) )
 		goto ERROR_EXIT;
-	    min::gen label = sp[-(int)j-1];
+	    min::gen label = sp[-2];
 	    if ( min::is_num ( label ) )
 	    {
 		min::uns32 s = min::size_of ( vp );
@@ -822,16 +803,14 @@ static bool optimized_run_process ( mex::process p )
 	    {
 		vp = min::NULL_STUB;
 		min::gen v = * -- sp;
-		int sp_change = new_sp - sp;
 		SAVE;
 		min::set ( obj, label, v );
 		RESTORE;
-		new_sp = sp_change + sp;
 	    }
 	    else
 	        goto ERROR_EXIT;
 
-	    sp = -- new_sp;
+	    -- sp;  // For label.
 
 	    break;
 	}
@@ -2951,25 +2930,13 @@ TEST_LOOP:	// Come here after fatal error processed
 	    case mex::GET:
 	        if ( immedA >= frame_length )
 		    goto FRAME_TOO_SMALL;
-	        if ( immedC >= frame_length )
+	        if ( 1 > frame_length )
 		    goto FRAME_TOO_SMALL;
 
-		sp_change = +1;
-		if ( immedB != 0 )
-		{
-		    if ( immedC != 0 )
-		    {
-		        message = "GET: immedB !=0 but"
-			          " immedC != 0";
-			goto INNER_FATAL;
-		    }
-		    sp_change = 0;
-		}
-		if ( sp + sp_change > spend )
-		    goto STACK_LIMIT_STOP;
+		sp_change = 0;
 
 		obj = sp[-(int)immedA-1];
-		label = sp[-(int)immedC-1];
+		label = sp[-1];
 		if ( min::is_num ( label ) )
 		{
 		    min::obj_vec_ptr vp = obj;
@@ -3027,27 +2994,14 @@ TEST_LOOP:	// Come here after fatal error processed
 	    {
 	        if ( immedA >= frame_length )
 		    goto FRAME_TOO_SMALL;
-	        if ( immedC >= frame_length )
+	        if ( 2 > frame_length )
 		    goto FRAME_TOO_SMALL;
 
-		sp_change = -1;
-		if ( immedB != 0 )
-		{
-		    sp_change = -2;
-		    if ( immedC != 1 )
-		    {
-		        message = "SET: immedB != 0 but"
-			          " immedC != 1";
-			goto INNER_FATAL;
-		    }
-		}
-		if (   frame_length
-		     < (min::uns32) ( - sp_change ) )
-		    goto FRAME_TOO_SMALL;
+		sp_change = -2;
 
 		value = sp[-1];
 		obj = sp[-(int)immedA-1];
-		label = sp[-(int)immedC-1];
+		label = sp[-2];
 		min::obj_vec_updptr vp = obj;
 		if ( vp == min::NULL_STUB )
 		    goto NOT_AN_OBJECT;
@@ -3547,9 +3501,6 @@ TEST_LOOP:	// Come here after fatal error processed
 		    break;
 		}
 		case mex::GET:
-		    if ( immedB != 0 )
-		        p->printer << "*";
-		    // Fall Through
 		case mex::GETI:
 		{
 		    p->printer << ":";
@@ -3572,9 +3523,6 @@ TEST_LOOP:	// Come here after fatal error processed
 		    break;
 		}
 		case mex::SET:
-		    if ( immedB != 0 )
-		        p->printer << "*";
-		    // Fall Through
 		case mex::SETI:
 		{
 		    p->printer << ":";

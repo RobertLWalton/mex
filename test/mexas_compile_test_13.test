@@ -2,7 +2,7 @@
 //
 // File:        mexas_compile_test_13.mex
 // Author:      Bob Walton (walton@acm.org)
-// Date:        Sun Jan 26 02:57:41 AM EST 2025
+// Date:        Sun Feb 16 07:43:18 PM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -118,150 +118,138 @@ BEGF GET-SET-TEST
     [69:47;12] PUSHI T_PUSH 0 0 0 1; *
     PUSHI 2
     [70:48;13] PUSHI T_PUSH 0 0 0 2; *
-    TEST_INSTRUCTION GET 10 0 0
+    TEST_INSTRUCTION GET 10
     [71:49;13] GET T_GET 10 0 0
-    TEST_INSTRUCTION SET 10 0 0
+    TEST_INSTRUCTION SET 10
     [72:50;13] SET T_SET 10 0 0
-    TEST_INSTRUCTION GET 1 0 10
-    [73:51;13] GET T_GET 1 0 10
-    TEST_INSTRUCTION SET 1 0 10
-    [74:52;13] SET T_SET 1 0 10
-    TEST_INSTRUCTION GET 1 1 1
-    [75:53;13] GET T_GET 1 1 1
-    TEST_INSTRUCTION SET 1 1 0
-    [76:54;13] SET T_SET 1 1 0
-    TEST_INSTRUCTION GET 1 0 0
-    [77:55;13] GET T_GET 1 0 0
-    TEST_INSTRUCTION SET 1 0 0
-    [78:56;13] SET T_SET 1 0 0
     PUSHOBJ 10 5
-    [79:57;14] PUSHOBJ T_SET 10 0 5; *
+    [73:51;14] PUSHOBJ T_SET 10 0 5; *
     PUSHI 1e10
-    [80:58;15] PUSHI T_PUSH 0 0 0 10000000000; *
-    TEST_INSTRUCTION GET 1 0 0
+    [74:52;15] PUSHI T_PUSH 0 0 0 10000000000; *
+    TEST_INSTRUCTION GET 1
+    [75:53;15] GET T_GET 1 0 0
+    PUSHI 3
+    [76:54;16] PUSHI T_PUSH 0 0 0 3; *
+    TEST_INSTRUCTION SET 2
+    [77:55;16] SET T_SET 2 0 0
+    POP
+    [78:56;15] POPS T_POP 0 0 0; [< * * >]
+    POP
+    [79:57;14] POPS T_POP 0 0 0; [< * * >]
+    PUSHI TRUE
+    [80:58;15] PUSHI T_PUSH 0 0 0 *TRUE*; *
+    TEST_INSTRUCTION GET 1
     [81:59;15] GET T_GET 1 0 0
     PUSHI 3
     [82:60;16] PUSHI T_PUSH 0 0 0 3; *
-    TEST_INSTRUCTION SET 2 0 1
-    [83:61;16] SET T_SET 2 0 1
+    TEST_INSTRUCTION SET 2
+    [83:61;16] SET T_SET 2 0 0
     POP
     [84:62;15] POPS T_POP 0 0 0; [< * * >]
     POP
     [85:63;14] POPS T_POP 0 0 0; [< * * >]
-    PUSHI TRUE
-    [86:64;15] PUSHI T_PUSH 0 0 0 *TRUE*; *
-    TEST_INSTRUCTION GET 1 0 0
-    [87:65;15] GET T_GET 1 0 0
-    PUSHI 3
-    [88:66;16] PUSHI T_PUSH 0 0 0 3; *
-    TEST_INSTRUCTION SET 2 0 1
-    [89:67;16] SET T_SET 2 0 1
-    POP
-    [90:68;15] POPS T_POP 0 0 0; [< * * >]
-    POP
-    [91:69;14] POPS T_POP 0 0 0; [< * * >]
     PUSHI 5
-    [92:70;15] PUSHI T_PUSH 0 0 0 5; *
+    [86:64;15] PUSHI T_PUSH 0 0 0 5; *
     PUSHI 6
-    [93:71;16] PUSHI T_PUSH 0 0 0 6; *
-    TEST_INSTRUCTION SET 2 0 1
-    [94:72;16] SET T_SET 2 0 1
+    [87:65;16] PUSHI T_PUSH 0 0 0 6; *
+    TEST_INSTRUCTION SET 2
+    [88:66;16] SET T_SET 2 0 0
     POP
-    [95:73;15] POPS T_POP 0 0 0; [< * * >]
+    [89:67;15] POPS T_POP 0 0 0; [< * * >]
     POP
-    [96:74;14] POPS T_POP 0 0 0; [< * * >]
+    [90:68;14] POPS T_POP 0 0 0; [< * * >]
     TEST_INSTRUCTION GETI 10
-    [97:75;14] GETI T_GET 10 0 0
+    [91:69;14] GETI T_GET 10 0 0
     TEST_INSTRUCTION GETI 0
-    [98:76;14] GETI T_GET 0 0 0
+    [92:70;14] GETI T_GET 0 0 0
     PUSHI 5
-    [99:77;15] PUSHI T_PUSH 0 0 0 5; *
+    [93:71;15] PUSHI T_PUSH 0 0 0 5; *
     TEST_INSTRUCTION GETI 0 0 0 "foo"
-    [100:78;15] GETI T_GET 0 0 0 "foo"
+    [94:72;15] GETI T_GET 0 0 0 "foo"
     TEST_INSTRUCTION SETI 10
-    [101:79;15] SETI T_SET 10 0 0
+    [95:73;15] SETI T_SET 10 0 0
     PUSHI 6
-    [102:80;16] PUSHI T_PUSH 0 0 0 6; *
+    [96:74;16] PUSHI T_PUSH 0 0 0 6; *
     TEST_INSTRUCTION SETI 1 0 0 "foo"
-    [103:81;16] SETI T_SET 1 0 0 "foo"
+    [97:75;16] SETI T_SET 1 0 0 "foo"
     POP
-    [104:82;15] POPS T_POP 0 0 0; [< * * >]
+    [98:76;15] POPS T_POP 0 0 0; [< * * >]
     TEST_INSTRUCTION SETI 1 0 0 TRUE
-    [105:83;15] SETI T_SET 1 0 0 *TRUE*
+    [99:77;15] SETI T_SET 1 0 0 *TRUE*
     RET 0
-    [106:84;15] RET T_RET 0 1 0
+    [100:78;15] RET T_RET 0 1 0
 ENDF
-    [68:46;15] BEGF T_BEGF 0 1 40; [< GET-SET-TEST >]
-    [107:85;11] ENDF T_ENDF 0 1 0
+    [68:46;15] BEGF T_BEGF 0 1 34; [< GET-SET-TEST >]
+    [101:79;11] ENDF T_ENDF 0 1 0
 
 CALL GET-SET-TEST 0
-    [109:86;11] CALLM T_CALLM 0 0 46; [< GET-SET-TEST >]
+    [103:80;11] CALLM T_CALLM 0 0 46; [< GET-SET-TEST >]
 
 TEST_INSTRUCTION END
-    [111:87;11] END T_END 0 0 0
+    [105:81;11] END T_END 0 0 0
 
 BEGF BEG-END-TEST ARG1
-    [113:88;12] BEGF T_BEGF 1 1 0; [< BEG-END-TEST ARG1 >]
+    [107:82;12] BEGF T_BEGF 1 1 0; [< BEG-END-TEST ARG1 >]
     TEST_INSTRUCTION BEG 10
-    [114:89;12] BEG T_BEG 10 0 0
+    [108:83;12] BEG T_BEG 10 0 0
     TEST_INSTRUCTION BEGL 0 10
-    [115:90;12] BEGL T_BEGL 0 10 0
+    [109:84;12] BEGL T_BEGL 0 10 0
     TEST_INSTRUCTION ENDL 10
-    [116:91;12] ENDL T_ENDL 10 0 0
+    [110:85;12] ENDL T_ENDL 10 0 0
     TEST_INSTRUCTION CONT 10
-    [117:92;12] CONT T_CONT 10 0 0
+    [111:86;12] CONT T_CONT 10 0 0
     TEST_INSTRUCTION ENDL 0 5
-    [118:93;12] ENDL T_ENDL 0 5 0
+    [112:87;12] ENDL T_ENDL 0 5 0
     TEST_INSTRUCTION CONT 0 5
-    [119:94;12] CONT T_CONT 0 5 0
+    [113:88;12] CONT T_CONT 0 5 0
     TEST_INSTRUCTION ENDL 0 0 100
-    [120:95;12] ENDL T_ENDL 0 0 100
+    [114:89;12] ENDL T_ENDL 0 0 100
     TEST_INSTRUCTION CONT 0 0 100
-    [121:96;12] CONT T_CONT 0 0 100
+    [115:90;12] CONT T_CONT 0 0 100
     TEST_INSTRUCTION CONT [ 2 ]
-    [122:97;12] CONT T_CONT[2] 0 0 0
+    [116:91;12] CONT T_CONT[2] 0 0 0
     TEST_INSTRUCTION TRACE 10
-    [123:98;12] TRACE T_ALWAYS 10 0 0
+    [117:92;12] TRACE T_ALWAYS 10 0 0
     TEST_INSTRUCTION WARN 10
-    [124:99;12] WARN T_ALWAYS 10 0 0
+    [118:93;12] WARN T_ALWAYS 10 0 0
     TEST_INSTRUCTION ERROR 10
-    [125:100;12] ERROR T_ALWAYS 10 0 0
+    [119:94;12] ERROR T_ALWAYS 10 0 0
     TEST_INSTRUCTION BEGF 0 2 1000
-    [126:101;12] BEGF T_BEGF 0 2 1000
+    [120:95;12] BEGF T_BEGF 0 2 1000
     TEST_INSTRUCTION BEGF 0 1
-    [127:102;12] BEGF T_BEGF 0 1 0
+    [121:96;12] BEGF T_BEGF 0 1 0
     TEST_INSTRUCTION RET 0 0
-    [128:103;12] RET T_RET 0 0 0
+    [122:97;12] RET T_RET 0 0 0
     TEST_INSTRUCTION ENDF 0 0
-    [129:104;12] ENDF T_ENDF 0 0 0
+    [123:98;12] ENDF T_ENDF 0 0 0
     TEST_INSTRUCTION RET 0 1 2
-    [130:105;12] RET T_RET 0 1 2
+    [124:99;12] RET T_RET 0 1 2
     TEST_INSTRUCTION RET 0 1 1
-    [131:106;12] RET T_RET 0 1 1
+    [125:100;12] RET T_RET 0 1 1
     PUSHI 200
-    [132:107;13] PUSHI T_PUSH 0 0 0 200; *
+    [126:101;13] PUSHI T_PUSH 0 0 0 200; *
     RET 1
-    [133:108;12] RET T_RET 0 1 1
+    [127:102;12] RET T_RET 0 1 1
 ENDF
-    [113:88;12] BEGF T_BEGF 1 1 22; [< BEG-END-TEST ARG1 >]
-    [134:109;11] ENDF T_ENDF 0 1 0
+    [107:82;12] BEGF T_BEGF 1 1 22; [< BEG-END-TEST ARG1 >]
+    [128:103;11] ENDF T_ENDF 0 1 0
 
 PUSHI 100
-    [136:110;12] PUSHI T_PUSH 0 0 0 100; *
+    [130:104;12] PUSHI T_PUSH 0 0 0 100; *
 CALL BEG-END-TEST 1 X
-    [137:111;12] CALLM T_CALLM 1 1 88; [< BEG-END-TEST X >]
+    [131:105;12] CALLM T_CALLM 1 1 82; [< BEG-END-TEST X >]
 
 TEST_INSTRUCTION RET
-    [139:112;12] RET T_RET 0 0 0
+    [133:106;12] RET T_RET 0 0 0
 TEST_INSTRUCTION ENDF
-    [140:113;12] ENDF T_ENDF 0 0 0
+    [134:107;12] ENDF T_ENDF 0 0 0
 
 TEST_INSTRUCTION CALLG
-    [142:114;12] CALLG T_CALLG 0 0 0
+    [136:108;12] CALLG T_CALLG 0 0 0
 TEST_INSTRUCTION CALLM 0 0 10000
-    [143:115;12] CALLM T_CALLM 0 0 10000
+    [137:109;12] CALLM T_CALLM 0 0 10000
 TEST_INSTRUCTION CALLM 0 0 0
-    [144:116;12] CALLM T_CALLM 0 0 0
+    [138:110;12] CALLM T_CALLM 0 0 0
 * {14:0,1,1} PUSHI: * <= 100
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
     current frame too small for instruction
@@ -426,7 +414,7 @@ SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 75 > 0
 * {66:45,6,45} VSIZE GET 1 0 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 74 > 0
 * {68:46,6,46} BEGF
-* {109:86,6,47} CALLM to BEGF: GET-SET-TEST
+* {103:80,6,47} CALLM to BEGF: GET-SET-TEST
 *** {69:47,7,48} PUSHI: * <= 1
 *** {70:48,8,49} PUSHI: * <= 2
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
@@ -439,242 +427,210 @@ SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 73 > 0
     PC MODULE FILE IS mexas_compile_test_13.mex
 *** {72:50,8,51} SET SET 10 0 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 72 > 0
-!!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    current frame too small for instruction
-    PC MODULE FILE IS mexas_compile_test_13.mex
-*** {73:51,8,52} GET GET 1 0 10 *MISSING*
-SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 71 > 0
-!!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    current frame too small for instruction
-    PC MODULE FILE IS mexas_compile_test_13.mex
-*** {74:52,8,53} SET SET 1 0 10 *MISSING*
-SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 70 > 0
-!!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    GET: immedB !=0 but immedC != 0
-    PC MODULE FILE IS mexas_compile_test_13.mex
-*** {75:53,8,54} GET GET 1 1 1 *MISSING*
-SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 69 > 0
-!!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    SET: immedB != 0 but immedC != 1
-    PC MODULE FILE IS mexas_compile_test_13.mex
-*** {76:54,8,55} SET SET 1 1 0 *MISSING*
-SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 68 > 0
-!!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    object argument is not an object
-    PC MODULE FILE IS mexas_compile_test_13.mex
-*** {77:55,8,56} GET GET 1 0 0 *MISSING*
-    ARGS = 1 2
-SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 67 > 0
-!!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    object argument is not an object
-    PC MODULE FILE IS mexas_compile_test_13.mex
-*** {78:56,8,57} SET SET 1 0 0 *MISSING*
-    ARGS = 1 2
-SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 66 > 0
-*** {79:57,9,58} PUSHOBJ: * <= NEW OBJ ( 10, 5)
-*** {80:58,10,59} PUSHI: * <= 10000000000
+*** {73:51,9,52} PUSHOBJ: * <= NEW OBJ ( 10, 5)
+*** {74:52,10,53} PUSHI: * <= 10000000000
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
     GET: numeric label is not integer in range (-1e9, +1e9)
     PC MODULE FILE IS mexas_compile_test_13.mex
-*** {81:59,10,60} GET GET 1 0 0 *MISSING*
+*** {75:53,10,54} GET GET 1 0 0 *MISSING*
     ARGS = {} 10000000000
-SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 65 > 0
-*** {82:60,11,61} PUSHI: * <= 3
+SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 71 > 0
+*** {76:54,11,55} PUSHI: * <= 3
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
     SET: numeric label is not integer in range (-1e9, +1e9)
     PC MODULE FILE IS mexas_compile_test_13.mex
-*** {83:61,11,62} SET SET 2 0 1 *MISSING*
+*** {77:55,11,56} SET SET 2 0 0 *MISSING*
     ARGS = {} 10000000000
-SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 64 > 0
+SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 70 > 0
+*** {78:56,10,57} POPS: * <= * = 3
+*** {79:57,9,58} POPS: * <= * = 10000000000
+*** {80:58,10,59} PUSHI: * <= *TRUE*
+!!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
+    label argument is not a label
+    PC MODULE FILE IS mexas_compile_test_13.mex
+*** {81:59,10,60} GET GET 1 0 0 *MISSING*
+    ARGS = {} *TRUE*
+SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 69 > 0
+*** {82:60,11,61} PUSHI: * <= 3
+!!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
+    label argument is not a label
+    PC MODULE FILE IS mexas_compile_test_13.mex
+*** {83:61,11,62} SET SET 2 0 0 *MISSING*
+    ARGS = {} *TRUE*
+SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 68 > 0
 *** {84:62,10,63} POPS: * <= * = 3
-*** {85:63,9,64} POPS: * <= * = 10000000000
-*** {86:64,10,65} PUSHI: * <= *TRUE*
-!!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    label argument is not a label
-    PC MODULE FILE IS mexas_compile_test_13.mex
-*** {87:65,10,66} GET GET 1 0 0 *MISSING*
-    ARGS = {} *TRUE*
-SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 63 > 0
-*** {88:66,11,67} PUSHI: * <= 3
-!!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    label argument is not a label
-    PC MODULE FILE IS mexas_compile_test_13.mex
-*** {89:67,11,68} SET SET 2 0 1 *MISSING*
-    ARGS = {} *TRUE*
-SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 62 > 0
-*** {90:68,10,69} POPS: * <= * = 3
-*** {91:69,9,70} POPS: * <= * = *TRUE*
-*** {92:70,10,71} PUSHI: * <= 5
-*** {93:71,11,72} PUSHI: * <= 6
+*** {85:63,9,64} POPS: * <= * = *TRUE*
+*** {86:64,10,65} PUSHI: * <= 5
+*** {87:65,11,66} PUSHI: * <= 6
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
     SET: vector element does not exist
     PC MODULE FILE IS mexas_compile_test_13.mex
-*** {94:72,11,73} SET SET 2 0 1 *MISSING*
+*** {88:66,11,67} SET SET 2 0 0 *MISSING*
     ARGS = {} 5
-SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 61 > 0
-*** {95:73,10,74} POPS: * <= * = 6
-*** {96:74,9,75} POPS: * <= * = 5
+SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 67 > 0
+*** {89:67,10,68} POPS: * <= * = 6
+*** {90:68,9,69} POPS: * <= * = 5
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
     current frame too small for instruction
     PC MODULE FILE IS mexas_compile_test_13.mex
-*** {97:75,9,76} GETI GET 10 0 0 *MISSING*
-SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 60 > 0
+*** {91:69,9,70} GETI GET 10 0 0 *MISSING*
+SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 66 > 0
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
     label argument is not a label
     PC MODULE FILE IS mexas_compile_test_13.mex
-*** {98:76,9,77} GETI GET 0 0 0 *MISSING*
+*** {92:70,9,71} GETI GET 0 0 0 *MISSING*
     ARGS = {} *MISSING*
-SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 59 > 0
-*** {99:77,10,78} PUSHI: * <= 5
+SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 65 > 0
+*** {93:71,10,72} PUSHI: * <= 5
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
     object argument is not an object
     PC MODULE FILE IS mexas_compile_test_13.mex
-*** {100:78,10,79} GETI GET 0 0 0 foo
+*** {94:72,10,73} GETI GET 0 0 0 foo
     ARGS = 5 "foo"
+SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 64 > 0
+!!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
+    current frame too small for instruction
+    PC MODULE FILE IS mexas_compile_test_13.mex
+*** {95:73,10,74} SETI SET 10 0 0 *MISSING*
+SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 63 > 0
+*** {96:74,11,75} PUSHI: * <= 6
+!!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
+    object argument is not an object
+    PC MODULE FILE IS mexas_compile_test_13.mex
+*** {97:75,11,76} SETI SET 1 0 0 foo
+    ARGS = 5 "foo"
+SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 62 > 0
+*** {98:76,10,77} POPS: * <= * = 6
+!!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
+    label argument is not a label
+    PC MODULE FILE IS mexas_compile_test_13.mex
+*** {99:77,10,78} SETI SET 1 0 0 *TRUE*
+    ARGS = {} *TRUE*
+SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 61 > 0
+*** {100:78,6,79} RET to CALLM: GET-SET-TEST
+!!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
+    END: trace depth would become negative if instruction was executed
+    PC MODULE FILE IS mexas_compile_test_13.mex
+* {105:81,6,80} END END 0 0 0 *MISSING*
+SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 60 > 0
+* {107:82,6,81} BEGF
+* {130:104,7,82} PUSHI: * <= 100
+* {131:105,7,83} CALLM to BEGF: BEG-END-TEST, ARG1=100
+!!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
+    current frame too small for instruction
+    PC MODULE FILE IS mexas_compile_test_13.mex
+*** {108:83,7,84} BEG BEG 10 0 0 *MISSING*
+SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 59 > 0
+!!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
+    current frame too small for instruction
+    PC MODULE FILE IS mexas_compile_test_13.mex
+*** {109:84,7,85} BEGL BEGL 0 10 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 58 > 0
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
     current frame too small for instruction
     PC MODULE FILE IS mexas_compile_test_13.mex
-*** {101:79,10,80} SETI SET 10 0 0 *MISSING*
+*** {110:85,7,86} ENDL ENDL 10 0 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 57 > 0
-*** {102:80,11,81} PUSHI: * <= 6
-!!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    object argument is not an object
-    PC MODULE FILE IS mexas_compile_test_13.mex
-*** {103:81,11,82} SETI SET 1 0 0 foo
-    ARGS = 5 "foo"
-SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 56 > 0
-*** {104:82,10,83} POPS: * <= * = 6
-!!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    label argument is not a label
-    PC MODULE FILE IS mexas_compile_test_13.mex
-*** {105:83,10,84} SETI SET 1 0 0 *TRUE*
-    ARGS = {} *TRUE*
-SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 55 > 0
-*** {106:84,6,85} RET to CALLM: GET-SET-TEST
-!!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    END: trace depth would become negative if instruction was executed
-    PC MODULE FILE IS mexas_compile_test_13.mex
-* {111:87,6,86} END END 0 0 0 *MISSING*
-SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 54 > 0
-* {113:88,6,87} BEGF
-* {136:110,7,88} PUSHI: * <= 100
-* {137:111,7,89} CALLM to BEGF: BEG-END-TEST, ARG1=100
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
     current frame too small for instruction
     PC MODULE FILE IS mexas_compile_test_13.mex
-*** {114:89,7,90} BEG BEG 10 0 0 *MISSING*
+*** {111:86,7,87} CONT CONT 10 0 0 *MISSING*
+SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 56 > 0
+!!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
+    current frame too small for instruction
+    PC MODULE FILE IS mexas_compile_test_13.mex
+*** {112:87,7,88} ENDL ENDL 0 5 0 *MISSING*
+SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 55 > 0
+!!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
+    current frame too small for instruction
+    PC MODULE FILE IS mexas_compile_test_13.mex
+*** {113:88,7,89} CONT CONT 0 5 0 *MISSING*
+SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 54 > 0
+!!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
+    ENDL/CONT: immedC too large; associated BEGL non-extant
+    PC MODULE FILE IS mexas_compile_test_13.mex
+*** {114:89,7,90} ENDL ENDL 0 0 100 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 53 > 0
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    current frame too small for instruction
+    ENDL/CONT: immedC too large; associated BEGL non-extant
     PC MODULE FILE IS mexas_compile_test_13.mex
-*** {115:90,7,91} BEGL BEGL 0 10 0 *MISSING*
+*** {115:90,7,91} CONT CONT 0 0 100 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 52 > 0
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    current frame too small for instruction
+    CONT: trace depth would become negative if instruction was executed
     PC MODULE FILE IS mexas_compile_test_13.mex
-*** {116:91,7,92} ENDL ENDL 10 0 0 *MISSING*
+*** {116:91,7,92} CONT CONT [2] 0 0 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 51 > 0
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
     current frame too small for instruction
     PC MODULE FILE IS mexas_compile_test_13.mex
-*** {117:92,7,93} CONT CONT 10 0 0 *MISSING*
+*** {117:92,7,93} TRACE ALWAYS 10 0 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 50 > 0
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
     current frame too small for instruction
     PC MODULE FILE IS mexas_compile_test_13.mex
-*** {118:93,7,94} ENDL ENDL 0 5 0 *MISSING*
+*** {118:93,7,94} WARN ALWAYS 10 0 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 49 > 0
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
     current frame too small for instruction
     PC MODULE FILE IS mexas_compile_test_13.mex
-*** {119:94,7,95} CONT CONT 0 5 0 *MISSING*
+*** {119:94,7,95} ERROR ALWAYS 10 0 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 48 > 0
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    ENDL/CONT: immedC too large; associated BEGL non-extant
+    BEGF: immedC too large; target address beyond module length
     PC MODULE FILE IS mexas_compile_test_13.mex
-*** {120:95,7,96} ENDL ENDL 0 0 100 *MISSING*
+*** {120:95,7,96} BEGF BEGF 0 2 1000 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 47 > 0
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    ENDL/CONT: immedC too large; associated BEGL non-extant
+    BEGF: immedB != current lexical level + 1
     PC MODULE FILE IS mexas_compile_test_13.mex
-*** {121:96,7,97} CONT CONT 0 0 100 *MISSING*
+*** {121:96,7,97} BEGF BEGF 0 1 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 46 > 0
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    CONT: trace depth would become negative if instruction was executed
+    RET/ENDF: immedB != current lexical level
     PC MODULE FILE IS mexas_compile_test_13.mex
-*** {122:97,7,98} CONT CONT [2] 0 0 0 *MISSING*
+*** {122:97,7,98} RET RET 0 0 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 45 > 0
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    current frame too small for instruction
+    RET/ENDF: immedB != current lexical level
     PC MODULE FILE IS mexas_compile_test_13.mex
-*** {123:98,7,99} TRACE ALWAYS 10 0 0 *MISSING*
+*** {123:98,7,99} ENDF ENDF 0 0 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 44 > 0
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    current frame too small for instruction
+    RET: immedC != return stack nresults
     PC MODULE FILE IS mexas_compile_test_13.mex
-*** {124:99,7,100} WARN ALWAYS 10 0 0 *MISSING*
+*** {124:99,7,100} RET RET 0 1 2 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 43 > 0
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
     current frame too small for instruction
     PC MODULE FILE IS mexas_compile_test_13.mex
-*** {125:100,7,101} ERROR ALWAYS 10 0 0 *MISSING*
+*** {125:100,7,101} RET RET 0 1 1 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 42 > 0
+*** {126:101,8,102} PUSHI: * <= 200
+*** {127:102,7,103} RET to CALLM: BEG-END-TEST, X=200
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    BEGF: immedC too large; target address beyond module length
+    RET/ENDF: return stack is empty
     PC MODULE FILE IS mexas_compile_test_13.mex
-*** {126:101,7,102} BEGF BEGF 0 2 1000 *MISSING*
+* {133:106,7,104} RET RET 0 0 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 41 > 0
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    BEGF: immedB != current lexical level + 1
+    RET/ENDF: return stack is empty
     PC MODULE FILE IS mexas_compile_test_13.mex
-*** {127:102,7,103} BEGF BEGF 0 1 0 *MISSING*
+* {134:107,7,105} ENDF ENDF 0 0 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 40 > 0
-!!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    RET/ENDF: immedB != current lexical level
-    PC MODULE FILE IS mexas_compile_test_13.mex
-*** {128:103,7,104} RET RET 0 0 0 *MISSING*
-SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 39 > 0
-!!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    RET/ENDF: immedB != current lexical level
-    PC MODULE FILE IS mexas_compile_test_13.mex
-*** {129:104,7,105} ENDF ENDF 0 0 0 *MISSING*
-SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 38 > 0
-!!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    RET: immedC != return stack nresults
-    PC MODULE FILE IS mexas_compile_test_13.mex
-*** {130:105,7,106} RET RET 0 1 2 *MISSING*
-SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 37 > 0
-!!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    current frame too small for instruction
-    PC MODULE FILE IS mexas_compile_test_13.mex
-*** {131:106,7,107} RET RET 0 1 1 *MISSING*
-SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 36 > 0
-*** {132:107,8,108} PUSHI: * <= 200
-*** {133:108,7,109} RET to CALLM: BEG-END-TEST, X=200
-!!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    RET/ENDF: return stack is empty
-    PC MODULE FILE IS mexas_compile_test_13.mex
-* {139:112,7,110} RET RET 0 0 0 *MISSING*
-SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 35 > 0
-!!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    RET/ENDF: return stack is empty
-    PC MODULE FILE IS mexas_compile_test_13.mex
-* {140:113,7,111} ENDF ENDF 0 0 0 *MISSING*
-SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 34 > 0
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
     CALL immedD is not a module
     PC MODULE FILE IS mexas_compile_test_13.mex
-* {142:114,7,112} CALLG CALLG 0 0 0 *MISSING*
-SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 33 > 0
+* {136:108,7,106} CALLG CALLG 0 0 0 *MISSING*
+SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 39 > 0
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
     CALL immedC is equal to or larger than module length
     PC MODULE FILE IS mexas_compile_test_13.mex
-* {143:115,7,113} CALLM CALLM 0 0 10000 *MISSING*
-SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 32 > 0
+* {137:109,7,107} CALLM CALLM 0 0 10000 *MISSING*
+SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 38 > 0
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
     CALL target is not a BEGF
     PC MODULE FILE IS mexas_compile_test_13.mex
-* {144:116,7,114} CALLM CALLM 0 0 0 *MISSING*
-SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 31 > 0
+* {138:110,7,108} CALLM CALLM 0 0 0 *MISSING*
+SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 37 > 0
 mexas_compile_test_13.mex successfully compiled

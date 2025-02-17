@@ -2,7 +2,7 @@
 //
 // File:	mexas_compile_test_17.mex
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu Dec 12 07:02:03 PM EST 2024
+// Date:	Sun Feb 16 07:55:23 PM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -67,108 +67,62 @@ CALL SETI-GETI-TEST 0
 SET_OPTIMIZE ON
 CALL SETI-GETI-TEST 0
 
+
 BEGF SET-GET-TEST
 
     PUSHOBJ X
-    PUSHI "A" A
-    PUSHI "B" B
-    PUSHI "C" C
+    PUSHI "A"
     PUSHI 5
-    SET X A
+    SET X
+    PUSHI "B"
     PUSHI 7
-    SET X B
+    SET X
+    PUSH X
 
-    GET X A
-    PUSHI 5
+    PUSHI "B"
+    GET X
+    PUSHI 7
     JMPEQ GOOD
-    TRACE 'SET 5 OR GET 5 FAILED'
+    TRACE 'SET 7 OR GET 7 FAILED'
     LABEL GOOD
 
-    GET X C
+    PUSHI "C"
+    GET X
     PUSHI NONE
     JMPEQ GOOD
     TRACE 'GET C FAILED'
     LABEL GOOD
 
-    PUSHI NONE
-    SET X B
-
-    GET X B
-    PUSHI NONE
-    JMPEQ GOOD
-    TRACE 'GET B NONE FAILED'
-    LABEL GOOD
-
-    GET X A A2
-    PUSH A2
-    PUSHI 5
-    JMPEQ GOOD
-    TRACE 'GET A2 FAILED'
-    LABEL GOOD
-
-    NOP 'Only Traced if Optimize is OFF'
-ENDF
-
-SET_OPTIMIZE OFF
-CALL SET-GET-TEST 0
-SET_OPTIMIZE ON
-CALL SET-GET-TEST 0
-
-BEGF SET*-GET*-TEST
-
-    PUSHOBJ X
-    PUSHI "A"
-    PUSHI 5
-    SET X *
-    PUSHI "B"
-    PUSHI 7
-    SET X *
-    PUSH X
-
-    PUSHI "B"
-    GET X *
-    PUSHI 7
-    JMPEQ GOOD
-    TRACE 'SET * 7 OR GET * 7 FAILED'
-    LABEL GOOD
-
-    PUSHI "C"
-    GET X *
-    PUSHI NONE
-    JMPEQ GOOD
-    TRACE 'GET * C FAILED'
-    LABEL GOOD
-
     PUSHI "B"
     PUSHI NONE
-    SET X *
+    SET X
 
     PUSHI "B"
-    GET X *
+    GET X
     PUSHI NONE
     JMPEQ GOOD
-    TRACE 'GET * C FAILED'
+    TRACE 'GET B FAILED'
     LABEL GOOD
 
     PUSHOBJ Y
     PUSHI "X"
     PUSH X
-    SET Y *
+    SET Y
 
     PUSHI "X"
-    GET Y *
+    GET Y
     PUSH X
     JMPEQ GOOD
-    TRACE 'SET * OBJ OR GET * OBJ FAILED'
+    TRACE 'SET OBJ OR GET OBJ FAILED'
     LABEL GOOD
 
     NOP 'Only Traced if Optimize is OFF'
 ENDF
 
 SET_OPTIMIZE OFF
-CALL SET*-GET*-TEST 0
+CALL SET-GET-TEST 0
 SET_OPTIMIZE ON
-CALL SET*-GET*-TEST 0
+CALL SET-GET-TEST 0
 
 BEGF VPUSH-VPOP-VSIZE-TEST
 
@@ -183,15 +137,15 @@ BEGF VPUSH-VPOP-VSIZE-TEST
 
     VSIZE X XSIZE
     PUSHI 0
-    GET X * X0
+    GET X X0
     PUSHI 1
-    GET X * X1
+    GET X X1
     PUSHI 2
-    GET X * X2
+    GET X X2
     PUSHI -1
-    GET X * X-1
+    GET X X-1
     PUSHI 3
-    GET X * X3
+    GET X X3
 
     PUSH XSIZE
     PUSHI 3
@@ -202,31 +156,31 @@ BEGF VPUSH-VPOP-VSIZE-TEST
     PUSH X0
     PUSHI 100
     JMPEQ GOOD
-    TRACE 'SET OR GET X0 FAILED'
+    TRACE 'VPUSH OR GET X0 FAILED'
     LABEL GOOD
 
     PUSH X1
     PUSHI 101
     JMPEQ GOOD
-    TRACE 'SET OR GET X1 FAILED'
+    TRACE 'VPUSH OR GET X1 FAILED'
     LABEL GOOD
 
     PUSH X2
     PUSHI 102
     JMPEQ GOOD
-    TRACE 'SET OR GET X2 FAILED'
+    TRACE 'VPUSH OR GET X2 FAILED'
     LABEL GOOD
 
     PUSH X-1
     PUSHI NONE
     JMPEQ GOOD
-    TRACE 'SET OR GET X-1 FAILED'
+    TRACE 'VPUSH OR GET X-1 FAILED'
     LABEL GOOD
 
     PUSH X3
     PUSHI NONE
     JMPEQ GOOD
-    TRACE 'SET OR GET X3 FAILED'
+    TRACE 'VPUSH OR GET X3 FAILED'
     LABEL GOOD
 
     VPOP X
@@ -350,7 +304,7 @@ BEGF VPUSH-VPOP-VSIZE-TEST
     VPUSH Y
 
     PUSHI 2
-    GET Y *
+    GET Y
     PUSHI 1
     JMPEQ GOOD
     TRACE 'VPUSH OR GET Y[2] FAILED'

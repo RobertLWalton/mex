@@ -2,7 +2,7 @@
 //
 // File:	mexas_compile_test_16.mex
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Dec 13 06:35:32 PM EST 2024
+// Date:	Sun Feb 16 07:46:00 PM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -39,60 +39,32 @@ PUSH Y
 // SET/GET Test
 
 PUSHOBJ X
-PUSHI "A" A
-PUSHI "B" B
-PUSHI "C" C
-PUSHI 5
-SET X A
-PUSHI 7
-SET X B
-PUSH X
-
-PUSHI NONE
-SET X B
-PUSH X
-
-GET X A A2
-GET X B
-GET X C
-PUSH A2
-
-PUSHOBJ Y
-PUSHI "X" X-name
-PUSH X
-SET Y X-name
-GET Y X-name
-PUSH Y
-
-// SET/GET * Test
-
-PUSHOBJ X
 PUSHI "A"
 PUSHI 5
-SET X *
+SET X
 PUSHI "B"
 PUSHI 7
-SET X *
+SET X
 PUSH X
 
 PUSHI "B"
 PUSHI NONE
-SET X *
+SET X
 PUSH X
 
 PUSHI "A"
-GET X *
+GET X
 PUSHI "B"
-GET X *
+GET X
 PUSHI "C"
-GET X *
+GET X
 
 PUSHOBJ Y
 PUSHI "X"
 PUSH X
-SET Y *
+SET Y
 PUSHI "X"
-GET Y *
+GET Y
 PUSH Y
 
 // VPUSH/VPOP/VSIZE Test
@@ -106,15 +78,15 @@ VPUSH X
 PUSH X
 VSIZE X XSIZE3
 PUSHI 0
-GET X *
+GET X
 PUSHI 1
-GET X *
+GET X
 PUSHI 2
-GET X *
+GET X
 PUSHI -1
-GET X *
+GET X
 PUSHI 3
-GET X *
+GET X
 VPOP X
 VPOP X X101
 VPOP X
