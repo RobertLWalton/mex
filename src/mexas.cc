@@ -1200,6 +1200,8 @@ mex::module mexas::compile ( min::file file )
 		if ( new_name == min::NONE() )
 		    new_name = mexas::star;
 
+		min::pop ( mexas::variables );
+		mexstack::stack_length -= 1;
 		mexas::push_variable
 		    ( mexas::variables, new_name,
 		      LEVEL_AND_DEPTH );

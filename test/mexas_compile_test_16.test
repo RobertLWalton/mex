@@ -2,7 +2,7 @@
 //
 // File:        mexas_compile_test_16.mex
 // Author:      Bob Walton (walton@acm.org)
-// Date:        Sun Feb 16 07:46:00 PM EST 2025
+// Date:        Mon Feb 17 07:36:47 PM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -291,6 +291,41 @@ SETI Y "A"
     [161:129;49] SETI T_SET 2 0 0 "A"; [< * Y >]
 PUSH Y
     [162:130;50] PUSHS T_PUSH 1 0 0; [< Y * >]
+
+// COPY/COPYI Test
+
+COPYI 1 2 3 4 X
+    [166:131;51] COPYI T_SET 0 0 0 [1, 2, 3, 4]; X
+PUSHI 2
+    [167:132;52] PUSHI T_PUSH 0 0 0 2; *
+GET X
+    [168:133;52] GET T_GET 1 0 0; [< X * >]
+PUSH X Y
+    [169:134;53] PUSHS T_PUSH 1 0 0; [< X Y >]
+PUSHI 2
+    [170:135;54] PUSHI T_PUSH 0 0 0 2; *
+PUSHI 30
+    [171:136;55] PUSHI T_PUSH 0 0 0 30; *
+SET Y
+    [172:137;53] SET T_SET 2 0 0; [< * Y >]
+PUSH Y
+    [173:138;54] PUSHS T_PUSH 0 0 0; [< Y * >]
+PUSH X
+    [174:139;55] PUSHS T_PUSH 3 0 0; [< X * >]
+COPY Z
+    [175:140;55] COPY T_SET 0 0 0; Z
+PUSHI 3
+    [176:141;56] PUSHI T_PUSH 0 0 0 3; *
+PUSHI 40
+    [177:142;57] PUSHI T_PUSH 0 0 0 40; *
+SET X
+    [178:143;55] SET T_SET 6 0 0; [< * X >]
+PUSH X
+    [179:144;56] PUSHS T_PUSH 4 0 0; [< X * >]
+PUSH Y
+    [180:145;57] PUSHS T_PUSH 3 0 0; [< Y * >]
+PUSH Z
+    [181:146;58] PUSHS T_PUSH 2 0 0; [< Z * >]
 * {13:0,1,1} PUSHOBJ: X <= NEW OBJ ( 32, 8)
 * {14:1,2,2} PUSHI: * <= 5
 * {15:2,1,3} SETI: X["A"] <= * = 5
@@ -424,4 +459,20 @@ PUSH Y
 * {162:130,50,131} PUSHS: * <= Y =
                    {"": A = [1, 2, 3], .initiator = "[", .terminator =
                         "]", .separator = ","|100 200 1 2 3 300|}
+* {166:131,51,132} COPYI: X <= [1, 2, 3, 4]
+* {167:132,52,133} PUSHI: * <= 2
+* {168:133,52,134} GET: * <= X[2] = 3
+* {169:134,53,135} PUSHS: Y <= X = [1, 2, 3, 4]
+* {170:135,54,136} PUSHI: * <= 2
+* {171:136,55,137} PUSHI: * <= 30
+* {172:137,53,138} SET: Y[2] <= * = 30
+* {173:138,54,139} PUSHS: * <= Y = [1, 2, 30, 4]
+* {174:139,55,140} PUSHS: * <= X = [1, 2, 30, 4]
+* {175:140,55,141} COPY: Z <= [1, 2, 30, 4]
+* {176:141,56,142} PUSHI: * <= 3
+* {177:142,57,143} PUSHI: * <= 40
+* {178:143,55,144} SET: X[3] <= * = 40
+* {179:144,56,145} PUSHS: * <= X = [1, 2, 30, 40]
+* {180:145,57,146} PUSHS: * <= Y = [1, 2, 30, 40]
+* {181:146,58,147} PUSHS: * <= Z = [1, 2, 30, 4]
 mexas_compile_test_16.mex successfully compiled

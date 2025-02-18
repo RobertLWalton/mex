@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Feb 17 06:52:37 AM EST 2025
+// Date:	Mon Feb 17 07:01:32 PM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1646,7 +1646,7 @@ mex::op_info mex::op_infos [ mex::NUMBER_OF_OP_CODES ] =
     { mex::PUSHOBJ, NONA, T_SET,
                     NULL, "PUSHOBJ", NULL },
     { mex::COPY, NONA, T_SET, NULL, "COPY", NULL },
-    { mex::COPYI, NONA, T_SET, NULL, "COPY", NULL },
+    { mex::COPYI, NONA, T_SET, NULL, "COPYI", NULL },
     { mex::VPUSH, NONA, T_SET, NULL, "VPUSH", NULL },
     { mex::VPOP, NONA, T_GET, NULL, "VPOP", NULL },
     { mex::VSIZE, NONA, T_GET, NULL, "VSIZE", NULL },

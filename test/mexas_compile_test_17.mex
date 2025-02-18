@@ -2,7 +2,7 @@
 //
 // File:	mexas_compile_test_17.mex
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Feb 16 07:55:23 PM EST 2025
+// Date:	Tue Feb 18 03:07:08 AM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -10,7 +10,7 @@
 
 // Object Optimize Test
 //
-SET_TRACE SET_OPTIMIZE NOP
+SET_TRACE SET_OPTIMIZE NOP CALLM
 
 BEGF SETI-GETI-TEST
 
@@ -322,3 +322,54 @@ SET_OPTIMIZE OFF
 CALL VPUSH-VPOP-VSIZE-TEST 0
 SET_OPTIMIZE ON
 CALL VPUSH-VPOP-VSIZE-TEST 0
+
+BEGF COPY-TEST
+    COPYI 1 2 3 4 X
+    PUSHI 2
+    GET X
+    PUSHI 3
+    JMPEQ GOOD
+    TRACE 'COPYI FAILED'
+    LABEL GOOD
+    PUSH X Y
+    PUSHI 2
+    PUSHI 30
+    SET X
+    PUSHI 2
+    GET Y
+    PUSHI 30
+    JMPEQ GOOD
+    TRACE 'COPYI FAILED'
+    LABEL GOOD
+    PUSH X
+    COPY Z
+    PUSHI 2
+    GET Z
+    PUSHI 30
+    JMPEQ GOOD
+    TRACE 'COPY FAILED'
+    LABEL GOOD
+    PUSHI 1
+    PUSHI 20
+    SET X
+    PUSHI 1
+    GET Y
+    PUSHI 20
+    JMPEQ GOOD
+    TRACE 'ASSIGNMENT FAILED'
+    LABEL GOOD
+    PUSHI 1
+    GET Z
+    PUSHI 2
+    JMPEQ GOOD
+    TRACE 'COPY FAILED'
+    LABEL GOOD
+
+    NOP 'Only Traced if Optimize is OFF'
+ENDF
+
+SET_OPTIMIZE OFF
+CALL COPY-TEST 0
+SET_OPTIMIZE ON
+CALL COPY-TEST 0
+

@@ -2,7 +2,7 @@
 //
 // File:        mexas_compile_test_17.mex
 // Author:      Bob Walton (walton@acm.org)
-// Date:        Sun Feb 16 07:55:23 PM EST 2025
+// Date:        Tue Feb 18 03:07:08 AM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -10,8 +10,8 @@
 
 // Object Optimize Test
 //
-SET_TRACE SET_OPTIMIZE NOP
-    [13:0;0] SET_TRACE T_ALWAYS 1310720 0 0
+SET_TRACE SET_OPTIMIZE NOP CALLM
+    [13:0;0] SET_TRACE T_ALWAYS 1343488 0 0
 
 BEGF SETI-GETI-TEST
     [15:1;0] BEGF T_BEGF 0 1 0; [< SETI-GETI-TEST >]
@@ -627,14 +627,124 @@ SET_OPTIMIZE ON
     [323:239;0] SET_OPTIMIZE T_SET_OPTIMIZE 1 0 0
 CALL VPUSH-VPOP-VSIZE-TEST 0
     [324:240;0] CALLM T_CALLM 0 0 82; [< VPUSH-VPOP-VSIZE-TEST >]
-* {13:0,0,1} SET_TRACE: NOP SET_OPTIMIZE
+
+BEGF COPY-TEST
+    [326:241;0] BEGF T_BEGF 0 1 0; [< COPY-TEST >]
+    COPYI 1 2 3 4 X
+    [327:242;1] COPYI T_SET 0 0 0 [1, 2, 3, 4]; X
+    PUSHI 2
+    [328:243;2] PUSHI T_PUSH 0 0 0 2; *
+    GET X
+    [329:244;2] GET T_GET 1 0 0; [< X * >]
+    PUSHI 3
+    [330:245;3] PUSHI T_PUSH 0 0 0 3; *
+    JMPEQ GOOD
+    [331:246;1] JMPEQ T_JMPS 0 0 0; GOOD
+    TRACE 'COPYI FAILED'
+    [332:247;1] TRACE T_ALWAYS 0 0 0; [< "COPYI FAILED" >]
+    LABEL GOOD
+    [333:248;1] LABEL GOOD
+    [331:246;1] JMPEQ T_JMPS 0 0 2; GOOD
+    PUSH X Y
+    [334:248;2] PUSHS T_PUSH 0 0 0; [< X Y >]
+    PUSHI 2
+    [335:249;3] PUSHI T_PUSH 0 0 0 2; *
+    PUSHI 30
+    [336:250;4] PUSHI T_PUSH 0 0 0 30; *
+    SET X
+    [337:251;2] SET T_SET 3 0 0; [< * X >]
+    PUSHI 2
+    [338:252;3] PUSHI T_PUSH 0 0 0 2; *
+    GET Y
+    [339:253;3] GET T_GET 1 0 0; [< Y * >]
+    PUSHI 30
+    [340:254;4] PUSHI T_PUSH 0 0 0 30; *
+    JMPEQ GOOD
+    [341:255;2] JMPEQ T_JMPS 0 0 0; GOOD
+    TRACE 'COPYI FAILED'
+    [342:256;2] TRACE T_ALWAYS 0 0 0; [< "COPYI FAILED" >]
+    LABEL GOOD
+    [343:257;2] LABEL GOOD
+    [341:255;2] JMPEQ T_JMPS 0 0 2; GOOD
+    PUSH X
+    [344:257;3] PUSHS T_PUSH 1 0 0; [< X * >]
+    COPY Z
+    [345:258;3] COPY T_SET 0 0 0; Z
+    PUSHI 2
+    [346:259;4] PUSHI T_PUSH 0 0 0 2; *
+    GET Z
+    [347:260;4] GET T_GET 1 0 0; [< Z * >]
+    PUSHI 30
+    [348:261;5] PUSHI T_PUSH 0 0 0 30; *
+    JMPEQ GOOD
+    [349:262;3] JMPEQ T_JMPS 0 0 0; GOOD
+    TRACE 'COPY FAILED'
+    [350:263;3] TRACE T_ALWAYS 0 0 0; [< "COPY FAILED" >]
+    LABEL GOOD
+    [351:264;3] LABEL GOOD
+    [349:262;3] JMPEQ T_JMPS 0 0 2; GOOD
+    PUSHI 1
+    [352:264;4] PUSHI T_PUSH 0 0 0 1; *
+    PUSHI 20
+    [353:265;5] PUSHI T_PUSH 0 0 0 20; *
+    SET X
+    [354:266;3] SET T_SET 4 0 0; [< * X >]
+    PUSHI 1
+    [355:267;4] PUSHI T_PUSH 0 0 0 1; *
+    GET Y
+    [356:268;4] GET T_GET 2 0 0; [< Y * >]
+    PUSHI 20
+    [357:269;5] PUSHI T_PUSH 0 0 0 20; *
+    JMPEQ GOOD
+    [358:270;3] JMPEQ T_JMPS 0 0 0; GOOD
+    TRACE 'ASSIGNMENT FAILED'
+    [359:271;3] TRACE T_ALWAYS 0 0 0; [< "ASSIGNMENT FAILED" >]
+    LABEL GOOD
+    [360:272;3] LABEL GOOD
+    [358:270;3] JMPEQ T_JMPS 0 0 2; GOOD
+    PUSHI 1
+    [361:272;4] PUSHI T_PUSH 0 0 0 1; *
+    GET Z
+    [362:273;4] GET T_GET 1 0 0; [< Z * >]
+    PUSHI 2
+    [363:274;5] PUSHI T_PUSH 0 0 0 2; *
+    JMPEQ GOOD
+    [364:275;3] JMPEQ T_JMPS 0 0 0; GOOD
+    TRACE 'COPY FAILED'
+    [365:276;3] TRACE T_ALWAYS 0 0 0; [< "COPY FAILED" >]
+    LABEL GOOD
+    [366:277;3] LABEL GOOD
+    [364:275;3] JMPEQ T_JMPS 0 0 2; GOOD
+
+    NOP 'Only Traced if Optimize is OFF'
+    [368:277;3] NOP T_NOP 0 0 0; [< "Only Traced if Optimize is OFF" >]
+ENDF
+    [326:241;3] BEGF T_BEGF 0 1 38; [< COPY-TEST >]
+    [369:278;0] ENDF T_ENDF 0 1 0
+
+SET_OPTIMIZE OFF
+    [371:279;0] SET_OPTIMIZE T_SET_OPTIMIZE 0 0 0
+CALL COPY-TEST 0
+    [372:280;0] CALLM T_CALLM 0 0 241; [< COPY-TEST >]
+SET_OPTIMIZE ON
+    [373:281;0] SET_OPTIMIZE T_SET_OPTIMIZE 1 0 0
+CALL COPY-TEST 0
+    [374:282;0] CALLM T_CALLM 0 0 241; [< COPY-TEST >]
+* {13:0,0,1} SET_TRACE: CALLM NOP SET_OPTIMIZE
 * {65:36,0,3} SET_OPTIMIZE: OFF <= OFF
+* {66:37,0,4} CALLM to BEGF: SETI-GETI-TEST
 *** {62:34,4,32} NOP: "Only Traced if Optimize is OFF"
 * {67:38,0,34} SET_OPTIMIZE: ON <= OFF
 * {122:78,0,66} SET_OPTIMIZE: OFF <= ON
+* {123:79,0,67} CALLM to BEGF: SET-GET-TEST
 *** {119:76,3,99} NOP: "Only Traced if Optimize is OFF"
 * {124:80,0,101} SET_OPTIMIZE: ON <= OFF
 * {321:237,0,137} SET_OPTIMIZE: OFF <= ON
+* {322:238,0,138} CALLM to BEGF: VPUSH-VPOP-VSIZE-TEST
 *** {318:235,14,270} NOP: "Only Traced if Optimize is OFF"
 * {323:239,0,272} SET_OPTIMIZE: ON <= OFF
+* {371:279,0,408} SET_OPTIMIZE: OFF <= ON
+* {372:280,0,409} CALLM to BEGF: COPY-TEST
+*** {368:277,3,440} NOP: "Only Traced if Optimize is OFF"
+* {373:281,0,442} SET_OPTIMIZE: ON <= OFF
 mexas_compile_test_17.mex successfully compiled

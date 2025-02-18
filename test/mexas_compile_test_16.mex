@@ -2,7 +2,7 @@
 //
 // File:	mexas_compile_test_16.mex
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun Feb 16 07:46:00 PM EST 2025
+// Date:	Mon Feb 17 07:36:47 PM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -160,3 +160,22 @@ PUSH Y
 PUSH X
 SETI Y "A"
 PUSH Y
+
+// COPY/COPYI Test
+
+COPYI 1 2 3 4 X
+PUSHI 2
+GET X
+PUSH X Y
+PUSHI 2
+PUSHI 30
+SET Y
+PUSH Y
+PUSH X
+COPY Z
+PUSHI 3
+PUSHI 40
+SET X
+PUSH X
+PUSH Y
+PUSH Z
