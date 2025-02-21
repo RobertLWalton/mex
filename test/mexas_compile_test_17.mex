@@ -2,7 +2,7 @@
 //
 // File:	mexas_compile_test_17.mex
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue Feb 18 03:07:08 AM EST 2025
+// Date:	Fri Feb 21 02:18:34 AM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -135,7 +135,8 @@ BEGF VPUSH-VPOP-VSIZE-TEST
     VPUSH X
     PUSH X
 
-    VSIZE X XSIZE
+    PUSH X
+    VSIZE XSIZE
     PUSHI 0
     GET X X0
     PUSHI 1
@@ -219,7 +220,8 @@ BEGF VPUSH-VPOP-VSIZE-TEST
     PUSHI 400
     VPUSH X
 
-    VSIZE X VSIZE7
+    PUSH X
+    VSIZE VSIZE7
     PUSH VSIZE7
     PUSHI 7
     JMPEQ GOOD
@@ -245,7 +247,8 @@ BEGF VPUSH-VPOP-VSIZE-TEST
     JMPEQ GOOD
     TRACE 'VPUSH OR VPOP 300 FAILED'
     LABEL GOOD
-    VSIZE X
+    PUSH X
+    VSIZE
     PUSHI 3
     JMPEQ GOOD
     TRACE 'VSIZE 3 FAILED'
@@ -265,7 +268,8 @@ BEGF VPUSH-VPOP-VSIZE-TEST
     JMPEQ GOOD
     TRACE 'VPUSH OR VPOP 100 FAILED'
     LABEL GOOD
-    VSIZE X
+    PUSH X
+    VSIZE
     PUSHI 0
     JMPEQ GOOD
     TRACE 'VSIZE 0 FAILED'
@@ -309,7 +313,8 @@ BEGF VPUSH-VPOP-VSIZE-TEST
     JMPEQ GOOD
     TRACE 'VPUSH OR GET Y[2] FAILED'
     LABEL GOOD
-    VSIZE Y
+    PUSH Y
+    VSIZE
     PUSHI 6
     JMPEQ GOOD
     TRACE 'VSIZE 6 FAILED'

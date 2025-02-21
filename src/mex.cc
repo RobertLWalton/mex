@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Feb 17 07:01:32 PM EST 2025
+// Date:	Fri Feb 21 01:43:03 AM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -722,18 +722,14 @@ static bool optimized_run_process ( mex::process p )
 	}
 	case mex::VSIZE:
 	{
-	    min::uns32 i = pc->immedA;
-	    if ( sp < spbegin || i >= sp - spbegin
-	                      || sp >= spend )
+	    if ( sp < spbegin + 1 )
 	        goto ERROR_EXIT;
 
-	    min::gen obj = sp[-(int)i-1];
-	    if ( ! min::is_obj ( obj ) )
-		goto ERROR_EXIT;
-
-	    min::obj_vec_ptr vp = obj;
+	    min::obj_vec_ptr vp = sp[-1];
+	    if ( vp == min::NULL_STUB )
+	        goto ERROR_EXIT;
 	    sp = mex::process_push
-	        ( p, sp,
+	        ( p, sp - 1,
 		  GF ( min::size_of ( vp ) ) );
 
 	    break;
@@ -2950,7 +2946,7 @@ TEST_LOOP:	// Come here after fatal error processed
 	        if ( immedA >= frame_length )
 		    goto FRAME_TOO_SMALL;
 
-		min::gen obj = sp[-(int)immedA-1];
+		obj = sp[-(int)immedA-1];
 		if ( ! min::is_obj ( obj ) )
 		    goto NOT_AN_OBJECT;
 		 if ( min::public_flag_of ( obj ) )
@@ -2984,41 +2980,44 @@ TEST_LOOP:	// Come here after fatal error processed
 		break;
 	    }
 	    case mex::VPOP:
-	    case mex::VSIZE:
 	    {
 	        if ( immedA >= frame_length )
 		    goto FRAME_TOO_SMALL;
 		if ( sp >= spend )
 		    goto STACK_LIMIT_STOP;
 
-		min::gen obj = sp[-(int)immedA-1];
+		obj = sp[-(int)immedA-1];
 		if ( ! min::is_obj ( obj ) )
 		    goto NOT_AN_OBJECT;
 
-		if ( op_code == mex::VPOP )
+		if ( min::public_flag_of ( obj ) )
 		{
-		     if ( min::public_flag_of ( obj ) )
-		    {
-			message =
-			    "VPOP: trying to change"
-			    " read-only object";
-			goto INNER_FATAL;
-		    }
-		    min::obj_vec_insptr vp = obj;
-		    value = ( min::size_of ( vp ) == 0 ?
-		              min::NONE() :
-			      min::attr_pop ( vp ) );
+		    message =
+			"VPOP: trying to change"
+			" read-only object";
+		    goto INNER_FATAL;
 		}
-		else
-		{
-		    min::obj_vec_ptr vp = obj;
-		    value = min::new_direct_float_gen
-			        ( min::size_of ( vp ) );
-		}
+		min::obj_vec_insptr vp = obj;
+		value = ( min::size_of ( vp ) == 0 ?
+			  min::NONE() :
+			  min::attr_pop ( vp ) );
 		mex::process_push ( p, sp, value );
 		sp_change = +1;
 
 		break;
+	    }
+	    case mex::VSIZE:
+	    {
+	        if ( frame_length == 0 )
+		    goto FRAME_TOO_SMALL;
+		obj = sp[-1];
+		min::obj_vec_ptr vp = obj;
+		if ( vp == min::NULL_STUB )
+		    goto NOT_AN_OBJECT;
+		    
+		value = min::new_direct_float_gen
+			    ( min::size_of ( vp ) );
+	        break;
 	    }
 	    case mex::GET:
 	        if ( immedA >= frame_length )

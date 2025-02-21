@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Feb 17 03:57:25 PM EST 2025
+// Date:	Fri Feb 21 02:03:17 AM EST 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1310,7 +1310,6 @@ mex::module mexas::compile ( min::file file )
 		break;
 	    }
 	    case mex::VPOP:
-	    case mex::VSIZE:
 	    {
 
 	        min::gen obj_var_name =
@@ -1318,7 +1317,8 @@ mex::module mexas::compile ( min::file file )
 		if ( obj_var_name == min::NONE() )
 		{
 		    mexcom::compile_error
-			( pp, "no object-variable-name;"
+			( pp, "VPOP: no object-"
+			      "variable-name;"
 			      " instruction ignored" );
 		    continue;
 		}
@@ -1344,6 +1344,50 @@ mex::module mexas::compile ( min::file file )
 		min::locatable_gen trace_info
 		    ( min::new_lab_gen ( labbuf, 2 ) );
 
+		mexas::push_variable
+		    ( mexas::variables, new_name,
+		      LEVEL_AND_DEPTH );
+
+		mexstack::push_instr
+		    ( instr, pp, trace_info );
+		break;
+	    }
+	    case mex::VSIZE:
+	    {
+	 	if (    mexstack::fp
+		          [mexstack::lexical_level]
+		     >= mexstack::stack_length )
+		{
+		    mexcom::compile_error
+			( pp, "VSIZE: function frame"
+			      " too small;"
+			      " instruction ignored" );
+		    continue;
+		}
+
+		min::gen new_name =
+		    mexas::get_name ( index );
+		if ( new_name != min::NONE() )
+		    check_new_name ( new_name, pp );
+		else
+		    new_name =
+			mexas::get_star ( index );
+		if ( new_name == min::NONE() )
+		    new_name = mexas::star;
+
+		min::gen old_name =
+		    ( mexas::variables
+		      +
+		      ( mexstack::stack_length
+			- 1 ) )
+		    ->name;
+		min::gen labbuf[2] =
+		    { old_name, new_name };
+		min::locatable_gen trace_info
+		    ( min::new_lab_gen ( labbuf, 2 ) );
+
+		min::pop ( mexas::variables );
+		mexstack::stack_length -= 1;
 		mexas::push_variable
 		    ( mexas::variables, new_name,
 		      LEVEL_AND_DEPTH );
