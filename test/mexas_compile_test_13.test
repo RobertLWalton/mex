@@ -2,7 +2,7 @@
 //
 // File:        mexas_compile_test_13.mex
 // Author:      Bob Walton (walton@acm.org)
-// Date:        Fri Feb 21 02:17:01 AM EST 2025
+// Date:        Thu May 15 10:05:31 AM EDT 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -222,8 +222,8 @@ BEGF BEG-END-TEST ARG1
     [122:97;12] RET T_RET 0 0 0
     TEST_INSTRUCTION ENDF 0 0
     [123:98;12] ENDF T_ENDF 0 0 0
-    TEST_INSTRUCTION RET 0 1 2
-    [124:99;12] RET T_RET 0 1 2
+    TEST_INSTRUCTION RET 0 1 0
+    [124:99;12] RET T_RET 0 1 0
     TEST_INSTRUCTION RET 0 1 1
     [125:100;12] RET T_RET 0 1 1
     PUSHI 200
@@ -599,9 +599,9 @@ SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 45 > 0
 *** {123:98,7,99} ENDF ENDF 0 0 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 44 > 0
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    RET: immedC != return stack nresults
+    RET: immedC < return stack nresults
     PC MODULE FILE IS mexas_compile_test_13.mex
-*** {124:99,7,100} RET RET 0 1 2 *MISSING*
+*** {124:99,7,100} RET RET 0 1 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 43 > 0
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
     current frame too small for instruction

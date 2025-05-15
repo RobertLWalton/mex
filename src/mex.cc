@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Feb 21 01:43:03 AM EST 2025
+// Date:	Thu May 15 09:43:32 AM EDT 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1268,7 +1268,9 @@ static bool optimized_run_process ( mex::process p )
 	    -- rp;
 	    const mex::ret * ret =
 	       ~ ( p->return_stack + rp );
-	    if ( 0 != ret->nresults )
+	    if ( 0 != ret->nresults
+	         &&
+		 mex::ALL_RESULTS != ret->nresults )
 	        goto ERROR_EXIT;
 
 	    min::gen * new_sp =
@@ -1323,7 +1325,10 @@ static bool optimized_run_process ( mex::process p )
 	    -- rp;
 	    const mex::ret * ret =
 	       ~ ( p->return_stack + rp );
-	    if ( immedC != ret->nresults )
+	    min::uns32 nresults = ret->nresults;
+	    if ( nresults == mex::ALL_RESULTS )
+	        nresults = immedC;
+	    else if ( immedC < ret->nresults )
 	        goto ERROR_EXIT;
 
 	    min::gen * new_sp =
@@ -1355,8 +1360,8 @@ static bool optimized_run_process ( mex::process p )
 	    p->ap[immedB] = ret->saved_ap;
 	    RW_UNS32 p->return_stack->length = rp;
 
-	    min::gen * qend = sp;
-	    min::gen * q = qend - (int) immedC;
+	    min::gen * q = sp - (int) immedC;
+	    min::gen * qend = q + nresults;
 	    while ( q < qend )
 	        * new_sp ++ = * q ++;
 	    sp = new_sp;
@@ -3298,13 +3303,16 @@ TEST_LOOP:	// Come here after fatal error processed
 		-- rp;
 		const mex::ret * ret =
 		   ~ ( p->return_stack + rp );
-		if ( immedC != ret->nresults )
+		min::uns32 nresults = ret->nresults;
+		if ( nresults == mex::ALL_RESULTS )
+		    nresults = immedC;
+		else if ( immedC < nresults )
 		{
 		    message =
 		        ( op_code == mex::ENDF ?
 			  "ENDF: return stack nresults"
-			  " is not zero" :
-			  "RET: immedC != return stack"
+			  " is greater than zero" :
+			  "RET: immedC < return stack"
 		              " nresults" );
 		    goto INNER_FATAL;
 		}
@@ -3371,8 +3379,8 @@ TEST_LOOP:	// Come here after fatal error processed
 
 		// RET/ENDF updates stack before trace.
 		//
-		min::gen * qend = sp;
-		min::gen * q = qend - (int) immedC;
+		min::gen * q = sp - (int) immedC;
+		min::gen * qend = q + nresults;
 		while ( q < qend )
 		    * new_sp ++ = * q ++;
 		sp = new_sp;

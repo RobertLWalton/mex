@@ -18,7 +18,7 @@
 
 \author{Robert L. Walton}
 
-\date{February 18, 2025}
+\date{May 15, 2025}
  
 \maketitle
 
@@ -1168,13 +1168,16 @@ in the current function frame.
 \ttkey{RET}
     & Check that \TT{immedB} equals \TT{p->level}.  Then pop element $e$
       from \\
-    & the return stack and check that \TT{immedC} equals
-       \TT{$e$.nresults}.  Next \\
-    & pop \TT{immedC} values from the stack and save them.  Set \TT{sp} to \\
-    & \TT{ap[immedB]} (popping the
-      current function execution stack values).  \\
-    & Then push the saved values into the stack. Lastly, restore the \\
-    & process members saved in \TT{$e$.saved\_\{pc,level,fp,ap\}}, \\
+    & the return stack and set \TT{R = $e$.nresults} unless that
+          equals \\
+    & \TT{mex::ALL\_RESULTS}, in which case set \TT{R = immedC}. Check that \\
+    & \TT{immedC >= R}. Then pop \TT{immedC} values from the stack and save \\
+    & them.  Set \TT{sp} to \TT{ap[immedB]} (popping the current function \\
+    & execution stack values).  Then push into the stack the \TT{R} saved
+      values \\
+    & last popped from the stack (value last popped is first pushed).  Lastly \\
+    & restore the process members saved in \TT{$e$.saved\_\{pc,level,fp,ap\}},
+      \\
     & and increment the restored \TT{pc} by \TT{1}.
 \\\hline
 \end{tabular}
@@ -1775,6 +1778,13 @@ own.  Specifically:
 		   in the {\em trace-header} is replaced by
 		   \TT{RET to CALL\ldots}\label{RET-TO-CALL}
 		   or \TT{ENDF to CALL\ldots}.
+\\[0.5ex]
+		   & Note that if the \TT{CALL} \TT{immedC} value, the
+		   number of results to be returned, equals
+		   \TT{mex::ALL\_RESULTS}, the corresponding \TT{trace\_info}
+		   should be \TT{min::MISSING}, or should have \underline{no}
+		   {\em trace-variables}.
+
 \end{tabular}
 \end{center}
 

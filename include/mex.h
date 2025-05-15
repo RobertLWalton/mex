@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Feb 17 06:14:59 AM EST 2025
+// Date:	Thu May 15 09:47:56 AM EDT 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -380,6 +380,8 @@ min::uns32 DISP ( const mex::pc S::* d )
     return   min::OFFSETOF ( d )
            + min::DISP ( & mex::pc::module );
 }
+
+const min::uns32 ALL_RESULTS = 0xFFFFFFFF;
 
 struct ret
 {
