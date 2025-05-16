@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu May 15 09:43:32 AM EDT 2025
+// Date:	Fri May 16 08:56:55 AM EDT 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -2547,22 +2547,47 @@ TEST_LOOP:	// Come here after fatal error processed
 	    {
 		SAVE;
 
-		p->printer << min::bol;
-		if ( bad_jmp )
-		    p->printer
-		        << min::bol
-			<< "!!!!!!!!!!!!!!!!!!!!!!!!!"
-		        << " FATAL ERROR: "
-			   " invalid operands to a"
-			   " conditional jump"
-			   " instruction"
-			<< min::eol;
-
 		min::uns32 index = p->pc.index;
+
 		min::phrase_position pp =
 		    index < m->position->length ?
 		    m->position[index] :
 		    min::MISSING_PHRASE_POSITION;
+
+		min::file input_file =
+		    m->position->file;
+
+		p->printer << min::bol;
+
+		if ( bad_jmp )
+		{
+		    p->printer
+		        << min::bom
+			<< min::place_indent ( 4 )
+			<< "!!!!!!!!!!!!!!!!!!!!!!!!!"
+			<< " FATAL PROGRAM ERROR:";
+		    if ( pp )
+			p->printer
+			    << min::indent
+			    << min::pline_numbers
+				      ( input_file, pp )
+			    << ": ";
+		    p->printer
+			<< min::indent
+		        << "invalid operands to a"
+			   " conditional jump"
+			   " instruction";
+
+		    if ( pp )
+		    {
+			p->printer << min::bol;
+			min::print_phrase_lines
+			    ( p->printer, input_file,
+			      pp );
+		    }
+
+		    p->printer << min::eom;
+		}
 
 		print_header ( p, pp, sp_change )
 		    << " " << op_info->name;
@@ -2636,7 +2661,7 @@ TEST_LOOP:	// Come here after fatal error processed
 		    }
 		}
 
-		p->printer << min::eom;
+		p->printer << min::eol;
 
 		RESTORE;
 	    }
@@ -2663,8 +2688,8 @@ TEST_LOOP:	// Come here after fatal error processed
 		}
 		p->printer
 		    << min::bol
-		    << "TREATING JMP AS UNSUCCESSFUL"
-		       " AND CONTINUING BECAUSE"
+		    << "TREATING JMP AS UNSUCCESSFUL;"
+		       " CONTINUING BECAUSE"
 		       " PROCESS->TEST == "
 		    << p->test
 		    << " > 0"
@@ -3310,9 +3335,13 @@ TEST_LOOP:	// Come here after fatal error processed
 		{
 		    message =
 		        ( op_code == mex::ENDF ?
-			  "ENDF: return stack nresults"
-			  " is greater than zero" :
-			  "RET: immedC < return stack"
+			  "ENDF: CALL expects return"
+			  " values but function ends"
+			  " returning no values:"
+			  " 0 < return stack nresults" :
+			  "RET: function returns fewer"
+			  " values than CALL expects:"
+			  " immedC < return stack"
 		              " nresults" );
 		    goto INNER_FATAL;
 		}
@@ -3461,7 +3490,7 @@ TEST_LOOP:	// Come here after fatal error processed
 		if ( op_code == mex::ERROR )
 		    p->printer
 			<< "!!!!!!!!!!!!!!!!!!!!!!!!!"
-		        << " FATAL ERROR: "
+		        << " FATAL ERROR INSTRUCTION:"
 			<< min::eol;
 
 		min::phrase_position pp =
@@ -3772,7 +3801,7 @@ TEST_LOOP:	// Come here after fatal error processed
 		}
 
 		}
-		p->printer << min::eom;
+		p->printer << min::eol;
 
 		if ( op_code == mex::ERROR )
 		{
@@ -4068,20 +4097,27 @@ FATAL:
 	m->position[i] :
 	min::MISSING_PHRASE_POSITION;
 
+    min::file input_file = m->position->file;
+
     p->printer << min::bom
 	       << min::place_indent ( 4 )
 	       << "!!!!!!!!!!!!!!!!!!!!!!!!!"
-               << " FATAL PROGRAM ERROR: "
-	       << min::indent
-               << message;
-    if ( p->pc.module == min::NULL_STUB )
-        p->printer << min::indent << "PC HAS NO MODULE";
-    else if (    p->pc.module->position->file
-              == min::NULL_STUB )
+               << " FATAL PROGRAM ERROR:";
+    if ( pp )
         p->printer << min::indent
-	           << "PC MODULE HAS NO FILE";
-    else if (    p->pc.module->position->file->file_name
-              != min::MISSING() )
+	           << min::pline_numbers
+		          ( input_file, pp )
+	           << ": ";
+    p->printer << min::indent << message;
+
+    if ( pp )
+    {
+        p->printer << min::bol;
+	min::print_phrase_lines
+	    ( p->printer, input_file, pp );
+    }
+
+    if ( ! pp )
         p->printer << min::indent
 	           << "PC MODULE FILE IS "
 		   << p->pc.module->position->file
