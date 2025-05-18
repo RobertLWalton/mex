@@ -252,49 +252,49 @@ TEST_INSTRUCTION CALLM 0 0 0
     [138:110;12] CALLM T_CALLM 0 0 0
 * {14:0,1,1} PUSHI: * <= 100
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    mexas_compile_test_13.mex: line ####:
     current frame too small for instruction
+    mexas_compile_test_13.mex: line ####:
 TEST_INSTRUCTION ADD  // stack too small
 * {15:1,1,2} ADD AOP 0 0 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 100 > 0
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    mexas_compile_test_13.mex: line ####:
     JMP immedC == 0; illegal
+    mexas_compile_test_13.mex: line ####:
 TEST_INSTRUCTION JMP  // immedC = 0
 * {16:2,1,3} JMP JMP 0 0 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 99 > 0
 * {17:3,2,4} PUSHI: * <= "HELLO"
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    mexas_compile_test_13.mex: line ####:
     invalid operands to a conditional jump instruction
+    mexas_compile_test_13.mex: line ####:
 TEST_INSTRUCTION JMPGEQ 0 0 1 // invalid arg
 * {18:4,0,5} JMPGEQ location 5 with invalid operand(s)
              ARGS = 100 "HELLO"
 TREATING JMP AS UNSUCCESSFUL; CONTINUING BECAUSE PROCESS->TEST == 98 > 0
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    mexas_compile_test_13.mex: line ####:
     JMP immedA is greater than stack size
+    mexas_compile_test_13.mex: line ####:
 TEST_INSTRUCTION JMP 100 0 1 // immedA too large
 * {19:5,0,6} JMP JMP 100 0 1 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 97 > 0
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    mexas_compile_test_13.mex: line ####:
     JMP immedC too large; target is beyond module end
+    mexas_compile_test_13.mex: line ####:
 TEST_INSTRUCTION JMP 0 0 1000000 // immedC too large
 * {20:6,0,7} JMP JMP 0 0 1000000 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 96 > 0
 * {21:7,1,8} PUSHI: * <= inf
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    mexas_compile_test_13.mex: line ####:
     invalid operands to a conditional jump instruction
+    mexas_compile_test_13.mex: line ####:
 TEST_INSTRUCTION JMPCNT 0 0 1 1 // INF count
 * {22:8,1,9} JMPCNT location 9 with invalid operand(s)
              ARGS = inf 1
 TREATING JMP AS UNSUCCESSFUL; CONTINUING BECAUSE PROCESS->TEST == 95 > 0
 * {23:9,2,10} PUSHI: * <= 5
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    mexas_compile_test_13.mex: line ####:
     JMPCNT immedD is not a finite number > 0
+    mexas_compile_test_13.mex: line ####:
 TEST_INSTRUCTION JMPCNT 0 0 1 // immedD <= 0
 * {24:10,2,11} JMPCNT JMPS 0 0 1 *MISSING*
     ARGS = 5 *MISSING*
@@ -303,55 +303,55 @@ SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 94 > 0
 * {26:12,4,13} PUSHI: * <= inf
 * {27:13,5,14} PUSHI: * <= inf
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    mexas_compile_test_13.mex: line ####:
     invalid operands to a conditional jump instruction
+    mexas_compile_test_13.mex: line ####:
 TEST_INSTRUCTION JMPGEQ 0 1 1 // invalid arg
 * {28:14,4,15} JMPGEQ* location 15 with invalid operand(s)
                ARGS = inf inf
 TREATING JMP AS UNSUCCESSFUL; CONTINUING BECAUSE PROCESS->TEST == 93 > 0
 * {29:15,5,16} PUSHI: * <= nan
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    mexas_compile_test_13.mex: line ####:
     invalid operands to a conditional jump instruction
+    mexas_compile_test_13.mex: line ####:
 TEST_INSTRUCTION JMPGEQ 0 0 1 // invalid arg
 * {30:16,3,17} JMPGEQ location 17 with invalid operand(s)
                ARGS = inf nan
 TREATING JMP AS UNSUCCESSFUL; CONTINUING BECAUSE PROCESS->TEST == 92 > 0
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    mexas_compile_test_13.mex: line ####:
     JMP immedB != 0 or 1; illegal
+    mexas_compile_test_13.mex: line ####:
 TEST_INSTRUCTION JMPGEQ 0 4 1 // immedB is not 0 or 1
 * {31:17,3,18} JMPGEQ JMPS 0 4 1 *MISSING*
     ARGS = 5 0
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 91 > 0
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    mexas_compile_test_13.mex: line ####:
     if JMP were executed, trace_depth would become negative
+    mexas_compile_test_13.mex: line ####:
 TEST_INSTRUCTION JMP [ 5 ] 0 0 1 // too big trace depth
 * {32:18,3,19} JMP JMP [5] 0 0 1 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 90 > 0
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    mexas_compile_test_13.mex: line ####:
     current frame too small for instruction
+    mexas_compile_test_13.mex: line ####:
 TEST_INSTRUCTION PUSHS 100  // too big immedA
 * {33:19,3,20} PUSHS PUSH 100 0 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 89 > 0
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    mexas_compile_test_13.mex: line ####:
     PUSHG immedD is not a module
+    mexas_compile_test_13.mex: line ####:
 TEST_INSTRUCTION PUSHG  // no module
 * {34:20,3,21} PUSHG PUSH 0 0 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 88 > 0
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    mexas_compile_test_13.mex: line ####:
     PUSHL immedB larger than current lexical level
+    mexas_compile_test_13.mex: line ####:
 TEST_INSTRUCTION PUSHL 0 1  // immedB > lexical level
 * {35:21,3,22} PUSHL PUSH 0 1 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 87 > 0
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    mexas_compile_test_13.mex: line ####:
     PUSHL immedA too large; addresses variable beyond the end of the
     function frame
+    mexas_compile_test_13.mex: line ####:
 TEST_INSTRUCTION PUSHL 1000  // immedA > stack length
 * {36:22,3,23} PUSHL PUSH 1000 0 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 86 > 0
@@ -362,61 +362,61 @@ SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 86 > 0
 * {60:40,5,28} CALLM to BEGF: PUSH-POP-TEST, ARG1="VALUE 1",
                               ARG2="VALUE 2"
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    mexas_compile_test_13.mex: line ####:
     PUSHL immedA too large; addresses variable beyond the end of the
     function frame
+    mexas_compile_test_13.mex: line ####:
     TEST_INSTRUCTION PUSHL 1000 1
 *** {41:25,5,29} PUSHL PUSH 1000 1 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 85 > 0
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    mexas_compile_test_13.mex: lines ####-####
     PUSHL immedA too large; addresses variable beyond the end of the
     function frame
+    mexas_compile_test_13.mex: lines ####-####
         // fp[1] + immedA > stack length
     TEST_INSTRUCTION PUSHL 1000 0
 *** {43:26,5,30} PUSHL PUSH 1000 0 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 84 > 0
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    mexas_compile_test_13.mex: lines ####-####
     PUSHA: invalid immedB; 0 or greater than current lexical level
+    mexas_compile_test_13.mex: lines ####-####
         // fp[0] + immedA > ap[1]
     TEST_INSTRUCTION PUSHA 0 2  // immedB > p->level
 *** {45:27,5,31} PUSHA PUSH 0 2 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 83 > 0
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    mexas_compile_test_13.mex: line ####:
     PUSHA immedA too large; addresses non-extant argument
+    mexas_compile_test_13.mex: line ####:
     TEST_INSTRUCTION PUSHA 3 1  // immedA > fp[1]
 *** {46:28,5,32} PUSHA PUSH 3 1 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 82 > 0
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    mexas_compile_test_13.mex: line ####:
     PUSHNARGS: invalid immedB; 0 or greater than current lexical level
+    mexas_compile_test_13.mex: line ####:
     TEST_INSTRUCTION PUSHNARGS  // immedB == 0
 *** {47:29,5,33} PUSHNARGS PUSH 0 0 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 81 > 0
 *** {48:30,6,34} PUSHI: * <= 2.5
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    mexas_compile_test_13.mex: line ####:
     PUSHV immedB is 0 or greater than current lexical level
+    mexas_compile_test_13.mex: line ####:
     TEST_INSTRUCTION PUSHV 0 2  // immedB > p->level
 *** {49:31,6,35} PUSHV PUSH 0 2 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 80 > 0
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    mexas_compile_test_13.mex: line ####:
     PUSHV: top of stack is not a non-negative integer
+    mexas_compile_test_13.mex: line ####:
     TEST_INSTRUCTION PUSHV 0 1  // top not int >= 0
 *** {50:32,6,36} PUSHV PUSH 0 1 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 79 > 0
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    mexas_compile_test_13.mex: line ####:
     current frame too small for instruction
+    mexas_compile_test_13.mex: line ####:
     TEST_INSTRUCTION POPS 10    // immedA > frame len
 *** {51:33,6,37} POPS POP 10 0 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 78 > 0
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    mexas_compile_test_13.mex: line ####:
     current frame too small for instruction
+    mexas_compile_test_13.mex: line ####:
     TEST_INSTRUCTION DEL 10 0 1
 *** {52:34,6,38} DEL POP 10 0 1 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 77 > 0
@@ -425,15 +425,15 @@ SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 77 > 0
 * {62:41,5,41} PUSHI: * <= 10
 * {63:42,6,42} PUSHI: * <= 20
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    mexas_compile_test_13.mex: line ####:
     object argument is not an object
+    mexas_compile_test_13.mex: line ####:
 TEST_INSTRUCTION VPUSH 1
 * {64:43,6,43} VPUSH SET 1 0 0 *MISSING*
     ARGS = 10
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 76 > 0
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    mexas_compile_test_13.mex: line ####:
     object argument is not an object
+    mexas_compile_test_13.mex: line ####:
 TEST_INSTRUCTION VPOP 1
 * {65:44,6,44} VPOP GET 1 0 0 *MISSING*
     ARGS = 10
@@ -441,38 +441,38 @@ SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 75 > 0
 * {67:45,6,45} BEGF
 * {103:80,6,46} CALLM to BEGF: GET-SET-VSIZE-TEST
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    mexas_compile_test_13.mex: line ####:
     current frame too small for instruction
+    mexas_compile_test_13.mex: line ####:
     TEST_INSTRUCTION VSIZE
 *** {68:46,6,47} VSIZE GET 0 0 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 74 > 0
 *** {69:47,7,48} PUSHI: * <= 1
 *** {70:48,8,49} PUSHI: * <= 2
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    mexas_compile_test_13.mex: line ####:
     current frame too small for instruction
+    mexas_compile_test_13.mex: line ####:
     TEST_INSTRUCTION GET 10
 *** {71:49,8,50} GET GET 10 0 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 73 > 0
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    mexas_compile_test_13.mex: line ####:
     current frame too small for instruction
+    mexas_compile_test_13.mex: line ####:
     TEST_INSTRUCTION SET 10
 *** {72:50,8,51} SET SET 10 0 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 72 > 0
 *** {73:51,9,52} PUSHOBJ: * <= NEW OBJ ( 10, 5)
 *** {74:52,10,53} PUSHI: * <= 10000000000
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    mexas_compile_test_13.mex: line ####:
     GET: numeric label is not integer in range (-1e9, +1e9)
+    mexas_compile_test_13.mex: line ####:
     TEST_INSTRUCTION GET 1
 *** {75:53,10,54} GET GET 1 0 0 *MISSING*
     ARGS = {} 10000000000
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 71 > 0
 *** {76:54,11,55} PUSHI: * <= 3
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    mexas_compile_test_13.mex: line ####:
     SET: numeric label is not integer in range (-1e9, +1e9)
+    mexas_compile_test_13.mex: line ####:
     TEST_INSTRUCTION SET 2
 *** {77:55,11,56} SET SET 2 0 0 *MISSING*
     ARGS = {} 10000000000
@@ -481,16 +481,16 @@ SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 70 > 0
 *** {79:57,9,58} POPS: * <= * = 10000000000
 *** {80:58,10,59} PUSHI: * <= *TRUE*
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    mexas_compile_test_13.mex: line ####:
     label argument is not a label
+    mexas_compile_test_13.mex: line ####:
     TEST_INSTRUCTION GET 1
 *** {81:59,10,60} GET GET 1 0 0 *MISSING*
     ARGS = {} *TRUE*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 69 > 0
 *** {82:60,11,61} PUSHI: * <= 3
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    mexas_compile_test_13.mex: line ####:
     label argument is not a label
+    mexas_compile_test_13.mex: line ####:
     TEST_INSTRUCTION SET 2
 *** {83:61,11,62} SET SET 2 0 0 *MISSING*
     ARGS = {} *TRUE*
@@ -500,8 +500,8 @@ SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 68 > 0
 *** {86:64,10,65} PUSHI: * <= 5
 *** {87:65,11,66} PUSHI: * <= 6
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    mexas_compile_test_13.mex: line ####:
     SET: vector element does not exist
+    mexas_compile_test_13.mex: line ####:
     TEST_INSTRUCTION SET 2
 *** {88:66,11,67} SET SET 2 0 0 *MISSING*
     ARGS = {} 5
@@ -509,52 +509,52 @@ SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 67 > 0
 *** {89:67,10,68} POPS: * <= * = 6
 *** {90:68,9,69} POPS: * <= * = 5
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    mexas_compile_test_13.mex: line ####:
     current frame too small for instruction
+    mexas_compile_test_13.mex: line ####:
     TEST_INSTRUCTION GETI 10
 *** {91:69,9,70} GETI GET 10 0 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 66 > 0
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    mexas_compile_test_13.mex: line ####:
     label argument is not a label
+    mexas_compile_test_13.mex: line ####:
     TEST_INSTRUCTION GETI 0
 *** {92:70,9,71} GETI GET 0 0 0 *MISSING*
     ARGS = {} *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 65 > 0
 *** {93:71,10,72} PUSHI: * <= 5
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    mexas_compile_test_13.mex: line ####:
     object argument is not an object
+    mexas_compile_test_13.mex: line ####:
     TEST_INSTRUCTION GETI 0 0 0 "foo"
 *** {94:72,10,73} GETI GET 0 0 0 foo
     ARGS = 5 "foo"
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 64 > 0
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    mexas_compile_test_13.mex: line ####:
     current frame too small for instruction
+    mexas_compile_test_13.mex: line ####:
     TEST_INSTRUCTION SETI 10
 *** {95:73,10,74} SETI SET 10 0 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 63 > 0
 *** {96:74,11,75} PUSHI: * <= 6
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    mexas_compile_test_13.mex: line ####:
     object argument is not an object
+    mexas_compile_test_13.mex: line ####:
     TEST_INSTRUCTION SETI 1 0 0 "foo"
 *** {97:75,11,76} SETI SET 1 0 0 foo
     ARGS = 5 "foo"
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 62 > 0
 *** {98:76,10,77} POPS: * <= * = 6
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    mexas_compile_test_13.mex: line ####:
     label argument is not a label
+    mexas_compile_test_13.mex: line ####:
     TEST_INSTRUCTION SETI 1 0 0 TRUE
 *** {99:77,10,78} SETI SET 1 0 0 *TRUE*
     ARGS = {} *TRUE*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 61 > 0
 *** {100:78,6,79} RET to CALLM: GET-SET-VSIZE-TEST
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    mexas_compile_test_13.mex: lines ####-####
     END: trace depth would become negative if instruction was executed
+    mexas_compile_test_13.mex: lines ####-####
 
 TEST_INSTRUCTION END
 * {105:81,6,80} END END 0 0 0 *MISSING*
@@ -563,145 +563,145 @@ SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 60 > 0
 * {130:104,7,82} PUSHI: * <= 100
 * {131:105,7,83} CALLM to BEGF: BEG-END-TEST, ARG1=100
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    mexas_compile_test_13.mex: line ####:
     current frame too small for instruction
+    mexas_compile_test_13.mex: line ####:
     TEST_INSTRUCTION BEG 10
 *** {108:83,7,84} BEG BEG 10 0 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 59 > 0
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    mexas_compile_test_13.mex: line ####:
     current frame too small for instruction
+    mexas_compile_test_13.mex: line ####:
     TEST_INSTRUCTION BEGL 0 10
 *** {109:84,7,85} BEGL BEGL 0 10 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 58 > 0
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    mexas_compile_test_13.mex: line ####:
     current frame too small for instruction
+    mexas_compile_test_13.mex: line ####:
     TEST_INSTRUCTION ENDL 10
 *** {110:85,7,86} ENDL ENDL 10 0 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 57 > 0
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    mexas_compile_test_13.mex: line ####:
     current frame too small for instruction
+    mexas_compile_test_13.mex: line ####:
     TEST_INSTRUCTION CONT 10
 *** {111:86,7,87} CONT CONT 10 0 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 56 > 0
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    mexas_compile_test_13.mex: line ####:
     current frame too small for instruction
+    mexas_compile_test_13.mex: line ####:
     TEST_INSTRUCTION ENDL 0 5
 *** {112:87,7,88} ENDL ENDL 0 5 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 55 > 0
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    mexas_compile_test_13.mex: line ####:
     current frame too small for instruction
+    mexas_compile_test_13.mex: line ####:
     TEST_INSTRUCTION CONT 0 5
 *** {113:88,7,89} CONT CONT 0 5 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 54 > 0
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    mexas_compile_test_13.mex: line ####:
     ENDL/CONT: immedC too large; associated BEGL non-extant
+    mexas_compile_test_13.mex: line ####:
     TEST_INSTRUCTION ENDL 0 0 100
 *** {114:89,7,90} ENDL ENDL 0 0 100 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 53 > 0
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    mexas_compile_test_13.mex: line ####:
     ENDL/CONT: immedC too large; associated BEGL non-extant
+    mexas_compile_test_13.mex: line ####:
     TEST_INSTRUCTION CONT 0 0 100
 *** {115:90,7,91} CONT CONT 0 0 100 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 52 > 0
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    mexas_compile_test_13.mex: line ####:
     CONT: trace depth would become negative if instruction was executed
+    mexas_compile_test_13.mex: line ####:
     TEST_INSTRUCTION CONT [ 2 ]
 *** {116:91,7,92} CONT CONT [2] 0 0 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 51 > 0
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    mexas_compile_test_13.mex: line ####:
     current frame too small for instruction
+    mexas_compile_test_13.mex: line ####:
     TEST_INSTRUCTION TRACE 10
 *** {117:92,7,93} TRACE ALWAYS 10 0 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 50 > 0
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    mexas_compile_test_13.mex: line ####:
     current frame too small for instruction
+    mexas_compile_test_13.mex: line ####:
     TEST_INSTRUCTION WARN 10
 *** {118:93,7,94} WARN ALWAYS 10 0 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 49 > 0
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    mexas_compile_test_13.mex: line ####:
     current frame too small for instruction
+    mexas_compile_test_13.mex: line ####:
     TEST_INSTRUCTION ERROR 10
 *** {119:94,7,95} ERROR ALWAYS 10 0 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 48 > 0
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    mexas_compile_test_13.mex: line ####:
     BEGF: immedC too large; target address beyond module length
+    mexas_compile_test_13.mex: line ####:
     TEST_INSTRUCTION BEGF 0 2 1000
 *** {120:95,7,96} BEGF BEGF 0 2 1000 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 47 > 0
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    mexas_compile_test_13.mex: line ####:
     BEGF: immedB != current lexical level + 1
+    mexas_compile_test_13.mex: line ####:
     TEST_INSTRUCTION BEGF 0 1
 *** {121:96,7,97} BEGF BEGF 0 1 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 46 > 0
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    mexas_compile_test_13.mex: line ####:
     RET/ENDF: immedB != current lexical level
+    mexas_compile_test_13.mex: line ####:
     TEST_INSTRUCTION RET 0 0
 *** {122:97,7,98} RET RET 0 0 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 45 > 0
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    mexas_compile_test_13.mex: line ####:
     RET/ENDF: immedB != current lexical level
+    mexas_compile_test_13.mex: line ####:
     TEST_INSTRUCTION ENDF 0 0
 *** {123:98,7,99} ENDF ENDF 0 0 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 44 > 0
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    mexas_compile_test_13.mex: line ####:
     RET: function returns fewer values than CALL expects: immedC <
     return stack nresults
+    mexas_compile_test_13.mex: line ####:
     TEST_INSTRUCTION RET 0 1 0
 *** {124:99,7,100} RET RET 0 1 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 43 > 0
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    mexas_compile_test_13.mex: line ####:
     current frame too small for instruction
+    mexas_compile_test_13.mex: line ####:
     TEST_INSTRUCTION RET 0 1 1
 *** {125:100,7,101} RET RET 0 1 1 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 42 > 0
 *** {126:101,8,102} PUSHI: * <= 200
 *** {127:102,7,103} RET to CALLM: BEG-END-TEST, X=200
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    mexas_compile_test_13.mex: lines ####-####
     RET/ENDF: return stack is empty
+    mexas_compile_test_13.mex: lines ####-####
 
 TEST_INSTRUCTION RET
 * {133:106,7,104} RET RET 0 0 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 41 > 0
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    mexas_compile_test_13.mex: line ####:
     RET/ENDF: return stack is empty
+    mexas_compile_test_13.mex: line ####:
 TEST_INSTRUCTION ENDF
 * {134:107,7,105} ENDF ENDF 0 0 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 40 > 0
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    mexas_compile_test_13.mex: lines ####-####
     CALL immedD is not a module
+    mexas_compile_test_13.mex: lines ####-####
 
 TEST_INSTRUCTION CALLG
 * {136:108,7,106} CALLG CALLG 0 0 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 39 > 0
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    mexas_compile_test_13.mex: line ####:
     CALL immedC is equal to or larger than module length
+    mexas_compile_test_13.mex: line ####:
 TEST_INSTRUCTION CALLM 0 0 10000
 * {137:109,7,107} CALLM CALLM 0 0 10000 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 38 > 0
 !!!!!!!!!!!!!!!!!!!!!!!!! FATAL PROGRAM ERROR:
-    mexas_compile_test_13.mex: line ####:
     CALL target is not a BEGF
+    mexas_compile_test_13.mex: line ####:
 TEST_INSTRUCTION CALLM 0 0 0
 * {138:110,7,108} CALLM CALLM 0 0 0 *MISSING*
 SKIPPING INSTRUCTION AND CONTINUING BECAUSE PROCESS->TEST == 37 > 0

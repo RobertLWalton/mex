@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri May 16 08:56:55 AM EDT 2025
+// Date:	Sun May 18 02:49:52 EDT 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -2566,12 +2566,6 @@ TEST_LOOP:	// Come here after fatal error processed
 			<< min::place_indent ( 4 )
 			<< "!!!!!!!!!!!!!!!!!!!!!!!!!"
 			<< " FATAL PROGRAM ERROR:";
-		    if ( pp )
-			p->printer
-			    << min::indent
-			    << min::pline_numbers
-				      ( input_file, pp )
-			    << ": ";
 		    p->printer
 			<< min::indent
 		        << "invalid operands to a"
@@ -2580,6 +2574,11 @@ TEST_LOOP:	// Come here after fatal error processed
 
 		    if ( pp )
 		    {
+			p->printer
+			    << min::indent
+			    << min::pline_numbers
+				      ( input_file, pp )
+			    << ": ";
 			p->printer << min::bol;
 			min::print_phrase_lines
 			    ( p->printer, input_file,
@@ -4103,15 +4102,13 @@ FATAL:
 	       << min::place_indent ( 4 )
 	       << "!!!!!!!!!!!!!!!!!!!!!!!!!"
                << " FATAL PROGRAM ERROR:";
+    p->printer << min::indent << message;
     if ( pp )
+    {
         p->printer << min::indent
 	           << min::pline_numbers
 		          ( input_file, pp )
 	           << ": ";
-    p->printer << min::indent << message;
-
-    if ( pp )
-    {
         p->printer << min::bol;
 	min::print_phrase_lines
 	    ( p->printer, input_file, pp );
