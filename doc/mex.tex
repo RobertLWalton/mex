@@ -1611,13 +1611,14 @@ the value of
 If \TT{module->\EOL trace\_\EOL info[i]} is not a 2 element MIN label,
 both {\em from-variable} and {\em to-variable} are taken to be \TT{*}.
 
-However there are two exceptions with different {\em from-variables}
+There are three exceptions with different {\em from-variables}
 and with {\em trace\_\EOL info[i]} equal to just {\em to-variable}.
 They are:
 \begin{center}
 \begin{tabular}{l@{~~~~~}l}
 \bf Op Code & \bf \em from-variable
 \\\hline
+\TT{PUSHI}     & `{\em from-variable} \TT{=}' is omitted \\
 \TT{PUSHNARGS} & \TT{nargs[$L$]} \\
 \TT{PUSHV}     & \TT{stack[ap[$L$]+$V$]}
 \end{tabular}
@@ -1626,7 +1627,7 @@ where $L$ is the lexical level, \\
 $V$ is the value at the top of the stack, \\
 and \TT{nargs[$L$] = fp[$L$] - ap[$L$]}
 \end{center}
-For these two case,
+For these three case,
 if \TT{module->\EOL trace\_\EOL info[i]} is not a MIN string or MIN label,
 {\em to-variable} is taken to be \TT{*}.
 
