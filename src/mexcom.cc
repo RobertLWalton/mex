@@ -2,7 +2,7 @@
 //
 // File:	mexcom.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Aug  7 15:28:04 EDT 2024
+// Date:	Mon May 26 11:04:34 PM EDT 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -22,6 +22,7 @@
 min::uns32 mexcom::error_count;
 min::uns32 mexcom::warning_count;
 
+min::locatable_var<min::printer> mexcom::printer;
 min::locatable_var<min::file> mexcom::input_file;
 min::locatable_var<mex::module_ins>
     mexcom::output_module;
@@ -206,7 +207,7 @@ static void print_error_or_warning
 	  const min::op & message8,
 	  const char * message9 )
 {
-    min::printer printer = mexcom::input_file->printer;
+    min::printer printer = mexcom::printer;
     bool html =   printer->print_format.op_flags
 	        & min::OUTPUT_HTML;
     printer << min::bol;

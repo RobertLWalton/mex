@@ -2115,6 +2115,8 @@ The MEX basic compiler component is in the following:
 \begin{tabular}{@{}r@{~~~}l}
 \verb|min::locatable_var<mex::module_ins> mexcom::|
 	& \MEXCOMKEY{output\_module} \\
+\verb|min::locatable_var<min::printer> mexcom::|
+	& \MEXCOMKEY{printer} \\
 \verb|min::locatable_var<min::file> mexcom::|
 	& \MEXCOMKEY{input\_file}
 \end{tabular}
@@ -2123,7 +2125,7 @@ The MEX basic compiler component is in the following:
 These must be set by the compiler to
 the {\tt mex::module} currently being compiled and
 its input file.  The printer used by the compiler is
-{\tt mexcom::input\_file->printer}.
+{\tt mexcom::printer}.
 \end{indpar}
 
 \begin{tabular}{@{}r@{~~~}l}
@@ -2215,7 +2217,7 @@ If {\tt pp != min::\EOL MISSING\_\EOL PHRASE\_\EOL POSITION},
 print source lines after error message, and print the source file name and
 source line numbers as part of the error message.  Printing is done using
 {\tt mexcom::\EOL input\_\EOL file} and
-{\tt mexcom::\EOL input\_\EOL file->\EOL printer}.
+{\tt mexcom::\EOL printer}.
 \end{indpar}
 
 
@@ -2632,7 +2634,7 @@ as per {\tt mexstack::\EOL print\_\EOL switch},
 except do not print source lines if
 {\tt no\_source} is {\tt true}.
 Printing is done using {\tt mexcom::\EOL input\_\EOL file} and
-{\tt mexcom::\EOL input\_\EOL file->\EOL printer}.
+{\tt mexcom::\EOL printer}.
 
 The instruction printout has the syntax:
 \begin{indpar}
@@ -3068,7 +3070,7 @@ Print as per {\tt mexstack::\EOL print\_\EOL switch},
 except do not print source lines if
 {\tt no\_source} is {\tt true} or {\em phrase\_position} is missing.
 Printing is done using {\tt mexcom::\EOL input\_\EOL file} and
-{\tt mexcom::\EOL input\_\EOL file->\EOL printer}.
+{\tt mexcom::\EOL printer}.
 
 The label printout has the syntax:
 \begin{indpar}

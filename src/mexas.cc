@@ -2,7 +2,7 @@
 //
 // File:	mexas.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Feb 21 02:03:17 AM EST 2025
+// Date:	Mon May 26 11:27:57 PM EDT 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -20,6 +20,7 @@
 // ----- --- ----
 
 # include <mexas.h>
+# include <mexcom.h>
 # include <cmath>
 # include <cfenv>
 
@@ -481,12 +482,12 @@ static void scan_error
         ( const char * message,
 	  const char * header = "ERROR" )
 {
-    mexcom::input_file->printer
+    mexcom::printer
         << min::bol << min::bom << header << ": "
 	<< min::place_indent ( 0 )
 	<< "line " << mexas::last_line_number + 1
 	<< ": " << message << min::eom;
-    print_line ( mexcom::input_file->printer,
+    print_line ( mexcom::printer,
                  mexcom::input_file,
 		 mexas::last_line_number );
 }
@@ -1518,8 +1519,7 @@ mex::module mexas::compile ( min::file file )
 		     mexstack::NO_PRINT )
 		    continue;
 
-		min::printer printer =
-		    mexcom::input_file->printer;
+		min::printer printer = mexcom::printer;
 
 		if ( mexstack::print_switch
 		     ==

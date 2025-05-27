@@ -2,7 +2,7 @@
 //
 // File:	mexstack.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Fri Jan 24 01:44:34 AM EST 2025
+// Date:	Mon May 26 11:05:54 PM EDT 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -132,8 +132,7 @@ void mexstack::print_instr
 	  bool no_source, min::int32 stack_offset )
 {
     mexstack::print print = mexstack::print_switch;
-    min::printer printer =
-	mexcom::input_file->printer;
+    min::printer printer = mexcom::printer;
     mex::module m = mexcom::output_module;
 
     if ( print == mexstack::NO_PRINT )
@@ -312,8 +311,7 @@ void mexstack::print_label
 	  bool no_source, min::int32 stack_offset )
 {
     mexstack::print print = mexstack::print_switch;
-    min::printer printer =
-	mexcom::input_file->printer;
+    min::printer printer = mexcom::printer;
     mex::module m = mexcom::output_module;
 
     if ( print == mexstack::NO_PRINT )
@@ -479,7 +477,7 @@ unsigned mexstack::endx ( mex::instr & instr,
 	     ==
 	     mexstack::PRINT_WITH_SOURCE )
 	    min::print_phrase_lines
-		( mexcom::input_file->printer,
+		( mexcom::printer,
 		  mexcom::input_file, pp );
 	mexstack::print_instr
 	    ( e.begin_location, true );

@@ -2,7 +2,7 @@
 //
 // File:	mexas_main.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Wed Jan 15 01:47:43 AM EST 2025
+// Date:	Mon May 26 11:28:14 PM EDT 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -19,6 +19,7 @@ int main ( int argc, char * argv[] )
     min::init_ostream
         ( mex::default_printer, std::cout );
     mex::default_printer << min::ascii;
+    mexcom::printer = mex::default_printer;
 
     min::printer printer = mex::default_printer;
 
@@ -237,8 +238,6 @@ int main ( int argc, char * argv[] )
 	else if ( strcmp ( "-", arg ) == 0 )
 	{
 	    min::locatable_var<min::file> file;
-	    min::init_printer
-	        ( file, mex::default_printer );
 	    min::init_input_stream ( file, std::cin );
 	    bool result = mexas::compile ( file );
 	    if ( ! result )
@@ -267,8 +266,6 @@ int main ( int argc, char * argv[] )
 	    min::locatable_gen file_name
 	        ( min::new_str_gen ( arg ) );
 	    min::locatable_var<min::file> file;
-	    min::init_printer
-	        ( file, mex::default_printer );
 	    if ( ! min::init_input_named_file
 	               ( file, file_name ) )
 	    {

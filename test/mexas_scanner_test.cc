@@ -2,7 +2,7 @@
 //
 // File:	mexas_scanner_test.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu May 23 04:38:57 EDT 2024
+// Date:	Mon May 26 11:30:51 PM EDT 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -16,8 +16,7 @@ int main ( int argc, char * argv[] )
 
     min::init_ostream
         ( mex::default_printer, std::cout );
-    min::init_printer
-        ( mexcom::input_file, mex::default_printer );
+    mexcom::printer = mex::default_printer;
     min::init_input_stream
         ( mexcom::input_file, std::cin );
     mex::default_printer << min::ascii;

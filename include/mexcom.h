@@ -2,7 +2,7 @@
 //
 // File:	mexcom.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Mon Jun  3 04:38:53 EDT 2024
+// Date:	Mon May 26 10:59:19 PM EDT 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -28,6 +28,7 @@
 
 namespace mexcom {
 
+extern min::locatable_var<min::printer> printer;
 extern min::locatable_var<min::file> input_file;
 extern min::locatable_var<mex::module_ins>
     output_module;
