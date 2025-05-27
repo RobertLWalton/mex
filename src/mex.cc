@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Sun May 18 02:49:52 EDT 2025
+// Date:	Tue May 27 01:18:01 AM EDT 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -2280,6 +2280,8 @@ TEST_LOOP:	// Come here after fatal error processed
 		}
 
 		min::phrase_position pp =
+		    m->position != min::NULL_STUB
+		    &&
 		    p->pc.index < m->position->length ?
 		    m->position[p->pc.index] :
 		    min::MISSING_PHRASE_POSITION;
@@ -2550,12 +2552,11 @@ TEST_LOOP:	// Come here after fatal error processed
 		min::uns32 index = p->pc.index;
 
 		min::phrase_position pp =
+		    m->position != min::NULL_STUB
+		    &&
 		    index < m->position->length ?
 		    m->position[index] :
 		    min::MISSING_PHRASE_POSITION;
-
-		min::file input_file =
-		    m->position->file;
 
 		p->printer << min::bol;
 
@@ -2574,6 +2575,9 @@ TEST_LOOP:	// Come here after fatal error processed
 
 		    if ( pp )
 		    {
+			min::file input_file =
+			    m->position->file;
+
 			p->printer
 			    << min::indent
 			    << min::pline_numbers
@@ -3493,6 +3497,8 @@ TEST_LOOP:	// Come here after fatal error processed
 			<< min::eol;
 
 		min::phrase_position pp =
+		    m->position != min::NULL_STUB
+		    &&
 		    p->pc.index < m->position->length ?
 		    m->position[p->pc.index] :
 		    min::MISSING_PHRASE_POSITION;
@@ -4092,11 +4098,11 @@ FATAL:
 	          " [%u]", trace_depth );
 
     min::phrase_position pp =
+	m->position != min::NULL_STUB
+	&&
 	i < m->position->length ?
 	m->position[i] :
 	min::MISSING_PHRASE_POSITION;
-
-    min::file input_file = m->position->file;
 
     p->printer << min::bom
 	       << min::place_indent ( 4 )
@@ -4105,6 +4111,8 @@ FATAL:
     p->printer << min::indent << message;
     if ( pp )
     {
+	min::file input_file = m->position->file;
+
         p->printer << min::indent
 	           << min::pline_numbers
 		          ( input_file, pp )
@@ -4116,9 +4124,8 @@ FATAL:
 
     if ( ! pp )
         p->printer << min::indent
-	           << "PC MODULE FILE IS "
-		   << p->pc.module->position->file
-		                  ->file_name;
+	           << "PC NAME IS "
+		   << p->pc.module->name;
     print_header ( p, pp, 0 )
 	<< " " << op_name
 	<< " " << trace_class_name
@@ -4166,7 +4173,6 @@ mex::module mex::create_module ( min::file f )
     min::locatable_var<mex::module_ins> m =
         ( (mex::module_ins) ::module_vec_type.new_stub
 	     ( mex::module_length ) );
-    mex::name_ref(m) = f->file_name;
     mex::interface_ref(m) = min::MISSING();
     mex::globals_ref(m) = min::NULL_STUB;
     mex::trace_info_ref(m) =
@@ -4174,12 +4180,18 @@ mex::module mex::create_module ( min::file f )
 	    ( mex::module_length );
 
     min::locatable_var
-        <min::phrase_position_vec_insptr> position;
-    min::init
-        ( min::ref<min::phrase_position_vec_insptr>
-	      (position),
-	  f, min::MISSING_PHRASE_POSITION,
-	  mex::module_length );
+        <min::phrase_position_vec_insptr> position =
+             (min::phrase_position_vec_insptr)
+	     min::NULL_STUB;
+    if ( f != min::NULL_STUB )
+    {
+	mex::name_ref(m) = f->file_name;
+	min::init
+	    ( min::ref<min::phrase_position_vec_insptr>
+		  (position),
+	      f, min::MISSING_PHRASE_POSITION,
+	      mex::module_length );
+    }
     mex::position_ref(m) = position;
 
     return m;

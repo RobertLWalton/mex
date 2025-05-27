@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Thu May 15 09:47:56 AM EDT 2025
+// Date:	Tue May 27 12:59:14 AM EDT 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -449,7 +449,8 @@ bool run_process ( mex::process p );
 
 bool excepts_check ( mex::process p );
 
-mex::module create_module ( min::file f );
+mex::module create_module
+    ( min::file f = min::NULL_STUB );
 
 mex::process create_process
     ( min::printer printer = mex::default_printer );

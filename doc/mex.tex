@@ -18,7 +18,7 @@
 
 \author{Robert L. Walton}
 
-\date{May 15, 2025}
+\date{May 27, 2025}
  
 \maketitle
 
@@ -1869,17 +1869,25 @@ the trace depth).
 \label{MEX Functions}
 
 {\tt mex::module mex::}\MEXKEY{create\_module}
-    \verb|( min::file f )|
+    \verb|( min::file f = min::NULL_STUB )|
 \begin{indpar}
 A \TT{mex::module} is created and returned.  The code vector is empty.
-Empty \TT{position} and \TT{trace\_info} vectors are created.
+An empty \TT{trace\_info} vector is created.
+If \TT{f} is not \TT{min::NULL\_STUB}, an empty
+\TT{position} vector is created and the module \TT{name} is set
+to \TT{f->file\_name}.  Otherwise the \TT{position} vector is set to
+\TT{min::NULL\_STUB} and the module \TT{name} is not set.
 The \TT{globals} member is set to \TT{min::NULL\_STUB} and the
 \TT{interface} member is set to \TT{min::MISSING()}.
 
-The \TT{max\_length} of the three empty vectors is initially set to:
+The \TT{max\_length} of the two or three empty vectors is initially set to:
 \begin{indpar}
 \verb|min::uns32 mex::|\MEXKEY{module\_length}\verb|    // Default == 1 << 12.|
 \end{indpar}
+
+Note that \TT{mex} works with a module that has no \TT{position} vector,
+but \TT{mexcom} and \TT{mexstack} do \underline{not} work with modules
+that have no \TT{position} vector.
 
 Note that \TT{mex::module} and its components are read-only, so that
 to push instructions, positions, and info into the vectors the module type
