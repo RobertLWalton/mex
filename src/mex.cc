@@ -2,7 +2,7 @@
 //
 // File:	mex.cc
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue May 27 01:18:01 AM EDT 2025
+// Date:	Wed Jul 30 10:19:11 PM EDT 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -1291,18 +1291,15 @@ static bool optimized_run_process ( mex::process p )
 	        if ( new_pc > em->length )
 		    goto ERROR_EXIT;
 	    }
-	    if ( p->trace_depth == 0 )
-	        goto ERROR_EXIT;
 
 	    mex::set_pc ( p, ret->saved_pc );
 	    p->level = ret->saved_level;
 	    p->fp[immedB] = new_fp;
 	    p->ap[immedB] = ret->saved_ap;
+	    p->trace_depth = ret->trace_depth;
 	    RW_UNS32 p->return_stack->length = rp;
 
 	    sp = new_sp;
-
-	    -- p->trace_depth;
 
 	    if ( em == min::NULL_STUB )
 	        goto RET_EXIT;
@@ -1351,13 +1348,12 @@ static bool optimized_run_process ( mex::process p )
 	        if ( new_pc > em->length )
 		    goto ERROR_EXIT;
 	    }
-	    if ( p->trace_depth == 0 )
-	        goto ERROR_EXIT;
 
 	    mex::set_pc ( p, ret->saved_pc );
 	    p->level = ret->saved_level;
 	    p->fp[immedB] = new_fp;
 	    p->ap[immedB] = ret->saved_ap;
+	    p->trace_depth = ret->trace_depth;
 	    RW_UNS32 p->return_stack->length = rp;
 
 	    min::gen * q = sp - (int) immedC;
@@ -1365,8 +1361,6 @@ static bool optimized_run_process ( mex::process p )
 	    while ( q < qend )
 	        * new_sp ++ = * q ++;
 	    sp = new_sp;
-
-	    -- p->trace_depth;
 
 	    if ( em == min::NULL_STUB )
 	        goto RET_EXIT;
@@ -1415,6 +1409,7 @@ static bool optimized_run_process ( mex::process p )
 	    ret->saved_level = p->level;
 	    ret->saved_fp = p->fp[level];
 	    ret->saved_ap = p->ap[level];
+	    ret->trace_depth = p->trace_depth;
 	    p->level = level;
 	    p->fp[level] = fp;
 	    p->ap[level] = fp - nargs;
@@ -3400,17 +3395,10 @@ TEST_LOOP:	// Come here after fatal error processed
 		    goto INNER_FATAL;
 		}
 
-	        if ( p->trace_depth == 0 )
-		{
-		    message = "RET/ENDF: trace depth"
-		              " would become negative"
-			      " if instruction were"
-			      " executed";
-		    goto INNER_FATAL;
-		}
-
-		// RET/ENDF updates stack before trace.
+		// RET/ENDF updates trace_depth and
+		// stack before trace.
 		//
+		p->trace_depth = ret->trace_depth;
 		min::gen * q = sp - (int) immedC;
 		min::gen * qend = q + nresults;
 		while ( q < qend )
@@ -3944,7 +3932,6 @@ TEST_LOOP:	// Come here after fatal error processed
 		RW_UNS32 p->return_stack->length = rp;
 
 		p->level = ret->saved_level;
-		-- p->trace_depth;
 
 		m = em;
 		if ( m == min::NULL_STUB )
@@ -3982,6 +3969,7 @@ TEST_LOOP:	// Come here after fatal error processed
 		ret->saved_level = p->level;
 		ret->saved_fp = p->fp[level];
 		ret->saved_ap = p->ap[level];
+		ret->trace_depth = p->trace_depth;
 		p->level = level;
 		min::uns32 k = ( sp - spbegin );
 		p->fp[level] = k;
@@ -4298,6 +4286,7 @@ mex::process mex::init_process
 	ret->saved_fp = 0;
 	ret->saved_ap = 0;
 	ret->nresults = 0;
+	ret->trace_depth = 0;
 	RW_UNS32 p->return_stack->length = 1;
 
 	p->level = 1;

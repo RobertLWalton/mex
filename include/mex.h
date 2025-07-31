@@ -2,7 +2,7 @@
 //
 // File:	mex.h
 // Author:	Bob Walton (walton@acm.org)
-// Date:	Tue May 27 12:59:14 AM EDT 2025
+// Date:	Wed Jul 30 10:18:12 PM EDT 2025
 //
 // The authors have placed this program in the public
 // domain; they make no warranty and accept no liability
@@ -390,6 +390,7 @@ struct ret
     min::uns32 saved_fp;
     min::uns32 saved_ap;
     min::uns32 nresults;
+    min::uns32 trace_depth;
 };
 
 typedef min::packed_vec_insptr<mex::ret> return_stack;

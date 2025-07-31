@@ -163,7 +163,7 @@ CALL F1 1
 ******* {51:33,31,43} PUSHV: * <= stack[ap[2]+1] = 2002
 ******* {53:34,32,44} PUSHI: * <= 0
 ******* {54:35,32,45} PUSHV: * <= stack[ap[1]+0] = 1001
-******* {57:36,5,46} ENDF to CALLM: F3
-***** {62:41,2,47} ENDF to CALLM: F2
-*** {66:45,0,48} ENDF to CALLM: F1
+***** {57:36,5,46} ENDF to CALLM: F3
+*** {62:41,2,47} ENDF to CALLM: F2
+* {66:45,0,48} ENDF to CALLM: F1
 mexas_compile_test_6.mex successfully compiled

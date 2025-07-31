@@ -113,7 +113,7 @@ POP
 *** {17:2,4,6} PUSHA: * <= ARG2 = 157
 *** {18:3,2,7} JMPLT ITS-ARG1 is successful: true <= 23 < 157
 *** {22:6,3,8} PUSHA: * <= ARG1 = 23
-*** {23:7,1,9} RET to CALLM: MIN, Z=23
+* {23:7,1,9} RET to CALLM: MIN, Z=23
 * {31:12,0,10} POPS: * <= Z = 23
 * {37:13,0,11} BEGF
 * {52:25,1,12} PUSHI: * <= *FALSE*
@@ -121,7 +121,7 @@ POP
 *** {38:14,2,14} PUSHA: * <= ARG = *FALSE*
 *** {39:15,1,15} JMPFALSE ITS-0 is successful: true <= *FALSE*
 *** {45:20,2,16} PUSHI: * <= 1
-*** {46:21,1,17} RET to CALLM: FLIP, Z=1
+* {46:21,1,17} RET to CALLM: FLIP, Z=1
 * {54:27,0,18} POPS: * <= Z = 1
 * {55:28,1,19} PUSHI: * <= *TRUE*
 * {56:29,1,20} CALLM to BEGF: FLIP, ARG=*TRUE*
@@ -130,7 +130,7 @@ POP
 *** {40:16,2,23} PUSHA: * <= ARG = *TRUE*
 *** {41:17,1,24} JMPTRUE ITS-1 is successful: true <= *TRUE*
 *** {48:22,2,25} PUSHI: * <= 0
-*** {49:23,1,26} RET to CALLM: FLIP, Z=0
+* {49:23,1,26} RET to CALLM: FLIP, Z=0
 * {57:30,0,27} POPS: * <= Z = 0
 * {58:31,1,28} PUSHI: * <= 26
 * {59:32,1,29} CALLM to BEGF: FLIP, ARG=26
@@ -139,6 +139,6 @@ POP
 *** {40:16,2,32} PUSHA: * <= ARG = 26
 *** {41:17,1,33} JMPTRUE ITS-1 is UNsuccessful: false <= 26
 *** {42:18,2,34} PUSHI: * <= 555
-*** {43:19,1,35} RET to CALLM: FLIP, Z=555
+* {43:19,1,35} RET to CALLM: FLIP, Z=555
 * {60:33,0,36} POPS: * <= Z = 555
 mexas_compile_test_3.mex successfully compiled

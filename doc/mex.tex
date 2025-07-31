@@ -18,7 +18,7 @@
 
 \author{Robert L. Walton}
 
-\date{May 27, 2025}
+\date{July 30, 2025}
  
 \maketitle
 
@@ -645,6 +645,7 @@ a return stack, and other parameters.  Specifically:
 \verb|min::uns32 | & \TTMKEY{saved\_fp}{in {\tt mex::ret}} \\
 \verb|min::uns32 | & \TTMKEY{saved\_ap}{in {\tt mex::ret}} \\
 \verb|min::uns32 | & \TTMKEY{nresults}{in {\tt mex::ret}} \\
+\verb|min::uns32 | & \TTMKEY{trace\_depth}{in {\tt mex::ret}} \\
 \verb|}                   | \\
 \end{tabular}
 \\[1ex]
@@ -1853,9 +1854,11 @@ A process's \TT{trace\_depth} is initialized to \TT{0} and maintained
 by the following instructions:
 \begin{center}
 \begin{tabular}{l@{~~~~}l}
-\TT{BEG} ~ \TT{BEGL} ~ \TT{CALL}+\TT{BEGF} & Increment by 1. \\
-\TT{END} ~ \TT{ENDF} ~ \TT{RET} & Decrement by 1. \\
-\TT{JMP\ldots} ~ \TT{CONT} & Decrement by the instruction's \\
+\TT{BEG} ~ \TT{BEGL} & Increment by 1. \\
+\TT{CALL}+\TT{BEGF} & Save in return stack entry and then increment by 1. \\
+\TT{END} & Decrement by 1. \\
+\TT{ENDF} ~ \TT{RET} & Restore from return stack entry. \\
+\TT{JMP\ldots} ~ \TT{ENDL} ~ \TT{CONT} & Decrement by the instruction's \\
                & \TT{trace\_depth} member. \\
 \end{tabular}
 \end{center}
